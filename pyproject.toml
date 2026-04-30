@@ -1,0 +1,12 @@
+[project]
+name = "forecast-analysis"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "data-manipulation-utilities",
+]
+
+[tool.uv.sources]
+data-manipulation-utilities = { git = "https://github.com/1am2syman/data-manipulation-utilities.git" }

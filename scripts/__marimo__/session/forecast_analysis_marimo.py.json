@@ -1,0 +1,99 @@
+{
+  "version": "1",
+  "metadata": {
+    "marimo_version": "0.19.9"
+  },
+  "cells": [
+    {
+      "id": "Hbol",
+      "code_hash": "a3aa3011d87a3efdf4ff65893d286e44",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "exception",
+          "evalue": "No module named 'data_manipulation_utilities'",
+          "traceback": []
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stderr",
+          "text": "<span class=\"codehilite\"><div class=\"highlight\"><pre><span></span><span class=\"gt\">Traceback (most recent call last):</span>\n  File <span class=\"nb\">&quot;C:\\Users\\syedsazzad.ali\\AppData\\Local\\miniconda3\\Lib\\site-packages\\marimo\\_runtime\\executor.py&quot;</span>, line <span class=\"m\">138</span>, in <span class=\"n\">execute_cell</span>\n<span class=\"w\">    </span><span class=\"n\">exec</span><span class=\"p\">(</span><span class=\"n\">cell</span><span class=\"o\">.</span><span class=\"n\">body</span><span class=\"p\">,</span> <span class=\"n\">glbls</span><span class=\"p\">)</span>\n<span class=\"w\">    </span><span class=\"pm\">~~~~^^^^^^^^^^^^^^^^^^</span>\n  File <span class=\"nb\">&quot;C:\\Users\\syedsazzad.ali\\AppData\\Local\\Temp\\marimo_28756\\__marimo__cell_Hbol_.py&quot;</span>, line <span class=\"m\">7</span>, in <span class=\"n\">&lt;module&gt;</span>\n<span class=\"w\">    </span><span class=\"kn\">from</span><span class=\"w\"> </span><span class=\"nn\">data_manipulation_utilities</span><span class=\"w\"> </span><span class=\"kn\">import</span> <span class=\"n\">clean_columns</span>\n<span class=\"gr\">ModuleNotFoundError</span>: <span class=\"n\">No module named &#39;data_manipulation_utilities&#39;</span>\n</pre></div>\n</span>",
+          "mimetype": "application/vnd.marimo+traceback"
+        }
+      ]
+    },
+    {
+      "id": "tfPN",
+      "code_hash": "be41f65f05d218d4bbe5686d1259b9ea",
+      "outputs": [
+        {
+          "type": "error",
+          "ename": "syntax",
+          "evalue": "line 1\n    !pip install git+https://github.com/1am2syman/data-manipulation-utilities.git\n                                        ^\nSyntaxError: invalid decimal literal\n\nTo install packages, use the package manager panel.",
+          "traceback": []
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "QRcn",
+      "code_hash": "9bf99aae19d93b72e17d4505e0c2f9c5",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "GYTN",
+      "code_hash": "dc98c235161f017b24101c2529843691",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "nXoc",
+      "code_hash": "da424d67115fd84536662cf993c4052b",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='nXoc-0' random-id='6008a75d-e7c0-934b-572c-2eef6ca1bafd'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;parent_code&#92;&quot;:702082,&#92;&quot;calculation_month&#92;&quot;:&#92;&quot;2026-03-01&#92;&quot;,&#92;&quot;snop_month&#92;&quot;:&#92;&quot;2026-04-01&#92;&quot;,&#92;&quot;fc_kl&#92;&quot;:5.0},{&#92;&quot;parent_code&#92;&quot;:702082,&#92;&quot;calculation_month&#92;&quot;:&#92;&quot;2026-03-01&#92;&quot;,&#92;&quot;snop_month&#92;&quot;:&#92;&quot;2026-05-01&#92;&quot;,&#92;&quot;fc_kl&#92;&quot;:5.0},{&#92;&quot;parent_code&#92;&quot;:702082,&#92;&quot;calculation_month&#92;&quot;:&#92;&quot;2026-03-01&#92;&quot;,&#92;&quot;snop_month&#92;&quot;:&#92;&quot;2026-06-01&#92;&quot;,&#92;&quot;fc_kl&#92;&quot;:7.0},{&#92;&quot;parent_code&#92;&quot;:702082,&#92;&quot;calculation_month&#92;&quot;:&#92;&quot;2026-03-01&#92;&quot;,&#92;&quot;snop_month&#92;&quot;:&#92;&quot;2026-07-01&#92;&quot;,&#92;&quot;fc_kl&#92;&quot;:5.0},{&#92;&quot;parent_code&#92;&quot;:702082,&#92;&quot;calculation_month&#92;&quot;:&#92;&quot;2026-03-01&#92;&quot;,&#92;&quot;snop_month&#92;&quot;:&#92;&quot;2026-08-01&#92;&quot;,&#92;&quot;fc_kl&#92;&quot;:5.0},{&#92;&quot;parent_code&#92;&quot;:702082,&#92;&quot;calculation_month&#92;&quot;:&#92;&quot;2026-02-01&#92;&quot;,&#92;&quot;snop_month&#92;&quot;:&#92;&quot;2026-04-01&#92;&quot;,&#92;&quot;fc_kl&#92;&quot;:5.5},{&#92;&quot;parent_code&#92;&quot;:702082,&#92;&quot;calculation_month&#92;&quot;:&#92;&quot;2026-02-01&#92;&quot;,&#92;&quot;snop_month&#92;&quot;:&#92;&quot;2026-05-01&#92;&quot;,&#92;&quot;fc_kl&#92;&quot;:6.0},{&#92;&quot;parent_code&#92;&quot;:702082,&#92;&quot;calculation_month&#92;&quot;:&#92;&quot;2026-02-01&#92;&quot;,&#92;&quot;snop_month&#92;&quot;:&#92;&quot;2026-06-01&#92;&quot;,&#92;&quot;fc_kl&#92;&quot;:8.5},{&#92;&quot;parent_code&#92;&quot;:702082,&#92;&quot;calculation_month&#92;&quot;:&#92;&quot;2026-02-01&#92;&quot;,&#92;&quot;snop_month&#92;&quot;:&#92;&quot;2026-07-01&#92;&quot;,&#92;&quot;fc_kl&#92;&quot;:6.0},{&#92;&quot;parent_code&#92;&quot;:702082,&#92;&quot;calculation_month&#92;&quot;:&#92;&quot;2026-02-01&#92;&quot;,&#92;&quot;snop_month&#92;&quot;:&#92;&quot;2027-03-01&#92;&quot;,&#92;&quot;fc_kl&#92;&quot;:5.0}]&quot;' data-total-rows='60' data-total-columns='4' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='true' data-page-size='10' data-field-types='[[&quot;parent_code&quot;,[&quot;integer&quot;,&quot;i64&quot;]],[&quot;calculation_month&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;snop_month&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;fc_kl&quot;,[&quot;number&quot;,&quot;f64&quot;]]]' data-show-filters='true' data-show-download='true' data-show-column-summaries='true' data-show-data-types='true' data-show-page-size-selector='true' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "cnYa",
+      "code_hash": "5157e3c765af93679ea07052f30f0a6e",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='cnYa-0' random-id='3a8247ba-cc56-6365-241a-47181bf1958d'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;parent_material_code&#92;&quot;:&#92;&quot;702082&#92;&quot;,&#92;&quot;Month-Year&#92;&quot;:&#92;&quot;Apr-2024&#92;&quot;,&#92;&quot;sec_vol_kl_mth (billwise)&#92;&quot;:0.25516000000000005},{&#92;&quot;parent_material_code&#92;&quot;:&#92;&quot;702082&#92;&quot;,&#92;&quot;Month-Year&#92;&quot;:&#92;&quot;Apr-2025&#92;&quot;,&#92;&quot;sec_vol_kl_mth (billwise)&#92;&quot;:0.6132400000000003},{&#92;&quot;parent_material_code&#92;&quot;:&#92;&quot;702082&#92;&quot;,&#92;&quot;Month-Year&#92;&quot;:&#92;&quot;Apr-2026&#92;&quot;,&#92;&quot;sec_vol_kl_mth (billwise)&#92;&quot;:3.518563999999991},{&#92;&quot;parent_material_code&#92;&quot;:&#92;&quot;702082&#92;&quot;,&#92;&quot;Month-Year&#92;&quot;:&#92;&quot;Aug-2024&#92;&quot;,&#92;&quot;sec_vol_kl_mth (billwise)&#92;&quot;:0.26825999999999983},{&#92;&quot;parent_material_code&#92;&quot;:&#92;&quot;702082&#92;&quot;,&#92;&quot;Month-Year&#92;&quot;:&#92;&quot;Aug-2025&#92;&quot;,&#92;&quot;sec_vol_kl_mth (billwise)&#92;&quot;:1.1363400000000001},{&#92;&quot;parent_material_code&#92;&quot;:&#92;&quot;702082&#92;&quot;,&#92;&quot;Month-Year&#92;&quot;:&#92;&quot;Dec-2024&#92;&quot;,&#92;&quot;sec_vol_kl_mth (billwise)&#92;&quot;:0.9541000000000011},{&#92;&quot;parent_material_code&#92;&quot;:&#92;&quot;702082&#92;&quot;,&#92;&quot;Month-Year&#92;&quot;:&#92;&quot;Dec-2025&#92;&quot;,&#92;&quot;sec_vol_kl_mth (billwise)&#92;&quot;:4.230991999999997},{&#92;&quot;parent_material_code&#92;&quot;:&#92;&quot;702082&#92;&quot;,&#92;&quot;Month-Year&#92;&quot;:&#92;&quot;Feb-2025&#92;&quot;,&#92;&quot;sec_vol_kl_mth (billwise)&#92;&quot;:0.5778600000000003},{&#92;&quot;parent_material_code&#92;&quot;:&#92;&quot;702082&#92;&quot;,&#92;&quot;Month-Year&#92;&quot;:&#92;&quot;Feb-2026&#92;&quot;,&#92;&quot;sec_vol_kl_mth (billwise)&#92;&quot;:3.3879059999999748},{&#92;&quot;parent_material_code&#92;&quot;:&#92;&quot;702082&#92;&quot;,&#92;&quot;Month-Year&#92;&quot;:&#92;&quot;Jan-2025&#92;&quot;,&#92;&quot;sec_vol_kl_mth (billwise)&#92;&quot;:0.5873200000000004}]&quot;' data-total-rows='10711' data-total-columns='3' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='true' data-page-size='10' data-field-types='[[&quot;parent_material_code&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;Month-Year&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;sec_vol_kl_mth (billwise)&quot;,[&quot;number&quot;,&quot;f64&quot;]]]' data-show-filters='true' data-show-download='true' data-show-column-summaries='true' data-show-data-types='true' data-show-page-size-selector='true' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "GCwo",
+      "code_hash": null,
+      "outputs": [],
+      "console": []
+    }
+  ]
+}
