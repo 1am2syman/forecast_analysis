@@ -1,0 +1,1378 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Forecast vs Actuals — Notebook Schematic</title>
+    <meta
+      name="description"
+      content="A process schematic of forecast_analysis_marimo.py: how monthly forecasts are lined up with real secondary sales and the gap is measured."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0e1518;
+        --panel: #141e22;
+        --panel-2: #1a262b;
+        --hairline: #283a41;
+        --hairline-2: #1e2d32;
+        --flow: #3fb8af;
+        --flow-dim: #235f59;
+        --amber: #e8a33d;
+        --red: #d9544d;
+        --text: #e6edee;
+        --muted: #92a2a7;
+        --muted-2: #5e7077;
+        --display: "Chakra Petch", system-ui, sans-serif;
+        --body: "IBM Plex Sans", system-ui, sans-serif;
+        --mono: "IBM Plex Mono", ui-monospace, monospace;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: var(--body);
+        color: var(--text);
+        background-color: var(--bg);
+        background-image:
+          radial-gradient(
+            1100px 560px at 78% -8%,
+            rgba(63, 184, 175, 0.1),
+            transparent 62%
+          ),
+          radial-gradient(
+            800px 480px at 6% 8%,
+            rgba(232, 163, 61, 0.05),
+            transparent 60%
+          ),
+          repeating-linear-gradient(
+            0deg,
+            rgba(255, 255, 255, 0.016) 0 1px,
+            transparent 1px 34px
+          ),
+          repeating-linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0.016) 0 1px,
+            transparent 1px 34px
+          );
+        -webkit-font-smoothing: antialiased;
+        line-height: 1.55;
+      }
+      ::selection {
+        background: rgba(63, 184, 175, 0.28);
+        color: #fff;
+      }
+      a {
+        color: var(--flow);
+      }
+
+      .wrap {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 0 22px;
+      }
+
+      /* ── Top bar ─────────────────────────────── */
+      .topbar {
+        border-bottom: 1px solid var(--hairline-2);
+        font-family: var(--mono);
+        font-size: 12px;
+        letter-spacing: 0.04em;
+        color: var(--muted);
+      }
+      .topbar .wrap {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding-top: 12px;
+        padding-bottom: 12px;
+      }
+      .topbar .sig {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+      }
+      .dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--flow);
+        box-shadow: 0 0 10px var(--flow);
+      }
+      .topbar .meta {
+        opacity: 0.7;
+      }
+
+      /* ── Hero ───────────────────────────────── */
+      .hero {
+        padding: 72px 0 40px;
+      }
+      .hero__grid {
+        display: grid;
+        grid-template-columns: 1.35fr 0.95fr;
+        gap: 46px;
+        align-items: center;
+      }
+      .eyebrow {
+        font-family: var(--mono);
+        font-size: 12.5px;
+        letter-spacing: 0.17em;
+        text-transform: uppercase;
+        color: var(--flow);
+        margin: 0 0 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .eyebrow .bar {
+        height: 1px;
+        width: 34px;
+        background: var(--flow);
+        opacity: 0.7;
+      }
+      h1.title {
+        font-family: var(--display);
+        font-weight: 700;
+        font-size: clamp(34px, 5.4vw, 60px);
+        line-height: 1.04;
+        letter-spacing: -0.01em;
+        margin: 0 0 22px;
+        color: #f2f7f8;
+      }
+      h1.title em {
+        font-style: normal;
+        color: var(--amber);
+      }
+      .lede {
+        font-size: 17.5px;
+        color: var(--muted);
+        max-width: 46ch;
+        margin: 0;
+      }
+      .lede b {
+        color: var(--text);
+        font-weight: 500;
+      }
+
+      /* specimen readout */
+      .specimen {
+        background: linear-gradient(
+          180deg,
+          var(--panel) 0,
+          var(--panel-2) 100%
+        );
+        border: 1px solid var(--hairline);
+        border-radius: 10px;
+        box-shadow:
+          0 24px 60px -28px rgba(0, 0, 0, 0.7),
+          inset 0 1px 0 rgba(255, 255, 255, 0.03);
+        overflow: hidden;
+      }
+      .specimen__bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--hairline-2);
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--muted-2);
+      }
+      .specimen__bar .pill {
+        color: var(--flow);
+        border: 1px solid var(--flow-dim);
+        border-radius: 999px;
+        padding: 2px 8px;
+        letter-spacing: 0.08em;
+      }
+      .specimen__body {
+        padding: 16px 18px;
+        font-family: var(--mono);
+        font-size: 13.5px;
+      }
+      .specimen__row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 5px 0;
+        border-bottom: 1px dashed var(--hairline-2);
+      }
+      .specimen__row:last-child {
+        border-bottom: 0;
+      }
+      .specimen__row .k {
+        color: var(--muted);
+      }
+      .specimen__row .v {
+        color: var(--text);
+      }
+      .specimen__row .v.q {
+        color: var(--amber);
+      }
+      .specimen__row .v.tag {
+        color: var(--flow);
+      }
+      .specimen__foot {
+        padding: 10px 18px 14px;
+        font-family: var(--mono);
+        font-size: 11.5px;
+        color: var(--muted-2);
+        border-top: 1px solid var(--hairline-2);
+      }
+      .specimen__foot .arrow {
+        color: var(--flow);
+      }
+
+      /* ── Section heading ────────────────────── */
+      .sec {
+        padding: 46px 0 10px;
+      }
+      .sec__head {
+        display: flex;
+        align-items: baseline;
+        gap: 14px;
+        margin-bottom: 30px;
+      }
+      .sec__no {
+        font-family: var(--mono);
+        font-size: 12px;
+        color: var(--flow);
+        letter-spacing: 0.14em;
+      }
+      .sec__title {
+        font-family: var(--display);
+        font-weight: 600;
+        font-size: clamp(22px, 3vw, 30px);
+        letter-spacing: 0.005em;
+        margin: 0;
+        color: #eaf1f2;
+      }
+      .sec__sub {
+        color: var(--muted);
+        font-size: 15px;
+        max-width: 62ch;
+        margin: -18px 0 26px;
+        letter-spacing: 0.005em;
+      }
+
+      /* ── Inputs row ─────────────────────────── */
+      .inputs {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+      }
+      .input {
+        background: var(--panel);
+        border: 1px solid var(--hairline);
+        border-radius: 9px;
+        padding: 15px 15px 14px;
+        position: relative;
+      }
+      .input__tag {
+        font-family: var(--mono);
+        font-size: 10.5px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--muted-2);
+      }
+      .input__file {
+        font-family: var(--mono);
+        font-size: 13px;
+        color: var(--text);
+        margin: 7px 0 9px;
+        word-break: break-all;
+      }
+      .input__desc {
+        font-size: 13.5px;
+        color: var(--muted);
+        margin: 0;
+      }
+      .input__corner {
+        position: absolute;
+        top: 12px;
+        right: 13px;
+        width: 8px;
+        height: 8px;
+        border-top: 1px solid var(--flow);
+        border-right: 1px solid var(--flow);
+        opacity: 0.6;
+      }
+
+      /* ── Pipe / flow ────────────────────────── */
+      .pipe {
+        width: 3px;
+        height: 30px;
+        margin: 0 auto;
+        position: relative;
+        background: var(--hairline);
+      }
+      .pipe::before {
+        content: "";
+        position: absolute;
+        inset: -1px -2px;
+        width: 7px;
+        background: linear-gradient(
+          180deg,
+          transparent 0%,
+          var(--flow) 50%,
+          transparent 100%
+        );
+        background-size: 100% 220%;
+        animation: flow 1.7s linear infinite;
+        border-radius: 4px;
+        filter: drop-shadow(0 0 5px rgba(63, 184, 175, 0.55));
+      }
+      .pipe .chev {
+        position: absolute;
+        left: 50%;
+        bottom: -7px;
+        transform: translateX(-50%);
+        width: 0;
+        height: 0;
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-top: 6px solid var(--hairline);
+      }
+      @keyframes flow {
+        from {
+          background-position: 0 -120%;
+        }
+        to {
+          background-position: 0 120%;
+        }
+      }
+
+      /* manifold under inputs */
+      .manifold {
+        position: relative;
+        height: 26px;
+        margin-top: 0;
+      }
+      .manifold__bar {
+        position: absolute;
+        left: 8%;
+        right: 8%;
+        top: 13px;
+        height: 2px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          var(--hairline) 12%,
+          var(--hairline) 88%,
+          transparent
+        );
+      }
+      .manifold__bar::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          var(--flow) 30%,
+          var(--flow) 70%,
+          transparent
+        );
+        background-size: 220% 100%;
+        animation: flowX 2.4s linear infinite;
+        opacity: 0.5;
+      }
+      @keyframes flowX {
+        from {
+          background-position: 200% 0;
+        }
+        to {
+          background-position: -120% 0;
+        }
+      }
+      .manifold .drop {
+        position: absolute;
+        top: 0;
+        width: 2px;
+        height: 14px;
+        background: var(--hairline);
+      }
+      .manifold .drop.d1 {
+        left: calc(16.6% - 1px);
+      }
+      .manifold .drop.d2 {
+        left: calc(50% - 1px);
+      }
+      .manifold .drop.d3 {
+        left: calc(83.3% - 1px);
+      }
+
+      /* ── Stage card ─────────────────────────── */
+      .trunk {
+        max-width: 680px;
+        margin: 0 auto;
+      }
+      .stage {
+        background: linear-gradient(
+          180deg,
+          var(--panel) 0,
+          var(--panel-2) 100%
+        );
+        border: 1px solid var(--hairline);
+        border-radius: 10px;
+        position: relative;
+        padding: 0;
+      }
+      .stage__head {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 15px 18px;
+        border-bottom: 1px solid var(--hairline-2);
+      }
+      .stage__num {
+        font-family: var(--mono);
+        font-size: 12px;
+        color: var(--bg);
+        background: var(--flow);
+        padding: 3px 8px;
+        border-radius: 4px;
+        letter-spacing: 0.06em;
+        font-weight: 500;
+        box-shadow: 0 0 14px rgba(63, 184, 175, 0.4);
+      }
+      .stage__title {
+        font-family: var(--display);
+        font-weight: 600;
+        font-size: 17.5px;
+        letter-spacing: 0.01em;
+        color: #edf4f5;
+      }
+      .stage__title .verb {
+        color: var(--flow);
+      }
+      .stage__body {
+        padding: 14px 18px 16px;
+      }
+      .stage__note {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .stage__note b {
+        color: var(--text);
+        font-weight: 500;
+      }
+      .code {
+        display: block;
+        font-family: var(--mono);
+        font-size: 12.5px;
+        line-height: 1.7;
+        background: rgba(0, 0, 0, 0.28);
+        border: 1px solid var(--hairline-2);
+        border-radius: 7px;
+        padding: 11px 13px;
+        margin: 0 0 11px;
+        color: #cfe3e1;
+        overflow-x: auto;
+        white-space: pre;
+      }
+      .code .k {
+        color: var(--flow);
+      } /* keywords/calls */
+      .code .s {
+        color: #c7b6e8;
+      } /* strings */
+      .code .c {
+        color: var(--muted-2);
+      } /* comments */
+      .code .n {
+        color: var(--amber);
+      } /* numbers/idents of interest */
+      .ports {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 10px;
+        align-items: center;
+        padding: 0 18px 15px;
+      }
+      .port {
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.03em;
+        padding: 3px 9px;
+        border-radius: 5px;
+        border: 1px solid var(--hairline);
+      }
+      .port--in {
+        color: var(--muted);
+        background: rgba(0, 0, 0, 0.18);
+      }
+      .port--out {
+        color: var(--flow);
+        border-color: var(--flow-dim);
+        background: rgba(63, 184, 175, 0.07);
+      }
+
+      /* output stage */
+      .stage--out {
+        background: linear-gradient(180deg, #1c2a22 0, #16201b 100%);
+        border-color: #2d4a3b;
+      }
+      .stage--out .stage__num {
+        background: var(--amber);
+        box-shadow: 0 0 16px rgba(232, 163, 61, 0.4);
+      }
+      .stage--out .stage__title .verb {
+        color: var(--amber);
+      }
+
+      /* pending / next-step stage (commented-out in source) */
+      .stage--pending {
+        background: rgba(20, 30, 34, 0.5);
+        border: 1px dashed var(--hairline);
+      }
+      .stage--pending .stage__head {
+        border-bottom-style: dashed;
+      }
+      .stage--pending .stage__num {
+        background: transparent;
+        color: var(--muted);
+        border: 1px dashed var(--muted-2);
+        box-shadow: none;
+      }
+      .stage--pending .stage__title {
+        color: var(--muted);
+      }
+      .stage--pending .stage__title .verb {
+        color: var(--amber);
+      }
+      .stage--pending .code {
+        opacity: 0.88;
+      }
+      .stage__tag {
+        position: absolute;
+        top: -10px;
+        left: 16px;
+        background: var(--bg);
+        padding: 0 8px;
+        font-family: var(--mono);
+        font-size: 10.5px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--amber);
+      }
+      .pipe--pending {
+        background: transparent;
+      }
+      .pipe--pending::before {
+        animation: none;
+        background: repeating-linear-gradient(
+          180deg,
+          var(--hairline) 0 4px,
+          transparent 4px 9px
+        );
+        filter: none;
+      }
+      .pipe--pending .chev {
+        border-top-color: var(--muted-2);
+      }
+
+      /* ── Gauges ─────────────────────────────── */
+      .gauges {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+      }
+      .gauge {
+        background: var(--panel);
+        border: 1px solid var(--hairline);
+        border-radius: 9px;
+        padding: 16px 16px 18px;
+      }
+      .gauge__name {
+        font-family: var(--mono);
+        font-size: 13px;
+        color: var(--flow);
+        margin: 0 0 4px;
+      }
+      .gauge__formula {
+        font-family: var(--mono);
+        font-size: 11.5px;
+        color: var(--muted);
+        margin: 0 0 12px;
+        word-break: break-word;
+      }
+      .meter {
+        position: relative;
+        height: 8px;
+        border-radius: 5px;
+        background: #0c1416;
+        border: 1px solid var(--hairline-2);
+        overflow: hidden;
+      }
+      .meter__fill {
+        position: absolute;
+        inset: 0 auto 0 0;
+        border-radius: 5px;
+      }
+      .gauge ol {
+        margin: 12px 0 0;
+        padding: 0;
+        list-style: none;
+        font-size: 12.5px;
+        color: var(--muted);
+      }
+      .gauge ol li {
+        display: flex;
+        gap: 8px;
+        padding: 3px 0;
+      }
+      .gauge ol li .sw {
+        flex: 0 0 9px;
+        height: 9px;
+        border-radius: 2px;
+        margin-top: 5px;
+      }
+      .gauge__meaning {
+        font-size: 13px;
+        color: var(--muted);
+        margin: 12px 0 0;
+      }
+      .gauge__meaning b {
+        color: var(--text);
+        font-weight: 500;
+      }
+
+      /* ── Data dictionary ────────────────────── */
+      .dict {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0;
+        border: 1px solid var(--hairline);
+        border-radius: 10px;
+        overflow: hidden;
+        background: var(--panel);
+      }
+      .dict__row {
+        display: contents;
+      }
+      .dict__k,
+      .dict__v {
+        padding: 13px 16px;
+        border-bottom: 1px solid var(--hairline-2);
+      }
+      .dict__k {
+        font-family: var(--mono);
+        font-size: 13px;
+        color: var(--flow);
+        background: rgba(0, 0, 0, 0.18);
+        border-right: 1px solid var(--hairline-2);
+      }
+      .dict__v {
+        font-size: 13.5px;
+        color: var(--muted);
+      }
+      .dict__v b {
+        color: var(--text);
+        font-weight: 500;
+      }
+      .dict > div:nth-last-child(-n + 2) {
+        border-bottom: 0;
+      }
+
+      /* ── Pipeline block ─────────────────────── */
+      .pipeblock {
+        background: #0b1316;
+        border: 1px solid var(--hairline);
+        border-radius: 10px;
+        font-family: var(--mono);
+        font-size: 12.5px;
+        line-height: 1.75;
+        color: #cfe3e1;
+        padding: 16px 18px;
+        overflow-x: auto;
+        white-space: pre;
+      }
+      .pipeblock .k {
+        color: var(--flow);
+      }
+      .pipeblock .s {
+        color: #c7b6e8;
+      }
+      .pipeblock .n {
+        color: var(--amber);
+      }
+      .pipeblock .c {
+        color: var(--muted-2);
+      }
+
+      /* ── Footer ─────────────────────────────── */
+      footer {
+        margin-top: 60px;
+        border-top: 1px solid var(--hairline-2);
+        padding: 26px 0 50px;
+        color: var(--muted-2);
+        font-family: var(--mono);
+        font-size: 11.5px;
+        letter-spacing: 0.04em;
+      }
+      footer .wrap {
+        display: flex;
+        justify-content: space-between;
+        gap: 14px;
+        flex-wrap: wrap;
+      }
+
+      /* ── Responsive ─────────────────────────── */
+      @media (max-width: 820px) {
+        .hero__grid {
+          grid-template-columns: 1fr;
+          gap: 34px;
+        }
+        .inputs {
+          grid-template-columns: 1fr;
+        }
+        .manifold {
+          display: none;
+        }
+        .gauges {
+          grid-template-columns: 1fr;
+        }
+        .dict {
+          grid-template-columns: 1fr;
+        }
+        .dict__k {
+          border-right: 0;
+          border-bottom: 1px solid var(--hairline-2);
+        }
+        .hero {
+          padding: 48px 0 30px;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .pipe::before,
+        .manifold__bar::after {
+          animation: none;
+        }
+        .pipe::before {
+          background: linear-gradient(180deg, var(--flow), var(--flow-dim));
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="topbar">
+      <div class="wrap">
+        <div class="sig">
+          <span class="dot"></span> FORECAST_ANALYSIS_MARIMO.PY
+        </div>
+        <div class="meta">DEMAND PLANNING · PROCESS SCHEMATIC</div>
+      </div>
+    </div>
+
+    <!-- ════════════ HERO ════════════ -->
+    <section class="hero">
+      <div class="wrap">
+        <div class="hero__grid">
+          <div>
+            <p class="eyebrow">
+              <span class="bar"></span> Polars · marimo notebook · S&amp;OP
+            </p>
+            <h1 class="title">
+              A forecast is a promise.<br />The actuals are the
+              <em>receipt.</em>
+            </h1>
+            <p class="lede">
+              Every month a forecast is written for a future month. Months
+              later, the real secondary sales land.
+              <b
+                >This notebook is the machinery that lines the two up &mdash;
+                product by product, month by month &mdash; and measures the
+                gap.</b
+              >
+              Below is the whole pipeline, stage by stage.
+            </p>
+          </div>
+
+          <div
+            class="specimen"
+            aria-label="Sample row from the forecast history"
+          >
+            <div class="specimen__bar">
+              <span>specimen &middot; forecast_history.csv</span>
+              <span class="pill">row 1</span>
+            </div>
+            <div class="specimen__body">
+              <div class="specimen__row">
+                <span class="k">parent_code</span><span class="v">702082</span>
+              </div>
+              <div class="specimen__row">
+                <span class="k">calculation_month</span
+                ><span class="v">2026-03</span>
+              </div>
+              <div class="specimen__row">
+                <span class="k">snop_month</span><span class="v">2026-04</span>
+              </div>
+              <div class="specimen__row">
+                <span class="k">fc_kl</span><span class="v tag">5.0</span>
+              </div>
+              <div class="specimen__row">
+                <span class="k">actual_kl</span><span class="v q">?</span>
+              </div>
+            </div>
+            <div class="specimen__foot">
+              <span class="arrow">↓</span> resolved 4 stages downstream
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════ SCHEMATIC ════════════ -->
+    <section class="sec">
+      <div class="wrap">
+        <div class="sec__head">
+          <span class="sec__no">01 / FLOW</span>
+          <h2 class="sec__title">Three files in, one verdict out</h2>
+        </div>
+        <p class="sec__sub">
+          The notebook reads three exports from
+          <code style="font-family: var(--mono); color: var(--flow)"
+            >artifacts/</code
+          >, cleans and joins them, and emits a per-product, per-month accuracy
+          table. Follow the flow downward.
+        </p>
+
+        <!-- inputs -->
+        <div class="inputs">
+          <div class="input">
+            <span class="input__corner"></span>
+            <div class="input__tag">forecast history</div>
+            <div class="input__file">
+              artifacts/common/<br />forecast_history.csv
+            </div>
+            <p class="input__desc">
+              Every forecast (<span
+                style="font-family: var(--mono); color: var(--flow)"
+                >fc_kl</span
+              >) made in a
+              <span style="font-family: var(--mono); color: var(--text)"
+                >calculation_month</span
+              >
+              for a future
+              <span style="font-family: var(--mono); color: var(--text)"
+                >snop_month</span
+              >.
+            </p>
+          </div>
+          <div class="input">
+            <span class="input__corner"></span>
+            <div class="input__tag">actual sales</div>
+            <div class="input__file">
+              artifacts/secondary_sales/<br />Mode_Sec_Month…xlsb
+            </div>
+            <p class="input__desc">
+              Real secondary sales volume per product and month. The sheet
+              carries <b>5 title rows</b> above the real header.
+            </p>
+          </div>
+          <div class="input">
+            <span class="input__corner"></span>
+            <div class="input__tag">product hierarchy</div>
+            <div class="input__file">artifacts/ph/<br />PH_FG.xlsx</div>
+            <p class="input__desc">
+              Material master &mdash; maps each
+              <span style="font-family: var(--mono); color: var(--text)"
+                >material_code</span
+              >
+              to a description and a brand group.
+            </p>
+          </div>
+        </div>
+
+        <!-- manifold -->
+        <div class="manifold" aria-hidden="true">
+          <div class="drop d1"></div>
+          <div class="drop d2"></div>
+          <div class="drop d3"></div>
+          <div class="manifold__bar"></div>
+        </div>
+        <div class="pipe"><span class="chev"></span></div>
+
+        <!-- trunk of stages -->
+        <div class="trunk">
+          <div class="stage">
+            <div class="stage__head">
+              <span class="stage__num">01</span
+              ><span class="stage__title"
+                ><span class="verb">Read</span> &amp; align the keys</span
+              >
+            </div>
+            <div class="stage__body">
+              <span class="code"
+                ><span class="k">pl.read_csv</span>(fc_files[<span class="n"
+                  >0</span
+                >]) <span class="k">pl.read_excel</span>(actual_files[<span
+                  class="n"
+                  >0</span
+                >], read_options={<span class="s">'header_row'</span>:
+                <span class="n">5</span>}) ph.select([...]).unique(<span
+                  class="s"
+                  >'material_code'</span
+                >) .rename({<span class="s">'material_code'</span>:<span
+                  class="s"
+                  >'parent_code'</span
+                >, <span class="s">'material_group_code'</span>:<span class="s"
+                  >'brand'</span
+                >})</span
+              >
+              <p class="stage__note">
+                Forecasts parse to dates; the hierarchy is deduped and renamed
+                so its key <b>matches</b> the forecast's
+                <code style="font-family: var(--mono); color: var(--flow)"
+                  >parent_code</code
+                >.
+              </p>
+            </div>
+            <div class="ports">
+              <span class="port port--in">3 raw files</span>
+              <span class="port port--out">→ fc · actual · ph</span>
+            </div>
+          </div>
+
+          <div class="pipe"><span class="chev"></span></div>
+
+          <div class="stage">
+            <div class="stage__head">
+              <span class="stage__num">02</span
+              ><span class="stage__title"
+                ><span class="verb">Tidy</span> the sales export</span
+              >
+            </div>
+            <div class="stage__body">
+              <span class="code"
+                ><span class="c"># clean_actual()</span>
+                .select(cs.all().name.to_lowercase() .name.replace(<span
+                  class="s"
+                  >' '</span
+                >,<span class="s">'_'</span>).name.strip()) .rename({<span
+                  class="s"
+                  >'parent_material_code'</span
+                >:<span class="s">'parent_code'</span>,
+                <span class="s">'month_year'</span>:<span class="s"
+                  >'snop_month'</span
+                >, <span class="s">'sec_vol_kl_mth_(billwise)'</span>:<span
+                  class="s"
+                  >'actual_kl'</span
+                >}) .with_columns(snop_month=(<span class="s">'01-'</span
+                >+pl.col(<span class="s">'snop_month'</span>)).str.to_date(<span
+                  class="s"
+                  >'%d-%b-%Y'</span
+                >))</span
+              >
+              <p class="stage__note">
+                Column names are normalised, the business columns renamed, and
+                <code style="font-family: var(--mono); color: var(--text)"
+                  >Mon-YYYY</code
+                >
+                coerced into a real date.
+                <code style="font-family: var(--mono); color: var(--text)"
+                  >parent_code</code
+                >
+                is cast to <b>Int64</b> so the join keys line up exactly.
+              </p>
+            </div>
+            <div class="ports">
+              <span class="port port--in">actual (messy)</span>
+              <span class="port port--out">→ clean_actual()</span>
+            </div>
+          </div>
+
+          <div class="pipe"><span class="chev"></span></div>
+
+          <div class="stage">
+            <div class="stage__head">
+              <span class="stage__num">03</span
+              ><span class="stage__title"
+                ><span class="verb">Match</span> forecast to reality</span
+              >
+            </div>
+            <div class="stage__body">
+              <span class="code"
+                >fc.join(clean_actual(), on=[<span class="s">'parent_code'</span
+                >, <span class="s">'snop_month'</span>], how=<span class="s"
+                  >'left'</span
+                >) .filter(~pl.col(<span class="s">'actual_kl'</span
+                >).is_null())</span
+              >
+              <p class="stage__note">
+                Each forecast row is joined to the actuals for the same product
+                and month, then trimmed to
+                <b>only the months that have already happened</b> &mdash; the
+                rest is still promises.
+              </p>
+            </div>
+            <div class="ports">
+              <span class="port port--in">fc + actuals</span>
+              <span class="port port--out">→ matched rows</span>
+            </div>
+          </div>
+
+          <div class="pipe"><span class="chev"></span></div>
+
+          <div class="stage">
+            <div class="stage__head">
+              <span class="stage__num">04</span
+              ><span class="stage__title"
+                ><span class="verb">Pick</span> the earliest forecast</span
+              >
+            </div>
+            <div class="stage__body">
+              <span class="code"
+                >.sort([<span class="s">'parent_code'</span>,<span class="s"
+                  >'snop_month'</span
+                >,<span class="s">'calculation_month'</span>]) .with_columns(
+                oldest_fc = pl.col(<span class="s">'fc_kl'</span>).first()
+                .over([<span class="s">'parent_code'</span>,
+                <span class="s">'snop_month'</span>]))</span
+              >
+              <p class="stage__note">
+                Many forecasts can target the same month. Sorted by when they
+                were made and taking
+                <code style="font-family: var(--mono); color: var(--flow)"
+                  >.first()</code
+                >, <b>oldest_fc</b> becomes the original promise for that month
+                &mdash; the baseline to judge accuracy against.
+              </p>
+            </div>
+            <div class="ports">
+              <span class="port port--in">many fc per month</span>
+              <span class="port port--out">→ oldest_fc</span>
+            </div>
+          </div>
+
+          <div class="pipe"><span class="chev"></span></div>
+
+          <div class="stage">
+            <div class="stage__head">
+              <span class="stage__num">05</span
+              ><span class="stage__title"
+                ><span class="verb">Measure</span> the gap</span
+              >
+            </div>
+            <div class="stage__body">
+              <span class="code"
+                >.with_columns(deficit = oldest_fc - actual_kl)
+                .with_columns(under_ach_pct = deficit / oldest_fc *
+                <span class="n">100</span>)</span
+              >
+              <p class="stage__note">
+                The two numbers the whole pipeline exists to produce.
+                <b>deficit</b> in kilolitres; <b>under_ach_pct</b> as a share of
+                the original promise.
+              </p>
+            </div>
+            <div class="ports">
+              <span class="port port--in">oldest_fc · actual_kl</span>
+              <span class="port port--out">→ deficit · under_ach_pct</span>
+            </div>
+          </div>
+
+          <div class="pipe"><span class="chev"></span></div>
+
+          <div class="stage">
+            <div class="stage__head">
+              <span class="stage__num">06</span
+              ><span class="stage__title"
+                ><span class="verb">Tag</span> with brand</span
+              >
+            </div>
+            <div class="stage__body">
+              <span class="code"
+                >.join(ph, on=<span class="s">'parent_code'</span>, how=<span
+                  class="s"
+                  >'left'</span
+                >)
+                <span class="c"># adds parent_description + brand</span></span
+              >
+              <p class="stage__note">
+                The product hierarchy is attached so every row can be sliced by
+                <b>brand</b> later &mdash; the (currently commented-out) next
+                step rolls the gap up by brand and month.
+              </p>
+            </div>
+            <div class="ports">
+              <span class="port port--in">+ ph</span>
+              <span class="port port--out">→ brand · description</span>
+            </div>
+          </div>
+
+          <div class="pipe"><span class="chev"></span></div>
+
+          <div class="stage stage--out">
+            <div class="stage__head">
+              <span class="stage__num">▸</span
+              ><span class="stage__title"
+                ><span class="verb">Read</span> the verdict</span
+              >
+            </div>
+            <div class="stage__body">
+              <p class="stage__note">
+                A row per
+                <code style="font-family: var(--mono); color: var(--amber)"
+                  >(product, month)</code
+                >
+                answering:
+                <b
+                  >for each month that has now passed, how far short of the
+                  earliest forecast did the real volume fall &mdash; in
+                  kilolitres, and as a percentage?</b
+                >
+              </p>
+            </div>
+            <div class="ports">
+              <span class="port port--out"
+                >per-product, per-month accuracy table</span
+              >
+            </div>
+          </div>
+
+          <div class="pipe pipe--pending"><span class="chev"></span></div>
+
+          <div class="stage stage--pending">
+            <span class="stage__tag">next step &middot; commented out</span>
+            <div class="stage__head">
+              <span class="stage__num">07</span
+              ><span class="stage__title"
+                ><span class="verb">Roll up</span> by brand &amp; month</span
+              >
+            </div>
+            <div class="stage__body">
+              <span class="code"
+                ><span class="c"># the commented-out next step</span>
+                .group_by([<span class="s">'snop_month'</span>],
+                maintain_order=True) .agg(pl.col([<span class="s"
+                  >'deficit'</span
+                >, <span class="s">'oldest_fc'</span>]).sum())
+                .with_columns(under_ach_pct = deficit / oldest_fc *
+                <span class="n">100</span>) .sort([<span class="s">'brand'</span
+                >, <span class="s">'snop_month'</span>], descending=[False,
+                True])</span
+              >
+              <p class="stage__note">
+                Collapse the per-product rows into a
+                <b>brand &times; month scorecard</b>: sum the deficit and the
+                promise, then re-score under-achievement at the aggregated
+                level. Not wired up yet &mdash; one line to switch on.
+              </p>
+            </div>
+            <div class="ports">
+              <span class="port port--in">per-product table</span>
+              <span class="port port--out"
+                >&rarr; brand &times; month scorecard</span
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════ GAUGES ════════════ -->
+    <section class="sec">
+      <div class="wrap">
+        <div class="sec__head">
+          <span class="sec__no">02 / METRICS</span>
+          <h2 class="sec__title">The three numbers this produces</h2>
+        </div>
+        <p class="sec__sub">
+          Everything upstream exists to compute these. The meters show how to
+          read each value &mdash; not live data.
+        </p>
+
+        <div class="gauges">
+          <div class="gauge">
+            <p class="gauge__name">oldest_fc</p>
+            <p class="gauge__formula">
+              fc_kl · first() over (parent_code, snop_month)
+            </p>
+            <div class="meter">
+              <div
+                class="meter__fill"
+                style="
+                  width: 42%;
+                  background: linear-gradient(
+                    90deg,
+                    var(--flow-dim),
+                    var(--flow)
+                  );
+                "
+              ></div>
+            </div>
+            <p class="gauge__meaning">
+              The <b>earliest forecast</b> made for a month, in kilolitres. The
+              promise everything is measured against.
+            </p>
+          </div>
+
+          <div class="gauge">
+            <p class="gauge__name">deficit</p>
+            <p class="gauge__formula">oldest_fc − actual_kl</p>
+            <div class="meter">
+              <div
+                class="meter__fill"
+                style="
+                  width: 64%;
+                  background: linear-gradient(90deg, var(--amber), var(--red));
+                "
+              ></div>
+            </div>
+            <ol>
+              <li>
+                <span class="sw" style="background: var(--amber)"></span>
+                positive &rarr; under-sold (promised more than delivered)
+              </li>
+              <li>
+                <span class="sw" style="background: var(--flow)"></span>
+                negative &rarr; over-sold
+              </li>
+            </ol>
+          </div>
+
+          <div class="gauge">
+            <p class="gauge__name">under_ach_pct</p>
+            <p class="gauge__formula">deficit / oldest_fc × 100</p>
+            <div class="meter">
+              <div
+                class="meter__fill"
+                style="
+                  width: 100%;
+                  background: linear-gradient(
+                    90deg,
+                    var(--flow) 0%,
+                    var(--flow) 25%,
+                    var(--amber) 55%,
+                    var(--red) 100%
+                  );
+                "
+              ></div>
+            </div>
+            <ol>
+              <li>
+                <span class="sw" style="background: var(--flow)"></span> 0%
+                &mdash; on target
+              </li>
+              <li>
+                <span class="sw" style="background: var(--amber)"></span> ~50%
+                &mdash; watch
+              </li>
+              <li>
+                <span class="sw" style="background: var(--red)"></span> 100%+
+                &mdash; nothing delivered
+              </li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════ DATA DICTIONARY ════════════ -->
+    <section class="sec">
+      <div class="wrap">
+        <div class="sec__head">
+          <span class="sec__no">03 / VOCAB</span>
+          <h2 class="sec__title">The domain vocabulary</h2>
+        </div>
+        <p class="sec__sub">
+          These column names carry the planning world the notebook lives in.
+          SNOP = Sales &amp; Operations Planning.
+        </p>
+
+        <div class="dict">
+          <div class="dict__k">snop_month</div>
+          <div class="dict__v">
+            The <b>month being planned</b> &mdash; the horizon a forecast aims
+            at.
+          </div>
+          <div class="dict__k">calculation_month</div>
+          <div class="dict__v">
+            The month a forecast was <b>produced</b>. One snop_month can have
+            many.
+          </div>
+          <div class="dict__k">fc_kl</div>
+          <div class="dict__v">Forecast volume, in <b>kilolitres</b>.</div>
+          <div class="dict__k">actual_kl</div>
+          <div class="dict__v">
+            Real <b>secondary sales</b> volume (bill-wise), in kilolitres.
+          </div>
+          <div class="dict__k">parent_code</div>
+          <div class="dict__v">
+            The <b>product / SKU grouping</b> key used to join the three
+            sources.
+          </div>
+          <div class="dict__k">brand</div>
+          <div class="dict__v">
+            Material group from the product hierarchy &mdash; the rollup
+            dimension.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════ PIPELINE ════════════ -->
+    <section class="sec">
+      <div class="wrap">
+        <div class="sec__head">
+          <span class="sec__no">04 / SOURCE</span>
+          <h2 class="sec__title">The pipeline, verbatim</h2>
+        </div>
+        <p class="sec__sub">
+          Cell 6 of the notebook &mdash; the whole transformation in one Polars
+          chain.
+        </p>
+        <div class="pipeblock">
+          fc .join(clean_actual(), on=[<span class="s">'parent_code'</span>,
+          <span class="s">'snop_month'</span>], how=<span class="s">'left'</span
+          >) .filter(~pl.col(<span class="s">'actual_kl'</span>).is_null())
+          .sort([<span class="s">'parent_code'</span>,
+          <span class="s">'snop_month'</span>,
+          <span class="s">'calculation_month'</span>], descending=[<span
+            class="n"
+            >False</span
+          >, <span class="n">True</span>, <span class="n">False</span>])
+          .with_columns(oldest_fc = pl.col(<span class="s">'fc_kl'</span
+          >).first().over([<span class="s">'parent_code'</span>,
+          <span class="s">'snop_month'</span>])) .with_columns(deficit =
+          pl.col(<span class="s">'oldest_fc'</span>) - pl.col(<span class="s"
+            >'actual_kl'</span
+          >)) .with_columns(under_ach_pct = pl.col(<span class="s"
+            >'deficit'</span
+          >) / pl.col(<span class="s">'oldest_fc'</span>) *
+          <span class="n">100</span>) .join(ph, on=<span class="s"
+            >'parent_code'</span
+          >, how=<span class="s">'left'</span>)
+          <span class="c"
+            >#
+            .group_by(['snop_month']).agg(pl.col(['deficit','oldest_fc']).sum())
+            ← rollup by brand/month, next step</span
+          >
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="wrap">
+        <span>forecast_analysis_marimo.py · static process schematic</span>
+        <span>Polars · marimo · IBM Plex / Chakra Petch</span>
+      </div>
+    </footer>
+  </body>
+</html>

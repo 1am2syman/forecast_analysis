@@ -1,96 +1,30 @@
 {
   "version": "1",
   "metadata": {
-    "marimo_version": "0.19.9"
+    "marimo_version": "0.23.14",
+    "script_metadata_hash": null
   },
   "cells": [
     {
+      "id": "setup",
+      "code_hash": "64410ef41e7164ddbfb6f8ec8cb873d9",
+      "outputs": [],
+      "console": []
+    },
+    {
       "id": "Hbol",
-      "code_hash": "69f7b800cfefb3315295876efde0737a",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
+      "code_hash": "b6d178f7ce6628c245b6cbebf76fb4b2",
+      "outputs": [],
       "console": []
     },
     {
-      "id": "gIXg",
-      "code_hash": "c55f15a4c2d783759b291cb672dfa6b9",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
+      "id": "MJUe",
+      "code_hash": "5f840319133dd4dc34ddfbb1b9940c7c",
+      "outputs": [],
       "console": []
     },
     {
-      "id": "WzCs",
-      "code_hash": "0f873e72f8c528d4c75574a6bccfc60d",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
-      "console": [
-        {
-          "type": "stream",
-          "name": "stderr",
-          "text": "Could not determine dtype for column 8, falling back to string\nCould not determine dtype for column 13, falling back to string\nCould not determine dtype for column 22, falling back to string\nCould not determine dtype for column 27, falling back to string\nCould not determine dtype for column 56, falling back to string\nCould not determine dtype for column 57, falling back to string\nCould not determine dtype for column 58, falling back to string\nCould not determine dtype for column 61, falling back to string\nCould not determine dtype for column 62, falling back to string\nCould not determine dtype for column 98, falling back to string\nCould not determine dtype for column 99, falling back to string\nCould not determine dtype for column 102, falling back to string\nCould not determine dtype for column 121, falling back to string\nCould not determine dtype for column 123, falling back to string\nCould not determine dtype for column 129, falling back to string\nCould not determine dtype for column 132, falling back to string\nCould not determine dtype for column 135, falling back to string\nCould not determine dtype for column 136, falling back to string\nCould not determine dtype for column 137, falling back to string\n",
-          "mimetype": "text/plain"
-        }
-      ]
-    },
-    {
-      "id": "BAiM",
-      "code_hash": "e05fe30750d3ea262a610d17ebc07019",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/html": "<marimo-ui-element object-id='BAiM-0' random-id='989832e4-be86-a667-18ba-b5743f6e090e'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;parent_code&#92;&quot;:702082,&#92;&quot;calculation_month&#92;&quot;:&#92;&quot;2026-03-01&#92;&quot;,&#92;&quot;snop_month&#92;&quot;:&#92;&quot;2026-04-01&#92;&quot;,&#92;&quot;fc_kl&#92;&quot;:5.0},{&#92;&quot;parent_code&#92;&quot;:702082,&#92;&quot;calculation_month&#92;&quot;:&#92;&quot;2026-03-01&#92;&quot;,&#92;&quot;snop_month&#92;&quot;:&#92;&quot;2026-05-01&#92;&quot;,&#92;&quot;fc_kl&#92;&quot;:5.0},{&#92;&quot;parent_code&#92;&quot;:702082,&#92;&quot;calculation_month&#92;&quot;:&#92;&quot;2026-03-01&#92;&quot;,&#92;&quot;snop_month&#92;&quot;:&#92;&quot;2026-06-01&#92;&quot;,&#92;&quot;fc_kl&#92;&quot;:7.0},{&#92;&quot;parent_code&#92;&quot;:702082,&#92;&quot;calculation_month&#92;&quot;:&#92;&quot;2026-03-01&#92;&quot;,&#92;&quot;snop_month&#92;&quot;:&#92;&quot;2026-07-01&#92;&quot;,&#92;&quot;fc_kl&#92;&quot;:5.0},{&#92;&quot;parent_code&#92;&quot;:702082,&#92;&quot;calculation_month&#92;&quot;:&#92;&quot;2026-03-01&#92;&quot;,&#92;&quot;snop_month&#92;&quot;:&#92;&quot;2026-08-01&#92;&quot;,&#92;&quot;fc_kl&#92;&quot;:5.0},{&#92;&quot;parent_code&#92;&quot;:702082,&#92;&quot;calculation_month&#92;&quot;:&#92;&quot;2026-02-01&#92;&quot;,&#92;&quot;snop_month&#92;&quot;:&#92;&quot;2026-04-01&#92;&quot;,&#92;&quot;fc_kl&#92;&quot;:5.5},{&#92;&quot;parent_code&#92;&quot;:702082,&#92;&quot;calculation_month&#92;&quot;:&#92;&quot;2026-02-01&#92;&quot;,&#92;&quot;snop_month&#92;&quot;:&#92;&quot;2026-05-01&#92;&quot;,&#92;&quot;fc_kl&#92;&quot;:6.0},{&#92;&quot;parent_code&#92;&quot;:702082,&#92;&quot;calculation_month&#92;&quot;:&#92;&quot;2026-02-01&#92;&quot;,&#92;&quot;snop_month&#92;&quot;:&#92;&quot;2026-06-01&#92;&quot;,&#92;&quot;fc_kl&#92;&quot;:8.5},{&#92;&quot;parent_code&#92;&quot;:702082,&#92;&quot;calculation_month&#92;&quot;:&#92;&quot;2026-02-01&#92;&quot;,&#92;&quot;snop_month&#92;&quot;:&#92;&quot;2026-07-01&#92;&quot;,&#92;&quot;fc_kl&#92;&quot;:6.0},{&#92;&quot;parent_code&#92;&quot;:702082,&#92;&quot;calculation_month&#92;&quot;:&#92;&quot;2026-02-01&#92;&quot;,&#92;&quot;snop_month&#92;&quot;:&#92;&quot;2027-03-01&#92;&quot;,&#92;&quot;fc_kl&#92;&quot;:5.0}]&quot;' data-total-rows='6296' data-total-columns='4' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='true' data-page-size='10' data-field-types='[[&quot;parent_code&quot;,[&quot;integer&quot;,&quot;i64&quot;]],[&quot;calculation_month&quot;,[&quot;date&quot;,&quot;date&quot;]],[&quot;snop_month&quot;,[&quot;date&quot;,&quot;date&quot;]],[&quot;fc_kl&quot;,[&quot;number&quot;,&quot;f64&quot;]]]' data-show-filters='true' data-show-download='true' data-show-column-summaries='true' data-show-data-types='true' data-show-page-size-selector='true' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element>"
-          }
-        }
-      ],
-      "console": []
-    },
-    {
-      "id": "kwUw",
-      "code_hash": "74c987f5257fc849f8c4acf0c2e5e8ad",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
-      "console": []
-    },
-    {
-      "id": "sJgB",
-      "code_hash": "1bb949d9718f6a099f1a997dfa8c2493",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/html": "<marimo-ui-element object-id='sJgB-0' random-id='7a5ade23-7409-16e9-d47b-29208ee54f6b'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;parent_code&#92;&quot;:702082,&#92;&quot;calculation_month&#92;&quot;:&#92;&quot;2026-01-01&#92;&quot;,&#92;&quot;snop_month&#92;&quot;:&#92;&quot;2026-04-01&#92;&quot;,&#92;&quot;fc_kl&#92;&quot;:5.5,&#92;&quot;actual_kl&#92;&quot;:3.518563999999991,&#92;&quot;oldest_fc&#92;&quot;:5.5,&#92;&quot;deficit&#92;&quot;:1.9814360000000089,&#92;&quot;under_ach_pct&#92;&quot;:36.02610909090925,&#92;&quot;parent_description&#92;&quot;:&#92;&quot;PCNO 20ml FT BOT NEW&#92;&quot;,&#92;&quot;brand&#92;&quot;:&#92;&quot;BPCNO-SP&#92;&quot;},{&#92;&quot;parent_code&#92;&quot;:702082,&#92;&quot;calculation_month&#92;&quot;:&#92;&quot;2026-02-01&#92;&quot;,&#92;&quot;snop_month&#92;&quot;:&#92;&quot;2026-04-01&#92;&quot;,&#92;&quot;fc_kl&#92;&quot;:5.5,&#92;&quot;actual_kl&#92;&quot;:3.518563999999991,&#92;&quot;oldest_fc&#92;&quot;:5.5,&#92;&quot;deficit&#92;&quot;:1.9814360000000089,&#92;&quot;under_ach_pct&#92;&quot;:36.02610909090925,&#92;&quot;parent_description&#92;&quot;:&#92;&quot;PCNO 20ml FT BOT NEW&#92;&quot;,&#92;&quot;brand&#92;&quot;:&#92;&quot;BPCNO-SP&#92;&quot;},{&#92;&quot;parent_code&#92;&quot;:702082,&#92;&quot;calculation_month&#92;&quot;:&#92;&quot;2026-03-01&#92;&quot;,&#92;&quot;snop_month&#92;&quot;:&#92;&quot;2026-04-01&#92;&quot;,&#92;&quot;fc_kl&#92;&quot;:5.0,&#92;&quot;actual_kl&#92;&quot;:3.518563999999991,&#92;&quot;oldest_fc&#92;&quot;:5.5,&#92;&quot;deficit&#92;&quot;:1.9814360000000089,&#92;&quot;under_ach_pct&#92;&quot;:36.02610909090925,&#92;&quot;parent_description&#92;&quot;:&#92;&quot;PCNO 20ml FT BOT NEW&#92;&quot;,&#92;&quot;brand&#92;&quot;:&#92;&quot;BPCNO-SP&#92;&quot;},{&#92;&quot;parent_code&#92;&quot;:702082,&#92;&quot;calculation_month&#92;&quot;:&#92;&quot;2025-10-01&#92;&quot;,&#92;&quot;snop_month&#92;&quot;:&#92;&quot;2026-03-01&#92;&quot;,&#92;&quot;fc_kl&#92;&quot;:5.0,&#92;&quot;actual_kl&#92;&quot;:4.62997199999999,&#92;&quot;oldest_fc&#92;&quot;:5.0,&#92;&quot;deficit&#92;&quot;:0.37002800000001024,&#92;&quot;under_ach_pct&#92;&quot;:7.400560000000205,&#92;&quot;parent_description&#92;&quot;:&#92;&quot;PCNO 20ml FT BOT NEW&#92;&quot;,&#92;&quot;brand&#92;&quot;:&#92;&quot;BPCNO-SP&#92;&quot;},{&#92;&quot;parent_code&#92;&quot;:702082,&#92;&quot;calculation_month&#92;&quot;:&#92;&quot;2025-11-01&#92;&quot;,&#92;&quot;snop_month&#92;&quot;:&#92;&quot;2026-03-01&#92;&quot;,&#92;&quot;fc_kl&#92;&quot;:5.0,&#92;&quot;actual_kl&#92;&quot;:4.62997199999999,&#92;&quot;oldest_fc&#92;&quot;:5.0,&#92;&quot;deficit&#92;&quot;:0.37002800000001024,&#92;&quot;under_ach_pct&#92;&quot;:7.400560000000205,&#92;&quot;parent_description&#92;&quot;:&#92;&quot;PCNO 20ml FT BOT NEW&#92;&quot;,&#92;&quot;brand&#92;&quot;:&#92;&quot;BPCNO-SP&#92;&quot;},{&#92;&quot;parent_code&#92;&quot;:702082,&#92;&quot;calculation_month&#92;&quot;:&#92;&quot;2025-12-01&#92;&quot;,&#92;&quot;snop_month&#92;&quot;:&#92;&quot;2026-03-01&#92;&quot;,&#92;&quot;fc_kl&#92;&quot;:5.0,&#92;&quot;actual_kl&#92;&quot;:4.62997199999999,&#92;&quot;oldest_fc&#92;&quot;:5.0,&#92;&quot;deficit&#92;&quot;:0.37002800000001024,&#92;&quot;under_ach_pct&#92;&quot;:7.400560000000205,&#92;&quot;parent_description&#92;&quot;:&#92;&quot;PCNO 20ml FT BOT NEW&#92;&quot;,&#92;&quot;brand&#92;&quot;:&#92;&quot;BPCNO-SP&#92;&quot;},{&#92;&quot;parent_code&#92;&quot;:702082,&#92;&quot;calculation_month&#92;&quot;:&#92;&quot;2025-09-01&#92;&quot;,&#92;&quot;snop_month&#92;&quot;:&#92;&quot;2026-02-01&#92;&quot;,&#92;&quot;fc_kl&#92;&quot;:5.0,&#92;&quot;actual_kl&#92;&quot;:3.3879059999999748,&#92;&quot;oldest_fc&#92;&quot;:5.0,&#92;&quot;deficit&#92;&quot;:1.6120940000000252,&#92;&quot;under_ach_pct&#92;&quot;:32.241880000000506,&#92;&quot;parent_description&#92;&quot;:&#92;&quot;PCNO 20ml FT BOT NEW&#92;&quot;,&#92;&quot;brand&#92;&quot;:&#92;&quot;BPCNO-SP&#92;&quot;},{&#92;&quot;parent_code&#92;&quot;:702082,&#92;&quot;calculation_month&#92;&quot;:&#92;&quot;2025-10-01&#92;&quot;,&#92;&quot;snop_month&#92;&quot;:&#92;&quot;2026-02-01&#92;&quot;,&#92;&quot;fc_kl&#92;&quot;:5.0,&#92;&quot;actual_kl&#92;&quot;:3.3879059999999748,&#92;&quot;oldest_fc&#92;&quot;:5.0,&#92;&quot;deficit&#92;&quot;:1.6120940000000252,&#92;&quot;under_ach_pct&#92;&quot;:32.241880000000506,&#92;&quot;parent_description&#92;&quot;:&#92;&quot;PCNO 20ml FT BOT NEW&#92;&quot;,&#92;&quot;brand&#92;&quot;:&#92;&quot;BPCNO-SP&#92;&quot;},{&#92;&quot;parent_code&#92;&quot;:702082,&#92;&quot;calculation_month&#92;&quot;:&#92;&quot;2025-11-01&#92;&quot;,&#92;&quot;snop_month&#92;&quot;:&#92;&quot;2026-02-01&#92;&quot;,&#92;&quot;fc_kl&#92;&quot;:5.0,&#92;&quot;actual_kl&#92;&quot;:3.3879059999999748,&#92;&quot;oldest_fc&#92;&quot;:5.0,&#92;&quot;deficit&#92;&quot;:1.6120940000000252,&#92;&quot;under_ach_pct&#92;&quot;:32.241880000000506,&#92;&quot;parent_description&#92;&quot;:&#92;&quot;PCNO 20ml FT BOT NEW&#92;&quot;,&#92;&quot;brand&#92;&quot;:&#92;&quot;BPCNO-SP&#92;&quot;},{&#92;&quot;parent_code&#92;&quot;:702082,&#92;&quot;calculation_month&#92;&quot;:&#92;&quot;2025-12-01&#92;&quot;,&#92;&quot;snop_month&#92;&quot;:&#92;&quot;2026-02-01&#92;&quot;,&#92;&quot;fc_kl&#92;&quot;:5.0,&#92;&quot;actual_kl&#92;&quot;:3.3879059999999748,&#92;&quot;oldest_fc&#92;&quot;:5.0,&#92;&quot;deficit&#92;&quot;:1.6120940000000252,&#92;&quot;under_ach_pct&#92;&quot;:32.241880000000506,&#92;&quot;parent_description&#92;&quot;:&#92;&quot;PCNO 20ml FT BOT NEW&#92;&quot;,&#92;&quot;brand&#92;&quot;:&#92;&quot;BPCNO-SP&#92;&quot;}]&quot;' data-total-rows='4693' data-total-columns='10' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='true' data-page-size='10' data-field-types='[[&quot;parent_code&quot;,[&quot;integer&quot;,&quot;i64&quot;]],[&quot;calculation_month&quot;,[&quot;date&quot;,&quot;date&quot;]],[&quot;snop_month&quot;,[&quot;date&quot;,&quot;date&quot;]],[&quot;fc_kl&quot;,[&quot;number&quot;,&quot;f64&quot;]],[&quot;actual_kl&quot;,[&quot;number&quot;,&quot;f64&quot;]],[&quot;oldest_fc&quot;,[&quot;number&quot;,&quot;f64&quot;]],[&quot;deficit&quot;,[&quot;number&quot;,&quot;f64&quot;]],[&quot;under_ach_pct&quot;,[&quot;number&quot;,&quot;f64&quot;]],[&quot;parent_description&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;brand&quot;,[&quot;string&quot;,&quot;str&quot;]]]' data-show-filters='true' data-show-download='true' data-show-column-summaries='true' data-show-data-types='true' data-show-page-size-selector='true' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element>"
-          }
-        }
-      ],
-      "console": []
-    },
-    {
-      "id": "rNIv",
+      "id": "vblA",
       "code_hash": null,
       "outputs": [],
       "console": []
