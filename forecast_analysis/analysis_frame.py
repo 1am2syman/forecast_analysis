@@ -7,7 +7,12 @@ from pathlib import Path
 import polars as pl
 
 from .actuals import load_actuals
-from .contracts import ANALYSIS_COLUMNS, AnalysisDataset, AnalysisInputs
+from .contracts import (
+    ACTUAL_POPULATION_COLUMNS,
+    ANALYSIS_COLUMNS,
+    AnalysisDataset,
+    AnalysisInputs,
+)
 from .diagnostics import build_population_diagnostics
 from .forecast_history import load_forecast_history
 from .hierarchy import load_hierarchy
@@ -36,6 +41,34 @@ def _mapping_diagnostics(inputs: AnalysisInputs) -> pl.DataFrame | None:
         return None
     return diagnostics.select(
         ["parent_code", pl.col("diagnostic").alias("mapping_diagnostic")]
+    )
+
+
+def _build_actual_population(inputs: AnalysisInputs) -> pl.DataFrame:
+    """Join hierarchy context to every actual row, including forecast-only gaps."""
+    joined = inputs.actuals.join(inputs.hierarchy, on="parent_code", how="left")
+    mapping_diagnostics = _mapping_diagnostics(inputs)
+    if mapping_diagnostics is not None:
+        joined = joined.join(mapping_diagnostics, on="parent_code", how="left")
+    else:
+        joined = joined.with_columns(
+            pl.lit(None, dtype=pl.String).alias("mapping_diagnostic")
+        )
+
+    return (
+        joined.with_columns(pl.col("mapping_status").fill_null("unmapped"))
+        .with_columns(
+            pl.when(pl.col("mapping_diagnostic").is_null())
+            .then(
+                pl.when(pl.col("mapping_status") == "unmapped")
+                .then(pl.lit("no hierarchy mapping"))
+                .otherwise(pl.lit(None, dtype=pl.String))
+            )
+            .otherwise(pl.col("mapping_diagnostic"))
+            .alias("mapping_diagnostic")
+        )
+        .select(ACTUAL_POPULATION_COLUMNS)
+        .sort(["parent_code", "snop_month"])
     )
 
 
@@ -80,4 +113,8 @@ def build_analysis_dataset(inputs: AnalysisInputs) -> AnalysisDataset:
         .select(ANALYSIS_COLUMNS)
         .sort(["parent_code", "snop_month", "calculation_month", "source"])
     )
-    return AnalysisDataset(frame=frame, diagnostics=build_population_diagnostics(frame))
+    return AnalysisDataset(
+        frame=frame,
+        diagnostics=build_population_diagnostics(frame),
+        actual_population=_build_actual_population(inputs),
+    )

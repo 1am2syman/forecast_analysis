@@ -44,6 +44,15 @@ HIERARCHY_DIAGNOSTIC_COLUMNS = [
     "diagnostic",
 ]
 ACTUAL_COLUMNS = ["parent_code", "snop_month", "actual_kl"]
+ACTUAL_POPULATION_COLUMNS = [
+    "parent_code",
+    "snop_month",
+    "actual_kl",
+    "hierarchy_description",
+    "brand",
+    "mapping_status",
+    "mapping_diagnostic",
+]
 ANALYSIS_COLUMNS = [
     "source",
     "parent_code",
@@ -94,7 +103,8 @@ class AnalysisInputs:
 
 @dataclass(frozen=True)
 class AnalysisDataset:
-    """The shared long population and its measurable quality diagnostics."""
+    """The shared forecast population, actual population, and quality diagnostics."""
 
     frame: pl.DataFrame
     diagnostics: pl.DataFrame
+    actual_population: pl.DataFrame
