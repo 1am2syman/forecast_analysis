@@ -25,6 +25,10 @@ from .metrics import (
     build_revision_scatter,
     calculate_metrics,
 )  # pyright: ignore[reportMissingImports]
+from .product_history import (  # pyright: ignore[reportMissingImports]
+    ProductHistoryView,
+    build_product_history,
+)
 from .vintages import VintageRule, select_vintage_pair  # pyright: ignore[reportMissingImports]
 
 
@@ -63,6 +67,55 @@ def _filter_population_to_pairs(
         on=["source", "parent_code", "snop_month"],
         how="inner",
     ).sort(["parent_code", "snop_month", "calculation_month", "source"])
+
+
+def _product_detail_horizons(filters: DashboardFilters) -> tuple[int, ...] | None:
+    """Resolve the detail horizon without weakening comparison alignment."""
+    if not filters.comparison_mode:
+        return filters.horizons
+    if filters.comparison_horizon is None:
+        raise ValueError(
+            "comparison product detail requires one exact comparison horizon"
+        )
+    expected = (filters.comparison_horizon,)
+    if filters.horizons is not None and filters.horizons != expected:
+        raise ValueError(
+            "comparison product detail requires one exact horizon; "
+            "comparison_horizon and horizons conflict"
+        )
+    return expected
+
+
+def build_product_detail(
+    frame: pl.DataFrame,
+    filters: DashboardFilters,
+    parent_code: int,
+    target_month: object,
+) -> ProductHistoryView:
+    """Build product history from the same source and population filter state.
+
+    The product and target month are the detail selection. Source, brand,
+    minimum-volume, and horizon controls remain owned by ``DashboardFilters``.
+    The detail chart inherits the shared source, target-month, brand, product,
+    volume, and horizon filters. Comparison mode never substitutes Vintage A/B
+    rules or combines TM and ML rows.
+    """
+    detail_filters = replace(
+        filters,
+        parent_codes=(parent_code,),
+        target_months=(target_month,),
+        horizons=_product_detail_horizons(filters),
+        revision_directions=None,
+        revision_outcomes=None,
+    )
+    detail_population = apply_dashboard_filters(frame, detail_filters)
+    return build_product_history(
+        detail_population,
+        parent_code,
+        target_month,
+        sources=detail_filters.selected_sources,
+        revision_tolerance_kl=detail_filters.revision_tolerance_kl,
+    )
 
 
 def _build_comparison_dashboard_view(

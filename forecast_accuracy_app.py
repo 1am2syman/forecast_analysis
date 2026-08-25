@@ -13,7 +13,11 @@ with app.setup:
     import marimo as mo
     import polars as pl
 
-    from forecast_analysis import build_analysis_dataset, load_analysis_inputs
+    from forecast_analysis import (
+        build_analysis_dataset,
+        build_product_detail,
+        load_analysis_inputs,
+    )
     from forecast_analysis.dashboard import build_dashboard_view  # pyright: ignore[reportMissingImports]
     from forecast_analysis.filters import (  # pyright: ignore[reportMissingImports]
         DashboardFilters,
@@ -36,6 +40,142 @@ with app.setup:
     HIERARCHY_PATH = ROOT / "artifacts/ph/PH_FG.xlsx"
     ACTUALS_PATH = ROOT / "artifacts/secondary_sales"
     SOURCE_COLORS = {"tm": "#0F5B78", "ml": "#D97757"}
+
+    def _build_product_detail_controls(mo_module, products, target_months):
+        """Construct detail dropdowns with Marimo option keys and domain values."""
+        product_options = {
+            f"{row['parent_code']} — {row['parent_description']}": row["parent_code"]
+            for row in products
+        }
+        product_placeholder = "No products available"
+        product_dropdown = mo_module.ui.dropdown(
+            options=product_options or {product_placeholder: None},
+            value=next(iter(product_options), product_placeholder),
+            allow_select_none=True,
+            searchable=True,
+            label="Vintage history product (search code or description)",
+        )
+
+        target_month_options = {str(month): month for month in target_months}
+        target_month_placeholder = "No target months available"
+        target_month_dropdown = mo_module.ui.dropdown(
+            options=target_month_options or {target_month_placeholder: None},
+            value=next(iter(target_month_options), target_month_placeholder),
+            allow_select_none=True,
+            label="Vintage history target month",
+        )
+        return product_dropdown, target_month_dropdown
+
+    def _build_view_controls(mo_module):
+        """Construct mapped view/source controls with display-key defaults."""
+        comparison_mode_filter = mo_module.ui.dropdown(
+            options={
+                "Single source": "single",
+                "Compare TM vs ML": "comparison",
+            },
+            value="Single source",
+            label="View mode",
+        )
+        source_filter = mo_module.ui.dropdown(
+            options={"TM": "tm", "ML": "ml"},
+            value="TM",
+            label="Forecast source (single-source mode)",
+        )
+        return comparison_mode_filter, source_filter
+
+    def _build_mapped_filter_controls(
+        mo_module,
+        horizons,
+        default_horizons,
+        calculation_months,
+        horizon_label="Forecast horizon",
+    ):
+        """Construct mapped dashboard controls with key-based defaults."""
+        horizon_options = {
+            format_horizon_label(horizon): horizon for horizon in horizons
+        }
+        selected_horizon_keys = [
+            key for key, value in horizon_options.items() if value in default_horizons
+        ]
+        horizon_filter = mo_module.ui.multiselect(
+            options=horizon_options,
+            value=selected_horizon_keys,
+            label=horizon_label,
+        )
+
+        rule_options = {
+            "Oldest available": "oldest_available",
+            "Latest available": "latest_available",
+            "Exact calculation month": "specific_calculation_month",
+            "Exact horizon": "specific_horizon",
+        }
+        month_options = {
+            str(month): month for month in calculation_months
+        } or {"No calculation months available": None}
+        exact_horizon_options = {
+            format_horizon_label(horizon): horizon for horizon in horizons
+        } or {"No horizons available": None}
+        vintage_a_rule_filter = mo_module.ui.dropdown(
+            options=rule_options,
+            value="Oldest available",
+            label="Vintage A rule",
+        )
+        vintage_b_rule_filter = mo_module.ui.dropdown(
+            options=rule_options,
+            value="Latest available",
+            label="Vintage B rule",
+        )
+        vintage_a_month_filter = mo_module.ui.dropdown(
+            options=month_options,
+            value=next(iter(month_options)),
+            label="Vintage A exact calculation month",
+        )
+        vintage_b_month_filter = mo_module.ui.dropdown(
+            options=month_options,
+            value=next(iter(month_options)),
+            label="Vintage B exact calculation month",
+        )
+        vintage_a_horizon_filter = mo_module.ui.dropdown(
+            options=exact_horizon_options,
+            value=next(iter(exact_horizon_options)),
+            label="Vintage A exact horizon",
+        )
+        vintage_b_horizon_filter = mo_module.ui.dropdown(
+            options=exact_horizon_options,
+            value=next(iter(exact_horizon_options)),
+            label="Vintage B exact horizon",
+        )
+        direction_options = {
+            "Up": "up",
+            "Down": "down",
+            "Unchanged": "unchanged",
+        }
+        revision_direction_filter = mo_module.ui.multiselect(
+            options=direction_options,
+            value=list(direction_options),
+            label="Revision direction (active with comparable pairs)",
+        )
+        outcome_options = {
+            "Improved": "improved",
+            "Worsened": "worsened",
+            "Neutral": "neutral",
+        }
+        revision_outcome_filter = mo_module.ui.multiselect(
+            options=outcome_options,
+            value=list(outcome_options),
+            label="Revision outcome (active with comparable pairs)",
+        )
+        return (
+            horizon_filter,
+            vintage_a_rule_filter,
+            vintage_b_rule_filter,
+            vintage_a_month_filter,
+            vintage_b_month_filter,
+            vintage_a_horizon_filter,
+            vintage_b_horizon_filter,
+            revision_direction_filter,
+            revision_outcome_filter,
+        )
 
 
 @app.cell
@@ -60,20 +200,8 @@ def _(mo):
 
 
 @app.cell
-def _(mo):
-    comparison_mode_filter = mo.ui.dropdown(
-        options={
-            "Single source": "single",
-            "Compare TM vs ML": "comparison",
-        },
-        value="single",
-        label="View mode",
-    )
-    source_filter = mo.ui.dropdown(
-        options={"TM": "tm", "ML": "ml"},
-        value="tm",
-        label="Forecast source (single-source mode)",
-    )
+def _(mo, _build_view_controls):
+    comparison_mode_filter, source_filter = _build_view_controls(mo)
     mo.hstack([comparison_mode_filter, source_filter], justify="start")
     return comparison_mode_filter, source_filter
 
@@ -82,6 +210,8 @@ def _(mo):
 def _(
     validated_dataset,
     mo,
+    _build_product_detail_controls,
+    _build_mapped_filter_controls,
     source_filter,
     comparison_mode_filter,
     available_filter_values,
@@ -108,23 +238,41 @@ def _(
         value=_brands,
         label="Brand",
     )
+    _product_options = {
+        f"{row['parent_code']} — {row['parent_description']}": row["parent_code"]
+        for row in _products
+    }
     product_filter = mo.ui.multiselect(
-        options={
-            f"{row['parent_code']} — {row['parent_description']}": row["parent_code"]
-            for row in _products
-        },
-        value=[row["parent_code"] for row in _products],
+        options=_product_options,
+        value=list(_product_options),
         label="Parent product",
+    )
+    product_detail_filter, product_detail_target_month_filter = (
+        _build_product_detail_controls(mo, _products, _target_months)
     )
     _default_horizons = (
         [_options["default_comparison_horizon"]]
         if _comparison_mode and _options["default_comparison_horizon"] is not None
         else _horizons
     )
-    horizon_filter = mo.ui.multiselect(
-        options={format_horizon_label(horizon): horizon for horizon in _horizons},
-        value=_default_horizons,
-        label=("Comparison horizon (exact)" if _comparison_mode else "Forecast horizon"),
+    (
+        horizon_filter,
+        vintage_a_rule_filter,
+        vintage_b_rule_filter,
+        vintage_a_month_filter,
+        vintage_b_month_filter,
+        vintage_a_horizon_filter,
+        vintage_b_horizon_filter,
+        revision_direction_filter,
+        revision_outcome_filter,
+    ) = _build_mapped_filter_controls(
+        mo,
+        _horizons,
+        _default_horizons,
+        _calculation_months,
+        horizon_label=(
+            "Comparison horizon (exact)" if _comparison_mode else "Forecast horizon"
+        ),
     )
     minimum_actual_filter = mo.ui.number(
         value=0,
@@ -133,58 +281,6 @@ def _(
         label="Minimum actual volume (KL)",
     )
 
-    _rule_options = {
-        "Oldest available": "oldest_available",
-        "Latest available": "latest_available",
-        "Exact calculation month": "specific_calculation_month",
-        "Exact horizon": "specific_horizon",
-    }
-    _month_options = {
-        str(month): month for month in _calculation_months
-    } or {"No calculation months available": None}
-    _horizon_options = {
-        format_horizon_label(horizon): horizon for horizon in _horizons
-    } or {"No horizons available": None}
-    vintage_a_rule_filter = mo.ui.dropdown(
-        options=_rule_options,
-        value="oldest_available",
-        label="Vintage A rule",
-    )
-    vintage_b_rule_filter = mo.ui.dropdown(
-        options=_rule_options,
-        value="latest_available",
-        label="Vintage B rule",
-    )
-    vintage_a_month_filter = mo.ui.dropdown(
-        options=_month_options,
-        value=next(iter(_month_options.values())),
-        label="Vintage A exact calculation month",
-    )
-    vintage_b_month_filter = mo.ui.dropdown(
-        options=_month_options,
-        value=next(iter(_month_options.values())),
-        label="Vintage B exact calculation month",
-    )
-    vintage_a_horizon_filter = mo.ui.dropdown(
-        options=_horizon_options,
-        value=next(iter(_horizon_options.values())),
-        label="Vintage A exact horizon",
-    )
-    vintage_b_horizon_filter = mo.ui.dropdown(
-        options=_horizon_options,
-        value=next(iter(_horizon_options.values())),
-        label="Vintage B exact horizon",
-    )
-    revision_direction_filter = mo.ui.multiselect(
-        options={"Up": "up", "Down": "down", "Unchanged": "unchanged"},
-        value=["up", "down", "unchanged"],
-        label="Revision direction (active with comparable pairs)",
-    )
-    revision_outcome_filter = mo.ui.multiselect(
-        options={"Improved": "improved", "Worsened": "worsened", "Neutral": "neutral"},
-        value=["improved", "worsened", "neutral"],
-        label="Revision outcome (active with comparable pairs)",
-    )
     revision_tolerance_filter = mo.ui.number(
         value=0.01,
         start=0,
@@ -205,7 +301,12 @@ def _(
                 minimum_actual_filter,
             ],
             widths="equal",
-        )
+        ),
+        mo.md("### Product vintage history"),
+        mo.hstack(
+            [product_detail_filter, product_detail_target_month_filter],
+            widths="equal",
+        ),
     ]
     if _comparison_mode:
         _controls.extend(
@@ -251,6 +352,8 @@ def _(
         horizon_filter,
         minimum_actual_filter,
         product_filter,
+        product_detail_filter,
+        product_detail_target_month_filter,
         target_month_filter,
         vintage_a_rule_filter,
         vintage_b_rule_filter,
@@ -405,6 +508,185 @@ def _(
         vintage_b=vintage_b,
     )
     return comparison_ready, filters, view
+
+
+@app.cell
+def _(
+    build_product_detail,
+    filters,
+    product_detail_filter,
+    product_detail_target_month_filter,
+    validated_dataset,
+):
+    _parent_code = product_detail_filter.value
+    _target_month = product_detail_target_month_filter.value
+    product_history_error = None
+    if (
+        _parent_code is None
+        or _target_month is None
+        or not isinstance(_parent_code, int)
+        or isinstance(_parent_code, bool)
+    ):
+        product_history = None
+    else:
+        try:
+            product_history = build_product_detail(
+                validated_dataset.frame,
+                filters,
+                _parent_code,
+                _target_month,
+            )
+        except ValueError as exc:
+            product_history = None
+            product_history_error = str(exc)
+    return product_history, product_history_error
+
+
+@app.cell
+def _(
+    SOURCE_COLORS,
+    alt,
+    filters,
+    mo,
+    pl,
+    product_history,
+    product_history_error,
+):
+    if product_history_error is not None:
+        _output = mo.md(
+            "## Product vintage history\n\n"
+            f"⚠️ {product_history_error}."
+        )
+    elif product_history is None:
+        _output = mo.md(
+            "## Product vintage history\n\n"
+            "Select a product and target month to inspect forecast development."
+        )
+    elif product_history.points.height == 0:
+        _output = mo.vstack(
+            [
+                mo.md(
+                    f"## Product vintage history\n\n"
+                    f"No {', '.join(source.upper() for source in product_history.sources)} "
+                    f"vintage is available for parent product `{product_history.parent_code}` "
+                    f"and target month `{product_history.target_month}` under the active filters."
+                ),
+                mo.ui.table(product_history.stability, page_size=10),
+            ]
+        )
+    else:
+        _title = (
+            f"## Product vintage history — {product_history.parent_code} · "
+            f"{product_history.target_month}"
+        )
+        _metadata = (
+            f"**Description:** {product_history.parent_description or '—'} · "
+            f"**Brand:** {product_history.brand or 'Unmapped'} · "
+            f"**Mapping:** {product_history.mapping_status or '—'} · "
+            f"**Actual:** {product_history.actual_kl if product_history.actual_kl is not None else '—'} KL"
+        )
+        _scope_note = (
+            "Comparison mode uses the shared exact horizon; TM and ML remain separate "
+            "legend series."
+            if filters.comparison_mode
+            else "History respects the selected source and forecast-horizon filters."
+        )
+        _status_notes = [
+            mo.md(
+                f"{_title}\n\n{_metadata}\n\n{product_history.status_message}\n\n{_scope_note}"
+            )
+        ]
+        _insufficient = product_history.stability.filter(
+            pl.col("history_status") != "ready"
+        )
+        if _insufficient.height:
+            _status_notes.append(
+                mo.md(
+                    "\n".join(
+                        f"> ⚠️ **{row['source'].upper()}:** {row['history_message']}"
+                        for row in _insufficient.iter_rows(named=True)
+                    )
+                )
+            )
+
+        _points = product_history.points
+        _source_scale = alt.Scale(
+            domain=["tm", "ml"],
+            range=[SOURCE_COLORS["tm"], SOURCE_COLORS["ml"]],
+        )
+        _forecast_chart = (
+            alt.Chart(_points.to_pandas())
+            .mark_line(point=True, strokeWidth=2.5)
+            .encode(
+                x=alt.X("calculation_month:T", title="Calculation month"),
+                y=alt.Y("forecast_kl:Q", title="Forecast (KL)"),
+                color=alt.Color(
+                    "source:N",
+                    title="Forecast source",
+                    scale=_source_scale,
+                ),
+                tooltip=[
+                    alt.Tooltip("source:N", title="Source"),
+                    alt.Tooltip("calculation_month:T", title="Calculation month"),
+                    alt.Tooltip(
+                        "forecast_horizon_months:Q",
+                        title="Forecast horizon (months)",
+                        format=",.0f",
+                    ),
+                    alt.Tooltip("forecast_kl:Q", title="Forecast quantity (KL)", format=",.3f"),
+                    alt.Tooltip("actual_kl:Q", title="Actual quantity (KL)", format=",.3f"),
+                    alt.Tooltip("error_kl:Q", title="Error (KL)", format=",.3f"),
+                    alt.Tooltip("bias_pct:Q", title="Bias (%)", format=",.2f"),
+                ],
+            )
+            .properties(height=360)
+        )
+        _actual_reference = product_history.actual_reference.filter(
+            pl.col("actual_kl").is_not_null()
+        )
+        _chart = _forecast_chart
+        if _actual_reference.height:
+            _actual_chart = (
+                alt.Chart(_actual_reference.to_pandas())
+                .mark_rule(color="#5B6870", strokeDash=[6, 4])
+                .encode(
+                    y=alt.Y("actual_kl:Q", title="Forecast / actual (KL)"),
+                    tooltip=[
+                        alt.Tooltip("actual_kl:Q", title="Actual quantity (KL)", format=",.3f"),
+                        alt.Tooltip("actual_status:N", title="Actual status"),
+                    ],
+                )
+            )
+            _chart = _forecast_chart + _actual_chart
+
+        _audit_columns = [
+            "source",
+            "calculation_month",
+            "forecast_horizon_months",
+            "forecast_kl",
+            "actual_kl",
+            "error_kl",
+            "bias_pct",
+            "actual_status",
+        ]
+        _revision_table = (
+            mo.ui.table(product_history.revisions, page_size=20)
+            if product_history.revisions.height
+            else mo.md("No consecutive revisions are available in the selected history.")
+        )
+        _output = mo.vstack(
+            [
+                *_status_notes,
+                mo.ui.altair_chart(_chart, chart_selection=False, legend_selection=False),
+                mo.md("### Point audit\n\nEvery plotted point retains its calculation month, horizon, forecast, actual, error, and bias."),
+                mo.ui.table(_points.select(_audit_columns), page_size=20),
+                mo.md("### Consecutive source-specific revisions"),
+                _revision_table,
+                mo.md("### Source-specific stability"),
+                mo.ui.table(product_history.stability, page_size=10),
+            ]
+        )
+    mo.vstack([_output])
 
 
 @app.cell

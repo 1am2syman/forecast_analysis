@@ -5,7 +5,11 @@ from .actuals import aggregate_actuals, load_actuals, normalize_actuals
 from .analysis_frame import build_analysis_dataset, load_analysis_inputs
 from .contracts import AnalysisDataset, AnalysisInputs, HierarchyResult
 from .comparison import ComparisonView, build_source_comparison  # pyright: ignore[reportMissingImports]
-from .dashboard import DashboardView, build_dashboard_view  # pyright: ignore[reportMissingImports]
+from .dashboard import (  # pyright: ignore[reportMissingImports]
+    DashboardView,
+    build_dashboard_view,
+    build_product_detail,
+)
 from .diagnostics import build_population_diagnostics
 from .filters import (  # pyright: ignore[reportMissingImports]
     DashboardFilters,
@@ -33,6 +37,11 @@ from .metrics import (  # pyright: ignore[reportMissingImports]
     format_metric,
     format_revision_tolerance,
 )
+from .product_history import (  # pyright: ignore[reportMissingImports]
+    ProductHistoryView,
+    build_product_history,
+    search_parent_products,
+)
 from .vintages import VintageRule, select_vintage_pair  # pyright: ignore[reportMissingImports]
 
 __all__ = [
@@ -41,6 +50,7 @@ __all__ = [
     "DashboardFilters",
     "DashboardView",
     "MetricSummary",
+    "ProductHistoryView",
     "RevisionMetrics",
     "VintageRule",
     "aggregate_actuals",
@@ -53,10 +63,12 @@ __all__ = [
     "build_analysis_dataset",
     "build_brand_target_month_performance",
     "build_dashboard_view",
+    "build_product_detail",
     "build_horizon_performance",
     "build_source_comparison",
     "build_monthly_performance",
     "build_population_diagnostics",
+    "build_product_history",
     "build_revision_diagnostics",
     "build_revision_scatter",
     "brand_target_metric_definition",
@@ -74,6 +86,7 @@ __all__ = [
     "normalize_hierarchy",
     "format_horizon_label",
     "format_revision_tolerance",
+    "search_parent_products",
     "select_vintage_pair",
     "with_display_brand",
 ]

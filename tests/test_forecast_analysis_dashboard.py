@@ -16,7 +16,11 @@ from forecast_analysis.analysis_frame import (
     load_analysis_inputs,
 )
 from forecast_analysis.comparison import build_source_comparison  # pyright: ignore[reportMissingImports]
-from forecast_analysis.dashboard import DashboardView, build_dashboard_view  # pyright: ignore[reportMissingImports]
+from forecast_analysis.dashboard import (  # pyright: ignore[reportMissingImports]
+    DashboardView,
+    build_dashboard_view,
+    build_product_detail,
+)
 from forecast_analysis.filters import (  # pyright: ignore[reportMissingImports]
     DashboardFilters,
     apply_dashboard_filters,
@@ -29,7 +33,16 @@ from forecast_analysis.metrics import (  # pyright: ignore[reportMissingImports]
     calculate_revision_metrics,
     format_revision_tolerance,
 )
+from forecast_analysis.product_history import (  # pyright: ignore[reportMissingImports]
+    build_product_history,
+    search_parent_products,
+)
 from forecast_analysis.vintages import VintageRule, select_vintage_pair  # pyright: ignore[reportMissingImports]
+from forecast_accuracy_app import (
+    _build_mapped_filter_controls,
+    _build_product_detail_controls,
+    _build_view_controls,
+)
 
 
 class DashboardFixtureTests(unittest.TestCase):
@@ -1480,6 +1493,322 @@ class RealDashboardCoverageTests(unittest.TestCase):
             expected_ml_coverage - expected_tm_coverage,
         )
         self.assertGreater(coverage_delta, 0.0)
+
+
+class ProductVintageHistoryTests(unittest.TestCase):
+    @staticmethod
+    def history_frame() -> pl.DataFrame:
+        rows = [
+            # Deliberately unordered: the implementation must sort by calculation month.
+            ("tm", 100, "Alpha 100", "2025-03", 130.0, 10, 110.0, "matched_positive"),
+            ("tm", 100, "Alpha 100", "2025-01", 100.0, 12, 110.0, "matched_positive"),
+            ("ml", 100, "Alpha 100", "2025-03", 100.0, 10, 110.0, "matched_positive"),
+            ("tm", 100, "Alpha 100", "2025-02", 120.0, 11, 110.0, "matched_positive"),
+            ("ml", 100, "Alpha 100", "2025-01", 90.0, 12, 110.0, "matched_positive"),
+            # One vintage is an explicit insufficient-history case.
+            ("tm", 200, "Beta 200", "2025-01", 50.0, 12, 100.0, "matched_positive"),
+            # Two source-specific vintages with incomplete actual history.
+            ("tm", 300, "Gamma 300", "2025-03", 15.0, 10, None, "missing"),
+            ("tm", 300, "Gamma 300", "2025-01", 10.0, 12, None, "missing"),
+        ]
+        return pl.DataFrame(
+            {
+                "source": [row[0] for row in rows],
+                "parent_code": [row[1] for row in rows],
+                "parent_description": [row[2] for row in rows],
+                "hierarchy_description": [row[2] for row in rows],
+                "brand": ["Brand A" if row[1] == 100 else "Brand B" for row in rows],
+                "mapping_status": ["mapped"] * len(rows),
+                "mapping_diagnostic": [None] * len(rows),
+                "calculation_month": [row[3] for row in rows],
+                "snop_month": ["2026-01"] * len(rows),
+                "forecast_horizon_months": [row[5] for row in rows],
+                "forecast_kl": [row[4] for row in rows],
+                "actual_kl": [row[6] for row in rows],
+                "actual_status": [row[7] for row in rows],
+            }
+        ).with_columns(
+            pl.col("parent_code").cast(pl.Int64),
+            pl.col("calculation_month").str.to_date("%Y-%m"),
+            pl.col("snop_month").str.to_date("%Y-%m"),
+            pl.col("forecast_horizon_months").cast(pl.Int64),
+            pl.col("forecast_kl").cast(pl.Float64),
+            pl.col("actual_kl").cast(pl.Float64),
+        )
+
+    def test_search_matches_code_or_description_and_respects_target_month(self):
+        frame = self.history_frame()
+        by_code = search_parent_products(
+            frame,
+            "200",
+            sources=("tm",),
+            target_month=date(2026, 1, 1),
+        )
+        self.assertEqual(by_code["parent_code"].to_list(), [200])
+        by_description = search_parent_products(
+            frame,
+            "alpha",
+            sources=("tm", "ml"),
+            target_month="2026-01",
+        )
+        self.assertEqual(by_description["parent_code"].to_list(), [100])
+        self.assertEqual(by_description["display_label"].item(), "100 — Alpha 100")
+
+    def test_history_is_order_invariant_and_exposes_auditable_points(self):
+        frame = self.history_frame()
+        ordered = build_product_history(
+            frame.sort(["source", "calculation_month"]),
+            100,
+            date(2026, 1, 1),
+            sources=("tm", "ml"),
+        )
+        unordered = build_product_history(
+            frame.reverse(),
+            100,
+            "2026-01",
+            sources=("tm", "ml"),
+        )
+
+        self.assertEqual(ordered.points.to_dicts(), unordered.points.to_dicts())
+        self.assertEqual(ordered.revisions.to_dicts(), unordered.revisions.to_dicts())
+        self.assertEqual(ordered.stability.to_dicts(), unordered.stability.to_dicts())
+        self.assertEqual(
+            ordered.points.columns,
+            [
+                "source",
+                "parent_code",
+                "parent_description",
+                "hierarchy_description",
+                "brand",
+                "mapping_status",
+                "snop_month",
+                "calculation_month",
+                "forecast_horizon_months",
+                "forecast_kl",
+                "actual_kl",
+                "actual_status",
+                "error_kl",
+                "bias_pct",
+            ],
+        )
+        self.assertEqual(
+            ordered.points.filter(pl.col("source") == "tm")["calculation_month"].to_list(),
+            [date(2025, 1, 1), date(2025, 2, 1), date(2025, 3, 1)],
+        )
+        self.assertEqual(ordered.actual_reference["actual_kl"].to_list(), [110.0])
+        self.assertEqual(ordered.points.filter(pl.col("source") == "tm")["error_kl"].to_list(), [-10.0, 10.0, 20.0])
+
+    def test_revisions_are_consecutive_and_source_specific(self):
+        history = build_product_history(
+            self.history_frame(),
+            100,
+            date(2026, 1, 1),
+            sources=("tm", "ml"),
+        )
+        revisions = history.revisions
+        self.assertEqual(revisions.filter(pl.col("source") == "tm")["revision_kl"].to_list(), [20.0, 10.0])
+        self.assertEqual(revisions.filter(pl.col("source") == "tm")["revision_direction"].to_list(), ["up", "up"])
+        self.assertEqual(revisions.filter(pl.col("source") == "tm")["revision_outcome"].to_list(), ["neutral", "worsened"])
+        self.assertEqual(revisions.filter(pl.col("source") == "ml")["revision_kl"].to_list(), [10.0])
+        self.assertEqual(revisions.filter(pl.col("source") == "ml")["revision_outcome"].to_list(), ["improved"])
+        self.assertEqual(
+            revisions.filter(pl.col("source") == "tm")["previous_calculation_month"].to_list(),
+            [date(2025, 1, 1), date(2025, 2, 1)],
+        )
+        self.assertEqual(
+            revisions.filter(pl.col("source") == "ml")["previous_calculation_month"].to_list(),
+            [date(2025, 1, 1)],
+        )
+
+    def test_stability_metrics_are_independent_and_use_population_standard_deviation(self):
+        history = build_product_history(
+            self.history_frame(),
+            100,
+            date(2026, 1, 1),
+            sources=("tm", "ml"),
+        )
+        stability = {
+            row["source"]: row for row in history.stability.iter_rows(named=True)
+        }
+        tm = stability["tm"]
+        ml = stability["ml"]
+        self.assertEqual(tm["vintage_count"], 3)
+        self.assertEqual(tm["forecast_range_kl"], 30.0)
+        self.assertAlmostEqual(
+            tm["population_std_dev_kl"],
+            sum((value - (100 + 120 + 130) / 3) ** 2 for value in (100, 120, 130))
+            ** 0.5
+            / 3**0.5,
+        )
+        self.assertEqual(tm["revision_count"], 2)
+        self.assertEqual(tm["maximum_absolute_revision_kl"], 20.0)
+        self.assertEqual(ml["vintage_count"], 2)
+        self.assertEqual(ml["forecast_range_kl"], 10.0)
+        self.assertEqual(ml["population_std_dev_kl"], 5.0)
+        self.assertEqual(ml["revision_count"], 1)
+        self.assertEqual(ml["maximum_absolute_revision_kl"], 10.0)
+        self.assertEqual(history.status, "ready")
+
+    def test_view_and_source_dropdowns_use_display_keys_and_domain_values(self):
+        import marimo as mo
+
+        view_mode, source = _build_view_controls(mo)
+
+        self.assertEqual(view_mode.selected_key, "Single source")
+        self.assertEqual(view_mode.value, "single")
+        self.assertEqual(source.selected_key, "TM")
+        self.assertEqual(source.value, "tm")
+
+    def test_mapped_filter_controls_use_display_keys_and_domain_values(self):
+        import marimo as mo
+
+        (
+            horizons,
+            vintage_a_rule,
+            vintage_b_rule,
+            vintage_a_month,
+            vintage_b_month,
+            vintage_a_horizon,
+            vintage_b_horizon,
+            revision_directions,
+            revision_outcomes,
+        ) = _build_mapped_filter_controls(
+            mo,
+            [12, 6],
+            [12],
+            [date(2025, 1, 1), date(2025, 2, 1)],
+            horizon_label="Comparison horizon (exact)",
+        )
+
+        self.assertEqual(horizons.value, [12])
+        self.assertEqual(horizons.options, {"12 months ahead": 12, "6 months ahead": 6})
+        self.assertEqual(vintage_a_rule.selected_key, "Oldest available")
+        self.assertEqual(vintage_a_rule.value, "oldest_available")
+        self.assertEqual(vintage_b_rule.selected_key, "Latest available")
+        self.assertEqual(vintage_b_rule.value, "latest_available")
+        self.assertEqual(vintage_a_month.selected_key, "2025-01-01")
+        self.assertEqual(vintage_a_month.value, date(2025, 1, 1))
+        self.assertEqual(vintage_b_month.selected_key, "2025-01-01")
+        self.assertEqual(vintage_b_month.value, date(2025, 1, 1))
+        self.assertEqual(vintage_a_horizon.selected_key, "12 months ahead")
+        self.assertEqual(vintage_a_horizon.value, 12)
+        self.assertEqual(vintage_b_horizon.selected_key, "12 months ahead")
+        self.assertEqual(vintage_b_horizon.value, 12)
+        self.assertEqual(revision_directions.value, ["up", "down", "unchanged"])
+        self.assertEqual(revision_outcomes.value, ["improved", "worsened", "neutral"])
+
+    def test_product_detail_dropdowns_use_valid_option_keys_and_domain_values(self):
+        frame = DashboardFixtureTests.frame()
+        options = available_filter_values(frame, "tm")
+        products = options["parent_products"]
+        target_months = options["target_months"]
+
+        import marimo as mo
+
+        product_dropdown, target_month_dropdown = _build_product_detail_controls(
+            mo,
+            products,
+            target_months,
+        )
+
+        self.assertEqual(product_dropdown.selected_key, "100 — A")
+        self.assertEqual(product_dropdown.value, 100)
+        self.assertEqual(target_month_dropdown.selected_key, "2026-01-01")
+        self.assertEqual(target_month_dropdown.value, date(2026, 1, 1))
+
+    def test_comparison_detail_uses_comparison_horizon_when_horizon_filter_is_none(self):
+        detail = build_product_detail(
+            self.history_frame(),
+            DashboardFilters(
+                comparison_mode=True,
+                comparison_horizon=12,
+                horizons=None,
+            ),
+            100,
+            date(2026, 1, 1),
+        )
+        self.assertEqual(detail.points["forecast_horizon_months"].to_list(), [12, 12])
+        self.assertEqual(detail.revisions.height, 0)
+
+    def test_comparison_detail_rejects_conflicting_or_multi_horizon_filters(self):
+        for horizons in ((10,), (12, 10)):
+            with self.subTest(horizons=horizons):
+                with self.assertRaisesRegex(ValueError, "one exact horizon"):
+                    build_product_detail(
+                        self.history_frame(),
+                        DashboardFilters(
+                            comparison_mode=True,
+                            comparison_horizon=12,
+                            horizons=horizons,
+                        ),
+                        100,
+                        date(2026, 1, 1),
+                    )
+
+    def test_comparison_detail_uses_exact_horizon_and_keeps_sources_separate(self):
+        detail = build_product_detail(
+            self.history_frame(),
+            DashboardFilters(
+                comparison_mode=True,
+                comparison_horizon=12,
+                horizons=(12,),
+            ),
+            100,
+            date(2026, 1, 1),
+        )
+        self.assertEqual(set(detail.points["source"].to_list()), {"tm", "ml"})
+        self.assertEqual(detail.points.group_by("source").len().sort("source").to_dicts(), [
+            {"source": "ml", "len": 1},
+            {"source": "tm", "len": 1},
+        ])
+        self.assertEqual(detail.points["forecast_horizon_months"].to_list(), [12, 12])
+        self.assertEqual(detail.revisions.height, 0)
+        self.assertEqual(
+            set(detail.stability["history_status"].to_list()),
+            {"insufficient_history"},
+        )
+
+        standard = build_product_detail(
+            self.history_frame(),
+            DashboardFilters(source="tm", horizons=(12,)),
+            100,
+            date(2026, 1, 1),
+        )
+        self.assertEqual(standard.points["calculation_month"].to_list(), [date(2025, 1, 1)])
+        self.assertEqual(
+            standard.stability["history_status"].to_list(),
+            ["insufficient_history"],
+        )
+
+    def test_incomplete_and_single_vintage_histories_show_explicit_states(self):
+        single = build_product_history(
+            self.history_frame(),
+            200,
+            date(2026, 1, 1),
+            sources=("tm", "ml"),
+        )
+        self.assertEqual(single.status, "insufficient_history")
+        self.assertIn("At least two", single.status_message)
+        self.assertEqual(
+            single.stability.filter(pl.col("source") == "tm")["history_status"].item(),
+            "insufficient_history",
+        )
+        self.assertIsNone(
+            single.stability.filter(pl.col("source") == "tm")["forecast_range_kl"].item()
+        )
+        self.assertEqual(
+            single.stability.filter(pl.col("source") == "ml")["history_status"].item(),
+            "no_history",
+        )
+        incomplete_actual = build_product_history(
+            self.history_frame(),
+            300,
+            date(2026, 1, 1),
+            sources=("tm",),
+        )
+        self.assertEqual(incomplete_actual.status, "ready")
+        self.assertEqual(incomplete_actual.revisions.height, 1)
+        self.assertIsNone(incomplete_actual.revisions["error_improvement_kl"].item())
 
 
 if __name__ == "__main__":
