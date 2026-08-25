@@ -1,4 +1,4 @@
-"""Composition boundary for the ticket-02 dashboard population."""
+"""Composition boundary for the source-aware dashboard population and drilldowns."""
 
 from __future__ import annotations
 
@@ -14,6 +14,7 @@ from .filters import (
 )  # pyright: ignore[reportMissingImports]
 from .metrics import (
     MetricSummary,
+    build_brand_target_month_performance,
     build_horizon_performance,
     build_monthly_performance,
     build_revision_diagnostics,
@@ -35,6 +36,7 @@ class DashboardView:
     metrics: MetricSummary
     monthly_performance: pl.DataFrame
     horizon_performance: pl.DataFrame
+    brand_target_month_performance: pl.DataFrame
     revision_diagnostics: pl.DataFrame
     revision_scatter: pl.DataFrame
 
@@ -98,6 +100,11 @@ def build_dashboard_view(
         ),
         horizon_performance=build_horizon_performance(
             output_population, selected_actual_population
+        ),
+        brand_target_month_performance=build_brand_target_month_performance(
+            pairs,
+            selected_actual_population,
+            revision_tolerance_kl=active_filters.revision_tolerance_kl,
         ),
         revision_diagnostics=build_revision_diagnostics(pairs),
         revision_scatter=build_revision_scatter(pairs),

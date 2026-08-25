@@ -22,6 +22,8 @@ with app.setup:
     )
     from forecast_analysis.vintages import VintageRule  # pyright: ignore[reportMissingImports]
     from forecast_analysis.metrics import (  # pyright: ignore[reportMissingImports]
+        brand_target_metric_definition,
+        brand_target_month_order,
         format_horizon_label,
         format_metric,
         format_revision_tolerance,
@@ -644,6 +646,170 @@ def _(alt, horizon_metric, mo, pl, view):
 
 
 @app.cell
+def _(mo):
+    brand_month_metric = mo.ui.dropdown(
+        options={
+            "Forecast accuracy": "forecast_accuracy",
+            "Bias": "bias",
+            "Absolute error": "absolute_error",
+            "Vintage A accuracy": "vintage_a_accuracy",
+            "Vintage B accuracy": "vintage_b_accuracy",
+            "Accuracy delta": "accuracy_delta",
+            "Revision effectiveness": "revision_effectiveness",
+        },
+        value="forecast_accuracy",
+        label="Brand × target-month metric",
+    )
+    mo.hstack([brand_month_metric], justify="start")
+    return brand_month_metric,
+
+
+@app.cell
+def _(
+    alt,
+    brand_month_metric,
+    brand_target_metric_definition,
+    brand_target_month_order,
+    mo,
+    pl,
+    view,
+):
+    _heatmap = view.brand_target_month_performance
+    _metric_column, _metric_title, _unit, _scale_kind, _ = (
+        brand_target_metric_definition(brand_month_metric.value)
+    )
+    _metric_rows = _heatmap.filter(pl.col(_metric_column).is_not_null())
+    _scale_note = ""
+    if _heatmap.height == 0:
+        _output = mo.md(
+            "## Brand × target-month performance\n\n"
+            "No brand or target-month rows remain in this selection."
+        )
+    elif _metric_rows.height == 0:
+        _output = mo.md(
+            f"## Brand × target-month performance\n\n"
+            f"No {_metric_title.lower()} is applicable in this selection. "
+            "Coverage rows remain available in the filtered vintage download."
+        )
+    else:
+        _order = brand_target_month_order(_heatmap, brand_month_metric.value)
+        _chart_data = _heatmap.with_columns(
+            pl.col(_metric_column).alias("metric_value")
+        )
+        _legend_title = f"{_metric_title} ({_unit})"
+        if _scale_kind == "diverging":
+            _color_scale = alt.Scale(scheme="redblue", domainMid=0)
+            _legend_title += " · zero = 0"
+            _scale_note = "Diverging scale centered on the visible zero point (0 = neutral)."
+        elif _metric_column == "absolute_error_kl":
+            _color_scale = alt.Scale(scheme="oranges")
+            _scale_note = "Sequential scale shows increasing absolute-error magnitude."
+        else:
+            _color_scale = alt.Scale(scheme="greens")
+            _scale_note = "Sequential scale shows increasing effectiveness."
+        if brand_month_metric.value == "absolute_error":
+            _count_tooltips = [
+                alt.Tooltip(
+                    "absolute_error_observations:Q",
+                    title="Absolute-error observations (including zero actuals)",
+                    format=",.0f",
+                )
+            ]
+        elif brand_month_metric.value == "revision_effectiveness":
+            _count_tooltips = [
+                alt.Tooltip(
+                    "improved_revisions:Q",
+                    title="Improved revisions (numerator)",
+                    format=",.0f",
+                ),
+                alt.Tooltip(
+                    "materially_revised_observations:Q",
+                    title="Materially revised (denominator)",
+                    format=",.0f",
+                ),
+            ]
+        elif brand_month_metric.value == "vintage_a_accuracy":
+            _count_tooltips = [
+                alt.Tooltip(
+                    "vintage_a_eligible_observations:Q",
+                    title="Vintage A eligible observations",
+                    format=",.0f",
+                )
+            ]
+        elif brand_month_metric.value == "accuracy_delta":
+            _count_tooltips = [
+                alt.Tooltip(
+                    "complete_pairs:Q",
+                    title="Eligible complete Vintage A/B pairs",
+                    format=",.0f",
+                )
+            ]
+        else:
+            _count_tooltips = [
+                alt.Tooltip(
+                    "vintage_b_eligible_observations:Q",
+                    title="Vintage B eligible observations",
+                    format=",.0f",
+                )
+            ]
+        _chart = (
+            alt.Chart(_chart_data.to_pandas())
+            .mark_rect(stroke="white", strokeWidth=1)
+            .encode(
+                x=alt.X(
+                    "snop_month:T",
+                    title="Target month",
+                    sort=alt.SortField(field="snop_month", order="ascending"),
+                ),
+                y=alt.Y(
+                    "brand_display:N",
+                    title="Brand",
+                    sort=_order,
+                ),
+                color=alt.Color(
+                    "metric_value:Q",
+                    title=_legend_title,
+                    scale=_color_scale,
+                ),
+                tooltip=[
+                    alt.Tooltip("source:N", title="Source"),
+                    alt.Tooltip("brand_display:N", title="Brand"),
+                    alt.Tooltip("snop_month:T", title="Target month"),
+                    alt.Tooltip(
+                        "metric_value:Q",
+                        title=f"{_metric_title} ({_unit})",
+                        format=",.1f",
+                    ),
+                    alt.Tooltip("actual_kl:Q", title="Actual volume (KL)", format=",.1f"),
+                    *_count_tooltips,
+                    alt.Tooltip(
+                        "population_observations:Q",
+                        title="Population observations",
+                        format=",.0f",
+                    ),
+                ],
+            )
+            .properties(height=max(240, len(_order) * 26))
+        )
+        _output = mo.ui.altair_chart(
+            _chart,
+            chart_selection=False,
+            legend_selection=False,
+        )
+    mo.vstack(
+        [
+            mo.md(
+                "## Brand × target-month performance\n\n"
+                "Rows are sorted worst-first by the selected metric. "
+                "All brands summarizes the currently filtered brand population. "
+                f"{_scale_note if _heatmap.height and _metric_rows.height else ''}"
+            ),
+            _output,
+        ]
+    )
+
+
+@app.cell
 def _(alt, format_metric, mo, pl, view):
     _diagnostics = view.revision_diagnostics
     _m = view.metrics
@@ -723,6 +889,11 @@ def _(mo, view, with_display_brand):
         filename=f"forecast_{view.filters.source}_filtered_vintages.csv",
         label="Download filtered vintage CSV",
     )
+    _brand_month_download = mo.download(
+        view.brand_target_month_performance.write_csv().encode(),
+        filename=f"forecast_{view.filters.source}_brand_target_month_performance.csv",
+        label="Download brand × target-month CSV",
+    )
     if _pairs.height == 0:
         _output = mo.md(
             "## Filtered vintage table\n\nNo product-target pairs remain in this selection."
@@ -777,7 +948,7 @@ def _(mo, view, with_display_brand):
                 mo.ui.table(_table, page_size=20),
             ]
         )
-    mo.vstack([_output, _download])
+    mo.vstack([_output, _download, _brand_month_download])
 
 
 @app.cell
