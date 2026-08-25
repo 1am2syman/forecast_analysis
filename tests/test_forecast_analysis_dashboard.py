@@ -15,6 +15,7 @@ from forecast_analysis.analysis_frame import (
     build_analysis_dataset,
     load_analysis_inputs,
 )
+from forecast_analysis.comparison import build_source_comparison  # pyright: ignore[reportMissingImports]
 from forecast_analysis.dashboard import DashboardView, build_dashboard_view  # pyright: ignore[reportMissingImports]
 from forecast_analysis.filters import (  # pyright: ignore[reportMissingImports]
     DashboardFilters,
@@ -299,6 +300,55 @@ class DashboardFixtureTests(unittest.TestCase):
             pl.col("actual_kl").cast(pl.Float64),
         )
 
+    @staticmethod
+    def comparison_frame() -> pl.DataFrame:
+        rows = [
+            ("tm", 100, "Product 100", "Brand A", "2025-11", 2, 80.0, 100.0),
+            ("ml", 100, "Product 100", "Brand A", "2025-11", 2, 105.0, 100.0),
+            ("tm", 100, "Product 100", "Brand A", "2025-12", 1, 95.0, 100.0),
+            ("ml", 100, "Product 100", "Brand A", "2025-12", 1, 110.0, 100.0),
+            ("tm", 200, "Product 200", "Brand B", "2025-12", 1, 120.0, 100.0),
+            ("ml", 200, "Product 200", "Brand B", "2025-12", 1, 105.0, 100.0),
+            ("tm", 300, "Product 300", "Brand C", "2025-12", 1, 100.0, 100.0),
+            ("ml", 300, "Product 300", "Brand C", "2025-12", 1, 100.0, 100.0),
+            ("tm", 400, "Product 400", "Brand D", "2025-12", 1, 90.0, 20.0),
+            ("ml", 500, "Product 500", "Brand E", "2025-12", 1, 55.0, 80.0),
+        ]
+        return pl.DataFrame(
+            {
+                "source": [row[0] for row in rows],
+                "parent_code": [row[1] for row in rows],
+                "parent_description": [row[2] for row in rows],
+                "hierarchy_description": [row[2] for row in rows],
+                "brand": [row[3] for row in rows],
+                "mapping_status": ["mapped"] * len(rows),
+                "mapping_diagnostic": [None] * len(rows),
+                "calculation_month": [row[4] for row in rows],
+                "snop_month": ["2026-01"] * len(rows),
+                "forecast_horizon_months": [row[5] for row in rows],
+                "forecast_kl": [row[6] for row in rows],
+                "actual_kl": [row[7] for row in rows],
+                "actual_status": ["matched_positive"] * len(rows),
+            }
+        ).with_columns(
+            pl.col("parent_code").cast(pl.Int64),
+            pl.col("calculation_month").str.to_date("%Y-%m"),
+            pl.col("snop_month").str.to_date("%Y-%m"),
+            pl.col("forecast_horizon_months").cast(pl.Int64),
+            pl.col("forecast_kl").cast(pl.Float64),
+            pl.col("actual_kl").cast(pl.Float64),
+        )
+
+    @staticmethod
+    def comparison_actual_population() -> pl.DataFrame:
+        return pl.DataFrame(
+            {
+                "parent_code": [100, 200, 300, 400, 500],
+                "snop_month": [date(2026, 1, 1)] * 5,
+                "actual_kl": [100.0, 100.0, 100.0, 20.0, 80.0],
+            }
+        ).with_columns(pl.col("parent_code").cast(pl.Int64))
+
 
 class DashboardPopulationTests(unittest.TestCase):
     def test_default_source_is_tm_and_source_switch_recalculates_every_output(self):
@@ -546,6 +596,181 @@ class DashboardPopulationTests(unittest.TestCase):
         self.assertEqual(
             set(exact_pair.filter(pl.col("parent_code") == 200)["pair_status"]),
             {"missing_both"},
+        )
+
+
+class DashboardComparisonTests(unittest.TestCase):
+    def test_comparison_uses_common_one_month_horizon_and_separate_source_kpis(self):
+        frame = DashboardFixtureTests.comparison_frame()
+        actuals = DashboardFixtureTests.comparison_actual_population()
+        view = build_dashboard_view(
+            frame,
+            actuals,
+            DashboardFilters(comparison_mode=True),
+        )
+
+        self.assertIsNotNone(view.comparison)
+        comparison = view.comparison
+        assert comparison is not None
+        self.assertFalse(comparison.blocked)
+        self.assertEqual(comparison.selected_horizon, 1)
+        self.assertEqual(comparison.common_horizons, (1, 2))
+        self.assertEqual(
+            set(view.filtered_population["source"].unique().to_list()), {"tm", "ml"}
+        )
+        self.assertEqual(
+            set(view.monthly_performance["source"].unique().to_list()), {"tm", "ml"}
+        )
+        self.assertEqual(
+            set(view.brand_target_month_performance["source"].unique().to_list()),
+            {"tm", "ml"},
+        )
+
+        tm = comparison.source_metrics.filter(pl.col("source") == "tm").row(
+            0, named=True
+        )
+        ml = comparison.source_metrics.filter(pl.col("source") == "ml").row(
+            0, named=True
+        )
+        self.assertAlmostEqual(tm["forecast_accuracy_pct"], (1 - 25 / 300) * 100)
+        self.assertAlmostEqual(ml["forecast_accuracy_pct"], (1 - 15 / 300) * 100)
+        self.assertEqual(tm["actual_kl"], 300.0)
+        self.assertEqual(ml["actual_kl"], 300.0)
+        self.assertEqual(tm["forecast_kl"], 315.0)
+        self.assertEqual(ml["forecast_kl"], 315.0)
+        self.assertEqual(tm["absolute_error_kl"], 25.0)
+        self.assertEqual(ml["absolute_error_kl"], 15.0)
+        self.assertEqual(tm["coverage_pct"], 80.0)
+        self.assertEqual(ml["coverage_pct"], 95.0)
+
+        delta_values = {
+            row["metric"]: row["delta_ml_minus_tm"]
+            for row in comparison.deltas.iter_rows(named=True)
+        }
+        self.assertAlmostEqual(
+            delta_values["Forecast accuracy"], (10 / 300) * 100
+        )
+        self.assertEqual(delta_values["Bias"], 0.0)
+        self.assertEqual(delta_values["Absolute error"], -10.0)
+        self.assertEqual(delta_values["Coverage"], 15.0)
+        self.assertEqual(
+            comparison.population_summary.select("status").to_series().to_list(),
+            ["both_sources", "tm_only", "ml_only"],
+        )
+        self.assertEqual(
+            comparison.population_summary.select("observations").to_series().to_list(),
+            [3, 1, 1],
+        )
+        self.assertEqual(
+            comparison.population_summary.select("actual_kl").to_series().to_list(),
+            [300.0, 20.0, 80.0],
+        )
+        self.assertEqual(
+            comparison.winner_counts.select("observations").to_series().to_list(),
+            [1, 1, 1],
+        )
+        self.assertEqual(
+            comparison.paired_comparison.select("winner").to_series().to_list(),
+            ["tm_better", "ml_better", "tied"],
+        )
+
+    def test_comparison_is_order_invariant_and_mismatched_horizons_are_blocked(self):
+        frame = DashboardFixtureTests.comparison_frame()
+        actuals = DashboardFixtureTests.comparison_actual_population()
+        filters = DashboardFilters(comparison_mode=True)
+        first = build_source_comparison(frame, actuals, filters)
+        reversed_result = build_source_comparison(frame.reverse(), actuals, filters)
+
+        columns = [
+            "parent_code",
+            "snop_month",
+            "tm_forecast_kl",
+            "ml_forecast_kl",
+            "winner",
+        ]
+        self.assertEqual(
+            first.paired_comparison.select(columns).to_dicts(),
+            reversed_result.paired_comparison.select(columns).to_dicts(),
+        )
+        self.assertEqual(
+            first.source_metrics.to_dicts(),
+            reversed_result.source_metrics.to_dicts(),
+        )
+
+        blocked = build_dashboard_view(
+            frame,
+            actuals,
+            DashboardFilters(comparison_mode=True, horizons=(1, 2)),
+        )
+        assert blocked.comparison is not None
+        self.assertTrue(blocked.comparison.blocked)
+        self.assertIn("one shared exact horizon", blocked.comparison.warning or "")
+
+        conflicting_horizon_filter = build_dashboard_view(
+            frame,
+            actuals,
+            DashboardFilters(
+                comparison_mode=True,
+                horizons=(1,),
+                comparison_horizon=2,
+            ),
+        )
+        assert conflicting_horizon_filter.comparison is not None
+        self.assertTrue(conflicting_horizon_filter.comparison.blocked)
+        self.assertIn(
+            "comparison horizon and forecast-horizon filter do not match",
+            conflicting_horizon_filter.comparison.warning or "",
+        )
+
+        unavailable_horizon = build_dashboard_view(
+            frame,
+            actuals,
+            DashboardFilters(comparison_mode=True, comparison_horizon=3),
+        )
+        assert unavailable_horizon.comparison is not None
+        self.assertTrue(unavailable_horizon.comparison.blocked)
+        self.assertIn(
+            "selected exact horizon",
+            unavailable_horizon.comparison.warning or "",
+        )
+
+    def test_comparison_is_exact_horizon_only_and_ignores_vintage_revision_controls(self):
+        frame = DashboardFixtureTests.comparison_frame()
+        actuals = DashboardFixtureTests.comparison_actual_population()
+        baseline = build_dashboard_view(
+            frame,
+            actuals,
+            DashboardFilters(comparison_mode=True, horizons=(1,)),
+        )
+        controlled = build_dashboard_view(
+            frame,
+            actuals,
+            DashboardFilters(
+                comparison_mode=True,
+                horizons=(1,),
+                revision_directions=("up",),
+                revision_outcomes=("improved",),
+            ),
+            vintage_a=VintageRule.specific_horizon(2),
+            vintage_b=VintageRule.latest_available(),
+        )
+
+        assert baseline.comparison is not None
+        assert controlled.comparison is not None
+        self.assertIsNone(controlled.filters.revision_directions)
+        self.assertIsNone(controlled.filters.revision_outcomes)
+        self.assertEqual(controlled.comparison.selected_horizon, 1)
+        self.assertEqual(
+            controlled.comparison.alignment_rule,
+            "specific_horizon:1",
+        )
+        self.assertEqual(
+            baseline.comparison.paired_comparison.to_dicts(),
+            controlled.comparison.paired_comparison.to_dicts(),
+        )
+        self.assertEqual(
+            baseline.comparison.source_metrics.to_dicts(),
+            controlled.comparison.source_metrics.to_dicts(),
         )
 
 
@@ -1195,6 +1420,66 @@ class RealDashboardCoverageTests(unittest.TestCase):
             view.metrics.actual_kl / total_actual * 100,
         )
         self.assertLess(view.metrics.coverage_pct, 100.0)
+
+    def test_real_comparison_coverage_includes_asymmetric_source_only_volume(self):
+        root = Path(__file__).parents[1]
+        inputs = load_analysis_inputs(
+            root / "artifacts/forecast_history/consolidated/forecast_history_waterfall.csv",
+            root / "artifacts/ph/PH_FG.xlsx",
+            root / "artifacts/secondary_sales/Mode_Sec_Month on Month_2026_04_30.xlsb",
+        )
+        dataset = build_analysis_dataset(inputs)
+        view = build_dashboard_view(
+            dataset.frame,
+            dataset.actual_population,
+            DashboardFilters(comparison_mode=True),
+        )
+
+        self.assertIsNotNone(view.comparison)
+        comparison = view.comparison
+        assert comparison is not None
+        self.assertFalse(comparison.blocked)
+        self.assertEqual(comparison.selected_horizon, 1)
+
+        summary = {
+            row["population"]: row
+            for row in comparison.population_summary.iter_rows(named=True)
+        }
+        selected_actual = comparison.selected_actual_population["actual_kl"].sum()
+        self.assertIsInstance(selected_actual, (int, float))
+        assert isinstance(selected_actual, (int, float))
+        expected_tm_coverage = (
+            summary["common"]["actual_kl"] + summary["tm_only"]["actual_kl"]
+        ) / selected_actual * 100
+        expected_ml_coverage = (
+            summary["common"]["actual_kl"] + summary["ml_only"]["actual_kl"]
+        ) / selected_actual * 100
+        self.assertEqual(
+            [summary[key]["observations"] for key in ("common", "tm_only", "ml_only")],
+            [1275, 430, 229],
+        )
+        self.assertGreater(summary["tm_only"]["actual_kl"], 0.0)
+        self.assertGreater(summary["ml_only"]["actual_kl"], 0.0)
+
+        metrics = {
+            row["source"]: row
+            for row in comparison.source_metrics.iter_rows(named=True)
+        }
+        self.assertAlmostEqual(metrics["tm"]["coverage_pct"], expected_tm_coverage)
+        self.assertAlmostEqual(metrics["ml"]["coverage_pct"], expected_ml_coverage)
+        self.assertAlmostEqual(metrics["tm"]["coverage_pct"], 89.9026408913838)
+        self.assertAlmostEqual(metrics["ml"]["coverage_pct"], 97.62780544682361)
+        self.assertGreater(metrics["ml"]["coverage_pct"], metrics["tm"]["coverage_pct"])
+        coverage_delta = next(
+            row["delta_ml_minus_tm"]
+            for row in comparison.deltas.iter_rows(named=True)
+            if row["metric"] == "Coverage"
+        )
+        self.assertAlmostEqual(
+            coverage_delta,
+            expected_ml_coverage - expected_tm_coverage,
+        )
+        self.assertGreater(coverage_delta, 0.0)
 
 
 if __name__ == "__main__":

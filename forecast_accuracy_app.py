@@ -35,6 +35,7 @@ with app.setup:
     )
     HIERARCHY_PATH = ROOT / "artifacts/ph/PH_FG.xlsx"
     ACTUALS_PATH = ROOT / "artifacts/secondary_sales"
+    SOURCE_COLORS = {"tm": "#0F5B78", "ml": "#D97757"}
 
 
 @app.cell
@@ -60,18 +61,37 @@ def _(mo):
 
 @app.cell
 def _(mo):
+    comparison_mode_filter = mo.ui.dropdown(
+        options={
+            "Single source": "single",
+            "Compare TM vs ML": "comparison",
+        },
+        value="single",
+        label="View mode",
+    )
     source_filter = mo.ui.dropdown(
         options={"TM": "tm", "ML": "ml"},
         value="tm",
-        label="Forecast source",
+        label="Forecast source (single-source mode)",
     )
-    mo.hstack([source_filter], justify="start")
-    return source_filter,
+    mo.hstack([comparison_mode_filter, source_filter], justify="start")
+    return comparison_mode_filter, source_filter
 
 
 @app.cell
-def _(validated_dataset, mo, source_filter, available_filter_values):
-    _options = available_filter_values(validated_dataset.frame, source_filter.value)
+def _(
+    validated_dataset,
+    mo,
+    source_filter,
+    comparison_mode_filter,
+    available_filter_values,
+):
+    _comparison_mode = comparison_mode_filter.value == "comparison"
+    _options = available_filter_values(
+        validated_dataset.frame,
+        source_filter.value,
+        comparison_mode=_comparison_mode,
+    )
     _target_months = _options["target_months"]
     _brands = _options["brands"]
     _products = _options["parent_products"]
@@ -96,10 +116,15 @@ def _(validated_dataset, mo, source_filter, available_filter_values):
         value=[row["parent_code"] for row in _products],
         label="Parent product",
     )
+    _default_horizons = (
+        [_options["default_comparison_horizon"]]
+        if _comparison_mode and _options["default_comparison_horizon"] is not None
+        else _horizons
+    )
     horizon_filter = mo.ui.multiselect(
         options={format_horizon_label(horizon): horizon for horizon in _horizons},
-        value=_horizons,
-        label="Forecast horizon",
+        value=_default_horizons,
+        label=("Comparison horizon (exact)" if _comparison_mode else "Forecast horizon"),
     )
     minimum_actual_filter = mo.ui.number(
         value=0,
@@ -164,44 +189,63 @@ def _(validated_dataset, mo, source_filter, available_filter_values):
         value=0.01,
         start=0,
         step=0.01,
-        label="Revision tolerance (KL)",
+        label=(
+            "Comparison tie tolerance (KL)"
+            if _comparison_mode
+            else "Revision tolerance (KL)"
+        ),
     )
-    mo.vstack(
-        [
-            mo.hstack(
-                [
-                    target_month_filter,
-                    brand_filter,
-                    product_filter,
-                    horizon_filter,
-                    minimum_actual_filter,
-                ],
-                widths="equal",
-            ),
-            mo.md("### Vintage comparison and revision filters"),
-            mo.hstack(
-                [vintage_a_rule_filter, vintage_b_rule_filter],
-                widths="equal",
-            ),
-            mo.hstack(
-                [
-                    vintage_a_month_filter,
-                    vintage_b_month_filter,
-                    vintage_a_horizon_filter,
-                    vintage_b_horizon_filter,
-                ],
-                widths="equal",
-            ),
-            mo.hstack(
-                [
-                    revision_direction_filter,
-                    revision_outcome_filter,
-                    revision_tolerance_filter,
-                ],
-                widths="equal",
-            ),
-        ]
-    )
+    _controls = [
+        mo.hstack(
+            [
+                target_month_filter,
+                brand_filter,
+                product_filter,
+                horizon_filter,
+                minimum_actual_filter,
+            ],
+            widths="equal",
+        )
+    ]
+    if _comparison_mode:
+        _controls.extend(
+            [
+                mo.md(
+                    "**Comparison mode:** TM and ML use one selected shared exact "
+                    "horizon. Vintage A/B and revision direction/outcome controls "
+                    "are unavailable because comparison is not a revision self-pair."
+                ),
+                revision_tolerance_filter,
+            ]
+        )
+    else:
+        _controls.extend(
+            [
+                mo.md("### Vintage comparison and revision filters"),
+                mo.hstack(
+                    [vintage_a_rule_filter, vintage_b_rule_filter],
+                    widths="equal",
+                ),
+                mo.hstack(
+                    [
+                        vintage_a_month_filter,
+                        vintage_b_month_filter,
+                        vintage_a_horizon_filter,
+                        vintage_b_horizon_filter,
+                    ],
+                    widths="equal",
+                ),
+                mo.hstack(
+                    [
+                        revision_direction_filter,
+                        revision_outcome_filter,
+                        revision_tolerance_filter,
+                    ],
+                    widths="equal",
+                ),
+            ]
+        )
+    mo.vstack(_controls)
     return (
         brand_filter,
         horizon_filter,
@@ -241,7 +285,10 @@ def _(
     revision_direction_filter,
     revision_outcome_filter,
     revision_tolerance_filter,
+    comparison_mode_filter,
 ):
+    _comparison_mode = comparison_mode_filter.value == "comparison"
+
     def _make_vintage_rule(kind, calculation_month, horizon):
         try:
             if (
@@ -266,26 +313,50 @@ def _(
         if revision_tolerance_filter.value is None
         else revision_tolerance_filter.value
     )
-    _selected_revision_directions = _all_or_selected(
-        revision_direction_filter.value,
-        ("up", "down", "unchanged"),
+    _selected_revision_directions = (
+        None
+        if _comparison_mode
+        else _all_or_selected(
+            revision_direction_filter.value,
+            ("up", "down", "unchanged"),
+        )
     )
-    _selected_revision_outcomes = _all_or_selected(
-        revision_outcome_filter.value,
-        ("improved", "worsened", "neutral"),
+    _selected_revision_outcomes = (
+        None
+        if _comparison_mode
+        else _all_or_selected(
+            revision_outcome_filter.value,
+            ("improved", "worsened", "neutral"),
+        )
     )
-    vintage_a = _make_vintage_rule(
-        vintage_a_rule_filter.value,
-        vintage_a_month_filter.value,
-        vintage_a_horizon_filter.value,
+    vintage_a = (
+        None
+        if _comparison_mode
+        else _make_vintage_rule(
+            vintage_a_rule_filter.value,
+            vintage_a_month_filter.value,
+            vintage_a_horizon_filter.value,
+        )
     )
-    vintage_b = _make_vintage_rule(
-        vintage_b_rule_filter.value,
-        vintage_b_month_filter.value,
-        vintage_b_horizon_filter.value,
+    vintage_b = (
+        None
+        if _comparison_mode
+        else _make_vintage_rule(
+            vintage_b_rule_filter.value,
+            vintage_b_month_filter.value,
+            vintage_b_horizon_filter.value,
+        )
+    )
+    _selected_horizons = tuple(horizon_filter.value)
+    _comparison_horizon = (
+        _selected_horizons[0]
+        if _comparison_mode and len(_selected_horizons) == 1
+        else None
     )
     base_filters = DashboardFilters(
         source=source_filter.value,
+        comparison_mode=_comparison_mode,
+        comparison_horizon=_comparison_horizon,
         target_months=tuple(target_month_filter.value),
         brands=tuple(brand_filter.value),
         parent_codes=tuple(product_filter.value),
@@ -300,19 +371,29 @@ def _(
         vintage_a=vintage_a,
         vintage_b=vintage_b,
     )
-    comparison_ready = base_view.metrics.complete_pairs > 0
+    comparison_ready = (
+        base_view.comparison.ready
+        if _comparison_mode and base_view.comparison is not None
+        else base_view.metrics.complete_pairs > 0
+    )
     filters = DashboardFilters(
         source=source_filter.value,
+        comparison_mode=_comparison_mode,
+        comparison_horizon=_comparison_horizon,
         target_months=tuple(target_month_filter.value),
         brands=tuple(brand_filter.value),
         parent_codes=tuple(product_filter.value),
         horizons=tuple(horizon_filter.value),
         minimum_actual_volume=minimum_actual_filter.value or 0,
         revision_directions=(
-            _selected_revision_directions if comparison_ready else None
+            _selected_revision_directions
+            if comparison_ready and not _comparison_mode
+            else None
         ),
         revision_outcomes=(
-            _selected_revision_outcomes if comparison_ready else None
+            _selected_revision_outcomes
+            if comparison_ready and not _comparison_mode
+            else None
         ),
         revision_tolerance_kl=_revision_tolerance,
     )
@@ -334,8 +415,41 @@ def _(
     format_metric,
     format_revision_tolerance,
     mo,
+    pl,
     view,
 ):
+    _comparison_output = None
+    if filters.comparison_mode and view.comparison is not None:
+        _comparison = view.comparison
+        _month_frame = (
+            _comparison.common_population
+            if _comparison.common_population.height
+            else _comparison.filtered_population
+        )
+        _months = _month_frame["snop_month"].unique().sort().to_list()
+        _month_label = (
+            f"{_months[0]} → {_months[-1]}" if _months else "no target months"
+        )
+        _horizon_label = (
+            format_horizon_label(_comparison.selected_horizon)
+            if _comparison.selected_horizon is not None
+            else "not aligned"
+        )
+        _alignment = _comparison.alignment_rule or "not selected"
+        _warning = _comparison.warning or _comparison.coverage_warning
+        _warning_text = (
+            f"\n\n> ⚠️ **Comparison note:** {_warning}" if _warning else ""
+        )
+        _comparison_output = mo.md(
+            f"""# Forecast performance — TM vs ML comparison
+
+**Common population:** `{_comparison.comparable_pairs:,}` paired product-target observations · `{_month_label}` · **aligned horizon:** `{_horizon_label}` · **rule:** `{_alignment}`
+
+**Coverage:** `{_comparison.population_summary.filter(pl.col('population') == 'common')['actual_kl'].item() if _comparison.population_summary.filter(pl.col('population') == 'common').height else 0.0:,.1f} KL` common actual volume · `{_comparison.population_summary.filter(pl.col('population') == 'tm_only')['observations'].item() if _comparison.population_summary.filter(pl.col('population') == 'tm_only').height else 0:,}` TM-only · `{_comparison.population_summary.filter(pl.col('population') == 'ml_only')['observations'].item() if _comparison.population_summary.filter(pl.col('population') == 'ml_only').height else 0:,}` ML-only
+
+Accuracy, bias, and absolute error use the common aligned population; each source's coverage uses its full aligned-horizon population (common plus source-only). {_warning_text}"""
+        )
+
     _month_frame = (
         view.coverage_pairs
         if view.coverage_pairs.height
@@ -366,7 +480,7 @@ def _(
         if comparison_ready
         else "Revision direction/outcome filters are a no-op: no complete positive-actual Vintage A/B pairs are available in this selection."
     )
-    mo.md(
+    _standard_output = mo.md(
         f"""# Forecast performance — {filters.source.upper()}
 
 **Population:** `{view.filtered_population.height:,}` forecast rows · `{view.coverage_pairs.height:,}` coverage product-target groups · `{view.vintage_pairs.height:,}` selected pair rows · `{_month_label}` · `{format_metric(_m.actual_kl, 'KL')}` actual volume
@@ -375,11 +489,51 @@ def _(
 
 **Revision policy:** tolerance `{format_revision_tolerance(filters.revision_tolerance_kl)}`; revisions above tolerance are **up**, below negative tolerance are **down**, and the remainder are **unchanged**. Error improvement above, below, or within the same tolerance is **improved**, **worsened**, or **neutral**. {_revision_filter_message}"""
     )
-    return
+    _comparison_output if filters.comparison_mode else _standard_output
 
 
 @app.cell
 def _(format_metric, mo, view):
+    _comparison_output = None
+    if view.filters.comparison_mode and view.comparison is not None:
+        _comparison = view.comparison
+
+        def _source_card(label, summary):
+            return mo.md(
+                f"**{label}**\n\n"
+                f"Accuracy: **{format_metric(summary.forecast_accuracy_pct, '%')}**  \n"
+                f"Bias: **{format_metric(summary.bias_pct, '%')}**  \n"
+                f"Absolute error: **{format_metric(summary.absolute_error_kl, 'KL')}**  \n"
+                f"Aligned-horizon coverage: **{format_metric(summary.coverage_pct, '%')}**  \n"
+                f"Common actual: `{format_metric(summary.actual_kl, 'KL')}` · "
+                f"Common forecast: `{format_metric(summary.forecast_kl, 'KL')}`  \n"
+                f"Eligible observations: `{summary.eligible_observations:,}`"
+            )
+
+        _delta_cards = []
+        for _row in _comparison.deltas.iter_rows(named=True):
+            _unit = "KL" if _row["metric"] == "Absolute error" else "pp"
+            _delta_cards.append(
+                mo.md(
+                    f"**ML − TM {_row['metric']}**\n\n"
+                    f"## {format_metric(_row['delta_ml_minus_tm'], _unit)}\n\n"
+                    "Positive means ML is higher; lower absolute error is better."
+                )
+            )
+        _comparison_output = mo.vstack(
+            [
+                mo.hstack(
+                    [
+                        _source_card("TM", _comparison.tm_metrics),
+                        _source_card("ML", _comparison.ml_metrics),
+                    ],
+                    widths="equal",
+                ),
+                mo.md("### Comparison deltas · ML minus TM"),
+                mo.hstack(_delta_cards, widths="equal"),
+            ]
+        )
+
     _m = view.metrics
     _empty_reason = (
         "No rows in the current selection"
@@ -427,8 +581,49 @@ def _(format_metric, mo, view):
                 ),
             ]
         )
-    mo.hstack(_cards, widths="equal")
-    return
+    _standard_output = mo.hstack(_cards, widths="equal")
+    _comparison_output if view.filters.comparison_mode else _standard_output
+
+
+@app.cell
+def _(mo, view):
+    _output = None
+    if view.filters.comparison_mode and view.comparison is not None:
+        _comparison = view.comparison
+        _paired = _comparison.paired_comparison
+        _paired_columns = [
+            "parent_code",
+            "snop_month",
+            "actual_kl",
+            "tm_forecast_kl",
+            "ml_forecast_kl",
+            "tm_absolute_error_kl",
+            "ml_absolute_error_kl",
+            "winner_label",
+            "pair_status",
+        ]
+        _output = mo.vstack(
+            [
+                mo.md(
+                    "## TM ↔ ML aligned population\n\n"
+                    "Common, TM-only, and ML-only counts use the one selected shared exact horizon. "
+                    "Source-only observations contribute to source coverage; winner labels compare "
+                    "absolute error only on common product-target observations."
+                ),
+                mo.ui.table(_comparison.population_summary, page_size=4),
+                mo.ui.table(
+                    _comparison.winner_counts,
+                    page_size=3,
+                ),
+                mo.ui.table(
+                    _paired.select(_paired_columns)
+                    if _paired.height
+                    else _paired,
+                    page_size=20,
+                ),
+            ]
+        )
+    mo.vstack([_output] if _output is not None else [])
 
 
 @app.cell
@@ -448,8 +643,12 @@ def _(mo):
 
 
 @app.cell
-def _(alt, monthly_metric, mo, pl, view):
+def _(SOURCE_COLORS, alt, monthly_metric, mo, pl, view):
     _monthly = view.monthly_performance
+    _source_scale = alt.Scale(
+        domain=["tm", "ml"],
+        range=[SOURCE_COLORS["tm"], SOURCE_COLORS["ml"]],
+    )
     if _monthly.height == 0:
         _output = mo.md("### Monthly performance\n\nNo target months remain in this selection.")
     elif monthly_metric.value == "forecast_vs_actual":
@@ -469,13 +668,18 @@ def _(alt, monthly_metric, mo, pl, view):
                 "### Monthly performance\n\nNo actual or forecast volume is available."
             )
         else:
+            _color = (
+                alt.Color("source:N", title="Source", scale=_source_scale)
+                if view.filters.comparison_mode
+                else alt.Color("series:N", title="Series")
+            )
             _chart = (
                 alt.Chart(_chart_data.to_pandas())
                 .mark_line(point=True, strokeWidth=2.5)
                 .encode(
                     x=alt.X("snop_month:T", title="Target month"),
                     y=alt.Y("value:Q", title="Volume (KL)"),
-                    color=alt.Color("series:N", title="Series"),
+                    color=_color,
                     tooltip=[
                         "source:N",
                         alt.Tooltip("snop_month:T", title="Target month"),
@@ -486,6 +690,10 @@ def _(alt, monthly_metric, mo, pl, view):
                 )
                 .properties(height=360)
             )
+            if view.filters.comparison_mode:
+                _chart = _chart.encode(
+                    strokeDash=alt.StrokeDash("series:N", title="Measure")
+                )
             _output = mo.ui.altair_chart(
                 _chart, chart_selection=False, legend_selection=False
             )
@@ -512,7 +720,11 @@ def _(alt, monthly_metric, mo, pl, view):
                 .encode(
                     x=alt.X("snop_month:T", title="Target month"),
                     y=alt.Y(_column + ":Q", title=_title, scale=alt.Scale(zero=False)),
-                    color=alt.Color("source:N", title="Source"),
+                    color=alt.Color(
+                        "source:N",
+                        title="Source",
+                        scale=_source_scale,
+                    ),
                     tooltip=[
                         alt.Tooltip("source:N", title="Source"),
                         alt.Tooltip("snop_month:T", title="Target month"),
@@ -557,8 +769,12 @@ def _(mo):
 
 
 @app.cell
-def _(alt, horizon_metric, mo, pl, view):
+def _(SOURCE_COLORS, alt, horizon_metric, mo, pl, view):
     _horizon = view.horizon_performance
+    _source_scale = alt.Scale(
+        domain=["tm", "ml"],
+        range=[SOURCE_COLORS["tm"], SOURCE_COLORS["ml"]],
+    )
     _column = {
         "accuracy": "forecast_accuracy_pct",
         "bias": "bias_pct",
@@ -586,7 +802,11 @@ def _(alt, horizon_metric, mo, pl, view):
                     title="Forecast horizon",
                 ),
                 y=alt.Y(_column + ":Q", title=_title, scale=alt.Scale(zero=False)),
-                color=alt.Color("source:N", title="Source"),
+                color=alt.Color(
+                    "source:N",
+                    title="Source",
+                    scale=_source_scale,
+                ),
                 tooltip=[
                     alt.Tooltip("source:N", title="Source"),
                     alt.Tooltip("horizon_label:N", title="Horizon"),
@@ -646,17 +866,23 @@ def _(alt, horizon_metric, mo, pl, view):
 
 
 @app.cell
-def _(mo):
+def _(mo, view):
+    _brand_metric_options = {
+        "Forecast accuracy": "forecast_accuracy",
+        "Bias": "bias",
+        "Absolute error": "absolute_error",
+    }
+    if not view.filters.comparison_mode:
+        _brand_metric_options.update(
+            {
+                "Vintage A accuracy": "vintage_a_accuracy",
+                "Vintage B accuracy": "vintage_b_accuracy",
+                "Accuracy delta": "accuracy_delta",
+                "Revision effectiveness": "revision_effectiveness",
+            }
+        )
     brand_month_metric = mo.ui.dropdown(
-        options={
-            "Forecast accuracy": "forecast_accuracy",
-            "Bias": "bias",
-            "Absolute error": "absolute_error",
-            "Vintage A accuracy": "vintage_a_accuracy",
-            "Vintage B accuracy": "vintage_b_accuracy",
-            "Accuracy delta": "accuracy_delta",
-            "Revision effectiveness": "revision_effectiveness",
-        },
+        options=_brand_metric_options,
         value="forecast_accuracy",
         label="Brand × target-month metric",
     )
@@ -791,6 +1017,14 @@ def _(
             )
             .properties(height=max(240, len(_order) * 26))
         )
+        if view.filters.comparison_mode:
+            _chart = _chart.facet(
+                row=alt.Row(
+                    "source:N",
+                    title="Source",
+                    sort=["tm", "ml"],
+                )
+            )
         _output = mo.ui.altair_chart(
             _chart,
             chart_selection=False,
@@ -810,7 +1044,7 @@ def _(
 
 
 @app.cell
-def _(alt, format_metric, mo, pl, view):
+def _(SOURCE_COLORS, alt, format_metric, mo, pl, view):
     _diagnostics = view.revision_diagnostics
     _m = view.metrics
     _summary_table = mo.ui.table(_diagnostics, page_size=4)
@@ -819,6 +1053,18 @@ def _(alt, format_metric, mo, pl, view):
             "No complete positive-actual vintage pairs remain for the revision scatter plot."
         )
     else:
+        _color = (
+            alt.Color(
+                "source:N",
+                title="Source",
+                scale=alt.Scale(
+                    domain=["tm", "ml"],
+                    range=[SOURCE_COLORS["tm"], SOURCE_COLORS["ml"]],
+                ),
+            )
+            if view.filters.comparison_mode
+            else alt.Color("brand:N", title="Brand")
+        )
         _chart = (
             alt.Chart(view.revision_scatter.to_pandas())
             .mark_circle(opacity=0.8)
@@ -828,7 +1074,7 @@ def _(alt, format_metric, mo, pl, view):
                     "error_improvement_kl:Q",
                     title="Error improvement (KL)",
                 ),
-                color=alt.Color("brand:N", title="Brand"),
+                color=_color,
                 size=alt.Size("actual_kl:Q", title="Actual volume (KL)"),
                 tooltip=[
                     alt.Tooltip("source:N", title="Source"),
@@ -863,35 +1109,45 @@ def _(alt, format_metric, mo, pl, view):
             chart_selection=False,
             legend_selection=False,
         )
-    mo.vstack(
-        [
-            mo.md(
-                f"## Revision effectiveness\n\n"
-                f"Improved: **{_m.improved_revisions:,}** · "
-                f"Worsened: **{_m.worsened_revisions:,}** · "
-                f"Neutral: **{_m.neutral_revisions:,}** · "
-                f"Unchanged: **{_m.unchanged_revisions:,}**\n\n"
-                f"Revised up: `{format_metric(_m.revised_up_pct, '%')}` · "
-                f"Revised down: `{format_metric(_m.revised_down_pct, '%')}` · "
-                f"Total error improvement: `{format_metric(_m.total_error_improvement_kl, 'KL')}`"
-            ),
-            _summary_table,
-            _chart_output,
-        ]
-    )
+    if view.filters.comparison_mode:
+        _revision_output = mo.md(
+            "## Revision effectiveness\n\n"
+            "Not applicable in exact-horizon comparison mode. TM and ML are "
+            "compared at one shared horizon; Vintage A/B and revision direction "
+            "and outcome controls are disabled to prevent artificial self-pairs."
+        )
+    else:
+        _revision_output = mo.vstack(
+            [
+                mo.md(
+                    f"## Revision effectiveness\n\n"
+                    f"Improved: **{_m.improved_revisions:,}** · "
+                    f"Worsened: **{_m.worsened_revisions:,}** · "
+                    f"Neutral: **{_m.neutral_revisions:,}** · "
+                    f"Unchanged: **{_m.unchanged_revisions:,}**\n\n"
+                    f"Revised up: `{format_metric(_m.revised_up_pct, '%')}` · "
+                    f"Revised down: `{format_metric(_m.revised_down_pct, '%')}` · "
+                    f"Total error improvement: `{format_metric(_m.total_error_improvement_kl, 'KL')}`"
+                ),
+                _summary_table,
+                _chart_output,
+            ]
+        )
+    mo.vstack([_revision_output])
 
 
 @app.cell
 def _(mo, view, with_display_brand):
     _pairs = view.vintage_pairs
+    _scope_label = "tm_vs_ml" if view.filters.comparison_mode else view.filters.source
     _download = mo.download(
         _pairs.write_csv().encode(),
-        filename=f"forecast_{view.filters.source}_filtered_vintages.csv",
+        filename=f"forecast_{_scope_label}_filtered_vintages.csv",
         label="Download filtered vintage CSV",
     )
     _brand_month_download = mo.download(
         view.brand_target_month_performance.write_csv().encode(),
-        filename=f"forecast_{view.filters.source}_brand_target_month_performance.csv",
+        filename=f"forecast_{_scope_label}_brand_target_month_performance.csv",
         label="Download brand × target-month CSV",
     )
     if _pairs.height == 0:
@@ -899,51 +1155,82 @@ def _(mo, view, with_display_brand):
             "## Filtered vintage table\n\nNo product-target pairs remain in this selection."
         )
     else:
-        _table = (
-            with_display_brand(_pairs)
-            .select(
-                [
-                    "source",
-                    "parent_code",
-                    "parent_description",
-                    "brand_display",
-                    "mapping_status",
-                    "snop_month",
-                    "actual_kl",
-                    "actual_status",
-                    "vintage_a_rule",
-                    "vintage_a_calculation_month",
-                    "vintage_a_horizon_months",
-                    "vintage_a_forecast_kl",
-                    "vintage_a_absolute_error_kl",
-                    "vintage_a_bias_kl",
-                    "vintage_b_rule",
-                    "vintage_b_calculation_month",
-                    "vintage_b_horizon_months",
-                    "vintage_b_forecast_kl",
-                    "vintage_b_absolute_error_kl",
-                    "vintage_b_bias_kl",
-                    "revision_kl",
-                    "revision_pct",
-                    "error_improvement_kl",
-                    "revision_direction",
-                    "revision_outcome",
-                    "pair_status",
-                ]
+        _table_source = with_display_brand(_pairs)
+        if view.filters.comparison_mode:
+            _table = (
+                _table_source.select(
+                    [
+                        "source",
+                        "parent_code",
+                        "parent_description",
+                        "brand_display",
+                        "mapping_status",
+                        "snop_month",
+                        "actual_kl",
+                        "actual_status",
+                        "vintage_b_horizon_months",
+                        "vintage_b_forecast_kl",
+                        "vintage_b_absolute_error_kl",
+                        "pair_status",
+                    ]
+                )
+                .sort(
+                    ["vintage_b_absolute_error_kl", "snop_month", "parent_code"],
+                    descending=[True, False, False],
+                    nulls_last=True,
+                )
             )
-            .sort(
-                ["vintage_b_absolute_error_kl", "snop_month", "parent_code"],
-                descending=[True, False, False],
-                nulls_last=True,
+        else:
+            _table = (
+                _table_source.select(
+                    [
+                        "source",
+                        "parent_code",
+                        "parent_description",
+                        "brand_display",
+                        "mapping_status",
+                        "snop_month",
+                        "actual_kl",
+                        "actual_status",
+                        "vintage_a_rule",
+                        "vintage_a_calculation_month",
+                        "vintage_a_horizon_months",
+                        "vintage_a_forecast_kl",
+                        "vintage_a_absolute_error_kl",
+                        "vintage_a_bias_kl",
+                        "vintage_b_rule",
+                        "vintage_b_calculation_month",
+                        "vintage_b_horizon_months",
+                        "vintage_b_forecast_kl",
+                        "vintage_b_absolute_error_kl",
+                        "vintage_b_bias_kl",
+                        "revision_kl",
+                        "revision_pct",
+                        "error_improvement_kl",
+                        "revision_direction",
+                        "revision_outcome",
+                        "pair_status",
+                    ]
+                )
+                .sort(
+                    ["vintage_b_absolute_error_kl", "snop_month", "parent_code"],
+                    descending=[True, False, False],
+                    nulls_last=True,
+                )
             )
+        _table_note = (
+            "Rows use the selected target months, products, brands, and one shared "
+            "exact comparison horizon. Vintage A/B and revision filters are not "
+            "applied in comparison mode."
+            if view.filters.comparison_mode
+            else "Rows use the selected source, target months, products, brands, "
+            "horizons, vintage rules, revision filters, and tolerance."
         )
         _output = mo.vstack(
             [
                 mo.md(
                     "## Filtered vintage table\n\n"
-                    "Rows use the selected source, target months, products, brands, "
-                    "horizons, vintage rules, revision filters, and tolerance. "
-                    "The table is sorted by largest Vintage B absolute error."
+                    f"{_table_note} The table is sorted by largest Vintage B absolute error."
                 ),
                 mo.ui.table(_table, page_size=20),
             ]

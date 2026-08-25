@@ -4,6 +4,7 @@
 from .actuals import aggregate_actuals, load_actuals, normalize_actuals
 from .analysis_frame import build_analysis_dataset, load_analysis_inputs
 from .contracts import AnalysisDataset, AnalysisInputs, HierarchyResult
+from .comparison import ComparisonView, build_source_comparison  # pyright: ignore[reportMissingImports]
 from .dashboard import DashboardView, build_dashboard_view  # pyright: ignore[reportMissingImports]
 from .diagnostics import build_population_diagnostics
 from .filters import (  # pyright: ignore[reportMissingImports]
@@ -36,6 +37,7 @@ from .vintages import VintageRule, select_vintage_pair  # pyright: ignore[report
 
 __all__ = [
     "AnalysisDataset",
+    "ComparisonView",
     "DashboardFilters",
     "DashboardView",
     "MetricSummary",
@@ -52,6 +54,7 @@ __all__ = [
     "build_brand_target_month_performance",
     "build_dashboard_view",
     "build_horizon_performance",
+    "build_source_comparison",
     "build_monthly_performance",
     "build_population_diagnostics",
     "build_revision_diagnostics",

@@ -6,6 +6,10 @@ from dataclasses import dataclass, replace
 
 import polars as pl
 
+from .comparison import (  # pyright: ignore[reportMissingImports]
+    ComparisonView,
+    build_source_comparison,
+)
 from .filters import (
     DashboardFilters,
     apply_actual_filters,
@@ -26,7 +30,12 @@ from .vintages import VintageRule, select_vintage_pair  # pyright: ignore[report
 
 @dataclass(frozen=True)
 class DashboardView:
-    """All dashboard outputs derived from one filtered, source-isolated population."""
+    """Dashboard outputs derived from one shared filter state.
+
+    Standard mode remains source-isolated. Comparison mode exposes source-
+    separated projections through ``comparison`` while keeping the same view
+    seam for the Marimo presentation.
+    """
 
     filters: DashboardFilters
     filtered_population: pl.DataFrame
@@ -39,6 +48,7 @@ class DashboardView:
     brand_target_month_performance: pl.DataFrame
     revision_diagnostics: pl.DataFrame
     revision_scatter: pl.DataFrame
+    comparison: ComparisonView | None = None
 
 
 def _filter_population_to_pairs(
@@ -55,6 +65,38 @@ def _filter_population_to_pairs(
     ).sort(["parent_code", "snop_month", "calculation_month", "source"])
 
 
+def _build_comparison_dashboard_view(
+    frame: pl.DataFrame,
+    actual_population: pl.DataFrame,
+    filters: DashboardFilters,
+) -> DashboardView:
+    """Compose exact-horizon comparison outputs without revision self-pairs."""
+    comparison_filters = replace(
+        filters,
+        revision_directions=None,
+        revision_outcomes=None,
+    )
+    comparison = build_source_comparison(
+        frame,
+        actual_population,
+        comparison_filters,
+    )
+    return DashboardView(
+        filters=comparison_filters,
+        filtered_population=comparison.filtered_population,
+        vintage_pairs=comparison.vintage_pairs,
+        coverage_pairs=comparison.coverage_pairs,
+        selected_actual_population=comparison.selected_actual_population,
+        metrics=comparison.tm_metrics,
+        monthly_performance=comparison.monthly_performance,
+        horizon_performance=comparison.horizon_performance,
+        brand_target_month_performance=comparison.brand_target_month_performance,
+        revision_diagnostics=comparison.revision_diagnostics,
+        revision_scatter=comparison.revision_scatter,
+        comparison=comparison,
+    )
+
+
 def build_dashboard_view(
     frame: pl.DataFrame,
     actual_population: pl.DataFrame,
@@ -63,8 +105,20 @@ def build_dashboard_view(
     vintage_a: VintageRule | None = None,
     vintage_b: VintageRule | None = None,
 ) -> DashboardView:
-    """Apply shared filters, then derive pair and revision views consistently."""
+    """Apply shared filters, then derive source-specific dashboard views.
+
+    Comparison mode owns one shared exact-horizon rule, so ``vintage_a`` and
+    ``vintage_b`` are intentionally ignored there; those controls belong only
+    to standard single-source revision analysis.
+    """
     active_filters = filters or DashboardFilters()
+    if active_filters.comparison_mode:
+        return _build_comparison_dashboard_view(
+            frame,
+            actual_population,
+            active_filters,
+        )
+
     filtered = apply_dashboard_filters(frame, active_filters)
     coverage_filters = replace(active_filters, horizons=None)
     coverage_population = apply_dashboard_filters(frame, coverage_filters)

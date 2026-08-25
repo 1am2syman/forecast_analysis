@@ -84,10 +84,16 @@ class DashboardFilters:
     Revision direction is classified from ``revision_kl`` and revision outcome
     from ``error_improvement_kl``. Both use the same configurable absolute KL
     tolerance; unchanged revisions and neutral outcomes are not materially
-    revised for revision-effectiveness denominators.
+    revised for revision-effectiveness denominators. When ``comparison_mode``
+    is true, both TM and ML are selected and ``comparison_horizon`` identifies
+    the one exact horizon used for the aligned source comparison. Comparison
+    mode clears revision direction/outcome filters because it is not a
+    Vintage A/B revision analysis.
     """
 
     source: str = "tm"
+    comparison_mode: bool = False
+    comparison_horizon: int | None = None
     target_months: tuple[date, ...] | None = None
     brands: tuple[str, ...] | None = None
     parent_codes: tuple[int, ...] | None = None
@@ -105,6 +111,19 @@ class DashboardFilters:
                 f"choose one of {sorted(FORECAST_SOURCES)}"
             )
         object.__setattr__(self, "source", source)
+        if not isinstance(self.comparison_mode, bool):
+            raise ValueError("comparison_mode must be a boolean")
+        if self.comparison_horizon is not None:
+            if isinstance(self.comparison_horizon, bool) or not isinstance(
+                self.comparison_horizon, int
+            ):
+                raise ValueError(
+                    "comparison_horizon must be a non-negative integer or None"
+                )
+            if self.comparison_horizon < 0:
+                raise ValueError(
+                    "comparison_horizon must be a non-negative integer or None"
+                )
 
         if self.target_months is not None:
             object.__setattr__(
@@ -160,6 +179,9 @@ class DashboardFilters:
                 "revision_outcomes",
             ),
         )
+        if self.comparison_mode:
+            object.__setattr__(self, "revision_directions", None)
+            object.__setattr__(self, "revision_outcomes", None)
         object.__setattr__(
             self,
             "revision_tolerance_kl",
@@ -176,6 +198,11 @@ class DashboardFilters:
             raise ValueError("minimum_actual_volume must be a finite non-negative number")
         object.__setattr__(self, "minimum_actual_volume", minimum)
 
+    @property
+    def selected_sources(self) -> tuple[str, ...]:
+        """Return the source scope owned by this filter state."""
+        return ("tm", "ml") if self.comparison_mode else (self.source,)
+
 
 def apply_dashboard_filters(
     frame: pl.DataFrame, filters: DashboardFilters
@@ -188,7 +215,9 @@ def apply_dashboard_filters(
     positive threshold selects only rows with an actual at or above it.
     """
     require_columns(frame, ANALYSIS_COLUMNS, "analysis population")
-    filtered = with_display_brand(frame).filter(pl.col("source") == filters.source)
+    filtered = with_display_brand(frame).filter(
+        pl.col("source").is_in(filters.selected_sources)
+    )
 
     if filters.target_months is not None:
         filtered = filtered.filter(pl.col("snop_month").is_in(filters.target_months))
@@ -265,27 +294,64 @@ def apply_actual_filters(
     return filtered.sort(["parent_code", "snop_month"])
 
 
-def available_filter_values(frame: pl.DataFrame, source: str) -> dict[str, object]:
-    """Return source-scoped control values for the Marimo filter bar."""
+def available_filter_values(
+    frame: pl.DataFrame,
+    source: str,
+    *,
+    comparison_mode: bool = False,
+) -> dict[str, object]:
+    """Return source-scoped or comparison-scoped control values."""
     require_columns(frame, ANALYSIS_COLUMNS, "analysis population")
     normalized_source = str(source).strip().lower()
     if normalized_source not in FORECAST_SOURCES:
         raise ValueError(f"unsupported dashboard source {source!r}")
-    source_frame = with_display_brand(frame).filter(pl.col("source") == normalized_source)
+    selected_sources = (
+        tuple(sorted(FORECAST_SOURCES)) if comparison_mode else (normalized_source,)
+    )
+    source_frame = with_display_brand(frame).filter(
+        pl.col("source").is_in(selected_sources)
+    )
     parent_options = (
         source_frame.select(["parent_code", "parent_description"])
         .unique()
         .sort(["parent_code", "parent_description"])
         .to_dicts()
     )
+    horizons = sorted(
+        source_frame["forecast_horizon_months"].drop_nulls().unique().to_list(),
+        reverse=True,
+    )
+    if comparison_mode:
+        source_horizons = {
+            selected_source: set(
+                source_frame.filter(pl.col("source") == selected_source)[
+                    "forecast_horizon_months"
+                ].drop_nulls().to_list()
+            )
+            for selected_source in selected_sources
+        }
+        common_horizons = sorted(
+            set.intersection(*source_horizons.values())
+            if source_horizons
+            else set(),
+            reverse=True,
+        )
+    else:
+        common_horizons = []
+    default_comparison_horizon = (
+        1
+        if 1 in common_horizons
+        else min(common_horizons)
+        if common_horizons
+        else None
+    )
     return {
         "target_months": sorted(source_frame["snop_month"].unique().to_list()),
         "brands": sorted(source_frame["brand_display"].drop_nulls().unique().to_list()),
         "parent_products": parent_options,
-        "horizons": sorted(
-            source_frame["forecast_horizon_months"].unique().to_list(),
-            reverse=True,
-        ),
+        "horizons": horizons,
+        "common_horizons": common_horizons,
+        "default_comparison_horizon": default_comparison_horizon,
         "calculation_months": sorted(
             source_frame["calculation_month"].unique().to_list()
         ),
