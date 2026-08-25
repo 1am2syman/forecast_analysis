@@ -3,13 +3,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, datetime
 from typing import Literal
 
 import polars as pl
 
 from ._utils import require_columns
-from .contracts import FORECAST_SOURCES
+from .contracts import (
+    DEFAULT_REVISION_TOLERANCE_KL,
+    FORECAST_SOURCES,
+    REVISION_CLASSIFICATION_DECIMAL_PLACES,
+    normalize_revision_tolerance,
+)
 from .filters import with_display_brand  # pyright: ignore[reportMissingImports]
 
 VintageRuleKind = Literal[
@@ -45,6 +50,15 @@ PAIR_COLUMNS = [
     "vintage_b_calculation_month",
     "vintage_b_horizon_months",
     "vintage_b_forecast_kl",
+    "vintage_a_absolute_error_kl",
+    "vintage_b_absolute_error_kl",
+    "vintage_a_bias_kl",
+    "vintage_b_bias_kl",
+    "revision_kl",
+    "revision_pct",
+    "error_improvement_kl",
+    "revision_direction",
+    "revision_outcome",
     "pair_status",
 ]
 PAIR_SCHEMA = {
@@ -65,6 +79,15 @@ PAIR_SCHEMA = {
     "vintage_b_calculation_month": pl.Date,
     "vintage_b_horizon_months": pl.Int64,
     "vintage_b_forecast_kl": pl.Float64,
+    "vintage_a_absolute_error_kl": pl.Float64,
+    "vintage_b_absolute_error_kl": pl.Float64,
+    "vintage_a_bias_kl": pl.Float64,
+    "vintage_b_bias_kl": pl.Float64,
+    "revision_kl": pl.Float64,
+    "revision_pct": pl.Float64,
+    "error_improvement_kl": pl.Float64,
+    "revision_direction": pl.String,
+    "revision_outcome": pl.String,
     "pair_status": pl.String,
 }
 
@@ -87,13 +110,22 @@ class VintageRule:
                 raise ValueError(f"{self.kind} does not accept a value")
         elif self.value is None:
             raise ValueError(f"{self.kind} requires a value")
-        elif self.kind == "specific_calculation_month" and not isinstance(
-            self.value, date
-        ):
-            raise ValueError("specific_calculation_month requires a date value")
+        elif self.kind == "specific_calculation_month":
+            if not isinstance(self.value, date):
+                raise ValueError("specific_calculation_month requires a date value")
+            calculation_month = (
+                self.value.date() if isinstance(self.value, datetime) else self.value
+            )
+            object.__setattr__(
+                self,
+                "value",
+                date(calculation_month.year, calculation_month.month, 1),
+            )
         elif self.kind == "specific_horizon":
             if isinstance(self.value, bool) or not isinstance(self.value, int):
                 raise ValueError("specific_horizon requires an integer value")
+            if self.value < 0:
+                raise ValueError("specific_horizon requires a non-negative integer")
 
     @classmethod
     def oldest_available(cls) -> "VintageRule":
@@ -168,6 +200,139 @@ def _pair_status_expression() -> pl.Expr:
     )
 
 
+def _with_revision_metrics(
+    pair_frame: pl.DataFrame,
+    tolerance_kl: float,
+) -> pl.DataFrame:
+    """Add hand-calculable row metrics while preserving non-comparable statuses.
+
+    Revision values can be displayed for zero-actual pairs when both vintages
+    exist. Aggregate revision effectiveness still uses only ``complete`` rows,
+    so zero-actual and missing-actual rows remain visible without entering its
+    denominator.
+    """
+    tolerance = normalize_revision_tolerance(tolerance_kl)
+    has_both_vintages = (
+        pl.col("vintage_a_calculation_month").is_not_null()
+        & pl.col("vintage_b_calculation_month").is_not_null()
+    )
+    has_actual = has_both_vintages & pl.col("actual_kl").is_not_null()
+    classification_tolerance = round(
+        tolerance,
+        REVISION_CLASSIFICATION_DECIMAL_PLACES,
+    )
+    null_float = pl.lit(None, dtype=pl.Float64)
+    null_string = pl.lit(None, dtype=pl.String)
+    return (
+        pair_frame.with_columns(
+            pl.when(has_both_vintages)
+            .then(
+                (
+                    pl.col("vintage_b_forecast_kl")
+                    - pl.col("vintage_a_forecast_kl")
+                ).cast(pl.Float64)
+            )
+            .otherwise(null_float)
+            .alias("revision_kl")
+        )
+        .with_columns(
+            pl.when(
+                pl.col("revision_kl").is_not_null()
+                & (pl.col("vintage_a_forecast_kl") != 0)
+            )
+            .then(
+                (
+                    pl.col("revision_kl")
+                    / pl.col("vintage_a_forecast_kl")
+                    * 100
+                ).cast(pl.Float64)
+            )
+            .otherwise(null_float)
+            .alias("revision_pct"),
+            pl.when(has_actual)
+            .then(
+                (
+                    pl.col("vintage_a_forecast_kl") - pl.col("actual_kl")
+                ).abs().cast(pl.Float64)
+            )
+            .otherwise(null_float)
+            .alias("vintage_a_absolute_error_kl"),
+            pl.when(has_actual)
+            .then(
+                (
+                    pl.col("vintage_b_forecast_kl") - pl.col("actual_kl")
+                ).abs().cast(pl.Float64)
+            )
+            .otherwise(null_float)
+            .alias("vintage_b_absolute_error_kl"),
+            pl.when(has_actual)
+            .then(
+                (
+                    pl.col("vintage_a_forecast_kl") - pl.col("actual_kl")
+                ).cast(pl.Float64)
+            )
+            .otherwise(null_float)
+            .alias("vintage_a_bias_kl"),
+            pl.when(has_actual)
+            .then(
+                (
+                    pl.col("vintage_b_forecast_kl") - pl.col("actual_kl")
+                ).cast(pl.Float64)
+            )
+            .otherwise(null_float)
+            .alias("vintage_b_bias_kl"),
+        )
+        .with_columns(
+            pl.when(
+                pl.col("vintage_a_absolute_error_kl").is_not_null()
+                & pl.col("vintage_b_absolute_error_kl").is_not_null()
+            )
+            .then(
+                (
+                    pl.col("vintage_a_absolute_error_kl")
+                    - pl.col("vintage_b_absolute_error_kl")
+                ).cast(pl.Float64)
+            )
+            .otherwise(null_float)
+            .alias("error_improvement_kl"),
+            pl.when(pl.col("revision_kl").is_null())
+            .then(null_string)
+            .when(
+                pl.col("revision_kl").round(REVISION_CLASSIFICATION_DECIMAL_PLACES)
+                > classification_tolerance
+            )
+            .then(pl.lit("up"))
+            .when(
+                pl.col("revision_kl").round(REVISION_CLASSIFICATION_DECIMAL_PLACES)
+                < -classification_tolerance
+            )
+            .then(pl.lit("down"))
+            .otherwise(pl.lit("unchanged"))
+            .alias("revision_direction"),
+        )
+        .with_columns(
+            pl.when(pl.col("error_improvement_kl").is_null())
+            .then(null_string)
+            .when(
+                pl.col("error_improvement_kl").round(
+                    REVISION_CLASSIFICATION_DECIMAL_PLACES
+                )
+                > classification_tolerance
+            )
+            .then(pl.lit("improved"))
+            .when(
+                pl.col("error_improvement_kl").round(
+                    REVISION_CLASSIFICATION_DECIMAL_PLACES
+                )
+                < -classification_tolerance
+            )
+            .then(pl.lit("worsened"))
+            .otherwise(pl.lit("neutral"))
+            .alias("revision_outcome"),
+        )
+    )
+
+
 def select_vintage_pair(
     frame: pl.DataFrame,
     source: str,
@@ -175,13 +340,15 @@ def select_vintage_pair(
     vintage_b: VintageRule | None = None,
     *,
     population_frame: pl.DataFrame | None = None,
+    revision_tolerance_kl: float = DEFAULT_REVISION_TOLERANCE_KL,
 ) -> pl.DataFrame:
     """Build one source-isolated comparable row per parent product and target month.
 
     ``frame`` supplies the rows eligible for the selected vintage rules. When a
     filter narrows that frame to one exact horizon, ``population_frame`` keeps
     the unfiltered product-target groups as the coverage population so missing
-    observations become explicit pair statuses instead of disappearing.
+    observations become explicit pair statuses instead of disappearing. The
+    absolute tolerance controls ``revision_direction`` and ``revision_outcome``.
     """
     required = [
         "source",
@@ -245,4 +412,7 @@ def select_vintage_pair(
         )
         .with_columns(_pair_status_expression())
     )
-    return paired.select(PAIR_COLUMNS).sort(["parent_code", "snop_month"])
+    return _with_revision_metrics(
+        paired,
+        revision_tolerance_kl,
+    ).select(PAIR_COLUMNS).sort(["parent_code", "snop_month"])

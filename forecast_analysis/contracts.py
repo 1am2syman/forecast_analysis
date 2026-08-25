@@ -3,10 +3,32 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import math
 
 import polars as pl
 
 FORECAST_SOURCES = frozenset({"tm", "ml"})
+DEFAULT_REVISION_TOLERANCE_KL = 0.01
+REVISION_CLASSIFICATION_DECIMAL_PLACES = 12
+REVISION_DIRECTIONS = ("up", "down", "unchanged")
+REVISION_OUTCOMES = ("improved", "worsened", "neutral")
+
+
+def normalize_revision_tolerance(value: object) -> float:
+    """Validate the absolute KL tolerance used for revision classification."""
+    if isinstance(value, bool) or not isinstance(value, (int, float, str)):
+        raise ValueError("revision tolerance must be a finite non-negative number")
+    try:
+        tolerance = float(value)
+    except ValueError as exc:
+        raise ValueError(
+            "revision tolerance must be a finite non-negative number"
+        ) from exc
+    if not math.isfinite(tolerance) or tolerance < 0:
+        raise ValueError("revision tolerance must be a finite non-negative number")
+    return tolerance
+
+
 FORECAST_HISTORY_COLUMNS = [
     "calculation_month",
     "snop_month",

@@ -10,13 +10,38 @@ from typing import Iterable
 import polars as pl
 
 from ._utils import require_columns
-from .contracts import ACTUAL_COLUMNS, ANALYSIS_COLUMNS, FORECAST_SOURCES
+from .contracts import (
+    ACTUAL_COLUMNS,
+    ANALYSIS_COLUMNS,
+    FORECAST_SOURCES,
+    DEFAULT_REVISION_TOLERANCE_KL,
+    REVISION_DIRECTIONS,
+    REVISION_OUTCOMES,
+    normalize_revision_tolerance,
+)
 
 SOURCE_OPTIONS = {"TM": "tm", "ML": "ml"}
 QUALITY_BRAND_LABELS = {
     "unmapped": "Unmapped",
     "conflict": "Hierarchy conflict",
 }
+
+
+def _normalize_revision_choices(
+    values: tuple[str, ...] | None,
+    allowed: tuple[str, ...],
+    field_name: str,
+) -> tuple[str, ...] | None:
+    if values is None:
+        return None
+    normalized = tuple(str(value).strip().lower() for value in values)
+    unknown = sorted(set(normalized).difference(allowed))
+    if unknown:
+        raise ValueError(
+            f"{field_name} contains unsupported values {unknown}; "
+            f"choose from {list(allowed)}"
+        )
+    return normalized
 
 
 def _normalize_month(value: object) -> date:
@@ -54,7 +79,13 @@ def with_display_brand(frame: pl.DataFrame) -> pl.DataFrame:
 
 @dataclass(frozen=True)
 class DashboardFilters:
-    """The one filter state shared by every dashboard output."""
+    """The one filter state shared by every dashboard output.
+
+    Revision direction is classified from ``revision_kl`` and revision outcome
+    from ``error_improvement_kl``. Both use the same configurable absolute KL
+    tolerance; unchanged revisions and neutral outcomes are not materially
+    revised for revision-effectiveness denominators.
+    """
 
     source: str = "tm"
     target_months: tuple[date, ...] | None = None
@@ -62,6 +93,9 @@ class DashboardFilters:
     parent_codes: tuple[int, ...] | None = None
     minimum_actual_volume: float = 0.0
     horizons: tuple[int, ...] | None = None
+    revision_directions: tuple[str, ...] | None = None
+    revision_outcomes: tuple[str, ...] | None = None
+    revision_tolerance_kl: float = DEFAULT_REVISION_TOLERANCE_KL
 
     def __post_init__(self) -> None:
         source = str(self.source).strip().lower()
@@ -108,6 +142,30 @@ class DashboardFilters:
                 normalized_horizons.append(horizon)
             object.__setattr__(self, "horizons", tuple(normalized_horizons))
 
+        object.__setattr__(
+            self,
+            "revision_directions",
+            _normalize_revision_choices(
+                self.revision_directions,
+                REVISION_DIRECTIONS,
+                "revision_directions",
+            ),
+        )
+        object.__setattr__(
+            self,
+            "revision_outcomes",
+            _normalize_revision_choices(
+                self.revision_outcomes,
+                REVISION_OUTCOMES,
+                "revision_outcomes",
+            ),
+        )
+        object.__setattr__(
+            self,
+            "revision_tolerance_kl",
+            normalize_revision_tolerance(self.revision_tolerance_kl),
+        )
+
         try:
             minimum = float(self.minimum_actual_volume)
         except (TypeError, ValueError) as exc:
@@ -151,6 +209,27 @@ def apply_dashboard_filters(
     return filtered.sort(
         ["parent_code", "snop_month", "calculation_month", "source"]
     )
+
+
+def apply_revision_filters(
+    pair_frame: pl.DataFrame, filters: DashboardFilters
+) -> pl.DataFrame:
+    """Apply pair-only direction and outcome filters without hiding coverage pairs."""
+    require_columns(
+        pair_frame,
+        ["revision_direction", "revision_outcome"],
+        "vintage pair population",
+    )
+    filtered = pair_frame
+    if filters.revision_directions is not None:
+        filtered = filtered.filter(
+            pl.col("revision_direction").is_in(filters.revision_directions)
+        )
+    if filters.revision_outcomes is not None:
+        filtered = filtered.filter(
+            pl.col("revision_outcome").is_in(filters.revision_outcomes)
+        )
+    return filtered
 
 
 def apply_actual_filters(
@@ -206,6 +285,9 @@ def available_filter_values(frame: pl.DataFrame, source: str) -> dict[str, objec
         "horizons": sorted(
             source_frame["forecast_horizon_months"].unique().to_list(),
             reverse=True,
+        ),
+        "calculation_months": sorted(
+            source_frame["calculation_month"].unique().to_list()
         ),
     }
 

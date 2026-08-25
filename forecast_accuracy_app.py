@@ -20,9 +20,11 @@ with app.setup:
         available_filter_values,
         with_display_brand,
     )
+    from forecast_analysis.vintages import VintageRule  # pyright: ignore[reportMissingImports]
     from forecast_analysis.metrics import (  # pyright: ignore[reportMissingImports]
         format_horizon_label,
         format_metric,
+        format_revision_tolerance,
     )
 
     ROOT = Path(__file__).parent
@@ -72,6 +74,7 @@ def _(validated_dataset, mo, source_filter, available_filter_values):
     _brands = _options["brands"]
     _products = _options["parent_products"]
     _horizons = _options["horizons"]
+    _calculation_months = _options["calculation_months"]
 
     target_month_filter = mo.ui.multiselect(
         options=_target_months,
@@ -102,15 +105,100 @@ def _(validated_dataset, mo, source_filter, available_filter_values):
         step=1,
         label="Minimum actual volume (KL)",
     )
-    mo.hstack(
+
+    _rule_options = {
+        "Oldest available": "oldest_available",
+        "Latest available": "latest_available",
+        "Exact calculation month": "specific_calculation_month",
+        "Exact horizon": "specific_horizon",
+    }
+    _month_options = {
+        str(month): month for month in _calculation_months
+    } or {"No calculation months available": None}
+    _horizon_options = {
+        format_horizon_label(horizon): horizon for horizon in _horizons
+    } or {"No horizons available": None}
+    vintage_a_rule_filter = mo.ui.dropdown(
+        options=_rule_options,
+        value="oldest_available",
+        label="Vintage A rule",
+    )
+    vintage_b_rule_filter = mo.ui.dropdown(
+        options=_rule_options,
+        value="latest_available",
+        label="Vintage B rule",
+    )
+    vintage_a_month_filter = mo.ui.dropdown(
+        options=_month_options,
+        value=next(iter(_month_options.values())),
+        label="Vintage A exact calculation month",
+    )
+    vintage_b_month_filter = mo.ui.dropdown(
+        options=_month_options,
+        value=next(iter(_month_options.values())),
+        label="Vintage B exact calculation month",
+    )
+    vintage_a_horizon_filter = mo.ui.dropdown(
+        options=_horizon_options,
+        value=next(iter(_horizon_options.values())),
+        label="Vintage A exact horizon",
+    )
+    vintage_b_horizon_filter = mo.ui.dropdown(
+        options=_horizon_options,
+        value=next(iter(_horizon_options.values())),
+        label="Vintage B exact horizon",
+    )
+    revision_direction_filter = mo.ui.multiselect(
+        options={"Up": "up", "Down": "down", "Unchanged": "unchanged"},
+        value=["up", "down", "unchanged"],
+        label="Revision direction (active with comparable pairs)",
+    )
+    revision_outcome_filter = mo.ui.multiselect(
+        options={"Improved": "improved", "Worsened": "worsened", "Neutral": "neutral"},
+        value=["improved", "worsened", "neutral"],
+        label="Revision outcome (active with comparable pairs)",
+    )
+    revision_tolerance_filter = mo.ui.number(
+        value=0.01,
+        start=0,
+        step=0.01,
+        label="Revision tolerance (KL)",
+    )
+    mo.vstack(
         [
-            target_month_filter,
-            brand_filter,
-            product_filter,
-            horizon_filter,
-            minimum_actual_filter,
-        ],
-        widths="equal",
+            mo.hstack(
+                [
+                    target_month_filter,
+                    brand_filter,
+                    product_filter,
+                    horizon_filter,
+                    minimum_actual_filter,
+                ],
+                widths="equal",
+            ),
+            mo.md("### Vintage comparison and revision filters"),
+            mo.hstack(
+                [vintage_a_rule_filter, vintage_b_rule_filter],
+                widths="equal",
+            ),
+            mo.hstack(
+                [
+                    vintage_a_month_filter,
+                    vintage_b_month_filter,
+                    vintage_a_horizon_filter,
+                    vintage_b_horizon_filter,
+                ],
+                widths="equal",
+            ),
+            mo.hstack(
+                [
+                    revision_direction_filter,
+                    revision_outcome_filter,
+                    revision_tolerance_filter,
+                ],
+                widths="equal",
+            ),
+        ]
     )
     return (
         brand_filter,
@@ -118,12 +206,22 @@ def _(validated_dataset, mo, source_filter, available_filter_values):
         minimum_actual_filter,
         product_filter,
         target_month_filter,
+        vintage_a_rule_filter,
+        vintage_b_rule_filter,
+        vintage_a_month_filter,
+        vintage_b_month_filter,
+        vintage_a_horizon_filter,
+        vintage_b_horizon_filter,
+        revision_direction_filter,
+        revision_outcome_filter,
+        revision_tolerance_filter,
     )
 
 
 @app.cell
 def _(
     DashboardFilters,
+    VintageRule,
     build_dashboard_view,
     validated_dataset,
     brand_filter,
@@ -132,7 +230,75 @@ def _(
     product_filter,
     source_filter,
     target_month_filter,
+    vintage_a_rule_filter,
+    vintage_b_rule_filter,
+    vintage_a_month_filter,
+    vintage_b_month_filter,
+    vintage_a_horizon_filter,
+    vintage_b_horizon_filter,
+    revision_direction_filter,
+    revision_outcome_filter,
+    revision_tolerance_filter,
 ):
+    def _make_vintage_rule(kind, calculation_month, horizon):
+        try:
+            if (
+                kind == "specific_calculation_month"
+                and calculation_month is not None
+            ):
+                return VintageRule.specific_calculation_month(calculation_month)
+            if kind == "specific_horizon" and horizon is not None:
+                return VintageRule.specific_horizon(int(horizon))
+            if kind == "latest_available":
+                return VintageRule.latest_available()
+        except (TypeError, ValueError):
+            return VintageRule.oldest_available()
+        return VintageRule.oldest_available()
+
+    def _all_or_selected(values, all_values):
+        selected = tuple(values)
+        return None if set(selected) == set(all_values) else selected
+
+    _revision_tolerance = (
+        0.01
+        if revision_tolerance_filter.value is None
+        else revision_tolerance_filter.value
+    )
+    _selected_revision_directions = _all_or_selected(
+        revision_direction_filter.value,
+        ("up", "down", "unchanged"),
+    )
+    _selected_revision_outcomes = _all_or_selected(
+        revision_outcome_filter.value,
+        ("improved", "worsened", "neutral"),
+    )
+    vintage_a = _make_vintage_rule(
+        vintage_a_rule_filter.value,
+        vintage_a_month_filter.value,
+        vintage_a_horizon_filter.value,
+    )
+    vintage_b = _make_vintage_rule(
+        vintage_b_rule_filter.value,
+        vintage_b_month_filter.value,
+        vintage_b_horizon_filter.value,
+    )
+    base_filters = DashboardFilters(
+        source=source_filter.value,
+        target_months=tuple(target_month_filter.value),
+        brands=tuple(brand_filter.value),
+        parent_codes=tuple(product_filter.value),
+        horizons=tuple(horizon_filter.value),
+        minimum_actual_volume=minimum_actual_filter.value or 0,
+        revision_tolerance_kl=_revision_tolerance,
+    )
+    base_view = build_dashboard_view(
+        validated_dataset.frame,
+        validated_dataset.actual_population,
+        base_filters,
+        vintage_a=vintage_a,
+        vintage_b=vintage_b,
+    )
+    comparison_ready = base_view.metrics.complete_pairs > 0
     filters = DashboardFilters(
         source=source_filter.value,
         target_months=tuple(target_month_filter.value),
@@ -140,20 +306,37 @@ def _(
         parent_codes=tuple(product_filter.value),
         horizons=tuple(horizon_filter.value),
         minimum_actual_volume=minimum_actual_filter.value or 0,
+        revision_directions=(
+            _selected_revision_directions if comparison_ready else None
+        ),
+        revision_outcomes=(
+            _selected_revision_outcomes if comparison_ready else None
+        ),
+        revision_tolerance_kl=_revision_tolerance,
     )
     view = build_dashboard_view(
         validated_dataset.frame,
         validated_dataset.actual_population,
         filters,
+        vintage_a=vintage_a,
+        vintage_b=vintage_b,
     )
-    return filters, view
+    return comparison_ready, filters, view
 
 
 @app.cell
-def _(filters, format_horizon_label, format_metric, mo, view):
+def _(
+    comparison_ready,
+    filters,
+    format_horizon_label,
+    format_metric,
+    format_revision_tolerance,
+    mo,
+    view,
+):
     _month_frame = (
-        view.vintage_pairs
-        if view.vintage_pairs.height
+        view.coverage_pairs
+        if view.coverage_pairs.height
         else view.filtered_population
     )
     _months = _month_frame["snop_month"].unique().sort().to_list()
@@ -168,13 +351,27 @@ def _(filters, format_horizon_label, format_metric, mo, view):
         _horizon_label = ", ".join(
             format_horizon_label(horizon) for horizon in filters.horizons
         )
+    _rules = (
+        view.coverage_pairs.select(
+            ["vintage_a_rule", "vintage_b_rule"]
+        ).unique().row(0, named=True)
+        if view.coverage_pairs.height
+        else {"vintage_a_rule": "not selected", "vintage_b_rule": "not selected"}
+    )
     _m = view.metrics
+    _revision_filter_message = (
+        "Revision direction/outcome filters are active."
+        if comparison_ready
+        else "Revision direction/outcome filters are a no-op: no complete positive-actual Vintage A/B pairs are available in this selection."
+    )
     mo.md(
         f"""# Forecast performance — {filters.source.upper()}
 
-**Population:** `{view.filtered_population.height:,}` forecast rows · `{view.vintage_pairs.height:,}` product-target groups · `{_month_label}` · `{format_metric(_m.actual_kl, 'KL')}` actual volume
+**Population:** `{view.filtered_population.height:,}` forecast rows · `{view.coverage_pairs.height:,}` coverage product-target groups · `{view.vintage_pairs.height:,}` selected pair rows · `{_month_label}` · `{format_metric(_m.actual_kl, 'KL')}` actual volume
 
-**Horizon:** `{_horizon_label}` · **Comparison:** Vintage A = oldest available · Vintage B = latest available · `{_m.complete_pairs:,}` complete vintage pairs · `{_m.missing_vintage_pairs:,}` missing vintage pairs · `{_m.missing_actual_observations:,}` missing actuals · `{_m.zero_actual_observations:,}` zero actuals"""
+**Horizon:** `{_horizon_label}` · **Comparison:** Vintage A = `{_rules['vintage_a_rule']}` · Vintage B = `{_rules['vintage_b_rule']}` · `{_m.complete_pairs:,}` complete selected pairs · `{_m.missing_vintage_pairs:,}` missing vintage pairs · `{_m.missing_actual_observations:,}` missing actuals · `{_m.zero_actual_observations:,}` zero actuals
+
+**Revision policy:** tolerance `{format_revision_tolerance(filters.revision_tolerance_kl)}`; revisions above tolerance are **up**, below negative tolerance are **down**, and the remainder are **unchanged**. Error improvement above, below, or within the same tolerance is **improved**, **worsened**, or **neutral**. {_revision_filter_message}"""
     )
     return
 
@@ -214,6 +411,20 @@ def _(format_metric, mo, view):
             f"**Eligible observations**\n\n## {format_metric(_m.eligible_observations, 'count')}\n\nPositive-actual rows"
         ),
     ]
+    if _m.complete_pairs:
+        _cards.extend(
+            [
+                mo.md(
+                    f"**Accuracy delta**\n\n## {format_metric(_m.accuracy_delta_pp, 'pp')}\n\n{_m.complete_pairs:,} complete positive-actual comparisons · Vintage B − Vintage A"
+                ),
+                mo.md(
+                    f"**Revision effectiveness**\n\n## {format_metric(_m.revision_effectiveness_pct, '%')}\n\n{_m.improved_revisions:,} improved / {_m.materially_revised_observations:,} materially revised"
+                ),
+                mo.md(
+                    f"**Total error improvement**\n\n## {format_metric(_m.total_error_improvement_kl, 'KL')}\n\n{_m.complete_pairs:,} complete positive-actual comparisons · Positive values improve error"
+                ),
+            ]
+        )
     mo.hstack(_cards, widths="equal")
     return
 
@@ -433,6 +644,78 @@ def _(alt, horizon_metric, mo, pl, view):
 
 
 @app.cell
+def _(alt, format_metric, mo, pl, view):
+    _diagnostics = view.revision_diagnostics
+    _m = view.metrics
+    _summary_table = mo.ui.table(_diagnostics, page_size=4)
+    if view.revision_scatter.height == 0:
+        _chart_output = mo.md(
+            "No complete positive-actual vintage pairs remain for the revision scatter plot."
+        )
+    else:
+        _chart = (
+            alt.Chart(view.revision_scatter.to_pandas())
+            .mark_circle(opacity=0.8)
+            .encode(
+                x=alt.X("revision_kl:Q", title="Revision amount (KL)"),
+                y=alt.Y(
+                    "error_improvement_kl:Q",
+                    title="Error improvement (KL)",
+                ),
+                color=alt.Color("brand:N", title="Brand"),
+                size=alt.Size("actual_kl:Q", title="Actual volume (KL)"),
+                tooltip=[
+                    alt.Tooltip("source:N", title="Source"),
+                    alt.Tooltip("parent_code:Q", title="Parent product"),
+                    alt.Tooltip("snop_month:T", title="Target month"),
+                    alt.Tooltip("actual_kl:Q", title="Actual KL", format=",.1f"),
+                    alt.Tooltip("revision_kl:Q", title="Revision KL", format=",.3f"),
+                    alt.Tooltip(
+                        "error_improvement_kl:Q",
+                        title="Error improvement KL",
+                        format=",.3f",
+                    ),
+                    alt.Tooltip("revision_direction:N", title="Direction"),
+                    alt.Tooltip("revision_outcome:N", title="Outcome"),
+                ],
+            )
+            .properties(height=360)
+        )
+        _zero_data = pl.DataFrame({"baseline": [0.0]}).to_pandas()
+        _vertical_zero = (
+            alt.Chart(_zero_data)
+            .mark_rule(color="#5B6870", strokeDash=[5, 4])
+            .encode(x=alt.X("baseline:Q", title="Revision amount (KL)"))
+        )
+        _horizontal_zero = (
+            alt.Chart(_zero_data)
+            .mark_rule(color="#5B6870", strokeDash=[5, 4])
+            .encode(y=alt.Y("baseline:Q", title="Error improvement (KL)"))
+        )
+        _chart_output = mo.ui.altair_chart(
+            _chart + _vertical_zero + _horizontal_zero,
+            chart_selection=False,
+            legend_selection=False,
+        )
+    mo.vstack(
+        [
+            mo.md(
+                f"## Revision effectiveness\n\n"
+                f"Improved: **{_m.improved_revisions:,}** · "
+                f"Worsened: **{_m.worsened_revisions:,}** · "
+                f"Neutral: **{_m.neutral_revisions:,}** · "
+                f"Unchanged: **{_m.unchanged_revisions:,}**\n\n"
+                f"Revised up: `{format_metric(_m.revised_up_pct, '%')}` · "
+                f"Revised down: `{format_metric(_m.revised_down_pct, '%')}` · "
+                f"Total error improvement: `{format_metric(_m.total_error_improvement_kl, 'KL')}`"
+            ),
+            _summary_table,
+            _chart_output,
+        ]
+    )
+
+
+@app.cell
 def _(mo, view, with_display_brand):
     _pairs = view.vintage_pairs
     _download = mo.download(
@@ -457,23 +740,39 @@ def _(mo, view, with_display_brand):
                     "snop_month",
                     "actual_kl",
                     "actual_status",
+                    "vintage_a_rule",
                     "vintage_a_calculation_month",
                     "vintage_a_horizon_months",
                     "vintage_a_forecast_kl",
+                    "vintage_a_absolute_error_kl",
+                    "vintage_a_bias_kl",
+                    "vintage_b_rule",
                     "vintage_b_calculation_month",
                     "vintage_b_horizon_months",
                     "vintage_b_forecast_kl",
+                    "vintage_b_absolute_error_kl",
+                    "vintage_b_bias_kl",
+                    "revision_kl",
+                    "revision_pct",
+                    "error_improvement_kl",
+                    "revision_direction",
+                    "revision_outcome",
                     "pair_status",
                 ]
             )
-            .sort(["snop_month", "parent_code"])
+            .sort(
+                ["vintage_b_absolute_error_kl", "snop_month", "parent_code"],
+                descending=[True, False, False],
+                nulls_last=True,
+            )
         )
         _output = mo.vstack(
             [
                 mo.md(
                     "## Filtered vintage table\n\n"
                     "Rows use the selected source, target months, products, brands, "
-                    "horizons, and vintage rules."
+                    "horizons, vintage rules, revision filters, and tolerance. "
+                    "The table is sorted by largest Vintage B absolute error."
                 ),
                 mo.ui.table(_table, page_size=20),
             ]
@@ -484,7 +783,7 @@ def _(mo, view, with_display_brand):
 @app.cell
 def _(mo, pl, view):
     _population = view.filtered_population
-    _pairs = view.vintage_pairs
+    _pairs = view.coverage_pairs
     _quality = []
     for _column in ("mapping_status", "actual_status"):
         if _population.height:

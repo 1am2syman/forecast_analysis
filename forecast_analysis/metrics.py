@@ -4,12 +4,18 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 from datetime import date
+import math
 from typing import Literal
 
 import polars as pl
 
 from ._utils import require_columns
-from .contracts import ACTUAL_COLUMNS
+from .contracts import (
+    ACTUAL_COLUMNS,
+    DEFAULT_REVISION_TOLERANCE_KL,
+    REVISION_CLASSIFICATION_DECIMAL_PLACES,
+    normalize_revision_tolerance,
+)
 
 METRIC_COLUMNS = [
     "source",
@@ -62,6 +68,25 @@ HORIZON_METRIC_SCHEMA = {
 
 
 @dataclass(frozen=True)
+class RevisionMetrics:
+    """Revision KPIs calculated from complete, positive-actual pairs only."""
+
+    accuracy_delta_pp: float | None = None
+    revision_effectiveness_pct: float | None = None
+    total_error_improvement_kl: float | None = None
+    materially_revised_observations: int = 0
+    improved_revisions: int = 0
+    worsened_revisions: int = 0
+    neutral_revisions: int = 0
+    unchanged_revisions: int = 0
+    revised_up_pct: float | None = None
+    revised_down_pct: float | None = None
+
+    def as_dict(self) -> dict[str, object]:
+        return asdict(self)
+
+
+@dataclass(frozen=True)
 class MetricSummary:
     """KPI values and counts derived from one selected vintage pair population."""
 
@@ -77,6 +102,16 @@ class MetricSummary:
     missing_vintage_pairs: int
     missing_actual_observations: int
     zero_actual_observations: int
+    accuracy_delta_pp: float | None = None
+    revision_effectiveness_pct: float | None = None
+    total_error_improvement_kl: float | None = None
+    materially_revised_observations: int = 0
+    improved_revisions: int = 0
+    worsened_revisions: int = 0
+    neutral_revisions: int = 0
+    unchanged_revisions: int = 0
+    revised_up_pct: float | None = None
+    revised_down_pct: float | None = None
 
     def as_dict(self) -> dict[str, object]:
         return asdict(self)
@@ -121,9 +156,136 @@ def _sum_or_none(frame: pl.DataFrame, column: str) -> float | None:
     raise TypeError(f"metric total is not numeric: {value!r}")
 
 
+def _empty_revision_metrics() -> RevisionMetrics:
+    return RevisionMetrics()
+
+
+def calculate_revision_metrics(
+    pair_frame: pl.DataFrame,
+    revision_tolerance_kl: float = DEFAULT_REVISION_TOLERANCE_KL,
+) -> RevisionMetrics:
+    """Calculate accuracy delta and revision effectiveness from valid pairs.
+
+    ``pair_status == "complete"`` is the sole revision-metric population. This
+    excludes missing vintages, missing actuals, and zero actuals from both the
+    effectiveness denominator and aggregate error-improvement numerator while
+    leaving those rows available to coverage and exception views.
+    """
+    tolerance = normalize_revision_tolerance(revision_tolerance_kl)
+    classification_tolerance = round(
+        tolerance,
+        REVISION_CLASSIFICATION_DECIMAL_PLACES,
+    )
+    if "vintage_a_forecast_kl" not in pair_frame.columns:
+        return _empty_revision_metrics()
+    require_columns(
+        pair_frame,
+        [
+            "vintage_a_forecast_kl",
+            "vintage_b_forecast_kl",
+            "actual_kl",
+            "pair_status",
+        ],
+        "revision pair population",
+    )
+    complete = pair_frame.filter(
+        (pl.col("pair_status") == "complete")
+        & pl.col("vintage_a_forecast_kl").is_not_null()
+        & pl.col("vintage_b_forecast_kl").is_not_null()
+        & pl.col("actual_kl").is_not_null()
+    )
+    if complete.height == 0:
+        return _empty_revision_metrics()
+
+    actual_total = _sum_or_none(complete, "actual_kl")
+    a_absolute_error = (
+        pl.col("vintage_a_forecast_kl") - pl.col("actual_kl")
+    ).abs()
+    b_absolute_error = (
+        pl.col("vintage_b_forecast_kl") - pl.col("actual_kl")
+    ).abs()
+    complete_with_errors = complete.with_columns(
+        a_absolute_error.alias("_a_absolute_error_kl"),
+        b_absolute_error.alias("_b_absolute_error_kl"),
+        (
+            pl.col("vintage_b_forecast_kl")
+            - pl.col("vintage_a_forecast_kl")
+        ).cast(pl.Float64).alias("_revision_kl"),
+    ).with_columns(
+        (
+            pl.col("_a_absolute_error_kl")
+            - pl.col("_b_absolute_error_kl")
+        ).cast(pl.Float64).alias("_error_improvement_kl")
+    )
+    a_error_total = _sum_or_none(complete_with_errors, "_a_absolute_error_kl")
+    b_error_total = _sum_or_none(complete_with_errors, "_b_absolute_error_kl")
+    total_error_improvement = _sum_or_none(
+        complete_with_errors,
+        "_error_improvement_kl",
+    )
+    accuracy_delta = None
+    if (
+        actual_total not in (None, 0)
+        and a_error_total is not None
+        and b_error_total is not None
+    ):
+        accuracy_delta = (a_error_total - b_error_total) / actual_total * 100
+
+    revision_value = pl.col("_revision_kl").round(
+        REVISION_CLASSIFICATION_DECIMAL_PLACES
+    )
+    improvement_value = pl.col("_error_improvement_kl").round(
+        REVISION_CLASSIFICATION_DECIMAL_PLACES
+    )
+    materially_revised = complete_with_errors.filter(
+        (revision_value > classification_tolerance)
+        | (revision_value < -classification_tolerance)
+    )
+    improved = complete_with_errors.filter(
+        improvement_value > classification_tolerance
+    )
+    worsened = complete_with_errors.filter(
+        improvement_value < -classification_tolerance
+    )
+    neutral = complete_with_errors.filter(
+        (improvement_value.abs() <= classification_tolerance)
+        & (
+            (revision_value > classification_tolerance)
+            | (revision_value < -classification_tolerance)
+        )
+    )
+    unchanged = complete_with_errors.filter(
+        improvement_value.abs() <= classification_tolerance
+    ).filter(
+        revision_value.abs() <= classification_tolerance
+    )
+    effectiveness = None
+    if materially_revised.height:
+        effectiveness = improved.height / materially_revised.height * 100
+    revised_up = complete_with_errors.filter(revision_value > classification_tolerance)
+    revised_down = complete_with_errors.filter(
+        revision_value < -classification_tolerance
+    )
+
+    return RevisionMetrics(
+        accuracy_delta_pp=accuracy_delta,
+        revision_effectiveness_pct=effectiveness,
+        total_error_improvement_kl=total_error_improvement,
+        materially_revised_observations=materially_revised.height,
+        improved_revisions=improved.height,
+        worsened_revisions=worsened.height,
+        neutral_revisions=neutral.height,
+        unchanged_revisions=unchanged.height,
+        revised_up_pct=revised_up.height / complete.height * 100,
+        revised_down_pct=revised_down.height / complete.height * 100,
+    )
+
+
 def calculate_metrics(
     pair_frame: pl.DataFrame,
     selected_actual_population: pl.DataFrame,
+    *,
+    revision_tolerance_kl: float = DEFAULT_REVISION_TOLERANCE_KL,
 ) -> MetricSummary:
     """Calculate latest-vintage KPIs from aggregate numerators and denominators.
 
@@ -156,6 +318,10 @@ def calculate_metrics(
             "vintage pair metrics require exactly one unique source; "
             f"received {sorted(sources)}"
         )
+    revision_metrics = calculate_revision_metrics(
+        pair_frame,
+        revision_tolerance_kl,
+    )
 
     selected_rows = pair_frame.filter(
         pl.col("pair_status").is_in(["complete", "zero_actual"])
@@ -219,6 +385,121 @@ def calculate_metrics(
         missing_vintage_pairs=missing_pairs,
         missing_actual_observations=missing_actual,
         zero_actual_observations=zero_actual,
+        accuracy_delta_pp=revision_metrics.accuracy_delta_pp,
+        revision_effectiveness_pct=revision_metrics.revision_effectiveness_pct,
+        total_error_improvement_kl=revision_metrics.total_error_improvement_kl,
+        materially_revised_observations=revision_metrics.materially_revised_observations,
+        improved_revisions=revision_metrics.improved_revisions,
+        worsened_revisions=revision_metrics.worsened_revisions,
+        neutral_revisions=revision_metrics.neutral_revisions,
+        unchanged_revisions=revision_metrics.unchanged_revisions,
+        revised_up_pct=revision_metrics.revised_up_pct,
+        revised_down_pct=revision_metrics.revised_down_pct,
+    )
+
+
+REVISION_DIAGNOSTIC_COLUMNS = [
+    "category",
+    "observations",
+    "share_of_complete_pairs_pct",
+    "actual_kl",
+    "revision_kl",
+    "error_improvement_kl",
+]
+REVISION_DIAGNOSTIC_SCHEMA = {
+    "category": pl.String,
+    "observations": pl.Int64,
+    "share_of_complete_pairs_pct": pl.Float64,
+    "actual_kl": pl.Float64,
+    "revision_kl": pl.Float64,
+    "error_improvement_kl": pl.Float64,
+}
+REVISION_SCATTER_COLUMNS = [
+    "source",
+    "parent_code",
+    "parent_description",
+    "brand",
+    "snop_month",
+    "actual_kl",
+    "revision_kl",
+    "error_improvement_kl",
+    "revision_direction",
+    "revision_outcome",
+]
+REVISION_SCATTER_SCHEMA = {
+    "source": pl.String,
+    "parent_code": pl.Int64,
+    "parent_description": pl.String,
+    "brand": pl.String,
+    "snop_month": pl.Date,
+    "actual_kl": pl.Float64,
+    "revision_kl": pl.Float64,
+    "error_improvement_kl": pl.Float64,
+    "revision_direction": pl.String,
+    "revision_outcome": pl.String,
+}
+
+
+def build_revision_diagnostics(pair_frame: pl.DataFrame) -> pl.DataFrame:
+    """Summarize improved, worsened, neutral, and unchanged valid pairs."""
+    require_columns(
+        pair_frame,
+        [
+            "pair_status",
+            "actual_kl",
+            "revision_kl",
+            "error_improvement_kl",
+            "revision_direction",
+            "revision_outcome",
+        ],
+        "revision diagnostic population",
+    )
+    complete = pair_frame.filter(pl.col("pair_status") == "complete")
+    categories = {
+        "improved": complete.filter(pl.col("revision_outcome") == "improved"),
+        "worsened": complete.filter(pl.col("revision_outcome") == "worsened"),
+        "neutral": complete.filter(
+            (pl.col("revision_outcome") == "neutral")
+            & (pl.col("revision_direction") != "unchanged")
+        ),
+        "unchanged": complete.filter(pl.col("revision_direction") == "unchanged"),
+    }
+    rows: list[dict[str, object]] = []
+    for category, subset in categories.items():
+        rows.append(
+            {
+                "category": category,
+                "observations": subset.height,
+                "share_of_complete_pairs_pct": (
+                    subset.height / complete.height * 100
+                    if complete.height
+                    else None
+                ),
+                "actual_kl": _sum_or_none(subset, "actual_kl") or 0.0,
+                "revision_kl": _sum_or_none(subset, "revision_kl") or 0.0,
+                "error_improvement_kl": (
+                    _sum_or_none(subset, "error_improvement_kl") or 0.0
+                ),
+            }
+        )
+    return pl.DataFrame(rows, schema=REVISION_DIAGNOSTIC_SCHEMA).select(
+        REVISION_DIAGNOSTIC_COLUMNS
+    )
+
+
+def build_revision_scatter(pair_frame: pl.DataFrame) -> pl.DataFrame:
+    """Return valid pair points for the revision-versus-improvement chart."""
+    require_columns(
+        pair_frame,
+        REVISION_SCATTER_COLUMNS + ["pair_status"],
+        "revision scatter population",
+    )
+    if pair_frame.height == 0:
+        return pl.DataFrame(schema=REVISION_SCATTER_SCHEMA).select(
+            REVISION_SCATTER_COLUMNS
+        )
+    return pair_frame.filter(pl.col("pair_status") == "complete").select(
+        REVISION_SCATTER_COLUMNS
     )
 
 
@@ -379,8 +660,28 @@ def build_horizon_performance(
     )
 
 
+def format_revision_tolerance(value: float | int | None) -> str:
+    """Display small tolerances without rounding accepted values to zero."""
+    if value is None:
+        return "—"
+    try:
+        tolerance = normalize_revision_tolerance(value)
+        if tolerance == 0:
+            return "0 KL"
+        if abs(tolerance) >= 1:
+            decimals = 2
+        else:
+            decimals = max(
+                2,
+                min(8, int(-math.floor(math.log10(abs(tolerance)))) + 1),
+            )
+    except (TypeError, ValueError, OverflowError):
+        return "—"
+    return f"{tolerance:,.{decimals}f} KL"
+
+
 def format_metric(
-    value: float | int | None, unit: Literal["", "%", "KL", "count"] = ""
+    value: float | int | None, unit: Literal["", "%", "pp", "KL", "count"] = ""
 ) -> str:
     """Format a KPI without hiding negative values or undefined ratios."""
     if value is None:
@@ -389,6 +690,8 @@ def format_metric(
         return f"{value:,.0f}"
     if unit == "%":
         return f"{value:,.1f}%"
+    if unit == "pp":
+        return f"{value:,.1f} pp"
     if unit == "KL":
         return f"{value:,.1f} KL"
     return f"{value:,.1f}"

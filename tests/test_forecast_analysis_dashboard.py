@@ -16,6 +16,8 @@ from forecast_analysis.filters import (  # pyright: ignore[reportMissingImports]
 )
 from forecast_analysis.metrics import (  # pyright: ignore[reportMissingImports]
     calculate_metrics,
+    calculate_revision_metrics,
+    format_revision_tolerance,
 )
 from forecast_analysis.vintages import VintageRule, select_vintage_pair  # pyright: ignore[reportMissingImports]
 
@@ -174,6 +176,118 @@ class DashboardFixtureTests(unittest.TestCase):
                 "snop_month": [date(2026, 1, 1)] * 4,
                 "actual_kl": [100.0] * 4,
             }
+        )
+
+    @staticmethod
+    def revision_frame() -> pl.DataFrame:
+        rows = [
+            (100, "Product 100", "2025-01", 100.0, 100.0),
+            (100, "Product 100", "2025-02", 120.0, 100.0),
+            (200, "Product 200", "2025-01", 120.0, 100.0),
+            (200, "Product 200", "2025-02", 90.0, 100.0),
+            (300, "Product 300", "2025-01", 100.0, 100.0),
+            (300, "Product 300", "2025-02", 100.005, 100.0),
+            (400, "Product 400", "2025-01", 100.0, 105.0),
+            (400, "Product 400", "2025-02", 110.0, 105.0),
+            (500, "Product 500", "2025-01", 100.0, 100.0),
+            (600, "Product 600", "2025-02", 90.0, 100.0),
+            (800, "Product 800", "2025-01", 100.0, None),
+            (800, "Product 800", "2025-02", 120.0, None),
+            (900, "Product 900", "2025-01", 0.0, 0.0),
+            (900, "Product 900", "2025-02", 5.0, 0.0),
+        ]
+        return pl.DataFrame(
+            {
+                "source": ["tm"] * len(rows),
+                "parent_code": [row[0] for row in rows],
+                "parent_description": [row[1] for row in rows],
+                "hierarchy_description": [row[1] for row in rows],
+                "brand": [f"Brand {row[0]}" for row in rows],
+                "mapping_status": ["mapped"] * len(rows),
+                "mapping_diagnostic": [None] * len(rows),
+                "calculation_month": [row[2] for row in rows],
+                "snop_month": ["2026-01"] * len(rows),
+                "forecast_horizon_months": [
+                    2 if row[2] == "2025-01" else 1 for row in rows
+                ],
+                "forecast_kl": [row[3] for row in rows],
+                "actual_kl": [row[4] for row in rows],
+                "actual_status": [
+                    "missing"
+                    if row[4] is None
+                    else "matched_zero"
+                    if row[4] == 0
+                    else "matched_positive"
+                    for row in rows
+                ],
+            }
+        ).with_columns(
+            pl.col("parent_code").cast(pl.Int64),
+            pl.col("calculation_month").str.to_date("%Y-%m"),
+            pl.col("snop_month").str.to_date("%Y-%m"),
+            pl.col("forecast_horizon_months").cast(pl.Int64),
+            pl.col("forecast_kl").cast(pl.Float64),
+            pl.col("actual_kl").cast(pl.Float64),
+        )
+
+    @staticmethod
+    def revision_actual_population() -> pl.DataFrame:
+        values = {
+            100: 100.0,
+            200: 100.0,
+            300: 100.0,
+            400: 105.0,
+            500: 100.0,
+            600: 100.0,
+            800: None,
+            900: 0.0,
+        }
+        return pl.DataFrame(
+            {
+                "parent_code": list(values),
+                "snop_month": [date(2026, 1, 1)] * len(values),
+                "actual_kl": list(values.values()),
+            }
+        ).with_columns(pl.col("parent_code").cast(pl.Int64))
+
+    @staticmethod
+    def revision_boundary_frame() -> pl.DataFrame:
+        rows = [
+            (301, 100.0, 100.01, 100.0),
+            (302, 100.0, 99.99, 100.0),
+            (303, 100.0, 100.011, 100.0),
+            (304, 100.0, 99.989, 99.98),
+        ]
+        records = []
+        for parent_code, vintage_a, vintage_b, actual in rows:
+            for calculation_month, forecast in (
+                ("2025-01", vintage_a),
+                ("2025-02", vintage_b),
+            ):
+                records.append(
+                    {
+                        "source": "tm",
+                        "parent_code": parent_code,
+                        "parent_description": f"Product {parent_code}",
+                        "hierarchy_description": f"Product {parent_code}",
+                        "brand": f"Brand {parent_code}",
+                        "mapping_status": "mapped",
+                        "mapping_diagnostic": None,
+                        "calculation_month": calculation_month,
+                        "snop_month": "2026-01",
+                        "forecast_horizon_months": 12,
+                        "forecast_kl": forecast,
+                        "actual_kl": actual,
+                        "actual_status": "matched_positive",
+                    }
+                )
+        return pl.DataFrame(records).with_columns(
+            pl.col("parent_code").cast(pl.Int64),
+            pl.col("calculation_month").str.to_date("%Y-%m"),
+            pl.col("snop_month").str.to_date("%Y-%m"),
+            pl.col("forecast_horizon_months").cast(pl.Int64),
+            pl.col("forecast_kl").cast(pl.Float64),
+            pl.col("actual_kl").cast(pl.Float64),
         )
 
 
@@ -493,6 +607,233 @@ class DashboardMetricTests(unittest.TestCase):
         self.assertIn("absolute_error_kl", view.monthly_performance.columns)
         self.assertIn("forecast_kl", view.monthly_performance.columns)
         self.assertIn("actual_kl", view.monthly_performance.columns)
+
+
+class DashboardRevisionTests(unittest.TestCase):
+    def test_tolerance_display_preserves_tighter_values(self):
+        self.assertEqual(format_revision_tolerance(0.01), "0.010 KL")
+        self.assertEqual(format_revision_tolerance(0.001), "0.0010 KL")
+
+    def test_tolerance_boundaries_are_inclusive_for_both_signs(self):
+        pair = select_vintage_pair(
+            DashboardFixtureTests.revision_boundary_frame(),
+            "tm",
+            vintage_a=VintageRule.specific_calculation_month(date(2025, 1, 1)),
+            vintage_b=VintageRule.specific_calculation_month(date(2025, 2, 1)),
+            revision_tolerance_kl=0.01,
+        )
+        classifications = pair.select(
+            ["parent_code", "revision_direction", "revision_outcome"]
+        ).to_dicts()
+        self.assertEqual(
+            classifications,
+            [
+                {
+                    "parent_code": 301,
+                    "revision_direction": "unchanged",
+                    "revision_outcome": "neutral",
+                },
+                {
+                    "parent_code": 302,
+                    "revision_direction": "unchanged",
+                    "revision_outcome": "neutral",
+                },
+                {
+                    "parent_code": 303,
+                    "revision_direction": "up",
+                    "revision_outcome": "worsened",
+                },
+                {
+                    "parent_code": 304,
+                    "revision_direction": "down",
+                    "revision_outcome": "improved",
+                },
+            ],
+        )
+
+    def test_calculate_revision_metrics_reclassifies_using_requested_tolerance(self):
+        pair = select_vintage_pair(
+            DashboardFixtureTests.revision_frame().filter(
+                pl.col("parent_code") == 300
+            ),
+            "tm",
+            vintage_a=VintageRule.specific_calculation_month(date(2025, 1, 1)),
+            vintage_b=VintageRule.specific_calculation_month(date(2025, 2, 1)),
+            revision_tolerance_kl=0.01,
+        )
+        summary = calculate_revision_metrics(pair, revision_tolerance_kl=0.001)
+        self.assertEqual(summary.materially_revised_observations, 1)
+        self.assertEqual(summary.worsened_revisions, 1)
+        self.assertEqual(summary.revision_effectiveness_pct, 0.0)
+
+    def test_vintage_rules_select_exact_months_and_horizons_without_mixing_sources(self):
+        frame = DashboardFixtureTests.revision_frame()
+        with_extra_history = pl.concat(
+            [
+                frame,
+                frame.filter(pl.col("parent_code") == 500).head(1).with_columns(
+                    pl.lit(700).cast(pl.Int64).alias("parent_code"),
+                    pl.lit("Product 700").alias("parent_description"),
+                    pl.lit("2025-03").str.to_date("%Y-%m").alias("calculation_month"),
+                    pl.lit(0).cast(pl.Int64).alias("forecast_horizon_months"),
+                ),
+            ],
+            how="vertical",
+        )
+        exact_month = select_vintage_pair(
+            with_extra_history,
+            "tm",
+            vintage_a=VintageRule.specific_calculation_month(date(2025, 1, 15)),
+            vintage_b=VintageRule.specific_calculation_month(date(2025, 2, 1)),
+        )
+        product_100 = exact_month.filter(pl.col("parent_code") == 100).row(
+            0, named=True
+        )
+        self.assertEqual(product_100["vintage_a_calculation_month"], date(2025, 1, 1))
+        self.assertEqual(product_100["vintage_b_calculation_month"], date(2025, 2, 1))
+        self.assertEqual(
+            exact_month.filter(pl.col("parent_code") == 500)["pair_status"].item(),
+            "missing_b",
+        )
+        self.assertEqual(
+            exact_month.filter(pl.col("parent_code") == 600)["pair_status"].item(),
+            "missing_a",
+        )
+        self.assertEqual(
+            exact_month.filter(pl.col("parent_code") == 700)["pair_status"].item(),
+            "missing_both",
+        )
+
+        exact_horizon = select_vintage_pair(
+            frame,
+            "tm",
+            vintage_a=VintageRule.specific_horizon(2),
+            vintage_b=VintageRule.specific_horizon(1),
+        )
+        self.assertEqual(
+            exact_horizon.filter(pl.col("parent_code") == 100)
+            .select(["vintage_a_horizon_months", "vintage_b_horizon_months"])
+            .row(0),
+            (2, 1),
+        )
+        self.assertEqual(
+            exact_horizon.filter(pl.col("parent_code") == 500)["pair_status"].item(),
+            "missing_b",
+        )
+
+    def test_revision_metrics_match_hand_calculated_values_and_exclude_invalid_denominators(self):
+        frame = DashboardFixtureTests.revision_frame()
+        pair = select_vintage_pair(
+            frame,
+            "tm",
+            vintage_a=VintageRule.specific_calculation_month(date(2025, 1, 1)),
+            vintage_b=VintageRule.specific_calculation_month(date(2025, 2, 1)),
+        )
+        summary = calculate_metrics(
+            pair,
+            DashboardFixtureTests.revision_actual_population(),
+        )
+
+        product_100 = pair.filter(pl.col("parent_code") == 100).row(0, named=True)
+        self.assertEqual(product_100["revision_kl"], 20.0)
+        self.assertEqual(product_100["revision_pct"], 20.0)
+        self.assertEqual(product_100["error_improvement_kl"], -20.0)
+        self.assertEqual(product_100["revision_direction"], "up")
+        self.assertEqual(product_100["revision_outcome"], "worsened")
+
+        self.assertAlmostEqual(summary.accuracy_delta_pp or 0.0, -10.005 / 405 * 100)
+        self.assertAlmostEqual(summary.total_error_improvement_kl or 0.0, -10.005)
+        self.assertAlmostEqual(summary.revision_effectiveness_pct or 0.0, 1 / 3 * 100)
+        self.assertEqual(summary.materially_revised_observations, 3)
+        self.assertEqual(summary.improved_revisions, 1)
+        self.assertEqual(summary.worsened_revisions, 1)
+        self.assertEqual(summary.neutral_revisions, 1)
+        self.assertEqual(summary.unchanged_revisions, 1)
+        self.assertEqual(summary.complete_pairs, 4)
+        self.assertEqual(summary.zero_actual_observations, 1)
+        self.assertEqual(summary.missing_actual_observations, 1)
+
+        zero_actual = pair.filter(pl.col("parent_code") == 900).row(0, named=True)
+        self.assertEqual(zero_actual["pair_status"], "zero_actual")
+        self.assertEqual(zero_actual["revision_kl"], 5.0)
+        self.assertIsNone(zero_actual["revision_pct"])
+
+    def test_tolerance_and_revision_filters_change_pair_outputs_but_keep_coverage(self):
+        frame = DashboardFixtureTests.revision_frame()
+        actuals = DashboardFixtureTests.revision_actual_population()
+        default_pair = select_vintage_pair(
+            frame,
+            "tm",
+            vintage_a=VintageRule.specific_calculation_month(date(2025, 1, 1)),
+            vintage_b=VintageRule.specific_calculation_month(date(2025, 2, 1)),
+        )
+        default_300 = default_pair.filter(pl.col("parent_code") == 300).row(
+            0, named=True
+        )
+        self.assertEqual(default_300["revision_direction"], "unchanged")
+        self.assertEqual(default_300["revision_outcome"], "neutral")
+
+        tight = select_vintage_pair(
+            frame,
+            "tm",
+            vintage_a=VintageRule.specific_calculation_month(date(2025, 1, 1)),
+            vintage_b=VintageRule.specific_calculation_month(date(2025, 2, 1)),
+            revision_tolerance_kl=0.001,
+        )
+        tight_300 = tight.filter(pl.col("parent_code") == 300).row(0, named=True)
+        self.assertEqual(tight_300["revision_direction"], "up")
+        self.assertEqual(tight_300["revision_outcome"], "worsened")
+
+        improved = build_dashboard_view(
+            frame,
+            actuals,
+            DashboardFilters(
+                source="tm",
+                revision_outcomes=("improved",),
+            ),
+            vintage_a=VintageRule.specific_calculation_month(date(2025, 1, 1)),
+            vintage_b=VintageRule.specific_calculation_month(date(2025, 2, 1)),
+        )
+        self.assertEqual(improved.vintage_pairs["parent_code"].to_list(), [200])
+        self.assertEqual(improved.metrics.total_error_improvement_kl, 10.0)
+        self.assertEqual(improved.coverage_pairs.height, default_pair.height)
+        self.assertIn("missing_b", improved.coverage_pairs["pair_status"].to_list())
+        self.assertIn("missing_a", improved.coverage_pairs["pair_status"].to_list())
+        self.assertIn("missing_actual", improved.coverage_pairs["pair_status"].to_list())
+        self.assertIn("zero_actual", improved.coverage_pairs["pair_status"].to_list())
+
+    def test_revision_diagnostics_partition_valid_pairs_and_expose_scatter_points(self):
+        view = build_dashboard_view(
+            DashboardFixtureTests.revision_frame(),
+            DashboardFixtureTests.revision_actual_population(),
+            vintage_a=VintageRule.specific_calculation_month(date(2025, 1, 1)),
+            vintage_b=VintageRule.specific_calculation_month(date(2025, 2, 1)),
+        )
+        diagnostics = view.revision_diagnostics
+        self.assertEqual(diagnostics["category"].to_list(), [
+            "improved",
+            "worsened",
+            "neutral",
+            "unchanged",
+        ])
+        self.assertEqual(diagnostics["observations"].to_list(), [1, 1, 1, 1])
+        self.assertEqual(diagnostics["observations"].sum(), view.metrics.complete_pairs)
+        self.assertEqual(view.revision_scatter.height, 4)
+        self.assertEqual(
+            set(view.revision_scatter.columns),
+            {
+                "source",
+                "parent_code",
+                "parent_description",
+                "brand",
+                "snop_month",
+                "actual_kl",
+                "revision_kl",
+                "error_improvement_kl",
+                "revision_direction",
+                "revision_outcome",
+            },
+        )
 
 
 class RealDashboardCoverageTests(unittest.TestCase):
