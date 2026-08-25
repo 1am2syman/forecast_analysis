@@ -15,7 +15,14 @@ from .filters import (  # pyright: ignore[reportMissingImports]
 )
 from .forecast_history import load_forecast_history, normalize_forecast_history
 from .hierarchy import clean_hierarchy, load_hierarchy, normalize_hierarchy
-from .metrics import MetricSummary, build_monthly_performance, calculate_metrics, format_metric  # pyright: ignore[reportMissingImports]
+from .metrics import (  # pyright: ignore[reportMissingImports]
+    MetricSummary,
+    build_horizon_performance,
+    build_monthly_performance,
+    calculate_metrics,
+    format_horizon_label,
+    format_metric,
+)
 from .vintages import VintageRule, select_vintage_pair  # pyright: ignore[reportMissingImports]
 
 __all__ = [
@@ -32,6 +39,7 @@ __all__ = [
     "HierarchyResult",
     "build_analysis_dataset",
     "build_dashboard_view",
+    "build_horizon_performance",
     "build_monthly_performance",
     "build_population_diagnostics",
     "calculate_metrics",
@@ -44,6 +52,7 @@ __all__ = [
     "format_metric",
     "normalize_forecast_history",
     "normalize_hierarchy",
+    "format_horizon_label",
     "select_vintage_pair",
     "with_display_brand",
 ]

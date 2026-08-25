@@ -29,6 +29,36 @@ MONTHLY_METRIC_NAMES = {
     "absolute_error": "absolute_error_kl",
     "forecast_vs_actual": None,
 }
+HORIZON_METRIC_COLUMNS = [
+    "source",
+    "forecast_horizon_months",
+    "horizon_label",
+    "forecast_accuracy_pct",
+    "bias_pct",
+    "absolute_error_kl",
+    "actual_kl",
+    "forecast_kl",
+    "coverage_pct",
+    "eligible_observations",
+    "population_observations",
+    "missing_actual_observations",
+    "zero_actual_observations",
+]
+HORIZON_METRIC_SCHEMA = {
+    "source": pl.String,
+    "forecast_horizon_months": pl.Int64,
+    "horizon_label": pl.String,
+    "forecast_accuracy_pct": pl.Float64,
+    "bias_pct": pl.Float64,
+    "absolute_error_kl": pl.Float64,
+    "actual_kl": pl.Float64,
+    "forecast_kl": pl.Float64,
+    "coverage_pct": pl.Float64,
+    "eligible_observations": pl.Int64,
+    "population_observations": pl.Int64,
+    "missing_actual_observations": pl.Int64,
+    "zero_actual_observations": pl.Int64,
+}
 
 
 @dataclass(frozen=True)
@@ -250,6 +280,103 @@ def build_monthly_performance(
         "population_observations": pl.Int64,
     }
     return pl.DataFrame(rows, schema=schema).select(METRIC_COLUMNS)
+
+
+def format_horizon_label(horizon: int) -> str:
+    """Return an unambiguous label for a whole-month forecast horizon."""
+    if horizon == 0:
+        return "Current month"
+    unit = "month" if horizon == 1 else "months"
+    return f"{horizon} {unit} ahead"
+
+
+def build_horizon_performance(
+    frame: pl.DataFrame,
+    selected_actual_population: pl.DataFrame,
+) -> pl.DataFrame:
+    """Aggregate accuracy and volume metrics for every available horizon.
+
+    The horizon chart uses every filtered forecast observation at its exact
+    derived horizon. It does not select a nearest vintage when a horizon is
+    absent; missing actuals remain visible through the observation counts.
+    """
+    require_columns(
+        frame,
+        [
+            "source",
+            "calculation_month",
+            "forecast_horizon_months",
+            "forecast_kl",
+            "actual_kl",
+            "actual_status",
+        ],
+        "horizon performance population",
+    )
+    require_columns(
+        selected_actual_population,
+        ACTUAL_COLUMNS,
+        "selected actual population",
+    )
+    if frame.height == 0:
+        return pl.DataFrame(schema=HORIZON_METRIC_SCHEMA).select(
+            HORIZON_METRIC_COLUMNS
+        )
+
+    rows: list[dict[str, object]] = []
+    groups = (
+        frame.select(["source", "forecast_horizon_months"])
+        .unique()
+        .sort(
+            ["source", "forecast_horizon_months"],
+            descending=[False, True],
+        )
+        .iter_rows(named=True)
+    )
+    for group in groups:
+        subset = frame.filter(
+            (pl.col("source") == group["source"])
+            & (pl.col("forecast_horizon_months") == group["forecast_horizon_months"])
+        )
+        pair_subset = subset.select(
+            [
+                "source",
+                pl.lit(None, dtype=pl.Date).alias("vintage_a_calculation_month"),
+                pl.col("calculation_month").alias("vintage_b_calculation_month"),
+                pl.col("forecast_kl").alias("vintage_b_forecast_kl"),
+                "actual_kl",
+                pl.when(pl.col("actual_status") == "missing")
+                .then(pl.lit("missing_actual"))
+                .when(pl.col("actual_status") == "matched_zero")
+                .then(pl.lit("zero_actual"))
+                .otherwise(pl.lit("complete"))
+                .alias("pair_status"),
+            ]
+        )
+        summary = calculate_metrics(pair_subset, selected_actual_population)
+        horizon = group["forecast_horizon_months"]
+        if not isinstance(horizon, int):
+            raise TypeError(f"forecast horizon is not an integer: {horizon!r}")
+        rows.append(
+            {
+                "source": group["source"],
+                "forecast_horizon_months": horizon,
+                "horizon_label": format_horizon_label(horizon),
+                "forecast_accuracy_pct": summary.forecast_accuracy_pct,
+                "bias_pct": summary.bias_pct,
+                "absolute_error_kl": summary.absolute_error_kl,
+                "actual_kl": summary.actual_kl,
+                "forecast_kl": summary.forecast_kl,
+                "coverage_pct": summary.coverage_pct,
+                "eligible_observations": summary.eligible_observations,
+                "population_observations": summary.population_observations,
+                "missing_actual_observations": summary.missing_actual_observations,
+                "zero_actual_observations": summary.zero_actual_observations,
+            }
+        )
+
+    return pl.DataFrame(rows, schema=HORIZON_METRIC_SCHEMA).select(
+        HORIZON_METRIC_COLUMNS
+    )
 
 
 def format_metric(

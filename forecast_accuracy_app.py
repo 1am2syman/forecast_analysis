@@ -20,7 +20,10 @@ with app.setup:
         available_filter_values,
         with_display_brand,
     )
-    from forecast_analysis.metrics import format_metric  # pyright: ignore[reportMissingImports]
+    from forecast_analysis.metrics import (  # pyright: ignore[reportMissingImports]
+        format_horizon_label,
+        format_metric,
+    )
 
     ROOT = Path(__file__).parent
     FORECAST_HISTORY_PATH = (
@@ -68,6 +71,7 @@ def _(validated_dataset, mo, source_filter, available_filter_values):
     _target_months = _options["target_months"]
     _brands = _options["brands"]
     _products = _options["parent_products"]
+    _horizons = _options["horizons"]
 
     target_month_filter = mo.ui.multiselect(
         options=_target_months,
@@ -87,6 +91,11 @@ def _(validated_dataset, mo, source_filter, available_filter_values):
         value=[row["parent_code"] for row in _products],
         label="Parent product",
     )
+    horizon_filter = mo.ui.multiselect(
+        options={format_horizon_label(horizon): horizon for horizon in _horizons},
+        value=_horizons,
+        label="Forecast horizon",
+    )
     minimum_actual_filter = mo.ui.number(
         value=0,
         start=0,
@@ -94,10 +103,22 @@ def _(validated_dataset, mo, source_filter, available_filter_values):
         label="Minimum actual volume (KL)",
     )
     mo.hstack(
-        [target_month_filter, brand_filter, product_filter, minimum_actual_filter],
+        [
+            target_month_filter,
+            brand_filter,
+            product_filter,
+            horizon_filter,
+            minimum_actual_filter,
+        ],
         widths="equal",
     )
-    return brand_filter, minimum_actual_filter, product_filter, target_month_filter
+    return (
+        brand_filter,
+        horizon_filter,
+        minimum_actual_filter,
+        product_filter,
+        target_month_filter,
+    )
 
 
 @app.cell
@@ -106,6 +127,7 @@ def _(
     build_dashboard_view,
     validated_dataset,
     brand_filter,
+    horizon_filter,
     minimum_actual_filter,
     product_filter,
     source_filter,
@@ -116,6 +138,7 @@ def _(
         target_months=tuple(target_month_filter.value),
         brands=tuple(brand_filter.value),
         parent_codes=tuple(product_filter.value),
+        horizons=tuple(horizon_filter.value),
         minimum_actual_volume=minimum_actual_filter.value or 0,
     )
     view = build_dashboard_view(
@@ -127,18 +150,31 @@ def _(
 
 
 @app.cell
-def _(filters, format_metric, mo, view):
-    _months = view.filtered_population["snop_month"].unique().sort().to_list()
+def _(filters, format_horizon_label, format_metric, mo, view):
+    _month_frame = (
+        view.vintage_pairs
+        if view.vintage_pairs.height
+        else view.filtered_population
+    )
+    _months = _month_frame["snop_month"].unique().sort().to_list()
     _month_label = (
         f"{_months[0]} → {_months[-1]}" if _months else "no target months"
     )
+    if filters.horizons is None:
+        _horizon_label = "all available"
+    elif not filters.horizons:
+        _horizon_label = "none selected"
+    else:
+        _horizon_label = ", ".join(
+            format_horizon_label(horizon) for horizon in filters.horizons
+        )
     _m = view.metrics
     mo.md(
         f"""# Forecast performance — {filters.source.upper()}
 
 **Population:** `{view.filtered_population.height:,}` forecast rows · `{view.vintage_pairs.height:,}` product-target groups · `{_month_label}` · `{format_metric(_m.actual_kl, 'KL')}` actual volume
 
-**Comparison:** Vintage A = oldest available · Vintage B = latest available · `{_m.complete_pairs:,}` complete vintage pairs · `{_m.missing_vintage_pairs:,}` missing vintage pairs · `{_m.missing_actual_observations:,}` missing actuals · `{_m.zero_actual_observations:,}` zero actuals"""
+**Horizon:** `{_horizon_label}` · **Comparison:** Vintage A = oldest available · Vintage B = latest available · `{_m.complete_pairs:,}` complete vintage pairs · `{_m.missing_vintage_pairs:,}` missing vintage pairs · `{_m.missing_actual_observations:,}` missing actuals · `{_m.zero_actual_observations:,}` zero actuals"""
     )
     return
 
@@ -148,8 +184,8 @@ def _(format_metric, mo, view):
     _m = view.metrics
     _empty_reason = (
         "No rows in the current selection"
-        if view.filtered_population.height == 0
-        else "No complete vintage pairs in the current selection"
+        if view.filtered_population.height == 0 and view.vintage_pairs.height == 0
+        else "No exact-horizon observations in the current selection"
         if _m.complete_pairs == 0 and _m.missing_vintage_pairs > 0
         else "No positive actuals in the current selection"
         if _m.eligible_observations == 0
@@ -294,8 +330,116 @@ def _(alt, monthly_metric, mo, pl, view):
 
 
 @app.cell
+def _(mo):
+    horizon_metric = mo.ui.dropdown(
+        options={
+            "Forecast accuracy": "accuracy",
+            "Bias": "bias",
+        },
+        value="accuracy",
+        label="Horizon performance metric",
+    )
+    mo.hstack([horizon_metric], justify="start")
+    return horizon_metric,
+
+
+@app.cell
+def _(alt, horizon_metric, mo, pl, view):
+    _horizon = view.horizon_performance
+    _column = {
+        "accuracy": "forecast_accuracy_pct",
+        "bias": "bias_pct",
+    }[horizon_metric.value]
+    _title = {
+        "accuracy": "Forecast accuracy (%)",
+        "bias": "Bias (%)",
+    }[horizon_metric.value]
+    _chart_data = _horizon.filter(pl.col(_column).is_not_null())
+    if _chart_data.height == 0:
+        _output = mo.md(
+            "No eligible forecast accuracy or bias is available at the selected "
+            "horizons. Coverage and missing observations remain visible below."
+        )
+    else:
+        _chart = (
+            alt.Chart(_chart_data.to_pandas())
+            .mark_line(point=True, strokeWidth=2.5)
+            .encode(
+                x=alt.X(
+                    "horizon_label:N",
+                    sort=alt.SortField(
+                        field="forecast_horizon_months", order="descending"
+                    ),
+                    title="Forecast horizon",
+                ),
+                y=alt.Y(_column + ":Q", title=_title, scale=alt.Scale(zero=False)),
+                color=alt.Color("source:N", title="Source"),
+                tooltip=[
+                    alt.Tooltip("source:N", title="Source"),
+                    alt.Tooltip("horizon_label:N", title="Horizon"),
+                    alt.Tooltip(
+                        "forecast_horizon_months:Q",
+                        title="Months ahead",
+                        format=",.0f",
+                    ),
+                    alt.Tooltip(_column + ":Q", title=_title, format=",.1f"),
+                    alt.Tooltip("actual_kl:Q", title="Actual KL", format=",.1f"),
+                    alt.Tooltip(
+                        "forecast_kl:Q", title="Forecast KL", format=",.1f"
+                    ),
+                    alt.Tooltip(
+                        "coverage_pct:Q", title="Coverage (%)", format=",.1f"
+                    ),
+                    alt.Tooltip(
+                        "eligible_observations:Q",
+                        title="Positive-actual observations",
+                        format=",.0f",
+                    ),
+                    alt.Tooltip(
+                        "population_observations:Q",
+                        title="Forecast observations",
+                        format=",.0f",
+                    ),
+                    alt.Tooltip(
+                        "missing_actual_observations:Q",
+                        title="Missing actuals",
+                        format=",.0f",
+                    ),
+                ],
+            )
+            .properties(height=360)
+        )
+        _plot = _chart
+        if horizon_metric.value == "bias":
+            _zero_rule = (
+                alt.Chart(pl.DataFrame({"baseline": [0.0]}).to_pandas())
+                .mark_rule(color="#5B6870", strokeDash=[5, 4])
+                .encode(y=alt.Y("baseline:Q", title=_title))
+            )
+            _plot = _chart + _zero_rule
+        _output = mo.ui.altair_chart(
+            _plot, chart_selection=False, legend_selection=False
+        )
+    mo.vstack(
+        [
+            mo.md(
+                "## Performance by forecast horizon\n\n"
+                "Long-range forecasts appear first; near-term forecasts appear last. "
+                "Tooltips retain actual volume, forecast volume, coverage, and counts."
+            ),
+            _output,
+        ]
+    )
+
+
+@app.cell
 def _(mo, view, with_display_brand):
     _pairs = view.vintage_pairs
+    _download = mo.download(
+        _pairs.write_csv().encode(),
+        filename=f"forecast_{view.filters.source}_filtered_vintages.csv",
+        label="Download filtered vintage CSV",
+    )
     if _pairs.height == 0:
         _output = mo.md(
             "## Filtered vintage table\n\nNo product-target pairs remain in this selection."
@@ -309,11 +453,15 @@ def _(mo, view, with_display_brand):
                     "parent_code",
                     "parent_description",
                     "brand_display",
+                    "mapping_status",
                     "snop_month",
                     "actual_kl",
+                    "actual_status",
                     "vintage_a_calculation_month",
+                    "vintage_a_horizon_months",
                     "vintage_a_forecast_kl",
                     "vintage_b_calculation_month",
+                    "vintage_b_horizon_months",
                     "vintage_b_forecast_kl",
                     "pair_status",
                 ]
@@ -321,9 +469,16 @@ def _(mo, view, with_display_brand):
             .sort(["snop_month", "parent_code"])
         )
         _output = mo.vstack(
-            [mo.md("## Filtered vintage table"), mo.ui.table(_table, page_size=20)]
+            [
+                mo.md(
+                    "## Filtered vintage table\n\n"
+                    "Rows use the selected source, target months, products, brands, "
+                    "horizons, and vintage rules."
+                ),
+                mo.ui.table(_table, page_size=20),
+            ]
         )
-    mo.vstack([_output])
+    mo.vstack([_output, _download])
 
 
 @app.cell

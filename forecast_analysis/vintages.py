@@ -173,8 +173,16 @@ def select_vintage_pair(
     source: str,
     vintage_a: VintageRule | None = None,
     vintage_b: VintageRule | None = None,
+    *,
+    population_frame: pl.DataFrame | None = None,
 ) -> pl.DataFrame:
-    """Build one source-isolated comparable row per parent product and target month."""
+    """Build one source-isolated comparable row per parent product and target month.
+
+    ``frame`` supplies the rows eligible for the selected vintage rules. When a
+    filter narrows that frame to one exact horizon, ``population_frame`` keeps
+    the unfiltered product-target groups as the coverage population so missing
+    observations become explicit pair statuses instead of disappearing.
+    """
     required = [
         "source",
         "parent_code",
@@ -196,12 +204,20 @@ def select_vintage_pair(
     rule_a = vintage_a or VintageRule.oldest_available()
     rule_b = vintage_b or VintageRule.latest_available()
 
-    source_frame = with_display_brand(frame).filter(pl.col("source") == normalized_source)
-    if source_frame.height == 0:
+    selection_frame = with_display_brand(frame).filter(
+        pl.col("source") == normalized_source
+    )
+    coverage_frame = population_frame if population_frame is not None else frame
+    if population_frame is not None:
+        require_columns(coverage_frame, required, "coverage analysis population")
+    coverage_source_frame = with_display_brand(coverage_frame).filter(
+        pl.col("source") == normalized_source
+    )
+    if coverage_source_frame.height == 0:
         return _empty_pair_frame()
 
     base = (
-        source_frame.sort(GROUP_COLUMNS + ["calculation_month"])
+        coverage_source_frame.sort(GROUP_COLUMNS + ["calculation_month"])
         .group_by(GROUP_COLUMNS, maintain_order=True)
         .agg(
             pl.col("parent_description").first(),
@@ -213,8 +229,16 @@ def select_vintage_pair(
         )
     )
     paired = (
-        base.join(_project_selected(source_frame, rule_a, "vintage_a"), on=GROUP_COLUMNS, how="left")
-        .join(_project_selected(source_frame, rule_b, "vintage_b"), on=GROUP_COLUMNS, how="left")
+        base.join(
+            _project_selected(selection_frame, rule_a, "vintage_a"),
+            on=GROUP_COLUMNS,
+            how="left",
+        )
+        .join(
+            _project_selected(selection_frame, rule_b, "vintage_b"),
+            on=GROUP_COLUMNS,
+            how="left",
+        )
         .with_columns(
             pl.lit(rule_a.label).alias("vintage_a_rule"),
             pl.lit(rule_b.label).alias("vintage_b_rule"),

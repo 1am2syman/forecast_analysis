@@ -9,8 +9,14 @@ from forecast_analysis.analysis_frame import (
     load_analysis_inputs,
 )
 from forecast_analysis.dashboard import DashboardView, build_dashboard_view  # pyright: ignore[reportMissingImports]
-from forecast_analysis.filters import DashboardFilters, apply_dashboard_filters  # pyright: ignore[reportMissingImports]
-from forecast_analysis.metrics import calculate_metrics  # pyright: ignore[reportMissingImports]
+from forecast_analysis.filters import (  # pyright: ignore[reportMissingImports]
+    DashboardFilters,
+    apply_dashboard_filters,
+    available_filter_values,
+)
+from forecast_analysis.metrics import (  # pyright: ignore[reportMissingImports]
+    calculate_metrics,
+)
 from forecast_analysis.vintages import VintageRule, select_vintage_pair  # pyright: ignore[reportMissingImports]
 
 
@@ -118,6 +124,58 @@ class DashboardFixtureTests(unittest.TestCase):
             }
         )
 
+    @staticmethod
+    def horizon_frame() -> pl.DataFrame:
+        rows = [
+            ("tm", 100, "Product 100", "Brand A", date(2025, 11, 1), 80.0),
+            ("tm", 100, "Product 100", "Brand A", date(2025, 12, 1), 90.0),
+            ("tm", 200, "Product 200", "Brand B", date(2025, 12, 1), 20.0),
+            ("tm", 300, "Product 300", "Brand C", date(2025, 11, 1), 120.0),
+            ("ml", 400, "Product 400", "Brand D", date(2025, 10, 1), 70.0),
+        ]
+        target = date(2026, 1, 1)
+        return pl.DataFrame(
+            {
+                "source": [row[0] for row in rows],
+                "parent_code": [row[1] for row in rows],
+                "parent_description": [row[2] for row in rows],
+                "hierarchy_description": [row[2] for row in rows],
+                "brand": [row[3] for row in rows],
+                "mapping_status": ["mapped"] * len(rows),
+                "mapping_diagnostic": [None] * len(rows),
+                "calculation_month": [row[4] for row in rows],
+                "snop_month": [target] * len(rows),
+                "forecast_horizon_months": [
+                    (
+                        2
+                        if row[4] == date(2025, 11, 1)
+                        else 1
+                        if row[4] == date(2025, 12, 1)
+                        else 3
+                    )
+                    for row in rows
+                ],
+                "forecast_kl": [row[5] for row in rows],
+                "actual_kl": [100.0] * len(rows),
+                "actual_status": ["matched_positive"] * len(rows),
+            }
+        ).with_columns(
+            pl.col("parent_code").cast(pl.Int64),
+            pl.col("forecast_horizon_months").cast(pl.Int64),
+            pl.col("forecast_kl").cast(pl.Float64),
+            pl.col("actual_kl").cast(pl.Float64),
+        )
+
+    @staticmethod
+    def horizon_actual_population() -> pl.DataFrame:
+        return pl.DataFrame(
+            {
+                "parent_code": [100, 200, 300, 400],
+                "snop_month": [date(2026, 1, 1)] * 4,
+                "actual_kl": [100.0] * 4,
+            }
+        )
+
 
 class DashboardPopulationTests(unittest.TestCase):
     def test_default_source_is_tm_and_source_switch_recalculates_every_output(self):
@@ -133,6 +191,8 @@ class DashboardPopulationTests(unittest.TestCase):
         self.assertEqual(set(tm.filtered_population["source"].unique()), {"tm"})
         self.assertEqual(set(tm.vintage_pairs["source"].unique()), {"tm"})
         self.assertEqual(set(tm.monthly_performance["source"].unique()), {"tm"})
+        self.assertEqual(set(tm.horizon_performance["source"].unique()), {"tm"})
+        self.assertEqual(tm.horizon_performance["forecast_kl"].to_list(), [240.0])
         self.assertEqual(tm.metrics.forecast_kl, 150.0)
         self.assertEqual(tm.metrics.actual_kl, 130.0)
         self.assertEqual(tm.metrics.absolute_error_kl, 30.0)
@@ -142,12 +202,18 @@ class DashboardPopulationTests(unittest.TestCase):
         self.assertEqual(set(ml.filtered_population["source"].unique()), {"ml"})
         self.assertEqual(set(ml.vintage_pairs["source"].unique()), {"ml"})
         self.assertEqual(set(ml.monthly_performance["source"].unique()), {"ml"})
+        self.assertEqual(set(ml.horizon_performance["source"].unique()), {"ml"})
+        self.assertEqual(ml.horizon_performance["forecast_kl"].to_list(), [116.0])
         self.assertEqual(ml.metrics.forecast_kl, 56.0)
         self.assertEqual(ml.metrics.actual_kl, 110.0)
         self.assertEqual(ml.metrics.absolute_error_kl, 56.0)
         assert ml.metrics.coverage_pct is not None
         self.assertAlmostEqual(ml.metrics.coverage_pct, 110 / 230 * 100)
         self.assertNotEqual(tm.metrics.forecast_accuracy_pct, ml.metrics.forecast_accuracy_pct)
+        self.assertNotEqual(
+            tm.horizon_performance["forecast_accuracy_pct"].to_list(),
+            ml.horizon_performance["forecast_accuracy_pct"].to_list(),
+        )
 
     def test_default_oldest_and_latest_are_independent_within_each_source(self):
         frame = DashboardFixtureTests.frame()
@@ -202,6 +268,76 @@ class DashboardPopulationTests(unittest.TestCase):
         )
         self.assertEqual(filtered["parent_code"].unique().to_list(), [500])
         self.assertEqual(filtered["brand_display"].unique().to_list(), ["Unmapped"])
+
+    def test_horizon_controls_are_scoped_to_the_selected_source(self):
+        frame = DashboardFixtureTests.horizon_frame()
+
+        self.assertEqual(available_filter_values(frame, "tm")["horizons"], [2, 1])
+        self.assertEqual(available_filter_values(frame, "ml")["horizons"], [3])
+
+    def test_exact_horizon_filter_keeps_missing_product_targets_in_coverage_pairs(self):
+        frame = DashboardFixtureTests.horizon_frame()
+        actuals = DashboardFixtureTests.horizon_actual_population()
+        view = build_dashboard_view(
+            frame,
+            actuals,
+            DashboardFilters(source="tm", horizons=(2,)),
+        )
+
+        self.assertEqual(
+            set(view.filtered_population["forecast_horizon_months"].to_list()), {2}
+        )
+        self.assertEqual(set(view.vintage_pairs["parent_code"].to_list()), {100, 200, 300})
+        missing = view.vintage_pairs.filter(pl.col("parent_code") == 200).row(
+            0, named=True
+        )
+        self.assertEqual(missing["pair_status"], "missing_both")
+        self.assertIsNone(missing["vintage_a_horizon_months"])
+        self.assertIsNone(missing["vintage_b_horizon_months"])
+        self.assertEqual(view.metrics.complete_pairs, 2)
+        self.assertEqual(view.metrics.missing_vintage_pairs, 1)
+        self.assertEqual(view.metrics.forecast_kl, 200.0)
+        self.assertEqual(view.metrics.actual_kl, 200.0)
+        assert view.metrics.coverage_pct is not None
+        self.assertAlmostEqual(view.metrics.coverage_pct, 200 / 400 * 100)
+        self.assertEqual(
+            view.monthly_performance["population_observations"].to_list(), [3]
+        )
+        self.assertEqual(
+            view.horizon_performance["forecast_horizon_months"].to_list(), [2]
+        )
+        self.assertEqual(
+            view.horizon_performance["population_observations"].to_list(), [2]
+        )
+        horizon_metrics = view.horizon_performance.row(0, named=True)
+        self.assertEqual(horizon_metrics["forecast_accuracy_pct"], 80.0)
+        self.assertEqual(horizon_metrics["bias_pct"], 0.0)
+        self.assertEqual(horizon_metrics["actual_kl"], 200.0)
+        self.assertEqual(horizon_metrics["forecast_kl"], 200.0)
+
+        all_horizons = build_dashboard_view(
+            frame,
+            actuals,
+            DashboardFilters(source="tm"),
+        )
+        self.assertEqual(
+            all_horizons.horizon_performance["forecast_horizon_months"].to_list(),
+            [2, 1],
+        )
+        self.assertEqual(
+            all_horizons.horizon_performance["horizon_label"].to_list(),
+            ["2 months ahead", "1 month ahead"],
+        )
+        exact_pair = select_vintage_pair(
+            frame.filter(pl.col("source") == "tm"),
+            "tm",
+            vintage_a=VintageRule.specific_horizon(2),
+            vintage_b=VintageRule.specific_horizon(2),
+        )
+        self.assertEqual(
+            set(exact_pair.filter(pl.col("parent_code") == 200)["pair_status"]),
+            {"missing_both"},
+        )
 
 
 class DashboardMetricTests(unittest.TestCase):

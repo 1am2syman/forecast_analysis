@@ -61,6 +61,7 @@ class DashboardFilters:
     brands: tuple[str, ...] | None = None
     parent_codes: tuple[int, ...] | None = None
     minimum_actual_volume: float = 0.0
+    horizons: tuple[int, ...] | None = None
 
     def __post_init__(self) -> None:
         source = str(self.source).strip().lower()
@@ -89,6 +90,23 @@ class DashboardFilters:
             except (TypeError, ValueError) as exc:
                 raise ValueError("parent_codes must contain integers") from exc
             object.__setattr__(self, "parent_codes", parent_codes)
+        if self.horizons is not None:
+            normalized_horizons: list[int] = []
+            for value in self.horizons:
+                if isinstance(value, bool):
+                    raise ValueError("horizons must contain non-negative integers")
+                try:
+                    horizon = int(value)
+                except (TypeError, ValueError) as exc:
+                    raise ValueError(
+                        "horizons must contain non-negative integers"
+                    ) from exc
+                if isinstance(value, float) and not value.is_integer():
+                    raise ValueError("horizons must contain non-negative integers")
+                if horizon < 0:
+                    raise ValueError("horizons must contain non-negative integers")
+                normalized_horizons.append(horizon)
+            object.__setattr__(self, "horizons", tuple(normalized_horizons))
 
         try:
             minimum = float(self.minimum_actual_volume)
@@ -118,6 +136,10 @@ def apply_dashboard_filters(
         filtered = filtered.filter(pl.col("snop_month").is_in(filters.target_months))
     if filters.brands is not None:
         filtered = filtered.filter(pl.col("brand_display").is_in(filters.brands))
+    if filters.horizons is not None:
+        filtered = filtered.filter(
+            pl.col("forecast_horizon_months").is_in(filters.horizons)
+        )
     if filters.parent_codes is not None:
         filtered = filtered.filter(pl.col("parent_code").is_in(filters.parent_codes))
     if filters.minimum_actual_volume > 0:
@@ -134,7 +156,12 @@ def apply_dashboard_filters(
 def apply_actual_filters(
     frame: pl.DataFrame, filters: DashboardFilters
 ) -> pl.DataFrame:
-    """Apply the shared non-source filters to the selected actual population."""
+    """Apply shared filters that have meaning on the actual population.
+
+    Actuals have no forecast horizon, so the horizon filter is intentionally
+    omitted here. Keeping the full selected actual denominator makes product-
+    target combinations absent at an exact horizon visible as uncovered volume.
+    """
     require_columns(frame, ACTUAL_COLUMNS, "selected actual population")
     prepared = frame
     if "brand" not in prepared.columns:
@@ -177,7 +204,8 @@ def available_filter_values(frame: pl.DataFrame, source: str) -> dict[str, objec
         "brands": sorted(source_frame["brand_display"].drop_nulls().unique().to_list()),
         "parent_products": parent_options,
         "horizons": sorted(
-            source_frame["forecast_horizon_months"].unique().to_list()
+            source_frame["forecast_horizon_months"].unique().to_list(),
+            reverse=True,
         ),
     }
 

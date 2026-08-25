@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 import polars as pl
 
@@ -11,7 +11,12 @@ from .filters import (
     apply_actual_filters,
     apply_dashboard_filters,
 )  # pyright: ignore[reportMissingImports]
-from .metrics import MetricSummary, build_monthly_performance, calculate_metrics  # pyright: ignore[reportMissingImports]
+from .metrics import (
+    MetricSummary,
+    build_horizon_performance,
+    build_monthly_performance,
+    calculate_metrics,
+)  # pyright: ignore[reportMissingImports]
 from .vintages import VintageRule, select_vintage_pair  # pyright: ignore[reportMissingImports]
 
 
@@ -25,6 +30,7 @@ class DashboardView:
     selected_actual_population: pl.DataFrame
     metrics: MetricSummary
     monthly_performance: pl.DataFrame
+    horizon_performance: pl.DataFrame
 
 
 def build_dashboard_view(
@@ -38,12 +44,15 @@ def build_dashboard_view(
     """Apply filters once, select same-source vintages, and derive every view."""
     active_filters = filters or DashboardFilters()
     filtered = apply_dashboard_filters(frame, active_filters)
+    coverage_filters = replace(active_filters, horizons=None)
+    coverage_population = apply_dashboard_filters(frame, coverage_filters)
     selected_actual_population = apply_actual_filters(actual_population, active_filters)
     pairs = select_vintage_pair(
         filtered,
         active_filters.source,
         vintage_a=vintage_a,
         vintage_b=vintage_b,
+        population_frame=coverage_population,
     )
     return DashboardView(
         filters=active_filters,
@@ -53,5 +62,8 @@ def build_dashboard_view(
         metrics=calculate_metrics(pairs, selected_actual_population),
         monthly_performance=build_monthly_performance(
             pairs, selected_actual_population
+        ),
+        horizon_performance=build_horizon_performance(
+            filtered, selected_actual_population
         ),
     )
