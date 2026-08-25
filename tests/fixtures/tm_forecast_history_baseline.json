@@ -1,0 +1,17 @@
+{
+  "oracle_id": "tm-forecast-history-pre-ml-v1",
+  "purpose": "Immutable TM-only regression oracle captured before ML rows were added.",
+  "source_commit": "aa804e1922e57eb54e386d51fe7405bc45afdea3",
+  "source_path": "artifacts/forecast_history/consolidated/forecast_history_waterfall.csv",
+  "source_git_blob_oid": "8f56f41cfc3a286676001f4d109c41f64fd465ca",
+  "fixture_path": "tests/fixtures/tm_forecast_history_baseline.csv",
+  "fixture_sha256": "9419b320aa188d98948a858c25639db1c39a5f181a9ad3b1df0fc60181d5adef",
+  "columns": [
+    "calculation_month",
+    "snop_month",
+    "parent_code",
+    "parent_description",
+    "qty"
+  ],
+  "row_count": 8515
+}
