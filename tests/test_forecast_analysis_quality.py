@@ -246,7 +246,7 @@ class QualityWorkflowTests(unittest.TestCase):
         self.assertIn("actual", view.quality.exceptions)
         self.assertIn("missing", view.quality.explanations["actual"])
 
-    def test_quality_status_filters_isolate_metrics_without_rewriting_quality_totals(self):
+    def test_quality_status_filters_update_active_counts_and_preserve_scope_exclusions(self):
         missing = build_dashboard_view(
             QualityFixture.frame(),
             QualityFixture.actual_population(),
@@ -259,7 +259,18 @@ class QualityWorkflowTests(unittest.TestCase):
             ].item(),
             1,
         )
-        self.assertEqual(missing.quality.pairs["observations"].sum(), 4)
+        self.assertEqual(missing.quality.pairs["observations"].sum(), 1)
+        self.assertEqual(
+            set(missing.quality.exceptions["pairs"]["parent_code"].to_list()),
+            {300},
+        )
+        self.assertIsInstance(missing.quality.scope_exclusions, dict)
+        self.assertEqual(
+            missing.quality.scope_exclusion_counts.filter(
+                pl.col("category") == "pairs"
+            )["observations"].sum(),
+            3,
+        )
 
         complete_only = build_dashboard_view(
             QualityFixture.frame(),
@@ -270,15 +281,16 @@ class QualityWorkflowTests(unittest.TestCase):
             set(complete_only.vintage_pairs["pair_status"].to_list()), {"complete"}
         )
         self.assertEqual(
-            set(complete_only.quality.pairs["status"].to_list()),
-            {
-                "complete",
-                "missing_a",
-                "missing_b",
-                "missing_both",
-                "missing_actual",
-                "zero_actual",
-            },
+            complete_only.quality.pairs.filter(pl.col("observations") > 0)[
+                "status"
+            ].to_list(),
+            ["complete"],
+        )
+        self.assertEqual(
+            complete_only.quality.scope_exclusion_counts.filter(
+                pl.col("category") == "pairs"
+            )["observations"].sum(),
+            2,
         )
         self.assertEqual(complete_only.metrics.eligible_observations, 2)
         assert complete_only.metrics.coverage_pct is not None
@@ -290,7 +302,13 @@ class QualityWorkflowTests(unittest.TestCase):
             DashboardFilters(source="tm", hierarchy_statuses=("unmapped",)),
         )
         self.assertEqual(unmapped.vintage_pairs["parent_code"].unique().to_list(), [200])
-        self.assertEqual(unmapped.quality.hierarchy["observations"].sum(), 4)
+        self.assertEqual(unmapped.quality.hierarchy["observations"].sum(), 1)
+        self.assertEqual(
+            unmapped.quality.scope_exclusion_counts.filter(
+                pl.col("category") == "hierarchy"
+            )["observations"].sum(),
+            3,
+        )
 
         tm_only = build_dashboard_view(
             QualityFixture.frame(),
@@ -300,7 +318,13 @@ class QualityWorkflowTests(unittest.TestCase):
         self.assertEqual(
             set(tm_only.vintage_pairs["parent_code"].to_list()), {200, 300, 400}
         )
-        self.assertEqual(tm_only.quality.source_availability["observations"].sum(), 4)
+        self.assertEqual(tm_only.quality.source_availability["observations"].sum(), 3)
+        self.assertEqual(
+            tm_only.quality.scope_exclusion_counts.filter(
+                pl.col("category") == "source_availability"
+            )["observations"].sum(),
+            1,
+        )
 
     def test_quality_explanations_and_exception_download_frames_cover_each_category(self):
         view = build_dashboard_view(
@@ -653,7 +677,13 @@ class QualityWorkflowTests(unittest.TestCase):
         self.assertEqual(set(zero_forecasts.filtered_population["parent_code"].to_list()), {300})
         self.assertEqual(zero_forecasts.selected_actual_population["actual_kl"].sum(), 300.0)
         self.assertEqual(zero_forecasts.metrics.forecast_kl, 0.0)
-        self.assertEqual(zero_forecasts.quality.hierarchy["observations"].sum(), 3)
+        self.assertEqual(zero_forecasts.quality.hierarchy["observations"].sum(), 1)
+        self.assertEqual(
+            zero_forecasts.quality.scope_exclusion_counts.filter(
+                pl.col("category") == "hierarchy"
+            )["observations"].sum(),
+            2,
+        )
 
         complete_history = build_dashboard_view(
             frame,
@@ -666,7 +696,13 @@ class QualityWorkflowTests(unittest.TestCase):
         )
         self.assertEqual(set(complete_history.filtered_population["parent_code"].to_list()), {100, 300})
         self.assertEqual(complete_history.selected_actual_population["actual_kl"].sum(), 400.0)
-        self.assertEqual(complete_history.quality.hierarchy["observations"].sum(), 3)
+        self.assertEqual(complete_history.quality.hierarchy["observations"].sum(), 2)
+        self.assertEqual(
+            complete_history.quality.scope_exclusion_counts.filter(
+                pl.col("category") == "hierarchy"
+            )["observations"].sum(),
+            1,
+        )
 
 
 if __name__ == "__main__":

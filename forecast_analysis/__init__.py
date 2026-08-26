@@ -3,14 +3,27 @@
 # Keep the package seam small: adapters and population construction are the public surface.
 from .actuals import aggregate_actuals, load_actuals, normalize_actuals
 from .analysis_frame import build_analysis_dataset, load_analysis_inputs
-from .contracts import AnalysisDataset, AnalysisInputs, HierarchyResult
+from .contracts import (
+    ACTUAL_REFERENCE_COLOR,
+    AnalysisDataset,
+    AnalysisInputs,
+    FORECAST_DIRECTIONS,
+    HierarchyResult,
+    SOURCE_COLORS,
+    SOURCE_LABELS,
+    VINTAGE_COLORS,
+    VINTAGE_LABELS,
+    ZERO_REFERENCE_COLOR,
+)
 from .comparison import ComparisonView, build_source_comparison  # pyright: ignore[reportMissingImports]
 from .dashboard import (  # pyright: ignore[reportMissingImports]
     DashboardView,
     build_dashboard_view,
+    build_exception_download_frame,
+    build_population_summary,
     build_product_detail,
 )
-from .diagnostics import build_population_diagnostics
+from .diagnostics import build_dashboard_diagnostics, build_population_diagnostics
 from .quality import QualityView, build_quality_view  # pyright: ignore[reportMissingImports]
 from .filters import (  # pyright: ignore[reportMissingImports]
     DashboardFilters,
@@ -18,6 +31,7 @@ from .filters import (  # pyright: ignore[reportMissingImports]
     apply_dashboard_filters,
     apply_quality_pair_filters,
     apply_revision_filters,
+    apply_performance_filters,
     available_filter_values,
     with_display_brand,
 )
@@ -29,7 +43,9 @@ from .metrics import (  # pyright: ignore[reportMissingImports]
     brand_target_metric_definition,
     brand_target_month_order,
     build_brand_target_month_performance,
+    build_horizon_audit,
     build_horizon_performance,
+    build_monthly_audit,
     build_monthly_performance,
     build_revision_diagnostics,
     build_revision_scatter,
@@ -47,6 +63,7 @@ from .product_history import (  # pyright: ignore[reportMissingImports]
 from .vintages import VintageRule, select_vintage_pair  # pyright: ignore[reportMissingImports]
 
 __all__ = [
+    "ACTUAL_REFERENCE_COLOR",
     "AnalysisDataset",
     "ComparisonView",
     "QualityView",
@@ -61,16 +78,28 @@ __all__ = [
     "apply_dashboard_filters",
     "apply_quality_pair_filters",
     "apply_revision_filters",
+    "apply_performance_filters",
     "available_filter_values",
     "AnalysisInputs",
+    "FORECAST_DIRECTIONS",
     "HierarchyResult",
+    "SOURCE_COLORS",
+    "SOURCE_LABELS",
+    "VINTAGE_COLORS",
+    "VINTAGE_LABELS",
+    "ZERO_REFERENCE_COLOR",
     "build_analysis_dataset",
     "build_brand_target_month_performance",
     "build_dashboard_view",
+    "build_exception_download_frame",
+    "build_population_summary",
     "build_product_detail",
+    "build_horizon_audit",
     "build_horizon_performance",
     "build_source_comparison",
+    "build_monthly_audit",
     "build_monthly_performance",
+    "build_dashboard_diagnostics",
     "build_population_diagnostics",
     "build_quality_view",
     "build_product_history",

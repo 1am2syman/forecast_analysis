@@ -16,6 +16,7 @@ from .contracts import (
     FORECAST_SOURCES,
     ACTUAL_STATUSES,
     DEFAULT_REVISION_TOLERANCE_KL,
+    FORECAST_DIRECTIONS,
     HIERARCHY_STATUSES,
     PAIR_STATUSES,
     REVISION_DIRECTIONS,
@@ -29,6 +30,11 @@ QUALITY_BRAND_LABELS = {
     "unmapped": "Unmapped",
     "conflict": "Hierarchy conflict",
 }
+PERFORMANCE_TOP_N_METRICS = (
+    "actual_volume",
+    "absolute_error",
+    "deterioration",
+)
 
 
 def _normalize_revision_choices(
@@ -46,6 +52,29 @@ def _normalize_revision_choices(
             f"choose from {list(allowed)}"
         )
     return normalized
+
+
+def _normalize_band(
+    value: tuple[float, float] | None,
+    field_name: str,
+) -> tuple[float, float] | None:
+    if value is None:
+        return None
+    try:
+        bounds = tuple(value)
+    except TypeError as exc:
+        raise ValueError(f"{field_name} must contain exactly two finite bounds") from exc
+    if len(bounds) != 2:
+        raise ValueError(f"{field_name} must contain exactly two finite bounds")
+    try:
+        lower, upper = (float(bound) for bound in bounds)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"{field_name} must contain exactly two finite bounds") from exc
+    if not math.isfinite(lower) or not math.isfinite(upper) or lower > upper:
+        raise ValueError(
+            f"{field_name} must contain finite bounds in ascending order"
+        )
+    return lower, upper
 
 
 def _normalize_month(value: object) -> date:
@@ -117,6 +146,12 @@ class DashboardFilters:
     complete_vintage_history_only: bool = False
     revision_directions: tuple[str, ...] | None = None
     revision_outcomes: tuple[str, ...] | None = None
+    forecast_directions: tuple[str, ...] | None = None
+    forecast_accuracy_band: tuple[float, float] | None = None
+    bias_band: tuple[float, float] | None = None
+    minimum_absolute_error_kl: float = 0.0
+    top_n: int | None = None
+    top_n_metric: str = "actual_volume"
     revision_tolerance_kl: float = DEFAULT_REVISION_TOLERANCE_KL
 
     def __post_init__(self) -> None:
@@ -235,9 +270,55 @@ class DashboardFilters:
                 "revision_outcomes",
             ),
         )
+        object.__setattr__(
+            self,
+            "forecast_directions",
+            _normalize_revision_choices(
+                self.forecast_directions,
+                FORECAST_DIRECTIONS,
+                "forecast_directions",
+            ),
+        )
+        object.__setattr__(
+            self,
+            "forecast_accuracy_band",
+            _normalize_band(self.forecast_accuracy_band, "forecast_accuracy_band"),
+        )
+        object.__setattr__(
+            self,
+            "bias_band",
+            _normalize_band(self.bias_band, "bias_band"),
+        )
+        try:
+            minimum_absolute_error = float(self.minimum_absolute_error_kl)
+        except (TypeError, ValueError) as exc:
+            raise ValueError(
+                "minimum_absolute_error_kl must be a finite non-negative number"
+            ) from exc
+        if not math.isfinite(minimum_absolute_error) or minimum_absolute_error < 0:
+            raise ValueError(
+                "minimum_absolute_error_kl must be a finite non-negative number"
+            )
+        object.__setattr__(self, "minimum_absolute_error_kl", minimum_absolute_error)
+        if self.top_n is not None:
+            if isinstance(self.top_n, bool) or not isinstance(self.top_n, int):
+                raise ValueError("top_n must be a positive integer or None")
+            if self.top_n < 1:
+                raise ValueError("top_n must be a positive integer or None")
+        normalized_top_n_metric = str(self.top_n_metric).strip().lower()
+        if normalized_top_n_metric not in PERFORMANCE_TOP_N_METRICS:
+            raise ValueError(
+                f"top_n_metric must be one of {list(PERFORMANCE_TOP_N_METRICS)}"
+            )
+        object.__setattr__(self, "top_n_metric", normalized_top_n_metric)
         if self.comparison_mode:
             object.__setattr__(self, "revision_directions", None)
             object.__setattr__(self, "revision_outcomes", None)
+            object.__setattr__(self, "forecast_directions", None)
+            object.__setattr__(self, "forecast_accuracy_band", None)
+            object.__setattr__(self, "bias_band", None)
+            object.__setattr__(self, "minimum_absolute_error_kl", 0.0)
+            object.__setattr__(self, "top_n", None)
         object.__setattr__(
             self,
             "revision_tolerance_kl",
@@ -280,6 +361,30 @@ class DashboardFilters:
     def without_revision_filters(self) -> "DashboardFilters":
         """Return the same selection without pair revision filters."""
         return replace(self, revision_directions=None, revision_outcomes=None)
+
+    @property
+    def has_performance_filters(self) -> bool:
+        """Whether any Vintage-B performance filter narrows pair rows."""
+        return any(
+            (
+                self.forecast_directions is not None,
+                self.forecast_accuracy_band is not None,
+                self.bias_band is not None,
+                self.minimum_absolute_error_kl > 0,
+                self.top_n is not None,
+            )
+        )
+
+    def without_performance_filters(self) -> "DashboardFilters":
+        """Return the same selection without pair performance filters."""
+        return replace(
+            self,
+            forecast_directions=None,
+            forecast_accuracy_band=None,
+            bias_band=None,
+            minimum_absolute_error_kl=0.0,
+            top_n=None,
+        )
 
 
 def _source_availability_keys(frame: pl.DataFrame) -> pl.DataFrame:
@@ -563,6 +668,129 @@ def apply_revision_filters(
     return filtered
 
 
+def apply_performance_filters(
+    pair_frame: pl.DataFrame,
+    filters: DashboardFilters,
+) -> pl.DataFrame:
+    """Apply Vintage-B performance filters after deterministic pair selection.
+
+    Accuracy and bias are row-level projections of the same aggregate formulas:
+    they are used only to select rows, while KPI aggregation still recomputes
+    its numerators and denominators from the surviving detail population.
+    """
+    if not filters.has_performance_filters:
+        return pair_frame
+    required_columns = [
+        "vintage_b_forecast_kl",
+        "vintage_b_absolute_error_kl",
+        "actual_kl",
+        "pair_status",
+    ]
+    if filters.top_n_metric == "deterioration":
+        required_columns.append("error_improvement_kl")
+    require_columns(
+        pair_frame,
+        required_columns,
+        "vintage pair performance population",
+    )
+    filtered = pair_frame
+    if filters.forecast_directions is not None:
+        filtered = filtered.with_columns(
+            pl.when(
+                pl.col("actual_kl").is_null()
+                | pl.col("vintage_b_forecast_kl").is_null()
+            )
+            .then(pl.lit(None, dtype=pl.String))
+            .when(
+                pl.col("vintage_b_forecast_kl") - pl.col("actual_kl")
+                > filters.revision_tolerance_kl
+            )
+            .then(pl.lit("over"))
+            .when(
+                pl.col("vintage_b_forecast_kl") - pl.col("actual_kl")
+                < -filters.revision_tolerance_kl
+            )
+            .then(pl.lit("under"))
+            .otherwise(pl.lit("within_tolerance"))
+            .alias("_forecast_direction")
+        ).filter(pl.col("_forecast_direction").is_in(filters.forecast_directions))
+    if filters.forecast_accuracy_band is not None:
+        lower, upper = filters.forecast_accuracy_band
+        filtered = filtered.with_columns(
+            pl.when(
+                (pl.col("pair_status") == "complete")
+                & (pl.col("actual_kl") > 0)
+            )
+            .then(
+                (
+                    1
+                    - pl.col("vintage_b_absolute_error_kl") / pl.col("actual_kl")
+                )
+                * 100
+            )
+            .otherwise(pl.lit(None, dtype=pl.Float64))
+            .alias("_row_accuracy_pct")
+        ).filter(pl.col("_row_accuracy_pct").is_between(lower, upper, closed="both"))
+    if filters.bias_band is not None:
+        lower, upper = filters.bias_band
+        filtered = filtered.with_columns(
+            pl.when(
+                (pl.col("pair_status") == "complete")
+                & (pl.col("actual_kl") > 0)
+            )
+            .then(
+                (
+                    pl.col("vintage_b_forecast_kl") - pl.col("actual_kl")
+                )
+                / pl.col("actual_kl")
+                * 100
+            )
+            .otherwise(pl.lit(None, dtype=pl.Float64))
+            .alias("_row_bias_pct")
+        ).filter(pl.col("_row_bias_pct").is_between(lower, upper, closed="both"))
+    if filters.minimum_absolute_error_kl > 0:
+        filtered = filtered.filter(
+            pl.col("vintage_b_absolute_error_kl").is_not_null()
+            & (
+                pl.col("vintage_b_absolute_error_kl")
+                >= filters.minimum_absolute_error_kl
+            )
+        )
+    if filters.top_n is not None:
+        top_n_column = {
+            "actual_volume": "actual_kl",
+            "absolute_error": "vintage_b_absolute_error_kl",
+            "deterioration": "error_improvement_kl",
+        }[filters.top_n_metric]
+        if filters.top_n_metric == "deterioration":
+            filtered = filtered.with_columns(
+                (-pl.col(top_n_column)).alias("_top_n_value")
+            )
+            sort_column = "_top_n_value"
+        else:
+            filtered = filtered.with_columns(
+                pl.col(top_n_column).alias("_top_n_value")
+            )
+            sort_column = "_top_n_value"
+        filtered = filtered.sort(
+            [sort_column, "parent_code", "snop_month"],
+            descending=[True, False, False],
+            nulls_last=True,
+        ).head(filters.top_n)
+    return filtered.drop(
+        [
+            column
+            for column in (
+                "_forecast_direction",
+                "_row_accuracy_pct",
+                "_row_bias_pct",
+                "_top_n_value",
+            )
+            if column in filtered.columns
+        ]
+    )
+
+
 def apply_actual_filters(
     frame: pl.DataFrame,
     filters: DashboardFilters,
@@ -580,6 +808,37 @@ def apply_actual_filters(
     """
     require_columns(frame, ACTUAL_COLUMNS, "selected actual population")
     prepared = frame
+    if availability_frame is not None:
+        context_columns = [
+            column
+            for column in (
+                "parent_code",
+                "snop_month",
+                "brand",
+                "mapping_status",
+                "mapping_diagnostic",
+            )
+            if column in availability_frame.columns
+        ]
+        if len(context_columns) > 2:
+            context = (
+                availability_frame
+                .select(context_columns)
+                .unique(subset=["parent_code", "snop_month"], maintain_order=True)
+            )
+            missing_context_columns = [
+                column
+                for column in context_columns[2:]
+                if column not in prepared.columns
+            ]
+            if missing_context_columns:
+                prepared = prepared.join(
+                    context.select(
+                        ["parent_code", "snop_month", *missing_context_columns]
+                    ),
+                    on=["parent_code", "snop_month"],
+                    how="left",
+                )
     if "brand" not in prepared.columns:
         prepared = prepared.with_columns(pl.lit(None, dtype=pl.String).alias("brand"))
     if "mapping_status" not in prepared.columns:
@@ -588,6 +847,17 @@ def apply_actual_filters(
         prepared = prepared.with_columns(
             pl.lit("no hierarchy mapping").alias("mapping_diagnostic")
         )
+    prepared = prepared.with_columns(
+        pl.col("mapping_status").fill_null("unmapped"),
+        pl.when(pl.col("mapping_diagnostic").is_null())
+        .then(
+            pl.when(pl.col("mapping_status") == "unmapped")
+            .then(pl.lit("no hierarchy mapping"))
+            .otherwise(pl.lit(None, dtype=pl.String))
+        )
+        .otherwise(pl.col("mapping_diagnostic"))
+        .alias("mapping_diagnostic"),
+    )
     filtered = with_display_brand(prepared)
     if "actual_status" not in filtered.columns:
         filtered = filtered.with_columns(

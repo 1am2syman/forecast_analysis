@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from datetime import date
 import math
 from typing import Literal
@@ -187,6 +187,10 @@ class RevisionMetrics:
     unchanged_revisions: int = 0
     revised_up_pct: float | None = None
     revised_down_pct: float | None = None
+    effectiveness_numerator: int = 0
+    effectiveness_denominator: int = 0
+    accuracy_delta_numerator_kl: float | None = None
+    accuracy_delta_denominator_actual_kl: float | None = None
 
     def as_dict(self) -> dict[str, object]:
         return asdict(self)
@@ -194,7 +198,14 @@ class RevisionMetrics:
 
 @dataclass(frozen=True)
 class MetricSummary:
-    """KPI values and counts derived from one selected vintage pair population."""
+    """KPI values plus the counts and arithmetic needed to audit them.
+
+    Ratio metrics are calculated from the explicit numerator and denominator
+    fields below. ``eligible_observations`` is the positive-actual row count;
+    ``absolute_error_observations`` and ``mae_observations`` also include valid
+    zero-actual rows because those rows have a defined error but no ratio
+    denominator.
+    """
 
     forecast_accuracy_pct: float | None
     bias_pct: float | None
@@ -218,6 +229,19 @@ class MetricSummary:
     unchanged_revisions: int = 0
     revised_up_pct: float | None = None
     revised_down_pct: float | None = None
+    effectiveness_numerator: int = 0
+    effectiveness_denominator: int = 0
+    accuracy_delta_numerator_kl: float | None = None
+    accuracy_delta_denominator_actual_kl: float | None = None
+    mae_kl: float | None = None
+    mae_observations: int = 0
+    absolute_error_observations: int = 0
+    accuracy_numerator_kl: float | None = None
+    accuracy_denominator_actual_kl: float | None = None
+    bias_numerator_kl: float | None = None
+    bias_denominator_actual_kl: float | None = None
+    coverage_numerator_actual_kl: float | None = None
+    coverage_denominator_actual_kl: float | None = None
 
     def as_dict(self) -> dict[str, object]:
         return asdict(self)
@@ -269,6 +293,8 @@ class _ForecastMetricSnapshot:
     absolute_error_kl: float | None
     actual_kl: float | None
     forecast_kl: float | None
+    mae_kl: float | None
+    mae_observations: int
     eligible_observations: int
     absolute_error_observations: int
     ratio_actual_kl: float | None
@@ -302,8 +328,13 @@ def _calculate_forecast_snapshot(
         absolute_error = _sum_or_none(with_error, "_absolute_error_kl")
         actual_volume = _sum_or_none(with_error, "actual_kl")
         forecast_volume = _sum_or_none(with_error, forecast_column)
+        mae = (
+            absolute_error / selected_rows.height
+            if absolute_error is not None and selected_rows.height
+            else None
+        )
     else:
-        absolute_error = actual_volume = forecast_volume = None
+        absolute_error = actual_volume = forecast_volume = mae = None
 
     accuracy = bias = None
     ratio_actual = ratio_abs_error = ratio_net_error = None
@@ -326,6 +357,8 @@ def _calculate_forecast_snapshot(
         absolute_error_kl=absolute_error,
         actual_kl=actual_volume,
         forecast_kl=forecast_volume,
+        mae_kl=mae,
+        mae_observations=selected_rows.height,
         eligible_observations=ratio_rows.height,
         absolute_error_observations=selected_rows.height,
         ratio_actual_kl=ratio_actual,
@@ -469,6 +502,14 @@ def calculate_revision_metrics(
         unchanged_revisions=unchanged.height,
         revised_up_pct=revised_up.height / complete.height * 100,
         revised_down_pct=revised_down.height / complete.height * 100,
+        effectiveness_numerator=improved.height,
+        effectiveness_denominator=materially_revised.height,
+        accuracy_delta_numerator_kl=(
+            a_error_total - b_error_total
+            if a_error_total is not None and b_error_total is not None
+            else None
+        ),
+        accuracy_delta_denominator_actual_kl=actual_total,
     )
 
 
@@ -497,9 +538,19 @@ def calculate_metrics(
         "selected actual population",
     )
     if pair_frame.height == 0:
-        # An empty selection has no unique values by definition; the source
-        # column is still required so non-empty metric populations are isolated.
-        return _empty_summary()
+        # Preserve a positive selected-actual denominator even when no selected
+        # forecast is represented: coverage is explicitly 0 / denominator.
+        total_actual = _sum_or_none(selected_actual_population, "actual_kl")
+        return replace(
+            _empty_summary(),
+            coverage_pct=(
+                0.0 if total_actual not in (None, 0) else None
+            ),
+            coverage_numerator_actual_kl=(
+                0.0 if total_actual is not None else None
+            ),
+            coverage_denominator_actual_kl=total_actual,
+        )
     source_series = pair_frame.get_column("source")
     if source_series.null_count():
         raise ValueError("vintage pair metrics require a non-null source column")
@@ -533,10 +584,16 @@ def calculate_metrics(
         absolute_error = _sum_or_none(selected_with_error, "_absolute_error_kl")
         actual_volume = _sum_or_none(selected_with_error, "actual_kl")
         forecast_volume = _sum_or_none(selected_with_error, "vintage_b_forecast_kl")
+        mae = (
+            absolute_error / selected_rows.height
+            if absolute_error is not None
+            else None
+        )
     else:
-        absolute_error = actual_volume = forecast_volume = None
+        absolute_error = actual_volume = forecast_volume = mae = None
 
     accuracy = bias = None
+    ratio_abs_error = ratio_net_error = denominator = None
     if ratio_rows.height:
         ratio_with_error = ratio_rows.with_columns(
             (pl.col("vintage_b_forecast_kl") - pl.col("actual_kl"))
@@ -550,11 +607,18 @@ def calculate_metrics(
                 accuracy = (1 - ratio_abs_error / denominator) * 100
                 bias = ratio_net_error / denominator * 100
 
-    represented_actual = actual_volume
+    coverage_rows = pair_frame.filter(
+        pl.col("vintage_b_calculation_month").is_not_null()
+        & pl.col("vintage_b_forecast_kl").is_not_null()
+        & pl.col("actual_kl").is_not_null()
+    )
+    represented_actual = _sum_or_none(coverage_rows, "actual_kl")
     total_actual = _sum_or_none(selected_actual_population, "actual_kl")
+    if total_actual is not None and total_actual > 0:
+        represented_actual = 0.0 if represented_actual is None else represented_actual
     coverage = None
-    if represented_actual is not None and total_actual not in (None, 0):
-        coverage = represented_actual / total_actual * 100
+    if total_actual not in (None, 0):
+        coverage = (represented_actual or 0.0) / total_actual * 100
 
     complete_pairs = pair_frame.filter(pl.col("pair_status") == "complete").height
     missing_pairs = pair_frame.filter(
@@ -586,6 +650,19 @@ def calculate_metrics(
         unchanged_revisions=revision_metrics.unchanged_revisions,
         revised_up_pct=revision_metrics.revised_up_pct,
         revised_down_pct=revision_metrics.revised_down_pct,
+        effectiveness_numerator=revision_metrics.effectiveness_numerator,
+        effectiveness_denominator=revision_metrics.effectiveness_denominator,
+        accuracy_delta_numerator_kl=revision_metrics.accuracy_delta_numerator_kl,
+        accuracy_delta_denominator_actual_kl=revision_metrics.accuracy_delta_denominator_actual_kl,
+        mae_kl=mae,
+        mae_observations=selected_rows.height,
+        absolute_error_observations=selected_rows.height,
+        accuracy_numerator_kl=ratio_abs_error,
+        accuracy_denominator_actual_kl=denominator,
+        bias_numerator_kl=ratio_net_error,
+        bias_denominator_actual_kl=denominator,
+        coverage_numerator_actual_kl=represented_actual,
+        coverage_denominator_actual_kl=total_actual,
     )
 
 
@@ -754,6 +831,144 @@ def build_monthly_performance(
     return pl.DataFrame(rows, schema=schema).select(METRIC_COLUMNS)
 
 
+_AUDIT_CONTEXT_COLUMNS = [
+    "accuracy_numerator_kl",
+    "accuracy_denominator_actual_kl",
+    "bias_numerator_kl",
+    "bias_denominator_actual_kl",
+    "coverage_numerator_actual_kl",
+    "coverage_denominator_actual_kl",
+    "mae_kl",
+    "mae_observations",
+    "absolute_error_observations",
+]
+_AUDIT_CONTEXT_SCHEMA = {
+    "accuracy_numerator_kl": pl.Float64,
+    "accuracy_denominator_actual_kl": pl.Float64,
+    "bias_numerator_kl": pl.Float64,
+    "bias_denominator_actual_kl": pl.Float64,
+    "coverage_numerator_actual_kl": pl.Float64,
+    "coverage_denominator_actual_kl": pl.Float64,
+    "mae_kl": pl.Float64,
+    "mae_observations": pl.Int64,
+    "absolute_error_observations": pl.Int64,
+}
+
+
+def _audit_context_row(summary: MetricSummary) -> dict[str, object]:
+    return {
+        "accuracy_numerator_kl": summary.accuracy_numerator_kl,
+        "accuracy_denominator_actual_kl": summary.accuracy_denominator_actual_kl,
+        "bias_numerator_kl": summary.bias_numerator_kl,
+        "bias_denominator_actual_kl": summary.bias_denominator_actual_kl,
+        "coverage_numerator_actual_kl": summary.coverage_numerator_actual_kl,
+        "coverage_denominator_actual_kl": summary.coverage_denominator_actual_kl,
+        "mae_kl": summary.mae_kl,
+        "mae_observations": summary.mae_observations,
+        "absolute_error_observations": summary.absolute_error_observations,
+    }
+
+
+def build_monthly_audit(
+    pair_frame: pl.DataFrame,
+    selected_actual_population: pl.DataFrame,
+) -> pl.DataFrame:
+    """Return monthly metrics with exact numerator and denominator context."""
+    base = build_monthly_performance(pair_frame, selected_actual_population)
+    rows: list[dict[str, object]] = []
+    for group in (
+        pair_frame.select(["source", "snop_month"])
+        .unique()
+        .sort(["source", "snop_month"])
+        .iter_rows(named=True)
+    ):
+        subset = pair_frame.filter(
+            (pl.col("source") == group["source"])
+            & (pl.col("snop_month") == group["snop_month"])
+        )
+        actual_subset = selected_actual_population.filter(
+            pl.col("snop_month") == group["snop_month"]
+        )
+        summary = calculate_metrics(subset, actual_subset)
+        rows.append(
+            {
+                "source": group["source"],
+                "snop_month": group["snop_month"],
+                **_audit_context_row(summary),
+            }
+        )
+    audit = pl.DataFrame(
+        rows,
+        schema={
+            "source": pl.String,
+            "snop_month": pl.Date,
+            **_AUDIT_CONTEXT_SCHEMA,
+        },
+    ).select(["source", "snop_month", *_AUDIT_CONTEXT_COLUMNS])
+    return base.join(audit, on=["source", "snop_month"], how="left")
+
+
+def build_horizon_audit(
+    frame: pl.DataFrame,
+    selected_actual_population: pl.DataFrame,
+) -> pl.DataFrame:
+    """Return horizon metrics with exact numerator and denominator context."""
+    base = build_horizon_performance(frame, selected_actual_population)
+    rows: list[dict[str, object]] = []
+    for group in (
+        frame.select(["source", "forecast_horizon_months"])
+        .unique()
+        .sort(
+            ["source", "forecast_horizon_months"],
+            descending=[False, True],
+        )
+        .iter_rows(named=True)
+    ):
+        subset = frame.filter(
+            (pl.col("source") == group["source"])
+            & (
+                pl.col("forecast_horizon_months")
+                == group["forecast_horizon_months"]
+            )
+        )
+        pair_subset = subset.select(
+            [
+                "source",
+                pl.lit(None, dtype=pl.Date).alias("vintage_a_calculation_month"),
+                pl.col("calculation_month").alias("vintage_b_calculation_month"),
+                pl.col("forecast_kl").alias("vintage_b_forecast_kl"),
+                "actual_kl",
+                pl.when(pl.col("actual_status") == "missing")
+                .then(pl.lit("missing_actual"))
+                .when(pl.col("actual_status") == "matched_zero")
+                .then(pl.lit("zero_actual"))
+                .otherwise(pl.lit("complete"))
+                .alias("pair_status"),
+            ]
+        )
+        summary = calculate_metrics(pair_subset, selected_actual_population)
+        rows.append(
+            {
+                "source": group["source"],
+                "forecast_horizon_months": group["forecast_horizon_months"],
+                **_audit_context_row(summary),
+            }
+        )
+    audit = pl.DataFrame(
+        rows,
+        schema={
+            "source": pl.String,
+            "forecast_horizon_months": pl.Int64,
+            **_AUDIT_CONTEXT_SCHEMA,
+        },
+    ).select(["source", "forecast_horizon_months", *_AUDIT_CONTEXT_COLUMNS])
+    return base.join(
+        audit,
+        on=["source", "forecast_horizon_months"],
+        how="left",
+    )
+
+
 def _build_brand_target_summary(
     pair_frame: pl.DataFrame,
     actual_population: pl.DataFrame,
@@ -776,8 +991,8 @@ def _build_brand_target_summary(
     )
     total_actual = _sum_or_none(actual_population, "actual_kl")
     coverage = None
-    if vintage_b.actual_kl is not None and total_actual not in (None, 0):
-        coverage = vintage_b.actual_kl / total_actual * 100
+    if total_actual not in (None, 0):
+        coverage = (vintage_b.actual_kl or 0.0) / total_actual * 100
 
     return {
         "source": source,

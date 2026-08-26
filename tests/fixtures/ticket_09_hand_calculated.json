@@ -1,0 +1,226 @@
+{
+  "metric_pair_rows": [
+    {
+      "source": "tm",
+      "parent_code": 1,
+      "vintage_a_calculation_month": "2025-01-01",
+      "vintage_b_calculation_month": "2025-02-01",
+      "vintage_a_forecast_kl": 80.0,
+      "vintage_b_forecast_kl": 90.0,
+      "actual_kl": 100.0,
+      "pair_status": "complete"
+    },
+    {
+      "source": "tm",
+      "parent_code": 2,
+      "vintage_a_calculation_month": "2025-01-01",
+      "vintage_b_calculation_month": "2025-02-01",
+      "vintage_a_forecast_kl": 60.0,
+      "vintage_b_forecast_kl": 70.0,
+      "actual_kl": 50.0,
+      "pair_status": "complete"
+    },
+    {
+      "source": "tm",
+      "parent_code": 3,
+      "vintage_a_calculation_month": "2025-01-01",
+      "vintage_b_calculation_month": "2025-02-01",
+      "vintage_a_forecast_kl": 0.0,
+      "vintage_b_forecast_kl": 5.0,
+      "actual_kl": 0.0,
+      "pair_status": "zero_actual"
+    },
+    {
+      "source": "tm",
+      "parent_code": 4,
+      "vintage_a_calculation_month": "2025-01-01",
+      "vintage_b_calculation_month": null,
+      "vintage_a_forecast_kl": 20.0,
+      "vintage_b_forecast_kl": null,
+      "actual_kl": 25.0,
+      "pair_status": "missing_b"
+    },
+    {
+      "source": "tm",
+      "parent_code": 5,
+      "vintage_a_calculation_month": "2025-01-01",
+      "vintage_b_calculation_month": "2025-02-01",
+      "vintage_a_forecast_kl": 10.0,
+      "vintage_b_forecast_kl": 10.0,
+      "actual_kl": null,
+      "pair_status": "missing_actual"
+    }
+  ],
+  "metric_actual_population": [
+    {"parent_code": 1, "snop_month": "2026-01-01", "actual_kl": 100.0},
+    {"parent_code": 2, "snop_month": "2026-01-01", "actual_kl": 50.0},
+    {"parent_code": 3, "snop_month": "2026-01-01", "actual_kl": 0.0},
+    {"parent_code": 4, "snop_month": "2026-01-01", "actual_kl": 25.0},
+    {"parent_code": 5, "snop_month": "2026-01-01", "actual_kl": null}
+  ],
+  "metric_expected": {
+    "forecast_accuracy_pct": 80.0,
+    "bias_pct": 6.666666666666667,
+    "absolute_error_kl": 35.0,
+    "mae_kl": 11.666666666666666,
+    "mae_observations": 3,
+    "actual_kl": 150.0,
+    "forecast_kl": 165.0,
+    "coverage_pct": 85.71428571428572,
+    "eligible_observations": 2,
+    "absolute_error_observations": 3,
+    "accuracy_numerator_kl": 30.0,
+    "accuracy_denominator_actual_kl": 150.0,
+    "bias_numerator_kl": 10.0,
+    "bias_denominator_actual_kl": 150.0,
+    "coverage_numerator_actual_kl": 150.0,
+    "coverage_denominator_actual_kl": 175.0,
+    "complete_pairs": 2,
+    "missing_vintage_pairs": 1,
+    "missing_actual_observations": 1,
+    "zero_actual_observations": 1,
+    "accuracy_delta_pp": 0.0,
+    "accuracy_delta_numerator_kl": 0.0,
+    "accuracy_delta_denominator_actual_kl": 150.0,
+    "total_error_improvement_kl": 0.0,
+    "revision_effectiveness_pct": 50.0,
+    "effectiveness_numerator": 1,
+    "effectiveness_denominator": 2,
+    "materially_revised_observations": 2,
+    "improved_revisions": 1,
+    "worsened_revisions": 1,
+    "neutral_revisions": 0,
+    "unchanged_revisions": 0,
+    "revised_up_pct": 100.0,
+    "revised_down_pct": 0.0
+  },
+  "comparison_rows": [
+    {"source": "tm", "parent_code": 1, "parent_description": "One", "brand": "Alpha", "calculation_month": "2025-12-01", "snop_month": "2026-01-01", "forecast_horizon_months": 1, "forecast_kl": 90.0, "actual_kl": 100.0},
+    {"source": "ml", "parent_code": 1, "parent_description": "One", "brand": "Alpha", "calculation_month": "2025-12-01", "snop_month": "2026-01-01", "forecast_horizon_months": 1, "forecast_kl": 80.0, "actual_kl": 100.0},
+    {"source": "tm", "parent_code": 2, "parent_description": "Two", "brand": "Beta", "calculation_month": "2025-12-01", "snop_month": "2026-01-01", "forecast_horizon_months": 1, "forecast_kl": 60.0, "actual_kl": 50.0},
+    {"source": "ml", "parent_code": 2, "parent_description": "Two", "brand": "Beta", "calculation_month": "2025-12-01", "snop_month": "2026-01-01", "forecast_horizon_months": 1, "forecast_kl": 55.0, "actual_kl": 50.0},
+    {"source": "tm", "parent_code": 3, "parent_description": "Three", "brand": "Gamma", "calculation_month": "2025-12-01", "snop_month": "2026-01-01", "forecast_horizon_months": 1, "forecast_kl": 30.0, "actual_kl": 25.0},
+    {"source": "ml", "parent_code": 4, "parent_description": "Four", "brand": "Delta", "calculation_month": "2025-12-01", "snop_month": "2026-01-01", "forecast_horizon_months": 1, "forecast_kl": 20.0, "actual_kl": 25.0}
+  ],
+  "comparison_expected": {
+    "selected_horizon": 1,
+    "common_observations": 2,
+    "tm_accuracy_pct": 86.66666666666667,
+    "ml_accuracy_pct": 83.33333333333333,
+    "tm_coverage_pct": 87.5,
+    "tm_coverage_numerator_actual_kl": 175.0,
+    "tm_coverage_denominator_actual_kl": 200.0,
+    "ml_coverage_pct": 87.5,
+    "ml_coverage_numerator_actual_kl": 175.0,
+    "ml_coverage_denominator_actual_kl": 200.0,
+    "winner_order": ["tm_better", "ml_better"]
+  },
+  "coverage_edge_cases": {
+    "missing_a": {
+      "pair_rows": [
+        {
+          "source": "tm",
+          "parent_code": 10,
+          "vintage_a_calculation_month": null,
+          "vintage_b_calculation_month": "2025-02-01",
+          "vintage_a_forecast_kl": null,
+          "vintage_b_forecast_kl": 90.0,
+          "actual_kl": 100.0,
+          "pair_status": "missing_a"
+        }
+      ],
+      "actual_population": [
+        {"parent_code": 10, "snop_month": "2026-01-01", "actual_kl": 100.0}
+      ],
+      "expected": {
+        "coverage_pct": 100.0,
+        "coverage_numerator_actual_kl": 100.0,
+        "coverage_denominator_actual_kl": 100.0
+      }
+    },
+    "missing_b": {
+      "pair_rows": [
+        {
+          "source": "tm",
+          "parent_code": 11,
+          "vintage_a_calculation_month": "2025-01-01",
+          "vintage_b_calculation_month": null,
+          "vintage_a_forecast_kl": 90.0,
+          "vintage_b_forecast_kl": null,
+          "actual_kl": 100.0,
+          "pair_status": "missing_b"
+        }
+      ],
+      "actual_population": [
+        {"parent_code": 11, "snop_month": "2026-01-01", "actual_kl": 100.0}
+      ],
+      "expected": {
+        "coverage_pct": 0.0,
+        "coverage_numerator_actual_kl": 0.0,
+        "coverage_denominator_actual_kl": 100.0
+      }
+    },
+    "missing_both": {
+      "pair_rows": [
+        {
+          "source": "tm",
+          "parent_code": 12,
+          "vintage_a_calculation_month": null,
+          "vintage_b_calculation_month": null,
+          "vintage_a_forecast_kl": null,
+          "vintage_b_forecast_kl": null,
+          "actual_kl": 100.0,
+          "pair_status": "missing_both"
+        }
+      ],
+      "actual_population": [
+        {"parent_code": 12, "snop_month": "2026-01-01", "actual_kl": 100.0}
+      ],
+      "expected": {
+        "coverage_pct": 0.0,
+        "coverage_numerator_actual_kl": 0.0,
+        "coverage_denominator_actual_kl": 100.0
+      }
+    },
+    "zero_denominator": {
+      "pair_rows": [
+        {
+          "source": "tm",
+          "parent_code": 13,
+          "vintage_a_calculation_month": "2025-01-01",
+          "vintage_b_calculation_month": "2025-02-01",
+          "vintage_a_forecast_kl": 0.0,
+          "vintage_b_forecast_kl": 5.0,
+          "actual_kl": 0.0,
+          "pair_status": "zero_actual"
+        }
+      ],
+      "actual_population": [
+        {"parent_code": 13, "snop_month": "2026-01-01", "actual_kl": 0.0}
+      ],
+      "expected": {
+        "coverage_pct": null,
+        "coverage_numerator_actual_kl": 0.0,
+        "coverage_denominator_actual_kl": 0.0
+      }
+    }
+  },
+  "stability_rows": [
+    {"source": "tm", "parent_code": 1, "parent_description": "One", "calculation_month": "2025-03-01", "snop_month": "2026-01-01", "forecast_horizon_months": 10, "forecast_kl": 130.0, "actual_kl": 110.0},
+    {"source": "tm", "parent_code": 1, "parent_description": "One", "calculation_month": "2025-01-01", "snop_month": "2026-01-01", "forecast_horizon_months": 12, "forecast_kl": 100.0, "actual_kl": 110.0},
+    {"source": "tm", "parent_code": 1, "parent_description": "One", "calculation_month": "2025-02-01", "snop_month": "2026-01-01", "forecast_horizon_months": 11, "forecast_kl": 120.0, "actual_kl": 110.0},
+    {"source": "ml", "parent_code": 1, "parent_description": "One", "calculation_month": "2025-01-01", "snop_month": "2026-01-01", "forecast_horizon_months": 12, "forecast_kl": 90.0, "actual_kl": 110.0},
+    {"source": "ml", "parent_code": 1, "parent_description": "One", "calculation_month": "2025-02-01", "snop_month": "2026-01-01", "forecast_horizon_months": 11, "forecast_kl": 100.0, "actual_kl": 110.0}
+  ],
+  "stability_expected": {
+    "tm_vintage_count": 3,
+    "tm_forecast_range_kl": 30.0,
+    "tm_population_std_dev_kl": 12.472191289246473,
+    "tm_revision_count": 2,
+    "tm_maximum_absolute_revision_kl": 20.0,
+    "ml_maximum_absolute_revision_kl": 10.0,
+    "ml_vintage_count": 2,
+    "ml_forecast_range_kl": 10.0,
+    "ml_population_std_dev_kl": 5.0
+  }
+}

@@ -8,10 +8,17 @@ import math
 import polars as pl
 
 FORECAST_SOURCES = frozenset({"tm", "ml"})
+SOURCE_LABELS = {"tm": "TM", "ml": "ML"}
+SOURCE_COLORS = {"tm": "#0F5B78", "ml": "#D97757"}
+VINTAGE_LABELS = {"a": "Vintage A", "b": "Vintage B"}
+VINTAGE_COLORS = {"a": "#365E7D", "b": "#C45A3A"}
+ACTUAL_REFERENCE_COLOR = "#5B6870"
+ZERO_REFERENCE_COLOR = "#5B6870"
 DEFAULT_REVISION_TOLERANCE_KL = 0.01
 REVISION_CLASSIFICATION_DECIMAL_PLACES = 12
 REVISION_DIRECTIONS = ("up", "down", "unchanged")
 REVISION_OUTCOMES = ("improved", "worsened", "neutral")
+FORECAST_DIRECTIONS = ("over", "under", "within_tolerance")
 
 
 def normalize_revision_tolerance(value: object) -> float:

@@ -6,10 +6,14 @@ from collections.abc import Iterable
 
 import polars as pl
 
+from ._utils import require_columns
 from .contracts import (
+    ACTUAL_COLUMNS,
     ACTUAL_STATUSES,
+    ANALYSIS_COLUMNS,
     DIAGNOSTIC_COLUMNS,
     HIERARCHY_STATUSES,
+    PAIR_STATUSES,
 )
 
 _DIAGNOSTIC_SCHEMA = {
@@ -75,6 +79,144 @@ def _rows_for_status(
             )
         )
     return rows
+
+
+def build_dashboard_diagnostics(
+    frame: pl.DataFrame,
+    actual_population: pl.DataFrame,
+    coverage_pairs: pl.DataFrame,
+    selected_pairs: pl.DataFrame,
+) -> pl.DataFrame:
+    """Return a compact, machine-readable audit of one dashboard selection.
+
+    This table is intentionally independent of Marimo. It is used by the
+    release validator and can also be displayed or exported by another shell.
+    Counts come from the same frames that feed the dashboard, so the command
+    validates population wiring rather than only checking that files import.
+    """
+    require_columns(frame, ANALYSIS_COLUMNS, "dashboard analysis population")
+    require_columns(actual_population, ACTUAL_COLUMNS, "dashboard actual population")
+    require_columns(
+        coverage_pairs,
+        ["source", "parent_code", "snop_month", "pair_status"],
+        "dashboard coverage pairs",
+    )
+    require_columns(
+        selected_pairs,
+        ["source", "parent_code", "snop_month", "pair_status"],
+        "dashboard selected pairs",
+    )
+
+    def total(source: pl.DataFrame, column: str) -> float:
+        if column not in source.columns or source.height == 0:
+            return 0.0
+        value = source.get_column(column).drop_nulls().sum()
+        if value is None:
+            return 0.0
+        try:
+            return float(value)
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"{column} must contain numeric values") from exc
+
+    rows = [
+        ("forecast_rows_loaded", frame.height, "count"),
+        (
+            "distinct_source_parent_target_keys",
+            frame.select(["source", "parent_code", "snop_month"]).unique().height,
+            "count",
+        ),
+        ("distinct_parent_products", frame["parent_code"].n_unique(), "count"),
+        (
+            "mapped_products",
+            frame.filter(pl.col("mapping_status") == "mapped")["parent_code"].n_unique(),
+            "count",
+        ),
+        (
+            "hierarchy_conflict_products",
+            frame.filter(pl.col("mapping_status") == "conflict")["parent_code"].n_unique(),
+            "count",
+        ),
+        (
+            "unmapped_products",
+            frame.filter(pl.col("mapping_status") == "unmapped")["parent_code"].n_unique(),
+            "count",
+        ),
+        (
+            "matched_actual_keys",
+            frame.filter(pl.col("actual_status") != "missing")
+            .select(["source", "parent_code", "snop_month"])
+            .unique()
+            .height,
+            "count",
+        ),
+        (
+            "positive_actual_keys",
+            frame.filter(pl.col("actual_status") == "matched_positive")
+            .select(["source", "parent_code", "snop_month"])
+            .unique()
+            .height,
+            "count",
+        ),
+        (
+            "zero_actual_keys",
+            frame.filter(pl.col("actual_status") == "matched_zero")
+            .select(["source", "parent_code", "snop_month"])
+            .unique()
+            .height,
+            "count",
+        ),
+        (
+            "missing_actual_keys",
+            frame.filter(pl.col("actual_status") == "missing")
+            .select(["source", "parent_code", "snop_month"])
+            .unique()
+            .height,
+            "count",
+        ),
+        (
+            "actual_population_rows",
+            actual_population.height,
+            "count",
+        ),
+        ("actual_population_volume_kl", total(actual_population, "actual_kl"), "KL"),
+        ("coverage_pair_rows", coverage_pairs.height, "count"),
+        ("selected_pair_rows", selected_pairs.height, "count"),
+        (
+            "complete_pairs",
+            selected_pairs.filter(pl.col("pair_status") == "complete").height,
+            "count",
+        ),
+        (
+            "incomplete_pairs",
+            selected_pairs.filter(
+                pl.col("pair_status").is_in(
+                    [status for status in PAIR_STATUSES if status != "complete"]
+                )
+            ).height,
+            "count",
+        ),
+        ("forecast_volume_in_selection_kl", total(frame, "forecast_kl"), "KL"),
+        ("actual_volume_in_forecast_rows_kl", total(frame, "actual_kl"), "KL"),
+    ]
+    return pl.DataFrame(
+        [
+            {
+                "check": check,
+                "value": value,
+                "unit": unit,
+                "status": "measured",
+                "detail": "derived from the active dashboard population",
+            }
+            for check, value, unit in rows
+        ],
+        schema={
+            "check": pl.String,
+            "value": pl.Float64,
+            "unit": pl.String,
+            "status": pl.String,
+            "detail": pl.String,
+        },
+    )
 
 
 def build_population_diagnostics(frame: pl.DataFrame) -> pl.DataFrame:

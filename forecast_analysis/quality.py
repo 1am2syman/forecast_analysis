@@ -394,12 +394,18 @@ def _actual_quality_population(
     for row in _deduplicate_observations(population).to_dicts():
         record = record_for(row)
         key = (record["parent_code"], record["snop_month"])
-        source_sets.setdefault(key, set()).add(str(row["source"]))
-        record["forecast_present"] = True
         source_name = str(row["source"])
+        source_sets.setdefault(key, set()).add(source_name)
+        forecast_value = row.get("forecast_kl")
+        if forecast_value is None:
+            # Pair-status quality projections may carry a source key with no
+            # selected-horizon forecast. Keep its metadata, but do not count
+            # the null evidence row as an available forecast.
+            continue
+        record["forecast_present"] = True
         source_totals = source_forecasts.setdefault(key, {})
         source_totals[source_name] = source_totals.get(source_name, 0.0) + _safe_float(
-            row["forecast_kl"], "forecast_kl"
+            forecast_value, "forecast_kl"
         )
         existing_forecast = record["forecast_kl"]
         existing_total = (
@@ -408,7 +414,7 @@ def _actual_quality_population(
             else _safe_float(existing_forecast, "forecast_kl")
         )
         record["forecast_kl"] = existing_total + _safe_float(
-            row["forecast_kl"], "forecast_kl"
+            forecast_value, "forecast_kl"
         )
 
     for row in actual_population.to_dicts():
@@ -460,9 +466,11 @@ def _actual_quality_population(
                 "actual_status": actual_status,
                 "actual_coverage_status": (
                     "actual_only"
-                    if not record["forecast_present"]
+                    if actual_value is not None and not record["forecast_present"]
                     else "forecast_only"
-                    if actual_status == "missing"
+                    if actual_value is None and record["forecast_present"]
+                    else "unrepresented"
+                    if actual_value is None
                     else "matched"
                 ),
             }
@@ -499,6 +507,7 @@ def _decorate_exceptions(
     *,
     hierarchy_diagnostics: pl.DataFrame | None = None,
     availability_evidence: pl.DataFrame | None = None,
+    include_good: bool = False,
 ) -> pl.DataFrame:
     require_columns(frame, [status_column], f"{category} quality population")
     prepared = frame
@@ -571,11 +580,14 @@ def _decorate_exceptions(
         prepared = prepared.with_columns(
             pl.lit(None, dtype=pl.String).alias("actual_coverage_status")
         )
-    exception_mask = ~pl.col(status_column).is_in(QUALITY_GOOD_STATUSES[category])
-    if category == "actual":
-        exception_mask = exception_mask | (
-            pl.col("actual_coverage_status") == "actual_only"
-        )
+    if include_good:
+        exception_mask = pl.lit(True)
+    else:
+        exception_mask = ~pl.col(status_column).is_in(QUALITY_GOOD_STATUSES[category])
+        if category == "actual":
+            exception_mask = exception_mask | (
+                pl.col("actual_coverage_status") == "actual_only"
+            )
     prepared = prepared.filter(exception_mask)
     if "source" not in prepared.columns:
         prepared = prepared.with_columns(pl.lit(None, dtype=pl.String).alias("source"))
@@ -642,9 +654,196 @@ def _decorate_exceptions(
     return prepared.select([*metadata, *remaining])
 
 
+def _quality_projection(
+    population: pl.DataFrame,
+    actual_population: pl.DataFrame,
+    coverage_pairs: pl.DataFrame,
+    source_availability_population: pl.DataFrame,
+    selected_sources: tuple[str, ...] | None,
+    hierarchy_diagnostics: pl.DataFrame | None,
+) -> tuple[dict[str, pl.DataFrame], dict[str, pl.DataFrame], dict[str, pl.DataFrame]]:
+    """Build one labeled quality projection from one explicit population scope."""
+    actual_quality_population = _actual_quality_population(
+        population,
+        actual_population,
+        source_availability_population,
+    )
+    hierarchy = _count_table(
+        "hierarchy",
+        actual_quality_population,
+        "mapping_status",
+        HIERARCHY_STATUSES,
+        profile=_actual_profile,
+    )
+    actual = _count_table(
+        "actual",
+        actual_quality_population,
+        "actual_status",
+        ACTUAL_STATUSES,
+        profile=_actual_profile,
+    )
+    pairs = _count_table(
+        "pairs",
+        coverage_pairs,
+        "pair_status",
+        PAIR_STATUSES,
+    )
+    availability = _source_availability_population(source_availability_population)
+    if selected_sources == ("tm",):
+        availability = availability.filter(
+            pl.col("source_availability") != "ml_only"
+        )
+    elif selected_sources == ("ml",):
+        availability = availability.filter(
+            pl.col("source_availability") != "tm_only"
+        )
+    availability_statuses = SOURCE_AVAILABILITY_STATUSES
+    if selected_sources == ("tm",):
+        availability_statuses = ("tm_only", "both_sources")
+    elif selected_sources == ("ml",):
+        availability_statuses = ("ml_only", "both_sources")
+    source_availability = _count_table(
+        "source_availability",
+        availability,
+        "source_availability",
+        availability_statuses,
+        profile=_availability_profile,
+    )
+
+    populations = {
+        "hierarchy": actual_quality_population,
+        "actual": actual_quality_population,
+        "pairs": coverage_pairs,
+        "source_availability": availability,
+    }
+    exceptions = {
+        "hierarchy": _decorate_exceptions(
+            actual_quality_population,
+            "hierarchy",
+            "mapping_status",
+            hierarchy_diagnostics=hierarchy_diagnostics,
+        ),
+        "actual": _decorate_exceptions(
+            actual_quality_population,
+            "actual",
+            "actual_status",
+        ),
+        "pairs": _decorate_exceptions(
+            coverage_pairs,
+            "pairs",
+            "pair_status",
+            availability_evidence=availability,
+        ),
+        "source_availability": _decorate_exceptions(
+            availability,
+            "source_availability",
+            "source_availability",
+        ),
+    }
+    counts = {
+        "hierarchy": hierarchy,
+        "actual": actual,
+        "pairs": pairs,
+        "source_availability": source_availability,
+    }
+    return counts, exceptions, populations
+
+
+_QUALITY_SCOPE_KEY_COLUMNS = {
+    "hierarchy": ["parent_code", "snop_month"],
+    "actual": ["parent_code", "snop_month"],
+    "pairs": ["source", "parent_code", "snop_month"],
+    # Include composition so a baseline both-sources key changing to a
+    # source-only key remains an explicit scope exclusion.
+    "source_availability": [
+        "parent_code",
+        "snop_month",
+        "source_availability",
+    ],
+}
+
+
+def _scope_exclusion_projection(
+    baseline_populations: dict[str, pl.DataFrame],
+    active_populations: dict[str, pl.DataFrame],
+    hierarchy_diagnostics: pl.DataFrame | None,
+    baseline_availability: pl.DataFrame,
+) -> dict[str, pl.DataFrame]:
+    """Return baseline rows outside the active key scope with quality metadata."""
+    exclusions: dict[str, pl.DataFrame] = {}
+    for category, baseline in baseline_populations.items():
+        active = active_populations[category]
+        key_columns = _QUALITY_SCOPE_KEY_COLUMNS[category]
+        if baseline.height and active.height:
+            excluded = baseline.join(
+                active.select(key_columns).unique(),
+                on=key_columns,
+                how="anti",
+            )
+        else:
+            excluded = baseline
+        status_column = {
+            "hierarchy": "mapping_status",
+            "actual": "actual_status",
+            "pairs": "pair_status",
+            "source_availability": "source_availability",
+        }[category]
+        exclusions[category] = _decorate_exceptions(
+            excluded,
+            category,
+            status_column,
+            hierarchy_diagnostics=hierarchy_diagnostics,
+            availability_evidence=baseline_availability,
+            include_good=True,
+        )
+    return exclusions
+
+
+def _scope_exclusion_counts(
+    exclusions: dict[str, pl.DataFrame],
+) -> pl.DataFrame:
+    """Summarize baseline rows removed from each active quality projection."""
+    profiles = {
+        "hierarchy": _actual_profile,
+        "actual": _actual_profile,
+        "pairs": _profile,
+        "source_availability": _availability_profile,
+    }
+    rows: list[dict[str, object]] = []
+    for category in QUALITY_CATEGORIES:
+        frame = exclusions.get(category)
+        if frame is None or frame.height == 0:
+            continue
+        for status in sorted(
+            str(value)
+            for value in frame["quality_status"].drop_nulls().unique().to_list()
+        ):
+            subset = frame.filter(pl.col("quality_status") == status)
+            values = profiles[category](subset)
+            explanation = subset["quality_explanation"].drop_nulls()
+            rows.append(
+                {
+                    "category": category,
+                    "status": status,
+                    "status_group": _status_group(category, status),
+                    **values,
+                    "severity": _severity(category, status),
+                    "blocking": False,
+                    "explanation": (
+                        str(explanation.item(0)) if explanation.len() else ""
+                    ),
+                }
+            )
+    if not rows:
+        return pl.DataFrame(schema=QUALITY_COUNT_SCHEMA)
+    return pl.DataFrame(rows, schema=QUALITY_COUNT_SCHEMA).select(
+        QUALITY_COUNT_COLUMNS
+    )
+
+
 @dataclass(frozen=True)
 class QualityView:
-    """All quality populations and evidence for one shared dashboard selection."""
+    """Active quality evidence plus separately labeled baseline scope evidence."""
 
     hierarchy: pl.DataFrame
     actual: pl.DataFrame
@@ -653,6 +852,14 @@ class QualityView:
     exceptions: dict[str, pl.DataFrame]
     explanations: dict[str, dict[str, str]]
     blocking_errors: tuple[str, ...] = ()
+    baseline_counts: pl.DataFrame = field(
+        default_factory=lambda: pl.DataFrame(schema=QUALITY_COUNT_SCHEMA)
+    )
+    baseline_exceptions: dict[str, pl.DataFrame] = field(default_factory=dict)
+    scope_exclusions: dict[str, pl.DataFrame] = field(default_factory=dict)
+    scope_exclusion_counts: pl.DataFrame = field(
+        default_factory=lambda: pl.DataFrame(schema=QUALITY_COUNT_SCHEMA)
+    )
 
     @property
     def counts(self) -> pl.DataFrame:
@@ -686,14 +893,17 @@ def build_quality_view(
     selected_sources: tuple[str, ...] | None = None,
     hierarchy_diagnostics: pl.DataFrame | None = None,
     blocking_errors: tuple[str, ...] = (),
+    baseline_population: pl.DataFrame | None = None,
+    baseline_actual_population: pl.DataFrame | None = None,
+    baseline_coverage_pairs: pl.DataFrame | None = None,
+    baseline_source_availability_population: pl.DataFrame | None = None,
 ) -> QualityView:
-    """Build hierarchy, actual, pair, and source-availability quality populations.
+    """Build active quality evidence and explicit baseline scope exclusions.
 
-    ``population`` and ``coverage_pairs`` are selected by the dashboard, but
-    ``coverage_pairs`` must be built before pair-status filters are applied. This
-    is the invariant that keeps excluded metric rows visible in quality totals.
-    ``blocking_errors`` is deliberately separate from the non-blocking tables;
-    malformed required inputs never become ordinary quality rows.
+    The first three populations are the active, shared-filtered populations and
+    therefore drive the primary counts and exception downloads. Optional
+    baseline populations preserve rows removed by active quality, revision, or
+    performance filters in a separately labeled ``scope_exclusions`` view.
     """
     require_columns(population, ANALYSIS_COLUMNS, "quality analysis population")
     require_columns(
@@ -717,83 +927,80 @@ def build_quality_view(
         "quality source availability population",
     )
 
-    actual_quality_population = _actual_quality_population(
-        population,
-        actual_population,
-        availability_population,
+    baseline_population = population if baseline_population is None else baseline_population
+    baseline_actual_population = (
+        actual_population
+        if baseline_actual_population is None
+        else baseline_actual_population
     )
-    hierarchy = _count_table(
-        "hierarchy",
-        actual_quality_population,
-        "mapping_status",
-        HIERARCHY_STATUSES,
-        profile=_actual_profile,
+    baseline_coverage_pairs = (
+        coverage_pairs if baseline_coverage_pairs is None else baseline_coverage_pairs
     )
-    actual = _count_table(
-        "actual",
-        actual_quality_population,
-        "actual_status",
-        ACTUAL_STATUSES,
-        profile=_actual_profile,
+    baseline_source_availability_population = (
+        availability_population
+        if baseline_source_availability_population is None
+        else baseline_source_availability_population
     )
-    pairs = _count_table(
-        "pairs",
-        coverage_pairs,
-        "pair_status",
-        PAIR_STATUSES,
+    require_columns(
+        baseline_population,
+        ANALYSIS_COLUMNS,
+        "baseline quality analysis population",
     )
-    availability = _source_availability_population(availability_population)
-    if selected_sources == ("tm",):
-        availability = availability.filter(
-            pl.col("source_availability") != "ml_only"
-        )
-    elif selected_sources == ("ml",):
-        availability = availability.filter(
-            pl.col("source_availability") != "tm_only"
-        )
-    availability_statuses = SOURCE_AVAILABILITY_STATUSES
-    if selected_sources == ("tm",):
-        availability_statuses = ("tm_only", "both_sources")
-    elif selected_sources == ("ml",):
-        availability_statuses = ("ml_only", "both_sources")
-    source_availability = _count_table(
-        "source_availability",
-        availability,
-        "source_availability",
-        availability_statuses,
-        profile=_availability_profile,
+    require_columns(
+        baseline_actual_population,
+        ["parent_code", "snop_month", "actual_kl"],
+        "baseline quality actual population",
+    )
+    require_columns(
+        baseline_coverage_pairs,
+        ["source", "parent_code", "snop_month", "pair_status", "actual_kl"],
+        "baseline quality coverage pairs",
+    )
+    require_columns(
+        baseline_source_availability_population,
+        ["source", "parent_code", "snop_month"],
+        "baseline quality source availability population",
     )
 
-    exceptions = {
-        "hierarchy": _decorate_exceptions(
-            actual_quality_population,
-            "hierarchy",
-            "mapping_status",
-            hierarchy_diagnostics=hierarchy_diagnostics,
-        ),
-        "actual": _decorate_exceptions(
-            actual_quality_population,
-            "actual",
-            "actual_status",
-        ),
-        "pairs": _decorate_exceptions(
-            coverage_pairs,
-            "pairs",
-            "pair_status",
-            availability_evidence=availability,
-        ),
-        "source_availability": _decorate_exceptions(
-            availability,
-            "source_availability",
-            "source_availability",
-        ),
-    }
+    active_counts, active_exceptions, active_populations = _quality_projection(
+        population,
+        actual_population,
+        coverage_pairs,
+        availability_population,
+        selected_sources,
+        hierarchy_diagnostics,
+    )
+    baseline_counts_by_category, baseline_exceptions, baseline_populations = (
+        _quality_projection(
+            baseline_population,
+            baseline_actual_population,
+            baseline_coverage_pairs,
+            baseline_source_availability_population,
+            selected_sources,
+            hierarchy_diagnostics,
+        )
+    )
+    baseline_counts = pl.concat(
+        list(baseline_counts_by_category.values()),
+        how="vertical_relaxed",
+    ).select(QUALITY_COUNT_COLUMNS)
+    baseline_availability = baseline_populations["source_availability"]
+    scope_exclusions = _scope_exclusion_projection(
+        baseline_populations,
+        active_populations,
+        hierarchy_diagnostics,
+        baseline_availability,
+    )
     return QualityView(
-        hierarchy=hierarchy,
-        actual=actual,
-        pairs=pairs,
-        source_availability=source_availability,
-        exceptions=exceptions,
+        hierarchy=active_counts["hierarchy"],
+        actual=active_counts["actual"],
+        pairs=active_counts["pairs"],
+        source_availability=active_counts["source_availability"],
+        exceptions=active_exceptions,
         explanations=QUALITY_EXPLANATIONS,
         blocking_errors=tuple(str(error) for error in blocking_errors),
+        baseline_counts=baseline_counts,
+        baseline_exceptions=baseline_exceptions,
+        scope_exclusions=scope_exclusions,
+        scope_exclusion_counts=_scope_exclusion_counts(scope_exclusions),
     )

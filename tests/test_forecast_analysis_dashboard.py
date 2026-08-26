@@ -362,6 +362,52 @@ class DashboardFixtureTests(unittest.TestCase):
             }
         ).with_columns(pl.col("parent_code").cast(pl.Int64))
 
+    @staticmethod
+    def comparison_pair_status_frame() -> tuple[pl.DataFrame, pl.DataFrame]:
+        """Return comparison rows covering complete, incomplete, missing, and zero cases."""
+        rows = [
+            ("tm", 100, date(2025, 12, 1), 1, 90.0, 100.0, "matched_positive"),
+            ("ml", 100, date(2025, 12, 1), 1, 110.0, 100.0, "matched_positive"),
+            ("tm", 200, date(2025, 11, 1), 2, 50.0, 50.0, "matched_positive"),
+            ("ml", 200, date(2025, 11, 1), 2, 55.0, 50.0, "matched_positive"),
+            ("tm", 300, date(2025, 12, 1), 1, 80.0, None, "missing"),
+            ("ml", 300, date(2025, 12, 1), 1, 85.0, None, "missing"),
+            ("tm", 400, date(2025, 12, 1), 1, 0.0, 0.0, "matched_zero"),
+            ("ml", 400, date(2025, 12, 1), 1, 5.0, 0.0, "matched_zero"),
+            ("tm", 500, date(2025, 12, 1), 1, 70.0, 80.0, "matched_positive"),
+            ("ml", 500, date(2025, 11, 1), 2, 75.0, 80.0, "matched_positive"),
+        ]
+        frame = pl.DataFrame(
+            {
+                "source": [row[0] for row in rows],
+                "parent_code": [row[1] for row in rows],
+                "parent_description": [f"Product {row[1]}" for row in rows],
+                "hierarchy_description": [f"Product {row[1]}" for row in rows],
+                "brand": [f"Brand {row[1]}" for row in rows],
+                "mapping_status": ["mapped"] * len(rows),
+                "mapping_diagnostic": [None] * len(rows),
+                "calculation_month": [row[2] for row in rows],
+                "snop_month": [date(2026, 1, 1)] * len(rows),
+                "forecast_horizon_months": [row[3] for row in rows],
+                "forecast_kl": [row[4] for row in rows],
+                "actual_kl": [row[5] for row in rows],
+                "actual_status": [row[6] for row in rows],
+            }
+        ).with_columns(
+            pl.col("parent_code").cast(pl.Int64),
+            pl.col("forecast_horizon_months").cast(pl.Int64),
+            pl.col("forecast_kl").cast(pl.Float64),
+            pl.col("actual_kl").cast(pl.Float64),
+        )
+        actuals = pl.DataFrame(
+            {
+                "parent_code": [100, 200, 300, 400, 500],
+                "snop_month": [date(2026, 1, 1)] * 5,
+                "actual_kl": [100.0, 50.0, None, 0.0, 80.0],
+            }
+        ).with_columns(pl.col("parent_code").cast(pl.Int64))
+        return frame, actuals
+
 
 class DashboardPopulationTests(unittest.TestCase):
     def test_default_source_is_tm_and_source_switch_recalculates_every_output(self):
@@ -785,6 +831,278 @@ class DashboardComparisonTests(unittest.TestCase):
             baseline.comparison.source_metrics.to_dicts(),
             controlled.comparison.source_metrics.to_dicts(),
         )
+
+    def test_comparison_pair_status_filters_share_one_active_union_scope(self):
+        frame, actuals = DashboardFixtureTests.comparison_pair_status_frame()
+        expected_statuses = {
+            "complete": {100, 500},
+            "missing_both": {200, 500},
+            "missing_actual": {300},
+            "zero_actual": {400},
+        }
+        baseline_source_keys = set(
+            frame.select(["source", "parent_code", "snop_month"])
+            .unique()
+            .iter_rows()
+        )
+        baseline_availability_sources: dict[tuple[int, date], set[str]] = {}
+        for source, parent_code, target_month in (
+            frame.filter(pl.col("forecast_horizon_months") == 1)
+            .select(["source", "parent_code", "snop_month"])
+            .unique()
+            .iter_rows()
+        ):
+            baseline_availability_sources.setdefault(
+                (parent_code, target_month), set()
+            ).add(source)
+        baseline_availability_records = {
+            (
+                parent_code,
+                target_month,
+                (
+                    "both_sources"
+                    if sources == {"tm", "ml"}
+                    else "tm_only"
+                    if sources == {"tm"}
+                    else "ml_only"
+                ),
+            )
+            for (parent_code, target_month), sources in baseline_availability_sources.items()
+        }
+        for pair_status, expected_products in expected_statuses.items():
+            with self.subTest(pair_status=pair_status):
+                view = build_dashboard_view(
+                    frame,
+                    actuals,
+                    DashboardFilters(
+                        comparison_mode=True,
+                        horizons=(1,),
+                        pair_statuses=(pair_status,),
+                    ),
+                )
+                assert view.comparison is not None
+                pairs = view.vintage_pairs
+                active_source_keys = set(
+                    pairs.select(["source", "parent_code", "snop_month"])
+                    .iter_rows()
+                )
+                visible_source_keys = set(
+                    view.filtered_population.select(
+                        ["source", "parent_code", "snop_month"]
+                    ).iter_rows()
+                )
+                download_source_keys = set(
+                    view.download_frame.select(
+                        ["source", "parent_code", "snop_month"]
+                    ).iter_rows()
+                )
+                selected_horizon = view.comparison.selected_horizon
+                self.assertEqual(selected_horizon, 1)
+                exact_source_keys = set(
+                    frame.filter(pl.col("forecast_horizon_months") == selected_horizon)
+                    .select(["source", "parent_code", "snop_month"])
+                    .unique()
+                    .iter_rows()
+                )
+                expected_visible_source_keys = active_source_keys & exact_source_keys
+                self.assertEqual(visible_source_keys, expected_visible_source_keys)
+                self.assertEqual(download_source_keys, active_source_keys)
+                quality_source_keys = set(
+                    view.comparison.quality_population.select(
+                        ["source", "parent_code", "snop_month"]
+                    ).iter_rows()
+                )
+                self.assertEqual(quality_source_keys, active_source_keys)
+                self.assertEqual(
+                    view.filtered_population.select(
+                        ["source", "parent_code", "snop_month"]
+                    ).unique().height,
+                    len(expected_visible_source_keys),
+                )
+                active_union_keys = {
+                    (parent_code, target_month)
+                    for _, parent_code, target_month in active_source_keys
+                }
+                visible_union_keys = set(
+                    view.filtered_population.select(
+                        ["parent_code", "snop_month"]
+                    ).unique().iter_rows()
+                )
+                expected_visible_union_keys = {
+                    (parent_code, target_month)
+                    for _, parent_code, target_month in expected_visible_source_keys
+                }
+                expected_visible_tm_keys = {
+                    (parent_code, target_month)
+                    for source, parent_code, target_month in expected_visible_source_keys
+                    if source == "tm"
+                }
+                expected_visible_ml_keys = {
+                    (parent_code, target_month)
+                    for source, parent_code, target_month in expected_visible_source_keys
+                    if source == "ml"
+                }
+                expected_visible_comparable_keys = (
+                    expected_visible_tm_keys & expected_visible_ml_keys
+                )
+                self.assertEqual(visible_union_keys, expected_visible_union_keys)
+                actual_keys = set(
+                    view.selected_actual_population.select(
+                        ["parent_code", "snop_month"]
+                    ).unique().iter_rows()
+                )
+                self.assertEqual(actual_keys, active_union_keys)
+                self.assertEqual(
+                    {key[0] for key in active_union_keys},
+                    expected_products,
+                )
+                self.assertEqual(
+                    set(view.filtered_population["parent_code"].unique().to_list()),
+                    {key[0] for key in expected_visible_union_keys},
+                )
+                for projected_name, projected in (
+                    ("filtered population", view.filtered_population),
+                    ("common population", view.comparison.common_population),
+                    ("TM-only population", view.comparison.tm_only_population),
+                    ("ML-only population", view.comparison.ml_only_population),
+                ):
+                    if projected.height:
+                        self.assertEqual(
+                            set(projected["forecast_horizon_months"].drop_nulls().unique()),
+                            {selected_horizon},
+                            projected_name,
+                        )
+                for projected_name, projected in (
+                    ("horizon performance", view.horizon_performance),
+                    ("horizon audit", view.horizon_audit),
+                ):
+                    if projected.height:
+                        self.assertEqual(
+                            set(projected["forecast_horizon_months"].drop_nulls().unique()),
+                            {selected_horizon},
+                            projected_name,
+                        )
+                if pair_status == "missing_both":
+                    self.assertEqual(view.comparison.common_population.height, 0)
+                    self.assertEqual(view.comparison.tm_only_population.height, 0)
+                    self.assertEqual(view.comparison.ml_only_population.height, 0)
+                    self.assertEqual(view.horizon_performance.height, 0)
+                    self.assertEqual(view.horizon_audit.height, 0)
+                    self.assertEqual(view.monthly_performance.height, 0)
+                    self.assertEqual(view.monthly_audit.height, 0)
+                    self.assertEqual(view.brand_target_month_performance.height, 0)
+                    self.assertEqual(view.comparison.paired_comparison.height, 0)
+                    self.assertIsNone(view.comparison.tm_metrics.forecast_kl)
+                    self.assertIsNone(view.comparison.ml_metrics.forecast_kl)
+
+                active_availability_sources: dict[tuple[int, date], set[str]] = {}
+                for source, parent_code, target_month in active_source_keys:
+                    active_availability_sources.setdefault(
+                        (parent_code, target_month), set()
+                    ).add(source)
+                expected_availability_counts = {
+                    "tm_only": 0,
+                    "ml_only": 0,
+                    "both_sources": 0,
+                }
+                for sources in active_availability_sources.values():
+                    status = (
+                        "both_sources"
+                        if sources == {"tm", "ml"}
+                        else "tm_only"
+                        if sources == {"tm"}
+                        else "ml_only"
+                    )
+                    expected_availability_counts[status] += 1
+                actual_availability_counts = {
+                    row["status"]: row["observations"]
+                    for row in view.quality.source_availability.to_dicts()
+                }
+                self.assertEqual(
+                    actual_availability_counts,
+                    expected_availability_counts,
+                )
+                self.assertEqual(
+                    {
+                        row["status"]: row["observations"]
+                        for row in view.comparison.population_summary.to_dicts()
+                    },
+                    expected_availability_counts,
+                )
+
+                self.assertEqual(
+                    view.quality.hierarchy["observations"].sum(),
+                    len(active_union_keys),
+                )
+                self.assertEqual(
+                    view.quality.actual["observations"].sum(),
+                    len(active_union_keys),
+                )
+                self.assertEqual(
+                    view.quality.pairs["observations"].sum(),
+                    pairs.height,
+                )
+                summary = view.population_summary.row(0, named=True)
+                self.assertEqual(
+                    summary["products"],
+                    len({key[0] for key in expected_visible_union_keys}),
+                )
+                self.assertEqual(summary["forecast_rows"], view.filtered_population.height)
+                self.assertEqual(summary["selected_pair_rows"], pairs.height)
+                self.assertEqual(
+                    summary["comparable_pairs"],
+                    len(expected_visible_comparable_keys),
+                )
+                self.assertEqual(
+                    summary["coverage_pair_rows"], view.coverage_pairs.height
+                )
+                self.assertEqual(
+                    view.comparison.population_summary["observations"].sum(),
+                    len(active_union_keys),
+                )
+
+                excluded_pair_keys = set(
+                    view.quality.scope_exclusions["pairs"]
+                    .select(["source", "parent_code", "snop_month"])
+                    .iter_rows()
+                )
+                expected_excluded_pair_keys = baseline_source_keys - active_source_keys
+                self.assertEqual(excluded_pair_keys, expected_excluded_pair_keys)
+                self.assertTrue(expected_excluded_pair_keys)
+                self.assertEqual(
+                    active_source_keys | excluded_pair_keys,
+                    baseline_source_keys,
+                )
+
+                active_availability_records = {
+                    (
+                        parent_code,
+                        target_month,
+                        (
+                            "both_sources"
+                            if sources == {"tm", "ml"}
+                            else "tm_only"
+                            if sources == {"tm"}
+                            else "ml_only"
+                        ),
+                    )
+                    for (parent_code, target_month), sources in active_availability_sources.items()
+                }
+                excluded_availability_records = set(
+                    view.quality.scope_exclusions["source_availability"]
+                    .select(
+                        ["parent_code", "snop_month", "source_availability"]
+                    )
+                    .iter_rows()
+                )
+                expected_excluded_availability = (
+                    baseline_availability_records - active_availability_records
+                )
+                self.assertEqual(
+                    excluded_availability_records,
+                    expected_excluded_availability,
+                )
+                self.assertTrue(expected_excluded_availability)
 
 
 class DashboardMetricTests(unittest.TestCase):
@@ -1696,6 +2014,31 @@ class ProductVintageHistoryTests(unittest.TestCase):
         self.assertEqual(vintage_b_horizon.value, 12)
         self.assertEqual(revision_directions.value, ["up", "down", "unchanged"])
         self.assertEqual(revision_outcomes.value, ["improved", "worsened", "neutral"])
+
+    def test_product_detail_cannot_reopen_excluded_product_or_target_month(self):
+        frame = DashboardFixtureTests.frame()
+        filters = DashboardFilters(
+            source="tm",
+            target_months=(date(2026, 1, 1),),
+            parent_codes=(100,),
+        )
+        out_of_scope = build_product_detail(
+            frame,
+            filters,
+            300,
+            date(2026, 2, 1),
+        )
+        self.assertEqual(out_of_scope.points.height, 0)
+        self.assertIn("No forecast vintages", out_of_scope.status_message)
+
+        in_scope = build_product_detail(
+            frame,
+            filters,
+            100,
+            date(2026, 1, 1),
+        )
+        self.assertEqual(in_scope.points["parent_code"].unique().to_list(), [100])
+        self.assertEqual(in_scope.points["snop_month"].unique().to_list(), [date(2026, 1, 1)])
 
     def test_product_detail_dropdowns_use_valid_option_keys_and_domain_values(self):
         frame = DashboardFixtureTests.frame()
