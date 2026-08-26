@@ -11,10 +11,12 @@ from .dashboard import (  # pyright: ignore[reportMissingImports]
     build_product_detail,
 )
 from .diagnostics import build_population_diagnostics
+from .quality import QualityView, build_quality_view  # pyright: ignore[reportMissingImports]
 from .filters import (  # pyright: ignore[reportMissingImports]
     DashboardFilters,
     apply_actual_filters,
     apply_dashboard_filters,
+    apply_quality_pair_filters,
     apply_revision_filters,
     available_filter_values,
     with_display_brand,
@@ -47,6 +49,7 @@ from .vintages import VintageRule, select_vintage_pair  # pyright: ignore[report
 __all__ = [
     "AnalysisDataset",
     "ComparisonView",
+    "QualityView",
     "DashboardFilters",
     "DashboardView",
     "MetricSummary",
@@ -56,6 +59,7 @@ __all__ = [
     "aggregate_actuals",
     "apply_actual_filters",
     "apply_dashboard_filters",
+    "apply_quality_pair_filters",
     "apply_revision_filters",
     "available_filter_values",
     "AnalysisInputs",
@@ -68,6 +72,7 @@ __all__ = [
     "build_source_comparison",
     "build_monthly_performance",
     "build_population_diagnostics",
+    "build_quality_view",
     "build_product_history",
     "build_revision_diagnostics",
     "build_revision_scatter",

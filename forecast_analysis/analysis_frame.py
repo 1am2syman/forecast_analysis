@@ -117,4 +117,5 @@ def build_analysis_dataset(inputs: AnalysisInputs) -> AnalysisDataset:
         frame=frame,
         diagnostics=build_population_diagnostics(frame),
         actual_population=_build_actual_population(inputs),
+        hierarchy_diagnostics=inputs.hierarchy_diagnostics,
     )

@@ -14,6 +14,7 @@ from .filters import (
     DashboardFilters,
     apply_actual_filters,
     apply_dashboard_filters,
+    apply_quality_pair_filters,
     apply_revision_filters,
 )  # pyright: ignore[reportMissingImports]
 from .metrics import (
@@ -29,6 +30,7 @@ from .product_history import (  # pyright: ignore[reportMissingImports]
     ProductHistoryView,
     build_product_history,
 )
+from .quality import QualityView, build_quality_view  # pyright: ignore[reportMissingImports]
 from .vintages import VintageRule, select_vintage_pair  # pyright: ignore[reportMissingImports]
 
 
@@ -52,6 +54,7 @@ class DashboardView:
     brand_target_month_performance: pl.DataFrame
     revision_diagnostics: pl.DataFrame
     revision_scatter: pl.DataFrame
+    quality: QualityView
     comparison: ComparisonView | None = None
 
 
@@ -67,6 +70,98 @@ def _filter_population_to_pairs(
         on=["source", "parent_code", "snop_month"],
         how="inner",
     ).sort(["parent_code", "snop_month", "calculation_month", "source"])
+
+
+def _quality_base_filters(filters: DashboardFilters) -> DashboardFilters:
+    """Keep business selection scope while removing metric-only quality filters."""
+    return replace(
+        filters,
+        hierarchy_statuses=None,
+        actual_statuses=None,
+        pair_statuses=None,
+        source_availability=None,
+        zero_forecast_only=False,
+        complete_vintage_history_only=False,
+        revision_directions=None,
+        revision_outcomes=None,
+        minimum_actual_volume=0,
+    )
+
+
+def _metric_selection_filters(filters: DashboardFilters) -> DashboardFilters:
+    """Select vintages before pair-level quality filters, including zero forecast."""
+    return replace(
+        filters,
+        hierarchy_statuses=None,
+        actual_statuses=None,
+        pair_statuses=None,
+        source_availability=None,
+        zero_forecast_only=False,
+        revision_directions=None,
+        revision_outcomes=None,
+    )
+
+
+def _quality_inputs(
+    frame: pl.DataFrame,
+    actual_population: pl.DataFrame,
+    filters: DashboardFilters,
+) -> tuple[pl.DataFrame, pl.DataFrame]:
+    quality_filters = _quality_base_filters(filters)
+    availability_filters = replace(
+        quality_filters,
+        comparison_mode=True,
+        source_availability=None,
+    )
+    availability_population = apply_dashboard_filters(
+        frame,
+        availability_filters,
+        availability_frame=frame,
+    )
+    quality_population = apply_dashboard_filters(
+        frame,
+        quality_filters,
+        availability_frame=availability_population,
+    )
+    quality_actual_population = apply_actual_filters(
+        actual_population,
+        quality_filters,
+        availability_frame=availability_population,
+    )
+    return quality_population, quality_actual_population
+
+
+def _build_quality(
+    frame: pl.DataFrame,
+    actual_population: pl.DataFrame,
+    filters: DashboardFilters,
+    coverage_pairs: pl.DataFrame,
+    hierarchy_diagnostics: pl.DataFrame | None = None,
+) -> QualityView:
+    quality_population, quality_actual_population = _quality_inputs(
+        frame,
+        actual_population,
+        filters,
+    )
+    availability_population = apply_dashboard_filters(
+        frame,
+        replace(
+            _quality_base_filters(filters),
+            comparison_mode=True,
+            pair_statuses=None,
+            minimum_actual_volume=0,
+            source_availability=None,
+        ),
+        availability_frame=frame,
+    )
+    return build_quality_view(
+        quality_population,
+        quality_actual_population,
+        coverage_pairs,
+        source_availability_population=availability_population,
+        selected_sources=filters.selected_sources,
+        hierarchy_diagnostics=hierarchy_diagnostics,
+    )
 
 
 def _product_detail_horizons(filters: DashboardFilters) -> tuple[int, ...] | None:
@@ -108,7 +203,11 @@ def build_product_detail(
         revision_directions=None,
         revision_outcomes=None,
     )
-    detail_population = apply_dashboard_filters(frame, detail_filters)
+    detail_population = apply_dashboard_filters(
+        frame,
+        detail_filters,
+        availability_frame=frame,
+    )
     return build_product_history(
         detail_population,
         parent_code,
@@ -122,6 +221,7 @@ def _build_comparison_dashboard_view(
     frame: pl.DataFrame,
     actual_population: pl.DataFrame,
     filters: DashboardFilters,
+    hierarchy_diagnostics: pl.DataFrame | None = None,
 ) -> DashboardView:
     """Compose exact-horizon comparison outputs without revision self-pairs."""
     comparison_filters = replace(
@@ -146,6 +246,13 @@ def _build_comparison_dashboard_view(
         brand_target_month_performance=comparison.brand_target_month_performance,
         revision_diagnostics=comparison.revision_diagnostics,
         revision_scatter=comparison.revision_scatter,
+        quality=_build_quality(
+            frame,
+            actual_population,
+            comparison_filters,
+            comparison.coverage_pairs,
+            hierarchy_diagnostics,
+        ),
         comparison=comparison,
     )
 
@@ -157,6 +264,7 @@ def build_dashboard_view(
     *,
     vintage_a: VintageRule | None = None,
     vintage_b: VintageRule | None = None,
+    hierarchy_diagnostics: pl.DataFrame | None = None,
 ) -> DashboardView:
     """Apply shared filters, then derive source-specific dashboard views.
 
@@ -170,24 +278,86 @@ def build_dashboard_view(
             frame,
             actual_population,
             active_filters,
+            hierarchy_diagnostics,
         )
 
-    filtered = apply_dashboard_filters(frame, active_filters)
-    coverage_filters = replace(active_filters, horizons=None)
-    coverage_population = apply_dashboard_filters(frame, coverage_filters)
-    selected_actual_population = apply_actual_filters(actual_population, active_filters)
+    availability_population = apply_dashboard_filters(
+        frame,
+        replace(
+            _quality_base_filters(active_filters),
+            comparison_mode=True,
+            pair_statuses=None,
+            minimum_actual_volume=0,
+            source_availability=None,
+        ),
+        availability_frame=frame,
+    )
+    filtered = apply_dashboard_filters(
+        frame,
+        active_filters,
+        availability_frame=availability_population,
+    )
+    selection_filters = _metric_selection_filters(active_filters)
+    selection_population = apply_dashboard_filters(
+        frame,
+        selection_filters,
+        availability_frame=availability_population,
+    )
+    coverage_filters = replace(
+        selection_filters,
+        horizons=None,
+        zero_forecast_only=False,
+        complete_vintage_history_only=False,
+    )
+    coverage_population = apply_dashboard_filters(
+        frame,
+        coverage_filters,
+        availability_frame=availability_population,
+    )
+    quality_pair_population = apply_dashboard_filters(
+        frame,
+        _quality_base_filters(active_filters),
+        availability_frame=availability_population,
+    )
     coverage_pairs = select_vintage_pair(
-        filtered,
+        quality_pair_population,
         active_filters.source,
         vintage_a=vintage_a,
         vintage_b=vintage_b,
         population_frame=coverage_population,
         revision_tolerance_kl=active_filters.revision_tolerance_kl,
     )
-    pairs = apply_revision_filters(coverage_pairs, active_filters)
+    metric_coverage_pairs = select_vintage_pair(
+        selection_population,
+        active_filters.source,
+        vintage_a=vintage_a,
+        vintage_b=vintage_b,
+        population_frame=coverage_population,
+        revision_tolerance_kl=active_filters.revision_tolerance_kl,
+    )
+    pairs = apply_quality_pair_filters(
+        metric_coverage_pairs,
+        active_filters,
+        availability_frame=availability_population,
+    )
+    pairs = apply_revision_filters(pairs, active_filters)
+    selected_actual_population = apply_actual_filters(
+        actual_population,
+        active_filters,
+        availability_frame=availability_population,
+        forecast_key_frame=(
+            pairs
+            if active_filters.zero_forecast_only
+            else selection_population
+            if active_filters.complete_vintage_history_only
+            else None
+        ),
+    )
     output_population = filtered
     if (
-        active_filters.revision_directions is not None
+        active_filters.zero_forecast_only
+        or active_filters.pair_statuses is not None
+        or active_filters.revision_directions is not None
         or active_filters.revision_outcomes is not None
     ):
         output_population = _filter_population_to_pairs(filtered, pairs)
@@ -215,4 +385,11 @@ def build_dashboard_view(
         ),
         revision_diagnostics=build_revision_diagnostics(pairs),
         revision_scatter=build_revision_scatter(pairs),
+        quality=_build_quality(
+            frame,
+            actual_population,
+            active_filters,
+            coverage_pairs,
+            hierarchy_diagnostics,
+        ),
     )

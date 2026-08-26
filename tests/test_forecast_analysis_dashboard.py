@@ -400,7 +400,7 @@ class DashboardPopulationTests(unittest.TestCase):
         self.assertEqual(ml.metrics.actual_kl, 110.0)
         self.assertEqual(ml.metrics.absolute_error_kl, 56.0)
         assert ml.metrics.coverage_pct is not None
-        self.assertAlmostEqual(ml.metrics.coverage_pct, 110 / 230 * 100)
+        self.assertAlmostEqual(ml.metrics.coverage_pct, 110 / 210 * 100)
         self.assertNotEqual(tm.metrics.forecast_accuracy_pct, ml.metrics.forecast_accuracy_pct)
         self.assertNotEqual(
             tm.horizon_performance["forecast_accuracy_pct"].to_list(),
@@ -1420,17 +1420,17 @@ class RealDashboardCoverageTests(unittest.TestCase):
             dataset.actual_population,
             DashboardFilters(source="tm"),
         )
-        total_actual_value = dataset.actual_population["actual_kl"].sum()
-        self.assertIsInstance(total_actual_value, (int, float))
-        assert isinstance(total_actual_value, (int, float))
-        total_actual = total_actual_value + 0.0
+        selected_actual_value = view.selected_actual_population["actual_kl"].sum()
+        self.assertIsInstance(selected_actual_value, (int, float))
+        assert isinstance(selected_actual_value, (int, float))
+        selected_actual = selected_actual_value + 0.0
         self.assertIsNotNone(view.metrics.actual_kl)
         self.assertIsNotNone(view.metrics.coverage_pct)
         assert view.metrics.actual_kl is not None
         assert view.metrics.coverage_pct is not None
         self.assertAlmostEqual(
             view.metrics.coverage_pct,
-            view.metrics.actual_kl / total_actual * 100,
+            view.metrics.actual_kl / selected_actual * 100,
         )
         self.assertLess(view.metrics.coverage_pct, 100.0)
 

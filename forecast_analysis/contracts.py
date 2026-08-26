@@ -103,6 +103,15 @@ DIAGNOSTIC_COLUMNS = [
 ]
 HIERARCHY_STATUSES = ("mapped", "unmapped", "conflict")
 ACTUAL_STATUSES = ("matched_positive", "matched_zero", "missing")
+PAIR_STATUSES = (
+    "complete",
+    "missing_a",
+    "missing_b",
+    "missing_both",
+    "missing_actual",
+    "zero_actual",
+)
+SOURCE_AVAILABILITY_STATUSES = ("tm_only", "ml_only", "both_sources")
 
 
 @dataclass(frozen=True)
@@ -130,3 +139,4 @@ class AnalysisDataset:
     frame: pl.DataFrame
     diagnostics: pl.DataFrame
     actual_population: pl.DataFrame
+    hierarchy_diagnostics: pl.DataFrame | None = None

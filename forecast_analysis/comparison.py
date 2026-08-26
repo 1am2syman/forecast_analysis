@@ -15,6 +15,7 @@ from .filters import (
     DashboardFilters,
     apply_actual_filters,
     apply_dashboard_filters,
+    apply_quality_pair_filters,
 )
 from .metrics import (
     MetricSummary,
@@ -559,13 +560,22 @@ def build_source_comparison(
         elif len(requested_horizons) == 0:
             requested_horizon = None
 
+    selection_filters = (
+        comparison_filters.without_status_quality_filters().without_revision_filters()
+    )
     base_filters = replace(
-        comparison_filters,
+        selection_filters,
         horizons=None,
+        zero_forecast_only=False,
+        complete_vintage_history_only=False,
+        pair_statuses=None,
         comparison_horizon=None,
     )
-    coverage_population = apply_dashboard_filters(frame, base_filters)
-    selected_actual_population = apply_actual_filters(actual_population, base_filters)
+    coverage_population = apply_dashboard_filters(
+        frame,
+        base_filters,
+        availability_frame=frame,
+    )
     source_horizons = {
         source: set(
             coverage_population
@@ -597,50 +607,100 @@ def build_source_comparison(
                 common_horizons[0] if common_horizons else None
             )
 
+    active_availability_filters = replace(
+        base_filters,
+        comparison_mode=True,
+        horizons=(selected_horizon,) if selected_horizon is not None else (),
+    )
+    availability_population = apply_dashboard_filters(
+        frame,
+        active_availability_filters,
+        availability_frame=frame,
+    )
+
     if selected_horizon is None:
         exact_population = coverage_population.head(0)
         comparison_rule = None
     else:
         exact_filters = replace(
-            base_filters,
+            selection_filters,
             horizons=(selected_horizon,),
             comparison_horizon=selected_horizon,
         )
-        exact_population = apply_dashboard_filters(frame, exact_filters)
+        exact_population = apply_dashboard_filters(
+            frame,
+            exact_filters,
+            availability_frame=availability_population,
+        )
         comparison_rule = VintageRule.specific_horizon(selected_horizon)
 
     selection_population = exact_population
-
-    if comparison_rule is None:
-        tm_pairs = select_vintage_pair(
-            selection_population,
-            "tm",
-            population_frame=coverage_population,
-            revision_tolerance_kl=comparison_filters.revision_tolerance_kl,
-        )
-        ml_pairs = select_vintage_pair(
-            selection_population,
-            "ml",
-            population_frame=coverage_population,
-            revision_tolerance_kl=comparison_filters.revision_tolerance_kl,
-        )
+    if selected_horizon is None:
+        visible_population = exact_population
     else:
-        tm_pairs = select_vintage_pair(
-            selection_population,
-            "tm",
+        visible_filters = replace(
+            comparison_filters,
+            horizons=(selected_horizon,),
+            comparison_horizon=selected_horizon,
+        )
+        visible_population = apply_dashboard_filters(
+            frame,
+            visible_filters,
+            availability_frame=availability_population,
+        )
+
+    selected_actual_population = apply_actual_filters(
+        actual_population,
+        comparison_filters,
+        availability_frame=availability_population,
+        forecast_key_frame=(
+            exact_population
+            if comparison_filters.zero_forecast_only
+            or comparison_filters.complete_vintage_history_only
+            else None
+        ),
+    )
+
+    pair_quality_filters = comparison_filters.without_quality_filters().without_revision_filters()
+    pair_quality_population = apply_dashboard_filters(
+        frame,
+        replace(
+            pair_quality_filters,
+            comparison_mode=True,
+            horizons=(selected_horizon,) if selected_horizon is not None else (),
+        ),
+        availability_frame=availability_population,
+    )
+
+    def _select_pairs(source: str, population: pl.DataFrame) -> pl.DataFrame:
+        if comparison_rule is None:
+            return select_vintage_pair(
+                population,
+                source,
+                population_frame=coverage_population,
+                revision_tolerance_kl=comparison_filters.revision_tolerance_kl,
+            )
+        return select_vintage_pair(
+            population,
+            source,
             vintage_a=comparison_rule,
             vintage_b=comparison_rule,
             population_frame=coverage_population,
             revision_tolerance_kl=comparison_filters.revision_tolerance_kl,
         )
-        ml_pairs = select_vintage_pair(
-            selection_population,
-            "ml",
-            vintage_a=comparison_rule,
-            vintage_b=comparison_rule,
-            population_frame=coverage_population,
-            revision_tolerance_kl=comparison_filters.revision_tolerance_kl,
-        )
+
+    tm_coverage_pairs = _select_pairs("tm", pair_quality_population)
+    ml_coverage_pairs = _select_pairs("ml", pair_quality_population)
+    tm_pairs = apply_quality_pair_filters(
+        _select_pairs("tm", selection_population),
+        comparison_filters,
+        availability_frame=availability_population,
+    )
+    ml_pairs = apply_quality_pair_filters(
+        _select_pairs("ml", selection_population),
+        comparison_filters,
+        availability_frame=availability_population,
+    )
 
     tm_available_keys = _keys_with_forecast(tm_pairs)
     ml_available_keys = _keys_with_forecast(ml_pairs)
@@ -653,16 +713,17 @@ def build_source_comparison(
     visible_pairs = pl.concat([tm_pairs, ml_pairs], how="vertical").sort(
         ["source", *COMPARISON_KEY_COLUMNS]
     )
-    coverage_pairs = pl.concat([tm_pairs, ml_pairs], how="vertical").sort(
-        ["source", *COMPARISON_KEY_COLUMNS]
-    )
+    coverage_pairs = pl.concat(
+        [tm_coverage_pairs, ml_coverage_pairs],
+        how="vertical",
+    ).sort(["source", *COMPARISON_KEY_COLUMNS])
 
-    common_population = _filter_to_keys(selection_population, common_keys)
+    common_population = _filter_to_keys(visible_population, common_keys)
     tm_only_population = _filter_to_keys(
-        selection_population.filter(pl.col("source") == "tm"), tm_only_keys
+        visible_population.filter(pl.col("source") == "tm"), tm_only_keys
     )
     ml_only_population = _filter_to_keys(
-        selection_population.filter(pl.col("source") == "ml"), ml_only_keys
+        visible_population.filter(pl.col("source") == "ml"), ml_only_keys
     )
 
     common_metrics_by_source = {
@@ -712,7 +773,7 @@ def build_source_comparison(
         blocked=warning is not None,
         warning=warning,
         coverage_warning=coverage_warning,
-        filtered_population=selection_population,
+        filtered_population=visible_population,
         vintage_pairs=visible_pairs,
         coverage_pairs=coverage_pairs,
         selected_actual_population=selected_actual_population,

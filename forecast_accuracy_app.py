@@ -191,8 +191,11 @@ def _(mo):
         mo.stop(
             True,
             mo.md(
-                "## Dashboard input error\n\n"
-                f"The canonical population could not be loaded: `{exc}`"
+                "## Dashboard blocking input error\n\n"
+                f"The canonical population could not be loaded: `{exc}`\n\n"
+                "This input error blocks dashboard construction; hierarchy, actual, "
+                "vintage-pair, and source-availability quality diagnostics are "
+                "non-blocking issues shown only after valid inputs load."
             ),
         )
         raise RuntimeError("dashboard data loading stopped after displaying the error")
@@ -281,6 +284,66 @@ def _(
         label="Minimum actual volume (KL)",
     )
 
+    _hierarchy_status_options = {
+        "Mapped": "mapped",
+        "Unmapped": "unmapped",
+        "Hierarchy conflict": "conflict",
+    }
+    _actual_status_options = {
+        "Positive actual": "matched_positive",
+        "Zero actual": "matched_zero",
+        "Missing actual": "missing",
+    }
+    _pair_status_options = {
+        "Complete pair": "complete",
+        "Missing Vintage A": "missing_a",
+        "Missing Vintage B": "missing_b",
+        "Missing both vintages": "missing_both",
+        "Missing actual": "missing_actual",
+        "Zero actual": "zero_actual",
+    }
+    _source_availability_options = (
+        {
+            "TM only": "tm_only",
+            "ML only": "ml_only",
+            "Both sources": "both_sources",
+        }
+        if _comparison_mode
+        else (
+            {"TM only": "tm_only", "Both sources": "both_sources"}
+            if source_filter.value == "tm"
+            else {"ML only": "ml_only", "Both sources": "both_sources"}
+        )
+    )
+    hierarchy_status_filter = mo.ui.multiselect(
+        options=_hierarchy_status_options,
+        value=list(_hierarchy_status_options),
+        label="Hierarchy quality status",
+    )
+    actual_status_filter = mo.ui.multiselect(
+        options=_actual_status_options,
+        value=list(_actual_status_options),
+        label="Actual quality status",
+    )
+    pair_status_filter = mo.ui.multiselect(
+        options=_pair_status_options,
+        value=list(_pair_status_options),
+        label="Vintage-pair quality status",
+    )
+    source_availability_filter = mo.ui.multiselect(
+        options=_source_availability_options,
+        value=list(_source_availability_options),
+        label="Source availability",
+    )
+    zero_forecast_filter = mo.ui.checkbox(
+        value=False,
+        label="Zero forecasts only",
+    )
+    complete_history_filter = mo.ui.checkbox(
+        value=False,
+        label="Complete vintage history only",
+    )
+
     revision_tolerance_filter = mo.ui.number(
         value=0.01,
         start=0,
@@ -308,6 +371,40 @@ def _(
             widths="equal",
         ),
     ]
+    _controls.extend(
+        [
+            mo.accordion(
+                {
+                    "Data-quality filters": mo.vstack(
+                        [
+                            mo.md(
+                                "Quality filters isolate metric populations without "
+                                "rewriting the diagnostic totals. Zero-forecast and "
+                                "complete-history filters restrict the actual denominator "
+                                "to surviving product-target keys; status and pair "
+                                "exceptions remain visible in the quality evidence. "
+                                "Complete history means a forecast exists at every "
+                                "horizon currently selected."
+                            ),
+                            mo.hstack(
+                                [
+                                    hierarchy_status_filter,
+                                    actual_status_filter,
+                                    pair_status_filter,
+                                    source_availability_filter,
+                                ],
+                                widths="equal",
+                            ),
+                            mo.hstack(
+                                [zero_forecast_filter, complete_history_filter],
+                                widths="equal",
+                            ),
+                        ]
+                    )
+                }
+            )
+        ]
+    )
     if _comparison_mode:
         _controls.extend(
             [
@@ -364,6 +461,12 @@ def _(
         revision_direction_filter,
         revision_outcome_filter,
         revision_tolerance_filter,
+        hierarchy_status_filter,
+        actual_status_filter,
+        pair_status_filter,
+        source_availability_filter,
+        zero_forecast_filter,
+        complete_history_filter,
     )
 
 
@@ -388,6 +491,12 @@ def _(
     revision_direction_filter,
     revision_outcome_filter,
     revision_tolerance_filter,
+    hierarchy_status_filter,
+    actual_status_filter,
+    pair_status_filter,
+    source_availability_filter,
+    zero_forecast_filter,
+    complete_history_filter,
     comparison_mode_filter,
 ):
     _comparison_mode = comparison_mode_filter.value == "comparison"
@@ -415,6 +524,31 @@ def _(
         0.01
         if revision_tolerance_filter.value is None
         else revision_tolerance_filter.value
+    )
+    _selected_hierarchy_statuses = _all_or_selected(
+        hierarchy_status_filter.value,
+        ("mapped", "unmapped", "conflict"),
+    )
+    _selected_actual_statuses = _all_or_selected(
+        actual_status_filter.value,
+        ("matched_positive", "matched_zero", "missing"),
+    )
+    _selected_pair_statuses = _all_or_selected(
+        pair_status_filter.value,
+        ("complete", "missing_a", "missing_b", "missing_both", "missing_actual", "zero_actual"),
+    )
+    _source_availability_values = (
+        ("tm_only", "ml_only", "both_sources")
+        if _comparison_mode
+        else (
+            ("tm_only", "both_sources")
+            if source_filter.value == "tm"
+            else ("ml_only", "both_sources")
+        )
+    )
+    _selected_source_availability = _all_or_selected(
+        source_availability_filter.value,
+        _source_availability_values,
     )
     _selected_revision_directions = (
         None
@@ -465,6 +599,12 @@ def _(
         parent_codes=tuple(product_filter.value),
         horizons=tuple(horizon_filter.value),
         minimum_actual_volume=minimum_actual_filter.value or 0,
+        hierarchy_statuses=_selected_hierarchy_statuses,
+        actual_statuses=_selected_actual_statuses,
+        pair_statuses=_selected_pair_statuses,
+        source_availability=_selected_source_availability,
+        zero_forecast_only=zero_forecast_filter.value,
+        complete_vintage_history_only=complete_history_filter.value,
         revision_tolerance_kl=_revision_tolerance,
     )
     base_view = build_dashboard_view(
@@ -473,6 +613,7 @@ def _(
         base_filters,
         vintage_a=vintage_a,
         vintage_b=vintage_b,
+        hierarchy_diagnostics=validated_dataset.hierarchy_diagnostics,
     )
     comparison_ready = (
         base_view.comparison.ready
@@ -488,6 +629,12 @@ def _(
         parent_codes=tuple(product_filter.value),
         horizons=tuple(horizon_filter.value),
         minimum_actual_volume=minimum_actual_filter.value or 0,
+        hierarchy_statuses=_selected_hierarchy_statuses,
+        actual_statuses=_selected_actual_statuses,
+        pair_statuses=_selected_pair_statuses,
+        source_availability=_selected_source_availability,
+        zero_forecast_only=zero_forecast_filter.value,
+        complete_vintage_history_only=complete_history_filter.value,
         revision_directions=(
             _selected_revision_directions
             if comparison_ready and not _comparison_mode
@@ -506,6 +653,7 @@ def _(
         filters,
         vintage_a=vintage_a,
         vintage_b=vintage_b,
+        hierarchy_diagnostics=validated_dataset.hierarchy_diagnostics,
     )
     return comparison_ready, filters, view
 
@@ -1521,37 +1669,67 @@ def _(mo, view, with_display_brand):
 
 
 @app.cell
-def _(mo, pl, view):
-    _population = view.filtered_population
-    _pairs = view.coverage_pairs
-    _quality = []
-    for _column in ("mapping_status", "actual_status"):
-        if _population.height:
-            _quality.append(
-                _population.group_by(_column).len().rename({_column: "status", "len": "rows"})
-            )
-    if _pairs.height:
-        _quality.append(
-            _pairs.group_by("pair_status").len().rename({"pair_status": "status", "len": "rows"})
+def _(mo, view):
+    _quality = view.quality
+    _blocking = (
+        "**Blocking input errors:** "
+        + " · ".join(f"`{error}`" for error in _quality.blocking_errors)
+        if _quality.blocking_errors
+        else "**Blocking input errors:** none"
+    )
+    _category_labels = {
+        "hierarchy": "Hierarchy mapping",
+        "actual": "Actual availability",
+        "pairs": "Vintage pairs",
+        "source_availability": "Source availability",
+    }
+    _sections = [
+        mo.md(
+            "## Data quality\n\n"
+            "Quality populations are derived from the shared target, brand, product, "
+            "source, and active-horizon selection. Rows excluded from metric denominators "
+            "remain in these totals and exception downloads. Metric actual-volume "
+            "denominators use the selected actual key population; zero-forecast and "
+            "complete-history filters narrow that denominator to surviving forecast keys.\n\n"
+            + _blocking
         )
-    if not _quality:
-        _output = mo.md("## Data quality\n\nNo quality rows remain in this selection.")
-    else:
-        _quality_table = pl.concat(
-            [table.with_columns(group=pl.lit(index)) for index, table in enumerate(_quality)],
-            how="diagonal",
-        ).select(["group", "status", "rows"])
-        _output = mo.vstack(
+    ]
+    for _category, _label in _category_labels.items():
+        _counts = getattr(_quality, _category)
+        _exceptions = _quality.exceptions[_category]
+        _download = mo.download(
+            _exceptions.write_csv().encode(),
+            filename=f"forecast_quality_{_category}_exceptions.csv",
+            label=f"Download {_label.lower()} exceptions",
+        )
+        _sections.extend(
             [
-                mo.md(
-                    "## Data quality\n\n"
-                    "Missing actuals, zero actuals, and incomplete vintage pairs remain visible "
-                    "instead of being folded into the ratio denominators."
+                mo.md(f"### {_label}\n\n{_quality.explanation_text(_category)}"),
+                mo.ui.table(
+                    _counts.select(
+                        [
+                            "status",
+                            "status_group",
+                            "observations",
+                            "products",
+                            "sources",
+                            "target_months",
+                            "actual_kl",
+                            "forecast_kl",
+                            "severity",
+                        ]
+                    ),
+                    page_size=10,
                 ),
-                mo.ui.table(_quality_table, page_size=12),
+                mo.md(
+                    "**Exception rows** — healthy statuses are omitted; these are "
+                    "the exact rows in the download."
+                ),
+                mo.ui.table(_exceptions, page_size=12),
+                _download,
             ]
         )
-    mo.vstack([_output])
+    mo.vstack(_sections)
 
 
 if __name__ == "__main__":
