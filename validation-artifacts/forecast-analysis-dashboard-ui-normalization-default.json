@@ -1,0 +1,1891 @@
+{
+  "evidence_version": 1,
+  "execution_id": "20260827T090002Z-4d98c1867b96",
+  "normalization": {
+    "actionContract": {
+      "ancestorProperties": {
+        "height": "auto",
+        "maxHeight": "none",
+        "minHeight": "auto",
+        "overflow": "visible",
+        "position": "relative"
+      }
+    },
+    "actions": [
+      {
+        "id": "App",
+        "properties": {
+          "after": {
+            "height": {
+              "computed": "12025px",
+              "inline": "auto",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "none",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "0px",
+              "inline": "auto",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "visible",
+              "inline": "visible",
+              "priority": ""
+            },
+            "position": {
+              "computed": "relative",
+              "inline": "relative",
+              "priority": ""
+            }
+          },
+          "before": {
+            "height": {
+              "computed": "800px",
+              "inline": "",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "0px",
+              "inline": "",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "hidden auto",
+              "inline": "",
+              "priority": ""
+            },
+            "position": {
+              "computed": "relative",
+              "inline": "",
+              "priority": ""
+            }
+          }
+        },
+        "tag": "div"
+      },
+      {
+        "id": "_r_1_",
+        "properties": {
+          "after": {
+            "height": {
+              "computed": "800px",
+              "inline": "auto",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "none",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "auto",
+              "inline": "auto",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "visible",
+              "inline": "visible",
+              "priority": ""
+            },
+            "position": {
+              "computed": "relative",
+              "inline": "relative",
+              "priority": ""
+            }
+          },
+          "before": {
+            "height": {
+              "computed": "800px",
+              "inline": "",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "auto",
+              "inline": "",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "hidden",
+              "inline": "hidden",
+              "priority": ""
+            },
+            "position": {
+              "computed": "static",
+              "inline": "",
+              "priority": ""
+            }
+          }
+        },
+        "tag": "div"
+      },
+      {
+        "id": null,
+        "properties": {
+          "after": {
+            "height": {
+              "computed": "11081.7px",
+              "inline": "auto",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "none",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "auto",
+              "inline": "auto",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "visible",
+              "inline": "visible",
+              "priority": ""
+            },
+            "position": {
+              "computed": "relative",
+              "inline": "relative",
+              "priority": ""
+            }
+          },
+          "before": {
+            "height": {
+              "computed": "800px",
+              "inline": "100%",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "auto",
+              "inline": "",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "hidden",
+              "inline": "hidden",
+              "priority": ""
+            },
+            "position": {
+              "computed": "static",
+              "inline": "",
+              "priority": ""
+            }
+          }
+        },
+        "tag": "div"
+      },
+      {
+        "id": null,
+        "properties": {
+          "after": {
+            "height": {
+              "computed": "11081.7px",
+              "inline": "auto",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "none",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "auto",
+              "inline": "auto",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "visible",
+              "inline": "visible",
+              "priority": ""
+            },
+            "position": {
+              "computed": "relative",
+              "inline": "relative",
+              "priority": ""
+            }
+          },
+          "before": {
+            "height": {
+              "computed": "800px",
+              "inline": "",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "0px",
+              "inline": "",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "hidden",
+              "inline": "",
+              "priority": ""
+            },
+            "position": {
+              "computed": "absolute",
+              "inline": "",
+              "priority": ""
+            }
+          }
+        },
+        "tag": "div"
+      },
+      {
+        "id": null,
+        "properties": {
+          "after": {
+            "height": {
+              "computed": "auto",
+              "inline": "auto",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "none",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "0px",
+              "inline": "auto",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "visible",
+              "inline": "visible",
+              "priority": ""
+            },
+            "position": {
+              "computed": "relative",
+              "inline": "relative",
+              "priority": ""
+            }
+          },
+          "before": {
+            "height": {
+              "computed": "auto",
+              "inline": "",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "0px",
+              "inline": "",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "visible",
+              "inline": "",
+              "priority": ""
+            },
+            "position": {
+              "computed": "static",
+              "inline": "",
+              "priority": ""
+            }
+          }
+        },
+        "tag": "div"
+      },
+      {
+        "id": "root",
+        "properties": {
+          "after": {
+            "height": {
+              "computed": "11081.7px",
+              "inline": "auto",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "none",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "0px",
+              "inline": "auto",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "visible",
+              "inline": "visible",
+              "priority": ""
+            },
+            "position": {
+              "computed": "relative",
+              "inline": "relative",
+              "priority": ""
+            }
+          },
+          "before": {
+            "height": {
+              "computed": "11081.7px",
+              "inline": "",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "800px",
+              "inline": "",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "visible",
+              "inline": "",
+              "priority": ""
+            },
+            "position": {
+              "computed": "static",
+              "inline": "",
+              "priority": ""
+            }
+          }
+        },
+        "tag": "div"
+      },
+      {
+        "id": null,
+        "properties": {
+          "after": {
+            "height": {
+              "computed": "11081.7px",
+              "inline": "auto",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "none",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "0px",
+              "inline": "auto",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "visible",
+              "inline": "visible",
+              "priority": ""
+            },
+            "position": {
+              "computed": "relative",
+              "inline": "relative",
+              "priority": ""
+            }
+          },
+          "before": {
+            "height": {
+              "computed": "11081.7px",
+              "inline": "",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "0px",
+              "inline": "",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "visible",
+              "inline": "",
+              "priority": ""
+            },
+            "position": {
+              "computed": "static",
+              "inline": "",
+              "priority": ""
+            }
+          }
+        },
+        "tag": "body"
+      },
+      {
+        "id": null,
+        "properties": {
+          "after": {
+            "height": {
+              "computed": "11081.7px",
+              "inline": "auto",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "none",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "0px",
+              "inline": "auto",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "visible",
+              "inline": "visible",
+              "priority": ""
+            },
+            "position": {
+              "computed": "relative",
+              "inline": "relative",
+              "priority": ""
+            }
+          },
+          "before": {
+            "height": {
+              "computed": "11081.7px",
+              "inline": "",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "0px",
+              "inline": "",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "visible",
+              "inline": "",
+              "priority": ""
+            },
+            "position": {
+              "computed": "static",
+              "inline": "",
+              "priority": ""
+            }
+          }
+        },
+        "tag": "html"
+      }
+    ],
+    "contentProbe": {
+      "appScrollHeight": 11082,
+      "appTextLength": 7857,
+      "bodyTextLength": 7857,
+      "maxVisibleElementBottom": 11081.703125
+    },
+    "measurements": {
+      "application": {
+        "clientHeight": 11082,
+        "clientWidth": 6650,
+        "scrollHeight": 11082,
+        "scrollWidth": 6650
+      },
+      "body": {
+        "clientHeight": 11082,
+        "clientWidth": 1280,
+        "scrollHeight": 11082,
+        "scrollWidth": 6650
+      },
+      "document": {
+        "clientHeight": 800,
+        "clientWidth": 1280,
+        "scrollHeight": 11082,
+        "scrollWidth": 6650
+      },
+      "viewport": {
+        "devicePixelRatio": 1,
+        "height": 800,
+        "width": 1280
+      }
+    },
+    "normalizationContract": "marimo-full-page-normalization-v1"
+  },
+  "normalization_contract": "marimo-full-page-normalization-v1",
+  "normalization_eval": {
+    "command": [
+      "/root/.local/share/pi-node/node-v24.18.0-linux-x64/bin/agent-browser",
+      "--session",
+      "forecast-dashboard-ui-78c4994f9290",
+      "--json",
+      "eval",
+      "--stdin"
+    ],
+    "data": {
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554591
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      },
+      "origin": "http://127.0.0.1:8765/",
+      "result": {
+        "actionContract": {
+          "ancestorProperties": {
+            "height": "auto",
+            "maxHeight": "none",
+            "minHeight": "auto",
+            "overflow": "visible",
+            "position": "relative"
+          }
+        },
+        "actions": [
+          {
+            "id": "App",
+            "properties": {
+              "after": {
+                "height": {
+                  "computed": "12025px",
+                  "inline": "auto",
+                  "priority": ""
+                },
+                "max-height": {
+                  "computed": "none",
+                  "inline": "none",
+                  "priority": ""
+                },
+                "min-height": {
+                  "computed": "0px",
+                  "inline": "auto",
+                  "priority": ""
+                },
+                "overflow": {
+                  "computed": "visible",
+                  "inline": "visible",
+                  "priority": ""
+                },
+                "position": {
+                  "computed": "relative",
+                  "inline": "relative",
+                  "priority": ""
+                }
+              },
+              "before": {
+                "height": {
+                  "computed": "800px",
+                  "inline": "",
+                  "priority": ""
+                },
+                "max-height": {
+                  "computed": "none",
+                  "inline": "",
+                  "priority": ""
+                },
+                "min-height": {
+                  "computed": "0px",
+                  "inline": "",
+                  "priority": ""
+                },
+                "overflow": {
+                  "computed": "hidden auto",
+                  "inline": "",
+                  "priority": ""
+                },
+                "position": {
+                  "computed": "relative",
+                  "inline": "",
+                  "priority": ""
+                }
+              }
+            },
+            "tag": "div"
+          },
+          {
+            "id": "_r_1_",
+            "properties": {
+              "after": {
+                "height": {
+                  "computed": "800px",
+                  "inline": "auto",
+                  "priority": ""
+                },
+                "max-height": {
+                  "computed": "none",
+                  "inline": "none",
+                  "priority": ""
+                },
+                "min-height": {
+                  "computed": "auto",
+                  "inline": "auto",
+                  "priority": ""
+                },
+                "overflow": {
+                  "computed": "visible",
+                  "inline": "visible",
+                  "priority": ""
+                },
+                "position": {
+                  "computed": "relative",
+                  "inline": "relative",
+                  "priority": ""
+                }
+              },
+              "before": {
+                "height": {
+                  "computed": "800px",
+                  "inline": "",
+                  "priority": ""
+                },
+                "max-height": {
+                  "computed": "none",
+                  "inline": "",
+                  "priority": ""
+                },
+                "min-height": {
+                  "computed": "auto",
+                  "inline": "",
+                  "priority": ""
+                },
+                "overflow": {
+                  "computed": "hidden",
+                  "inline": "hidden",
+                  "priority": ""
+                },
+                "position": {
+                  "computed": "static",
+                  "inline": "",
+                  "priority": ""
+                }
+              }
+            },
+            "tag": "div"
+          },
+          {
+            "id": null,
+            "properties": {
+              "after": {
+                "height": {
+                  "computed": "11081.7px",
+                  "inline": "auto",
+                  "priority": ""
+                },
+                "max-height": {
+                  "computed": "none",
+                  "inline": "none",
+                  "priority": ""
+                },
+                "min-height": {
+                  "computed": "auto",
+                  "inline": "auto",
+                  "priority": ""
+                },
+                "overflow": {
+                  "computed": "visible",
+                  "inline": "visible",
+                  "priority": ""
+                },
+                "position": {
+                  "computed": "relative",
+                  "inline": "relative",
+                  "priority": ""
+                }
+              },
+              "before": {
+                "height": {
+                  "computed": "800px",
+                  "inline": "100%",
+                  "priority": ""
+                },
+                "max-height": {
+                  "computed": "none",
+                  "inline": "",
+                  "priority": ""
+                },
+                "min-height": {
+                  "computed": "auto",
+                  "inline": "",
+                  "priority": ""
+                },
+                "overflow": {
+                  "computed": "hidden",
+                  "inline": "hidden",
+                  "priority": ""
+                },
+                "position": {
+                  "computed": "static",
+                  "inline": "",
+                  "priority": ""
+                }
+              }
+            },
+            "tag": "div"
+          },
+          {
+            "id": null,
+            "properties": {
+              "after": {
+                "height": {
+                  "computed": "11081.7px",
+                  "inline": "auto",
+                  "priority": ""
+                },
+                "max-height": {
+                  "computed": "none",
+                  "inline": "none",
+                  "priority": ""
+                },
+                "min-height": {
+                  "computed": "auto",
+                  "inline": "auto",
+                  "priority": ""
+                },
+                "overflow": {
+                  "computed": "visible",
+                  "inline": "visible",
+                  "priority": ""
+                },
+                "position": {
+                  "computed": "relative",
+                  "inline": "relative",
+                  "priority": ""
+                }
+              },
+              "before": {
+                "height": {
+                  "computed": "800px",
+                  "inline": "",
+                  "priority": ""
+                },
+                "max-height": {
+                  "computed": "none",
+                  "inline": "",
+                  "priority": ""
+                },
+                "min-height": {
+                  "computed": "0px",
+                  "inline": "",
+                  "priority": ""
+                },
+                "overflow": {
+                  "computed": "hidden",
+                  "inline": "",
+                  "priority": ""
+                },
+                "position": {
+                  "computed": "absolute",
+                  "inline": "",
+                  "priority": ""
+                }
+              }
+            },
+            "tag": "div"
+          },
+          {
+            "id": null,
+            "properties": {
+              "after": {
+                "height": {
+                  "computed": "auto",
+                  "inline": "auto",
+                  "priority": ""
+                },
+                "max-height": {
+                  "computed": "none",
+                  "inline": "none",
+                  "priority": ""
+                },
+                "min-height": {
+                  "computed": "0px",
+                  "inline": "auto",
+                  "priority": ""
+                },
+                "overflow": {
+                  "computed": "visible",
+                  "inline": "visible",
+                  "priority": ""
+                },
+                "position": {
+                  "computed": "relative",
+                  "inline": "relative",
+                  "priority": ""
+                }
+              },
+              "before": {
+                "height": {
+                  "computed": "auto",
+                  "inline": "",
+                  "priority": ""
+                },
+                "max-height": {
+                  "computed": "none",
+                  "inline": "",
+                  "priority": ""
+                },
+                "min-height": {
+                  "computed": "0px",
+                  "inline": "",
+                  "priority": ""
+                },
+                "overflow": {
+                  "computed": "visible",
+                  "inline": "",
+                  "priority": ""
+                },
+                "position": {
+                  "computed": "static",
+                  "inline": "",
+                  "priority": ""
+                }
+              }
+            },
+            "tag": "div"
+          },
+          {
+            "id": "root",
+            "properties": {
+              "after": {
+                "height": {
+                  "computed": "11081.7px",
+                  "inline": "auto",
+                  "priority": ""
+                },
+                "max-height": {
+                  "computed": "none",
+                  "inline": "none",
+                  "priority": ""
+                },
+                "min-height": {
+                  "computed": "0px",
+                  "inline": "auto",
+                  "priority": ""
+                },
+                "overflow": {
+                  "computed": "visible",
+                  "inline": "visible",
+                  "priority": ""
+                },
+                "position": {
+                  "computed": "relative",
+                  "inline": "relative",
+                  "priority": ""
+                }
+              },
+              "before": {
+                "height": {
+                  "computed": "11081.7px",
+                  "inline": "",
+                  "priority": ""
+                },
+                "max-height": {
+                  "computed": "none",
+                  "inline": "",
+                  "priority": ""
+                },
+                "min-height": {
+                  "computed": "800px",
+                  "inline": "",
+                  "priority": ""
+                },
+                "overflow": {
+                  "computed": "visible",
+                  "inline": "",
+                  "priority": ""
+                },
+                "position": {
+                  "computed": "static",
+                  "inline": "",
+                  "priority": ""
+                }
+              }
+            },
+            "tag": "div"
+          },
+          {
+            "id": null,
+            "properties": {
+              "after": {
+                "height": {
+                  "computed": "11081.7px",
+                  "inline": "auto",
+                  "priority": ""
+                },
+                "max-height": {
+                  "computed": "none",
+                  "inline": "none",
+                  "priority": ""
+                },
+                "min-height": {
+                  "computed": "0px",
+                  "inline": "auto",
+                  "priority": ""
+                },
+                "overflow": {
+                  "computed": "visible",
+                  "inline": "visible",
+                  "priority": ""
+                },
+                "position": {
+                  "computed": "relative",
+                  "inline": "relative",
+                  "priority": ""
+                }
+              },
+              "before": {
+                "height": {
+                  "computed": "11081.7px",
+                  "inline": "",
+                  "priority": ""
+                },
+                "max-height": {
+                  "computed": "none",
+                  "inline": "",
+                  "priority": ""
+                },
+                "min-height": {
+                  "computed": "0px",
+                  "inline": "",
+                  "priority": ""
+                },
+                "overflow": {
+                  "computed": "visible",
+                  "inline": "",
+                  "priority": ""
+                },
+                "position": {
+                  "computed": "static",
+                  "inline": "",
+                  "priority": ""
+                }
+              }
+            },
+            "tag": "body"
+          },
+          {
+            "id": null,
+            "properties": {
+              "after": {
+                "height": {
+                  "computed": "11081.7px",
+                  "inline": "auto",
+                  "priority": ""
+                },
+                "max-height": {
+                  "computed": "none",
+                  "inline": "none",
+                  "priority": ""
+                },
+                "min-height": {
+                  "computed": "0px",
+                  "inline": "auto",
+                  "priority": ""
+                },
+                "overflow": {
+                  "computed": "visible",
+                  "inline": "visible",
+                  "priority": ""
+                },
+                "position": {
+                  "computed": "relative",
+                  "inline": "relative",
+                  "priority": ""
+                }
+              },
+              "before": {
+                "height": {
+                  "computed": "11081.7px",
+                  "inline": "",
+                  "priority": ""
+                },
+                "max-height": {
+                  "computed": "none",
+                  "inline": "",
+                  "priority": ""
+                },
+                "min-height": {
+                  "computed": "0px",
+                  "inline": "",
+                  "priority": ""
+                },
+                "overflow": {
+                  "computed": "visible",
+                  "inline": "",
+                  "priority": ""
+                },
+                "position": {
+                  "computed": "static",
+                  "inline": "",
+                  "priority": ""
+                }
+              }
+            },
+            "tag": "html"
+          }
+        ],
+        "contentProbe": {
+          "appScrollHeight": 11082,
+          "appTextLength": 7857,
+          "bodyTextLength": 7857,
+          "maxVisibleElementBottom": 11081.703125
+        },
+        "measurements": {
+          "application": {
+            "clientHeight": 11082,
+            "clientWidth": 6650,
+            "scrollHeight": 11082,
+            "scrollWidth": 6650
+          },
+          "body": {
+            "clientHeight": 11082,
+            "clientWidth": 1280,
+            "scrollHeight": 11082,
+            "scrollWidth": 6650
+          },
+          "document": {
+            "clientHeight": 800,
+            "clientWidth": 1280,
+            "scrollHeight": 11082,
+            "scrollWidth": 6650
+          },
+          "viewport": {
+            "devicePixelRatio": 1,
+            "height": 800,
+            "width": 1280
+          }
+        },
+        "normalizationContract": "marimo-full-page-normalization-v1"
+      }
+    },
+    "envelope": {
+      "data": {
+        "lifecycle": {
+          "effectiveLaunch": {
+            "browserLaunched": true,
+            "engine": "chrome",
+            "launchHash": 7707568497978554591
+          },
+          "launched": false,
+          "relaunchedBrowser": false,
+          "restartedBackground": false,
+          "restoreStatus": "not_configured",
+          "reused": true,
+          "saveStatus": "not_attempted"
+        },
+        "origin": "http://127.0.0.1:8765/",
+        "result": {
+          "actionContract": {
+            "ancestorProperties": {
+              "height": "auto",
+              "maxHeight": "none",
+              "minHeight": "auto",
+              "overflow": "visible",
+              "position": "relative"
+            }
+          },
+          "actions": [
+            {
+              "id": "App",
+              "properties": {
+                "after": {
+                  "height": {
+                    "computed": "12025px",
+                    "inline": "auto",
+                    "priority": ""
+                  },
+                  "max-height": {
+                    "computed": "none",
+                    "inline": "none",
+                    "priority": ""
+                  },
+                  "min-height": {
+                    "computed": "0px",
+                    "inline": "auto",
+                    "priority": ""
+                  },
+                  "overflow": {
+                    "computed": "visible",
+                    "inline": "visible",
+                    "priority": ""
+                  },
+                  "position": {
+                    "computed": "relative",
+                    "inline": "relative",
+                    "priority": ""
+                  }
+                },
+                "before": {
+                  "height": {
+                    "computed": "800px",
+                    "inline": "",
+                    "priority": ""
+                  },
+                  "max-height": {
+                    "computed": "none",
+                    "inline": "",
+                    "priority": ""
+                  },
+                  "min-height": {
+                    "computed": "0px",
+                    "inline": "",
+                    "priority": ""
+                  },
+                  "overflow": {
+                    "computed": "hidden auto",
+                    "inline": "",
+                    "priority": ""
+                  },
+                  "position": {
+                    "computed": "relative",
+                    "inline": "",
+                    "priority": ""
+                  }
+                }
+              },
+              "tag": "div"
+            },
+            {
+              "id": "_r_1_",
+              "properties": {
+                "after": {
+                  "height": {
+                    "computed": "800px",
+                    "inline": "auto",
+                    "priority": ""
+                  },
+                  "max-height": {
+                    "computed": "none",
+                    "inline": "none",
+                    "priority": ""
+                  },
+                  "min-height": {
+                    "computed": "auto",
+                    "inline": "auto",
+                    "priority": ""
+                  },
+                  "overflow": {
+                    "computed": "visible",
+                    "inline": "visible",
+                    "priority": ""
+                  },
+                  "position": {
+                    "computed": "relative",
+                    "inline": "relative",
+                    "priority": ""
+                  }
+                },
+                "before": {
+                  "height": {
+                    "computed": "800px",
+                    "inline": "",
+                    "priority": ""
+                  },
+                  "max-height": {
+                    "computed": "none",
+                    "inline": "",
+                    "priority": ""
+                  },
+                  "min-height": {
+                    "computed": "auto",
+                    "inline": "",
+                    "priority": ""
+                  },
+                  "overflow": {
+                    "computed": "hidden",
+                    "inline": "hidden",
+                    "priority": ""
+                  },
+                  "position": {
+                    "computed": "static",
+                    "inline": "",
+                    "priority": ""
+                  }
+                }
+              },
+              "tag": "div"
+            },
+            {
+              "id": null,
+              "properties": {
+                "after": {
+                  "height": {
+                    "computed": "11081.7px",
+                    "inline": "auto",
+                    "priority": ""
+                  },
+                  "max-height": {
+                    "computed": "none",
+                    "inline": "none",
+                    "priority": ""
+                  },
+                  "min-height": {
+                    "computed": "auto",
+                    "inline": "auto",
+                    "priority": ""
+                  },
+                  "overflow": {
+                    "computed": "visible",
+                    "inline": "visible",
+                    "priority": ""
+                  },
+                  "position": {
+                    "computed": "relative",
+                    "inline": "relative",
+                    "priority": ""
+                  }
+                },
+                "before": {
+                  "height": {
+                    "computed": "800px",
+                    "inline": "100%",
+                    "priority": ""
+                  },
+                  "max-height": {
+                    "computed": "none",
+                    "inline": "",
+                    "priority": ""
+                  },
+                  "min-height": {
+                    "computed": "auto",
+                    "inline": "",
+                    "priority": ""
+                  },
+                  "overflow": {
+                    "computed": "hidden",
+                    "inline": "hidden",
+                    "priority": ""
+                  },
+                  "position": {
+                    "computed": "static",
+                    "inline": "",
+                    "priority": ""
+                  }
+                }
+              },
+              "tag": "div"
+            },
+            {
+              "id": null,
+              "properties": {
+                "after": {
+                  "height": {
+                    "computed": "11081.7px",
+                    "inline": "auto",
+                    "priority": ""
+                  },
+                  "max-height": {
+                    "computed": "none",
+                    "inline": "none",
+                    "priority": ""
+                  },
+                  "min-height": {
+                    "computed": "auto",
+                    "inline": "auto",
+                    "priority": ""
+                  },
+                  "overflow": {
+                    "computed": "visible",
+                    "inline": "visible",
+                    "priority": ""
+                  },
+                  "position": {
+                    "computed": "relative",
+                    "inline": "relative",
+                    "priority": ""
+                  }
+                },
+                "before": {
+                  "height": {
+                    "computed": "800px",
+                    "inline": "",
+                    "priority": ""
+                  },
+                  "max-height": {
+                    "computed": "none",
+                    "inline": "",
+                    "priority": ""
+                  },
+                  "min-height": {
+                    "computed": "0px",
+                    "inline": "",
+                    "priority": ""
+                  },
+                  "overflow": {
+                    "computed": "hidden",
+                    "inline": "",
+                    "priority": ""
+                  },
+                  "position": {
+                    "computed": "absolute",
+                    "inline": "",
+                    "priority": ""
+                  }
+                }
+              },
+              "tag": "div"
+            },
+            {
+              "id": null,
+              "properties": {
+                "after": {
+                  "height": {
+                    "computed": "auto",
+                    "inline": "auto",
+                    "priority": ""
+                  },
+                  "max-height": {
+                    "computed": "none",
+                    "inline": "none",
+                    "priority": ""
+                  },
+                  "min-height": {
+                    "computed": "0px",
+                    "inline": "auto",
+                    "priority": ""
+                  },
+                  "overflow": {
+                    "computed": "visible",
+                    "inline": "visible",
+                    "priority": ""
+                  },
+                  "position": {
+                    "computed": "relative",
+                    "inline": "relative",
+                    "priority": ""
+                  }
+                },
+                "before": {
+                  "height": {
+                    "computed": "auto",
+                    "inline": "",
+                    "priority": ""
+                  },
+                  "max-height": {
+                    "computed": "none",
+                    "inline": "",
+                    "priority": ""
+                  },
+                  "min-height": {
+                    "computed": "0px",
+                    "inline": "",
+                    "priority": ""
+                  },
+                  "overflow": {
+                    "computed": "visible",
+                    "inline": "",
+                    "priority": ""
+                  },
+                  "position": {
+                    "computed": "static",
+                    "inline": "",
+                    "priority": ""
+                  }
+                }
+              },
+              "tag": "div"
+            },
+            {
+              "id": "root",
+              "properties": {
+                "after": {
+                  "height": {
+                    "computed": "11081.7px",
+                    "inline": "auto",
+                    "priority": ""
+                  },
+                  "max-height": {
+                    "computed": "none",
+                    "inline": "none",
+                    "priority": ""
+                  },
+                  "min-height": {
+                    "computed": "0px",
+                    "inline": "auto",
+                    "priority": ""
+                  },
+                  "overflow": {
+                    "computed": "visible",
+                    "inline": "visible",
+                    "priority": ""
+                  },
+                  "position": {
+                    "computed": "relative",
+                    "inline": "relative",
+                    "priority": ""
+                  }
+                },
+                "before": {
+                  "height": {
+                    "computed": "11081.7px",
+                    "inline": "",
+                    "priority": ""
+                  },
+                  "max-height": {
+                    "computed": "none",
+                    "inline": "",
+                    "priority": ""
+                  },
+                  "min-height": {
+                    "computed": "800px",
+                    "inline": "",
+                    "priority": ""
+                  },
+                  "overflow": {
+                    "computed": "visible",
+                    "inline": "",
+                    "priority": ""
+                  },
+                  "position": {
+                    "computed": "static",
+                    "inline": "",
+                    "priority": ""
+                  }
+                }
+              },
+              "tag": "div"
+            },
+            {
+              "id": null,
+              "properties": {
+                "after": {
+                  "height": {
+                    "computed": "11081.7px",
+                    "inline": "auto",
+                    "priority": ""
+                  },
+                  "max-height": {
+                    "computed": "none",
+                    "inline": "none",
+                    "priority": ""
+                  },
+                  "min-height": {
+                    "computed": "0px",
+                    "inline": "auto",
+                    "priority": ""
+                  },
+                  "overflow": {
+                    "computed": "visible",
+                    "inline": "visible",
+                    "priority": ""
+                  },
+                  "position": {
+                    "computed": "relative",
+                    "inline": "relative",
+                    "priority": ""
+                  }
+                },
+                "before": {
+                  "height": {
+                    "computed": "11081.7px",
+                    "inline": "",
+                    "priority": ""
+                  },
+                  "max-height": {
+                    "computed": "none",
+                    "inline": "",
+                    "priority": ""
+                  },
+                  "min-height": {
+                    "computed": "0px",
+                    "inline": "",
+                    "priority": ""
+                  },
+                  "overflow": {
+                    "computed": "visible",
+                    "inline": "",
+                    "priority": ""
+                  },
+                  "position": {
+                    "computed": "static",
+                    "inline": "",
+                    "priority": ""
+                  }
+                }
+              },
+              "tag": "body"
+            },
+            {
+              "id": null,
+              "properties": {
+                "after": {
+                  "height": {
+                    "computed": "11081.7px",
+                    "inline": "auto",
+                    "priority": ""
+                  },
+                  "max-height": {
+                    "computed": "none",
+                    "inline": "none",
+                    "priority": ""
+                  },
+                  "min-height": {
+                    "computed": "0px",
+                    "inline": "auto",
+                    "priority": ""
+                  },
+                  "overflow": {
+                    "computed": "visible",
+                    "inline": "visible",
+                    "priority": ""
+                  },
+                  "position": {
+                    "computed": "relative",
+                    "inline": "relative",
+                    "priority": ""
+                  }
+                },
+                "before": {
+                  "height": {
+                    "computed": "11081.7px",
+                    "inline": "",
+                    "priority": ""
+                  },
+                  "max-height": {
+                    "computed": "none",
+                    "inline": "",
+                    "priority": ""
+                  },
+                  "min-height": {
+                    "computed": "0px",
+                    "inline": "",
+                    "priority": ""
+                  },
+                  "overflow": {
+                    "computed": "visible",
+                    "inline": "",
+                    "priority": ""
+                  },
+                  "position": {
+                    "computed": "static",
+                    "inline": "",
+                    "priority": ""
+                  }
+                }
+              },
+              "tag": "html"
+            }
+          ],
+          "contentProbe": {
+            "appScrollHeight": 11082,
+            "appTextLength": 7857,
+            "bodyTextLength": 7857,
+            "maxVisibleElementBottom": 11081.703125
+          },
+          "measurements": {
+            "application": {
+              "clientHeight": 11082,
+              "clientWidth": 6650,
+              "scrollHeight": 11082,
+              "scrollWidth": 6650
+            },
+            "body": {
+              "clientHeight": 11082,
+              "clientWidth": 1280,
+              "scrollHeight": 11082,
+              "scrollWidth": 6650
+            },
+            "document": {
+              "clientHeight": 800,
+              "clientWidth": 1280,
+              "scrollHeight": 11082,
+              "scrollWidth": 6650
+            },
+            "viewport": {
+              "devicePixelRatio": 1,
+              "height": 800,
+              "width": 1280
+            }
+          },
+          "normalizationContract": "marimo-full-page-normalization-v1"
+        }
+      },
+      "error": null,
+      "success": true
+    },
+    "exit_code": 0,
+    "stderr": "",
+    "stdout": "{\"success\":true,\"data\":{\"lifecycle\":{\"effectiveLaunch\":{\"browserLaunched\":true,\"engine\":\"chrome\",\"launchHash\":7707568497978554591},\"launched\":false,\"relaunchedBrowser\":false,\"restartedBackground\":false,\"restoreStatus\":\"not_configured\",\"reused\":true,\"saveStatus\":\"not_attempted\"},\"origin\":\"http://127.0.0.1:8765/\",\"result\":{\"actionContract\":{\"ancestorProperties\":{\"height\":\"auto\",\"maxHeight\":\"none\",\"minHeight\":\"auto\",\"overflow\":\"visible\",\"position\":\"relative\"}},\"actions\":[{\"id\":\"App\",\"properties\":{\"after\":{\"height\":{\"computed\":\"12025px\",\"inline\":\"auto\",\"priority\":\"\"},\"max-height\":{\"computed\":\"none\",\"inline\":\"none\",\"priority\":\"\"},\"min-height\":{\"computed\":\"0px\",\"inline\":\"auto\",\"priority\":\"\"},\"overflow\":{\"computed\":\"visible\",\"inline\":\"visible\",\"priority\":\"\"},\"position\":{\"computed\":\"relative\",\"inline\":\"relative\",\"priority\":\"\"}},\"before\":{\"height\":{\"computed\":\"800px\",\"inline\":\"\",\"priority\":\"\"},\"max-height\":{\"computed\":\"none\",\"inline\":\"\",\"priority\":\"\"},\"min-height\":{\"computed\":\"0px\",\"inline\":\"\",\"priority\":\"\"},\"overflow\":{\"computed\":\"hidden auto\",\"inline\":\"\",\"priority\":\"\"},\"position\":{\"computed\":\"relative\",\"inline\":\"\",\"priority\":\"\"}}},\"tag\":\"div\"},{\"id\":\"_r_1_\",\"properties\":{\"after\":{\"height\":{\"computed\":\"800px\",\"inline\":\"auto\",\"priority\":\"\"},\"max-height\":{\"computed\":\"none\",\"inline\":\"none\",\"priority\":\"\"},\"min-height\":{\"computed\":\"auto\",\"inline\":\"auto\",\"priority\":\"\"},\"overflow\":{\"computed\":\"visible\",\"inline\":\"visible\",\"priority\":\"\"},\"position\":{\"computed\":\"relative\",\"inline\":\"relative\",\"priority\":\"\"}},\"before\":{\"height\":{\"computed\":\"800px\",\"inline\":\"\",\"priority\":\"\"},\"max-height\":{\"computed\":\"none\",\"inline\":\"\",\"priority\":\"\"},\"min-height\":{\"computed\":\"auto\",\"inline\":\"\",\"priority\":\"\"},\"overflow\":{\"computed\":\"hidden\",\"inline\":\"hidden\",\"priority\":\"\"},\"position\":{\"computed\":\"static\",\"inline\":\"\",\"priority\":\"\"}}},\"tag\":\"div\"},{\"id\":null,\"properties\":{\"after\":{\"height\":{\"computed\":\"11081.7px\",\"inline\":\"auto\",\"priority\":\"\"},\"max-height\":{\"computed\":\"none\",\"inline\":\"none\",\"priority\":\"\"},\"min-height\":{\"computed\":\"auto\",\"inline\":\"auto\",\"priority\":\"\"},\"overflow\":{\"computed\":\"visible\",\"inline\":\"visible\",\"priority\":\"\"},\"position\":{\"computed\":\"relative\",\"inline\":\"relative\",\"priority\":\"\"}},\"before\":{\"height\":{\"computed\":\"800px\",\"inline\":\"100%\",\"priority\":\"\"},\"max-height\":{\"computed\":\"none\",\"inline\":\"\",\"priority\":\"\"},\"min-height\":{\"computed\":\"auto\",\"inline\":\"\",\"priority\":\"\"},\"overflow\":{\"computed\":\"hidden\",\"inline\":\"hidden\",\"priority\":\"\"},\"position\":{\"computed\":\"static\",\"inline\":\"\",\"priority\":\"\"}}},\"tag\":\"div\"},{\"id\":null,\"properties\":{\"after\":{\"height\":{\"computed\":\"11081.7px\",\"inline\":\"auto\",\"priority\":\"\"},\"max-height\":{\"computed\":\"none\",\"inline\":\"none\",\"priority\":\"\"},\"min-height\":{\"computed\":\"auto\",\"inline\":\"auto\",\"priority\":\"\"},\"overflow\":{\"computed\":\"visible\",\"inline\":\"visible\",\"priority\":\"\"},\"position\":{\"computed\":\"relative\",\"inline\":\"relative\",\"priority\":\"\"}},\"before\":{\"height\":{\"computed\":\"800px\",\"inline\":\"\",\"priority\":\"\"},\"max-height\":{\"computed\":\"none\",\"inline\":\"\",\"priority\":\"\"},\"min-height\":{\"computed\":\"0px\",\"inline\":\"\",\"priority\":\"\"},\"overflow\":{\"computed\":\"hidden\",\"inline\":\"\",\"priority\":\"\"},\"position\":{\"computed\":\"absolute\",\"inline\":\"\",\"priority\":\"\"}}},\"tag\":\"div\"},{\"id\":null,\"properties\":{\"after\":{\"height\":{\"computed\":\"auto\",\"inline\":\"auto\",\"priority\":\"\"},\"max-height\":{\"computed\":\"none\",\"inline\":\"none\",\"priority\":\"\"},\"min-height\":{\"computed\":\"0px\",\"inline\":\"auto\",\"priority\":\"\"},\"overflow\":{\"computed\":\"visible\",\"inline\":\"visible\",\"priority\":\"\"},\"position\":{\"computed\":\"relative\",\"inline\":\"relative\",\"priority\":\"\"}},\"before\":{\"height\":{\"computed\":\"auto\",\"inline\":\"\",\"priority\":\"\"},\"max-height\":{\"computed\":\"none\",\"inline\":\"\",\"priority\":\"\"},\"min-height\":{\"computed\":\"0px\",\"inline\":\"\",\"priority\":\"\"},\"overflow\":{\"computed\":\"visible\",\"inline\":\"\",\"priority\":\"\"},\"position\":{\"computed\":\"static\",\"inline\":\"\",\"priority\":\"\"}}},\"tag\":\"div\"},{\"id\":\"root\",\"properties\":{\"after\":{\"height\":{\"computed\":\"11081.7px\",\"inline\":\"auto\",\"priority\":\"\"},\"max-height\":{\"computed\":\"none\",\"inline\":\"none\",\"priority\":\"\"},\"min-height\":{\"computed\":\"0px\",\"inline\":\"auto\",\"priority\":\"\"},\"overflow\":{\"computed\":\"visible\",\"inline\":\"visible\",\"priority\":\"\"},\"position\":{\"computed\":\"relative\",\"inline\":\"relative\",\"priority\":\"\"}},\"before\":{\"height\":{\"computed\":\"11081.7px\",\"inline\":\"\",\"priority\":\"\"},\"max-height\":{\"computed\":\"none\",\"inline\":\"\",\"priority\":\"\"},\"min-height\":{\"computed\":\"800px\",\"inline\":\"\",\"priority\":\"\"},\"overflow\":{\"computed\":\"visible\",\"inline\":\"\",\"priority\":\"\"},\"position\":{\"computed\":\"static\",\"inline\":\"\",\"priority\":\"\"}}},\"tag\":\"div\"},{\"id\":null,\"properties\":{\"after\":{\"height\":{\"computed\":\"11081.7px\",\"inline\":\"auto\",\"priority\":\"\"},\"max-height\":{\"computed\":\"none\",\"inline\":\"none\",\"priority\":\"\"},\"min-height\":{\"computed\":\"0px\",\"inline\":\"auto\",\"priority\":\"\"},\"overflow\":{\"computed\":\"visible\",\"inline\":\"visible\",\"priority\":\"\"},\"position\":{\"computed\":\"relative\",\"inline\":\"relative\",\"priority\":\"\"}},\"before\":{\"height\":{\"computed\":\"11081.7px\",\"inline\":\"\",\"priority\":\"\"},\"max-height\":{\"computed\":\"none\",\"inline\":\"\",\"priority\":\"\"},\"min-height\":{\"computed\":\"0px\",\"inline\":\"\",\"priority\":\"\"},\"overflow\":{\"computed\":\"visible\",\"inline\":\"\",\"priority\":\"\"},\"position\":{\"computed\":\"static\",\"inline\":\"\",\"priority\":\"\"}}},\"tag\":\"body\"},{\"id\":null,\"properties\":{\"after\":{\"height\":{\"computed\":\"11081.7px\",\"inline\":\"auto\",\"priority\":\"\"},\"max-height\":{\"computed\":\"none\",\"inline\":\"none\",\"priority\":\"\"},\"min-height\":{\"computed\":\"0px\",\"inline\":\"auto\",\"priority\":\"\"},\"overflow\":{\"computed\":\"visible\",\"inline\":\"visible\",\"priority\":\"\"},\"position\":{\"computed\":\"relative\",\"inline\":\"relative\",\"priority\":\"\"}},\"before\":{\"height\":{\"computed\":\"11081.7px\",\"inline\":\"\",\"priority\":\"\"},\"max-height\":{\"computed\":\"none\",\"inline\":\"\",\"priority\":\"\"},\"min-height\":{\"computed\":\"0px\",\"inline\":\"\",\"priority\":\"\"},\"overflow\":{\"computed\":\"visible\",\"inline\":\"\",\"priority\":\"\"},\"position\":{\"computed\":\"static\",\"inline\":\"\",\"priority\":\"\"}}},\"tag\":\"html\"}],\"contentProbe\":{\"appScrollHeight\":11082,\"appTextLength\":7857,\"bodyTextLength\":7857,\"maxVisibleElementBottom\":11081.703125},\"measurements\":{\"application\":{\"clientHeight\":11082,\"clientWidth\":6650,\"scrollHeight\":11082,\"scrollWidth\":6650},\"body\":{\"clientHeight\":11082,\"clientWidth\":1280,\"scrollHeight\":11082,\"scrollWidth\":6650},\"document\":{\"clientHeight\":800,\"clientWidth\":1280,\"scrollHeight\":11082,\"scrollWidth\":6650},\"viewport\":{\"devicePixelRatio\":1,\"height\":800,\"width\":1280}},\"normalizationContract\":\"marimo-full-page-normalization-v1\"}},\"error\":null}\n"
+  },
+  "post_measurement": {
+    "application": {
+      "clientHeight": 11082,
+      "clientWidth": 6650,
+      "scrollHeight": 11082,
+      "scrollWidth": 6650
+    },
+    "body": {
+      "clientHeight": 11082,
+      "clientWidth": 1280,
+      "scrollHeight": 11082,
+      "scrollWidth": 6650
+    },
+    "contentProbe": {
+      "appScrollHeight": 11082,
+      "appTextLength": 7857,
+      "bodyTextLength": 7857,
+      "maxVisibleElementBottom": 11081.703125
+    },
+    "document": {
+      "clientHeight": 800,
+      "clientWidth": 1280,
+      "scrollHeight": 11082,
+      "scrollWidth": 6650
+    },
+    "viewport": {
+      "devicePixelRatio": 1,
+      "height": 800,
+      "width": 1280
+    }
+  },
+  "post_measurement_eval": {
+    "command": [
+      "/root/.local/share/pi-node/node-v24.18.0-linux-x64/bin/agent-browser",
+      "--session",
+      "forecast-dashboard-ui-78c4994f9290",
+      "--json",
+      "eval",
+      "--stdin"
+    ],
+    "data": {
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554591
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      },
+      "origin": "http://127.0.0.1:8765/",
+      "result": {
+        "application": {
+          "clientHeight": 11082,
+          "clientWidth": 6650,
+          "scrollHeight": 11082,
+          "scrollWidth": 6650
+        },
+        "body": {
+          "clientHeight": 11082,
+          "clientWidth": 1280,
+          "scrollHeight": 11082,
+          "scrollWidth": 6650
+        },
+        "contentProbe": {
+          "appScrollHeight": 11082,
+          "appTextLength": 7857,
+          "bodyTextLength": 7857,
+          "maxVisibleElementBottom": 11081.703125
+        },
+        "document": {
+          "clientHeight": 800,
+          "clientWidth": 1280,
+          "scrollHeight": 11082,
+          "scrollWidth": 6650
+        },
+        "viewport": {
+          "devicePixelRatio": 1,
+          "height": 800,
+          "width": 1280
+        }
+      }
+    },
+    "envelope": {
+      "data": {
+        "lifecycle": {
+          "effectiveLaunch": {
+            "browserLaunched": true,
+            "engine": "chrome",
+            "launchHash": 7707568497978554591
+          },
+          "launched": false,
+          "relaunchedBrowser": false,
+          "restartedBackground": false,
+          "restoreStatus": "not_configured",
+          "reused": true,
+          "saveStatus": "not_attempted"
+        },
+        "origin": "http://127.0.0.1:8765/",
+        "result": {
+          "application": {
+            "clientHeight": 11082,
+            "clientWidth": 6650,
+            "scrollHeight": 11082,
+            "scrollWidth": 6650
+          },
+          "body": {
+            "clientHeight": 11082,
+            "clientWidth": 1280,
+            "scrollHeight": 11082,
+            "scrollWidth": 6650
+          },
+          "contentProbe": {
+            "appScrollHeight": 11082,
+            "appTextLength": 7857,
+            "bodyTextLength": 7857,
+            "maxVisibleElementBottom": 11081.703125
+          },
+          "document": {
+            "clientHeight": 800,
+            "clientWidth": 1280,
+            "scrollHeight": 11082,
+            "scrollWidth": 6650
+          },
+          "viewport": {
+            "devicePixelRatio": 1,
+            "height": 800,
+            "width": 1280
+          }
+        }
+      },
+      "error": null,
+      "success": true
+    },
+    "exit_code": 0,
+    "stderr": "",
+    "stdout": "{\"success\":true,\"data\":{\"lifecycle\":{\"effectiveLaunch\":{\"browserLaunched\":true,\"engine\":\"chrome\",\"launchHash\":7707568497978554591},\"launched\":false,\"relaunchedBrowser\":false,\"restartedBackground\":false,\"restoreStatus\":\"not_configured\",\"reused\":true,\"saveStatus\":\"not_attempted\"},\"origin\":\"http://127.0.0.1:8765/\",\"result\":{\"application\":{\"clientHeight\":11082,\"clientWidth\":6650,\"scrollHeight\":11082,\"scrollWidth\":6650},\"body\":{\"clientHeight\":11082,\"clientWidth\":1280,\"scrollHeight\":11082,\"scrollWidth\":6650},\"contentProbe\":{\"appScrollHeight\":11082,\"appTextLength\":7857,\"bodyTextLength\":7857,\"maxVisibleElementBottom\":11081.703125},\"document\":{\"clientHeight\":800,\"clientWidth\":1280,\"scrollHeight\":11082,\"scrollWidth\":6650},\"viewport\":{\"devicePixelRatio\":1,\"height\":800,\"width\":1280}}},\"error\":null}\n"
+  },
+  "restore_eval": {
+    "command": [
+      "/root/.local/share/pi-node/node-v24.18.0-linux-x64/bin/agent-browser",
+      "--session",
+      "forecast-dashboard-ui-78c4994f9290",
+      "--json",
+      "eval",
+      "--stdin"
+    ],
+    "data": {
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554591
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      },
+      "origin": "http://127.0.0.1:8765/",
+      "result": {
+        "app": {
+          "height": ""
+        },
+        "restored": true
+      }
+    },
+    "envelope": {
+      "data": {
+        "lifecycle": {
+          "effectiveLaunch": {
+            "browserLaunched": true,
+            "engine": "chrome",
+            "launchHash": 7707568497978554591
+          },
+          "launched": false,
+          "relaunchedBrowser": false,
+          "restartedBackground": false,
+          "restoreStatus": "not_configured",
+          "reused": true,
+          "saveStatus": "not_attempted"
+        },
+        "origin": "http://127.0.0.1:8765/",
+        "result": {
+          "app": {
+            "height": ""
+          },
+          "restored": true
+        }
+      },
+      "error": null,
+      "success": true
+    },
+    "exit_code": 0,
+    "stderr": "",
+    "stdout": "{\"success\":true,\"data\":{\"lifecycle\":{\"effectiveLaunch\":{\"browserLaunched\":true,\"engine\":\"chrome\",\"launchHash\":7707568497978554591},\"launched\":false,\"relaunchedBrowser\":false,\"restartedBackground\":false,\"restoreStatus\":\"not_configured\",\"reused\":true,\"saveStatus\":\"not_attempted\"},\"origin\":\"http://127.0.0.1:8765/\",\"result\":{\"app\":{\"height\":\"\"},\"restored\":true}},\"error\":null}\n"
+  },
+  "screenshot": {
+    "height": 11082,
+    "path": "validation-artifacts/forecast-analysis-dashboard-default.png",
+    "sha256": "50290e0b328da578717d60c4fea2e6e2abaf39a6fc203c19d76d984147f84fe1",
+    "width": 6650
+  },
+  "screenshot_command": {
+    "command": [
+      "/root/.local/share/pi-node/node-v24.18.0-linux-x64/bin/agent-browser",
+      "--session",
+      "forecast-dashboard-ui-78c4994f9290",
+      "--json",
+      "screenshot",
+      "--full",
+      "/root/GitHub/forecast_analysis/validation-artifacts/forecast-analysis-dashboard-default.png"
+    ],
+    "data": {
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554591
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      },
+      "path": "/root/GitHub/forecast_analysis/validation-artifacts/forecast-analysis-dashboard-default.png"
+    },
+    "envelope": {
+      "data": {
+        "lifecycle": {
+          "effectiveLaunch": {
+            "browserLaunched": true,
+            "engine": "chrome",
+            "launchHash": 7707568497978554591
+          },
+          "launched": false,
+          "relaunchedBrowser": false,
+          "restartedBackground": false,
+          "restoreStatus": "not_configured",
+          "reused": true,
+          "saveStatus": "not_attempted"
+        },
+        "path": "/root/GitHub/forecast_analysis/validation-artifacts/forecast-analysis-dashboard-default.png"
+      },
+      "error": null,
+      "success": true
+    },
+    "exit_code": 0,
+    "stderr": "",
+    "stdout": "{\"success\":true,\"data\":{\"lifecycle\":{\"effectiveLaunch\":{\"browserLaunched\":true,\"engine\":\"chrome\",\"launchHash\":7707568497978554591},\"launched\":false,\"relaunchedBrowser\":false,\"restartedBackground\":false,\"restoreStatus\":\"not_configured\",\"reused\":true,\"saveStatus\":\"not_attempted\"},\"path\":\"/root/GitHub/forecast_analysis/validation-artifacts/forecast-analysis-dashboard-default.png\"},\"error\":null}\n"
+  },
+  "session": "forecast-dashboard-ui-78c4994f9290",
+  "source_state_artifact": "validation-artifacts/forecast-analysis-dashboard-ui-raw-default.json",
+  "state": "default-closed"
+}

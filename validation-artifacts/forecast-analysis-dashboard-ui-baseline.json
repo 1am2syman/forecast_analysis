@@ -1,0 +1,1509 @@
+{
+  "analytical_state": {
+    "brands": {
+      "option_count": 43,
+      "selected": [
+        "BBEL-PO-R",
+        "BELPHL_MV",
+        "BHAIRCODE",
+        "BNHR-AMLA",
+        "BPA-ALO-H",
+        "BPADV-EXC",
+        "BPAR-ADV",
+        "BPA_PET_J",
+        "BPCNO-LP",
+        "BPCNO-SP",
+        "FIERA_CRM",
+        "HC_CL_SMP",
+        "JFB_COMBO",
+        "JFB_CREAM",
+        "JFB_GELTP",
+        "JFB_LOTN",
+        "JFB_MGBWS",
+        "JFB_MGFCR",
+        "JFB_MGLTN",
+        "JFB_MGSOP",
+        "JFB_OIL",
+        "JFB_POWDR",
+        "JFB_SHMP",
+        "JFB_SOAP",
+        "JFB_WASH",
+        "JFB_WIPES",
+        "LIVON SLP",
+        "PA-BDYLOT",
+        "PAR.AMLA",
+        "PA_SECRT",
+        "PA_TCR_HO",
+        "PA_VIT_E",
+        "PN_SHMP_R",
+        "PN_SHMP_S",
+        "P_EN_ONI",
+        "P_SP_AGEL",
+        "RAZ_BDSPR",
+        "RK_CLO_R",
+        "RK_CLO_S",
+        "SAFF ACTV",
+        "SAF_HONEY",
+        "STX_SOAP",
+        "Unmapped"
+      ],
+      "selected_count": 43,
+      "selection": "all available"
+    },
+    "horizons": {
+      "option_count": 5,
+      "selected": [
+        "4 months ahead",
+        "3 months ahead",
+        "2 months ahead",
+        "1 month ahead",
+        "Current month"
+      ],
+      "selected_count": 5,
+      "selection": "all available"
+    },
+    "minimum_actual_volume_kl": 0.0,
+    "parent_products": {
+      "option_count": 141,
+      "selected": [
+        "702082 — PCNO 20ml FT BOT NEW",
+        "703584 — PCNO ADV 300ml FT",
+        "706059 — PCNO 100ml FT BOT NEW PB",
+        "706088 — PCNO 200ml FT BOT- (PB)",
+        "706090 — PCNO 500ml FT BOT - (PB)",
+        "707066 — SAFF ACTIVE 5 LTR JAR BD",
+        "707719 — PCNO 50ml FT BOT(324) NEW PB",
+        "707789 — NIHAR SHANTI BDM AMLA 300ML",
+        "707905 — PCNO 350ml FT BOT - (PB)",
+        "707936 — NIHAR SHANTI BDM AMLA 200ML-N",
+        "707989 — PCNO ADV EXTRA CARE 150ml FT",
+        "710085 — P BELIPHOOL 100ml -144 (BD)",
+        "711198 — HRC Hair Dye 5gm Sac (BD)-EXP",
+        "711378 — P BELIPHOOL 300ml -(New)",
+        "711379 — PCNO ADV EXTRA CARE 300ml FT-New",
+        "711848 — P BELIPHOOL 200ml",
+        "713088 — P BELIPHOOL 400ml",
+        "713680 — P ALOE VERA 250ML-(BD)",
+        "713681 — P ALOE VERA 150ML-(BD)",
+        "715161 — JFB WASH 200ML",
+        "715162 — JFB WASH 100ML",
+        "715164 — JFB LOTION 200ML",
+        "715166 — JFB LOTION 100ML",
+        "715167 — JFB OIL 200ML",
+        "715169 — JFB OIL 100ML",
+        "715677 — JFB SOAP 125G",
+        "715678 — JFB SOAP 75G",
+        "716306 — JFB TALCUM POWDER 200G",
+        "716308 — JFB TALCUM POWDER 100G",
+        "716573 — SAFF ACTIVE 2 LTR-BD",
+        "716621 — SP PETROLEUM JELLY 15ML",
+        "716622 — SP PETROLEUM JELLY 50ML",
+        "716624 — SP PETROLEUM JELLY 100ML",
+        "716653 — SP LOTION NATURAL MOISTURE 100ML",
+        "716654 — SP LOTION NATURAL MOISTURE 200ML",
+        "716655 — SP LOTION NATURAL MOISTURE 300ML",
+        "716658 — SP LOTION NATURAL WHITE 100ML",
+        "716659 — SP LOTION NATURAL WHITE 200ML",
+        "716660 — SP LOTION NATURAL WHITE 300ML",
+        "716662 — SP LOTION DEEP MOISTURE 200ML",
+        "716663 — SP LOTION DEEP MOISTURE 300ML",
+        "716830 — PCNO 500ml EJ - (PB) NEW",
+        "716831 — PCNO 200ml EJ - (PB) NEW",
+        "717083 — PCNO ADV EXTRA CARE 45ML",
+        "717612 — SP ALOE GEL 50ML",
+        "717613 — SP AlOE GEL 100ML",
+        "718019 — P ALOE VERA 75ML",
+        "718021 — JFB FACE CREAM 50G",
+        "718033 — JFB FACE CREAM 100G",
+        "718035 — SX MEN&#039;S SOAP 125G",
+        "719462 — SAFFOLA HONEY 250G GLS-MBL",
+        "719463 — SAFFOLA HONEY 500G GLS-MBL",
+        "719513 — JFB SOAP 25G SAMPLE",
+        "719535 — LOTION NM 5ML SAMPLE",
+        "719578 — PAEC 75ML APPLICATOR",
+        "719726 — SX MENS SOAP 75G",
+        "719861 — BELIPHOOL 35ML",
+        "720100 — JFB SHAMPOO 100ML",
+        "720101 — JFB SHAMPOO 200ML",
+        "720181 — LIVON SERUM 20ML MBL",
+        "720182 — LIVON SERUM 50ML MBL",
+        "720183 — LIVON SERUM 100ML MBL",
+        "720359 — REDKING COOLING OIL 2.5ML-N",
+        "720360 — REDKING COOLING OIL 100ML-N",
+        "720361 — REDKING COOLING OIL 200ML-N",
+        "720704 — SAFFOLA HONEY 100G INHOUSE",
+        "720814 — JFB COMBO PACK OLWPF 450ML",
+        "720821 — JFB OIL 100ML (COMBO- 720814)",
+        "720824 — JFB LTN 100ML (COMBO- 720814)",
+        "720825 — JFB WASH 100ML (COMBO- 720814)",
+        "720826 — JFB F.CR 50G (COMBO- 720814)",
+        "720827 — JFB PWDR 100G (COMBO- 720814)",
+        "721129 — HC BROWN PASTE 25G",
+        "721172 — HC COLOR SHAMPOO 18ML",
+        "721530 — BELIPHOOL 15ML",
+        "722024 — PA ONION HAIR OIL 200ML",
+        "723420 — BELI CHLD (F W BELI 200ML) 0TK 84X34ML",
+        "723527 — PN SHMP DM 200TK 24X170ML",
+        "723532 — PN SHMP NC 370TK 24X340ML",
+        "723533 — PN SHMP ONION 240TK 24X175ML",
+        "723534 — PN SHMP ONION 390TK 24X345ML",
+        "723535 — PN SHMP NC SCHT 0TK 960X5ML",
+        "723536 — PN SHMP NC SCHT 2TK 960X5.5ML",
+        "723538 — PN SHMP NC 230TK 24X170ML",
+        "723540 — PN SHMP AHF 370TK 24X340ML",
+        "723541 — PN SHMP AHF SCHT 2TK 960X5.5ML",
+        "723542 — PN SHMP DM SCHT 2TK 960X5.5ML",
+        "723543 — PN SHMP DM 370TK 24X340ML",
+        "723546 — PN SHMP AHF 230TK 24X170ML",
+        "724058 — JFB FACE CREAM MG 140TK 36X50ML",
+        "724059 — JFB FACE CREAM MG 245TK 36X100ML",
+        "724060 — JFB LOTION MG 340TK 48X200ML",
+        "724061 — JFB LOTION MG 200TK 36X100ML",
+        "724119 — PN SHMP ONION SCHT 3TK 960X5.5ML",
+        "724120 — JFB WASH MG 215TK 36X100ML",
+        "724121 — JFB WASH MG 325TK 48X200ML",
+        "724950 — PA ONION HAIR OIL 100TK 144X100ML",
+        "725248 — PN SHMP EGG SHINE SCHT 2TK 1080X5.25ML",
+        "725314 — PN SHMP EGG SHINE 230TK 24X170ML",
+        "725315 — PN SHMP EGG SHINE 370TK 24X330ML",
+        "725947 — PA SECRETS ALMOND 240TK 96X200ML",
+        "725948 — PA SECRETS ROSEMARY 240TK 96X200ML",
+        "725949 — PA SECRETS BLACKSEED 240TK 96X200ML",
+        "726121 — PA BELI MULTIVITAMIN 200TK 96X200ML",
+        "726286 — BELI 15TK 360X18ML",
+        "726657 — JFB TPST GEL OR 100TK 48X45G",
+        "726658 — JFB TPST GEL MNG 100TK 48X45G",
+        "726677 — JFB MILKY GLOW SOAP 110TK 48X75G",
+        "726985 — PA AMLA 55TK 144X75ML",
+        "726986 — PA AMLA 100TK 96X150ML",
+        "727423 — JFB WIPES 230TK 24X80PC 24X383G",
+        "727425 — JFB WIPES 285TK 24X120PC 24X575G",
+        "727975 — PA ADV VIT E 150TK 96X150ML",
+        "728926 — SAF HONEY 50TK 120X40G",
+        "729651 — JFB MG SOAP (F W POW 100G) 0TK 72X25G",
+        "730379 — FIERA CREAM 160TK 48X47G",
+        "730380 — FIERA CREAM 95TK 72X23G",
+        "730768 — PN SHMP ON (F W BELI 200ML) 0TK 168X5ML",
+        "731494 — PA BELI MV (F W BELI 400ML) 0TK 30X34ML",
+        "731495 — PA BELI MV (F NC 2X5ML) 120TK 120X100ML",
+        "731594 — PEARL FC (F W BELI 200ML) 0TK 72X9G",
+        "731671 — PN SHMP LLS SCHT 2TK 1080X5.15ML",
+        "731728 — PN SHMP LLS 265TK 24X320ML",
+        "731729 — PNS LLS 140TK 24X160ML",
+        "732128 — SP LOTION DM 170TK 48X100ML",
+        "732337 — PA SECRETS AL 135TK 48X100ML",
+        "732965 — PN SHMP NC (F W PA AV 250ML) 0TK 42X70ML",
+        "732992 — PN SHMP NC (F W PA AV 150ML) 0TK 84X30ML",
+        "733263 — PA TOTAL CARE 60TK 96X75ML",
+        "734166 — RAZE CONQUER 450TK 48X120ML",
+        "734169 — RAZE DARE 450TK 48X120ML",
+        "734170 — RAZE ASCEND 450TK 48X120ML",
+        "735347 — PCNO 550TK 24X600ML",
+        "735715 — PN SHMP AD SCHT 3TK 1152X5ML",
+        "735726 — PN SHMP AD 190TK 24X160ML",
+        "735727 — PN SHMP AD 350TK 24X320ML",
+        "999030 — PEARL CHLD (F W PAB 200ML) 0TK 84X9G",
+        "999063 — PA BELI MV 34ML (FR W BELI 400ML)",
+        "999064 — PA BELI MV CO (F NC 2X5ML) 130TK 96X100ML",
+        "999171 — PNS NC 30ML CHILD (F W Aloe Vera 150ML)",
+        "999173 — PNS NC 70ML CHILD (F W Aloe Vera 250ML)"
+      ],
+      "selected_count": 141,
+      "selection": "all available"
+    },
+    "performance_filters": {
+      "accuracy_band": "All",
+      "bias_band": "All",
+      "forecast_direction": [
+        "Over forecast",
+        "Under forecast",
+        "Within tolerance"
+      ],
+      "minimum_absolute_error_kl": 0.0,
+      "revision_direction": [
+        "Up",
+        "Down",
+        "Unchanged"
+      ],
+      "revision_outcome": [
+        "Improved",
+        "Worsened",
+        "Neutral"
+      ],
+      "revision_tolerance_kl": 0.01,
+      "top_n": 0,
+      "top_n_metric": "Actual volume"
+    },
+    "quality_filters": {
+      "actual_status": [
+        "Positive actual",
+        "Zero actual",
+        "Missing actual"
+      ],
+      "complete_vintage_history_only": false,
+      "hierarchy_status": [
+        "Mapped",
+        "Unmapped",
+        "Hierarchy conflict"
+      ],
+      "pair_status": [
+        "Complete pair",
+        "Missing Vintage A",
+        "Missing Vintage B",
+        "Missing both vintages",
+        "Missing actual",
+        "Zero actual"
+      ],
+      "source_availability": [
+        "TM only",
+        "Both sources"
+      ],
+      "zero_forecasts_only": false
+    },
+    "source": "TM",
+    "target_month_range": {
+      "end": "2026-12-01",
+      "selection": "full available range",
+      "start": "2025-05-01"
+    },
+    "view_mode": "Single source",
+    "vintage_a_rule": "Oldest available",
+    "vintage_b_rule": "Latest available"
+  },
+  "baseline_observations": {
+    "default_and_expanded_states_differ": true,
+    "full_page_screenshot_width_px": 6650,
+    "normalized_application_overflows": false,
+    "normalized_document_overflows": true,
+    "pre_normalization_application_overflows": true
+  },
+  "capture_contract": "forecast-analysis-dashboard-ui-baseline-v1",
+  "capture_date": "2026-08-27",
+  "default_capture": {
+    "normalization_actions": [
+      {
+        "id": "App",
+        "properties": {
+          "after": {
+            "height": {
+              "computed": "12025px",
+              "inline": "auto",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "none",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "0px",
+              "inline": "auto",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "visible",
+              "inline": "visible",
+              "priority": ""
+            },
+            "position": {
+              "computed": "relative",
+              "inline": "relative",
+              "priority": ""
+            }
+          },
+          "before": {
+            "height": {
+              "computed": "800px",
+              "inline": "",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "0px",
+              "inline": "",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "hidden auto",
+              "inline": "",
+              "priority": ""
+            },
+            "position": {
+              "computed": "relative",
+              "inline": "",
+              "priority": ""
+            }
+          }
+        },
+        "tag": "div"
+      },
+      {
+        "id": "_r_1_",
+        "properties": {
+          "after": {
+            "height": {
+              "computed": "800px",
+              "inline": "auto",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "none",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "auto",
+              "inline": "auto",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "visible",
+              "inline": "visible",
+              "priority": ""
+            },
+            "position": {
+              "computed": "relative",
+              "inline": "relative",
+              "priority": ""
+            }
+          },
+          "before": {
+            "height": {
+              "computed": "800px",
+              "inline": "",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "auto",
+              "inline": "",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "hidden",
+              "inline": "hidden",
+              "priority": ""
+            },
+            "position": {
+              "computed": "static",
+              "inline": "",
+              "priority": ""
+            }
+          }
+        },
+        "tag": "div"
+      },
+      {
+        "id": null,
+        "properties": {
+          "after": {
+            "height": {
+              "computed": "11081.7px",
+              "inline": "auto",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "none",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "auto",
+              "inline": "auto",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "visible",
+              "inline": "visible",
+              "priority": ""
+            },
+            "position": {
+              "computed": "relative",
+              "inline": "relative",
+              "priority": ""
+            }
+          },
+          "before": {
+            "height": {
+              "computed": "800px",
+              "inline": "100%",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "auto",
+              "inline": "",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "hidden",
+              "inline": "hidden",
+              "priority": ""
+            },
+            "position": {
+              "computed": "static",
+              "inline": "",
+              "priority": ""
+            }
+          }
+        },
+        "tag": "div"
+      },
+      {
+        "id": null,
+        "properties": {
+          "after": {
+            "height": {
+              "computed": "11081.7px",
+              "inline": "auto",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "none",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "auto",
+              "inline": "auto",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "visible",
+              "inline": "visible",
+              "priority": ""
+            },
+            "position": {
+              "computed": "relative",
+              "inline": "relative",
+              "priority": ""
+            }
+          },
+          "before": {
+            "height": {
+              "computed": "800px",
+              "inline": "",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "0px",
+              "inline": "",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "hidden",
+              "inline": "",
+              "priority": ""
+            },
+            "position": {
+              "computed": "absolute",
+              "inline": "",
+              "priority": ""
+            }
+          }
+        },
+        "tag": "div"
+      },
+      {
+        "id": null,
+        "properties": {
+          "after": {
+            "height": {
+              "computed": "auto",
+              "inline": "auto",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "none",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "0px",
+              "inline": "auto",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "visible",
+              "inline": "visible",
+              "priority": ""
+            },
+            "position": {
+              "computed": "relative",
+              "inline": "relative",
+              "priority": ""
+            }
+          },
+          "before": {
+            "height": {
+              "computed": "auto",
+              "inline": "",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "0px",
+              "inline": "",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "visible",
+              "inline": "",
+              "priority": ""
+            },
+            "position": {
+              "computed": "static",
+              "inline": "",
+              "priority": ""
+            }
+          }
+        },
+        "tag": "div"
+      },
+      {
+        "id": "root",
+        "properties": {
+          "after": {
+            "height": {
+              "computed": "11081.7px",
+              "inline": "auto",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "none",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "0px",
+              "inline": "auto",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "visible",
+              "inline": "visible",
+              "priority": ""
+            },
+            "position": {
+              "computed": "relative",
+              "inline": "relative",
+              "priority": ""
+            }
+          },
+          "before": {
+            "height": {
+              "computed": "11081.7px",
+              "inline": "",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "800px",
+              "inline": "",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "visible",
+              "inline": "",
+              "priority": ""
+            },
+            "position": {
+              "computed": "static",
+              "inline": "",
+              "priority": ""
+            }
+          }
+        },
+        "tag": "div"
+      },
+      {
+        "id": null,
+        "properties": {
+          "after": {
+            "height": {
+              "computed": "11081.7px",
+              "inline": "auto",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "none",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "0px",
+              "inline": "auto",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "visible",
+              "inline": "visible",
+              "priority": ""
+            },
+            "position": {
+              "computed": "relative",
+              "inline": "relative",
+              "priority": ""
+            }
+          },
+          "before": {
+            "height": {
+              "computed": "11081.7px",
+              "inline": "",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "0px",
+              "inline": "",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "visible",
+              "inline": "",
+              "priority": ""
+            },
+            "position": {
+              "computed": "static",
+              "inline": "",
+              "priority": ""
+            }
+          }
+        },
+        "tag": "body"
+      },
+      {
+        "id": null,
+        "properties": {
+          "after": {
+            "height": {
+              "computed": "11081.7px",
+              "inline": "auto",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "none",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "0px",
+              "inline": "auto",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "visible",
+              "inline": "visible",
+              "priority": ""
+            },
+            "position": {
+              "computed": "relative",
+              "inline": "relative",
+              "priority": ""
+            }
+          },
+          "before": {
+            "height": {
+              "computed": "11081.7px",
+              "inline": "",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "0px",
+              "inline": "",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "visible",
+              "inline": "",
+              "priority": ""
+            },
+            "position": {
+              "computed": "static",
+              "inline": "",
+              "priority": ""
+            }
+          }
+        },
+        "tag": "html"
+      }
+    ],
+    "normalization_contract": "marimo-full-page-normalization-v1",
+    "normalization_evidence": "validation-artifacts/forecast-analysis-dashboard-ui-normalization-default.json",
+    "normalized": true,
+    "normalized_capture": {
+      "application": {
+        "clientHeight": 11082,
+        "clientWidth": 6650,
+        "scrollHeight": 11082,
+        "scrollWidth": 6650
+      },
+      "body": {
+        "clientHeight": 11082,
+        "clientWidth": 1280,
+        "scrollHeight": 11082,
+        "scrollWidth": 6650
+      },
+      "content_probe": {
+        "appScrollHeight": 11082,
+        "appTextLength": 7857,
+        "bodyTextLength": 7857,
+        "maxVisibleElementBottom": 11081.703125
+      },
+      "document": {
+        "clientHeight": 800,
+        "clientWidth": 1280,
+        "scrollHeight": 11082,
+        "scrollWidth": 6650
+      },
+      "normalization_contract": "marimo-full-page-normalization-v1",
+      "normalized": true,
+      "screenshot": {
+        "height": 11082,
+        "path": "validation-artifacts/forecast-analysis-dashboard-default.png",
+        "sha256": "50290e0b328da578717d60c4fea2e6e2abaf39a6fc203c19d76d984147f84fe1",
+        "width": 6650
+      },
+      "state": "default-closed",
+      "viewport": {
+        "devicePixelRatio": 1,
+        "height": 800,
+        "width": 1280
+      }
+    },
+    "pre_normalization": {
+      "application": {
+        "clientHeight": 800,
+        "clientWidth": 1280,
+        "scrollHeight": 12025,
+        "scrollWidth": 2000
+      },
+      "body": {
+        "clientHeight": 800,
+        "clientWidth": 1280,
+        "scrollHeight": 800,
+        "scrollWidth": 1280
+      },
+      "document": {
+        "clientHeight": 800,
+        "clientWidth": 1280,
+        "scrollHeight": 800,
+        "scrollWidth": 1280
+      },
+      "viewport": {
+        "devicePixelRatio": 1,
+        "height": 800,
+        "width": 1280
+      }
+    },
+    "state": "default-closed",
+    "state_evidence": "validation-artifacts/forecast-analysis-dashboard-ui-raw-default.json",
+    "viewport": {
+      "devicePixelRatio": 1,
+      "height": 800,
+      "width": 1280
+    }
+  },
+  "expanded_capture": {
+    "normalization_actions": [
+      {
+        "id": "App",
+        "properties": {
+          "after": {
+            "height": {
+              "computed": "11186.3px",
+              "inline": "auto",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "none",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "0px",
+              "inline": "auto",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "visible",
+              "inline": "visible",
+              "priority": ""
+            },
+            "position": {
+              "computed": "relative",
+              "inline": "relative",
+              "priority": ""
+            }
+          },
+          "before": {
+            "height": {
+              "computed": "11186.3px",
+              "inline": "",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "0px",
+              "inline": "",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "hidden auto",
+              "inline": "",
+              "priority": ""
+            },
+            "position": {
+              "computed": "relative",
+              "inline": "",
+              "priority": ""
+            }
+          }
+        },
+        "tag": "div"
+      },
+      {
+        "id": "_r_1_",
+        "properties": {
+          "after": {
+            "height": {
+              "computed": "11186.3px",
+              "inline": "auto",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "none",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "auto",
+              "inline": "auto",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "visible",
+              "inline": "visible",
+              "priority": ""
+            },
+            "position": {
+              "computed": "relative",
+              "inline": "relative",
+              "priority": ""
+            }
+          },
+          "before": {
+            "height": {
+              "computed": "11186.3px",
+              "inline": "",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "auto",
+              "inline": "",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "visible",
+              "inline": "",
+              "priority": ""
+            },
+            "position": {
+              "computed": "static",
+              "inline": "",
+              "priority": ""
+            }
+          }
+        },
+        "tag": "div"
+      },
+      {
+        "id": null,
+        "properties": {
+          "after": {
+            "height": {
+              "computed": "11186.3px",
+              "inline": "auto",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "none",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "auto",
+              "inline": "auto",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "visible",
+              "inline": "visible",
+              "priority": ""
+            },
+            "position": {
+              "computed": "relative",
+              "inline": "relative",
+              "priority": ""
+            }
+          },
+          "before": {
+            "height": {
+              "computed": "11186.3px",
+              "inline": "",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "auto",
+              "inline": "",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "visible",
+              "inline": "",
+              "priority": ""
+            },
+            "position": {
+              "computed": "static",
+              "inline": "",
+              "priority": ""
+            }
+          }
+        },
+        "tag": "div"
+      },
+      {
+        "id": null,
+        "properties": {
+          "after": {
+            "height": {
+              "computed": "11186.3px",
+              "inline": "auto",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "none",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "auto",
+              "inline": "auto",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "visible",
+              "inline": "visible",
+              "priority": ""
+            },
+            "position": {
+              "computed": "relative",
+              "inline": "relative",
+              "priority": ""
+            }
+          },
+          "before": {
+            "height": {
+              "computed": "800px",
+              "inline": "",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "0px",
+              "inline": "",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "hidden",
+              "inline": "",
+              "priority": ""
+            },
+            "position": {
+              "computed": "absolute",
+              "inline": "",
+              "priority": ""
+            }
+          }
+        },
+        "tag": "div"
+      },
+      {
+        "id": null,
+        "properties": {
+          "after": {
+            "height": {
+              "computed": "auto",
+              "inline": "auto",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "none",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "0px",
+              "inline": "auto",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "visible",
+              "inline": "visible",
+              "priority": ""
+            },
+            "position": {
+              "computed": "relative",
+              "inline": "relative",
+              "priority": ""
+            }
+          },
+          "before": {
+            "height": {
+              "computed": "auto",
+              "inline": "",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "0px",
+              "inline": "",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "visible",
+              "inline": "",
+              "priority": ""
+            },
+            "position": {
+              "computed": "static",
+              "inline": "",
+              "priority": ""
+            }
+          }
+        },
+        "tag": "div"
+      },
+      {
+        "id": "root",
+        "properties": {
+          "after": {
+            "height": {
+              "computed": "11186.3px",
+              "inline": "auto",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "none",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "0px",
+              "inline": "auto",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "visible",
+              "inline": "visible",
+              "priority": ""
+            },
+            "position": {
+              "computed": "relative",
+              "inline": "relative",
+              "priority": ""
+            }
+          },
+          "before": {
+            "height": {
+              "computed": "11186.3px",
+              "inline": "",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "800px",
+              "inline": "",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "visible",
+              "inline": "",
+              "priority": ""
+            },
+            "position": {
+              "computed": "static",
+              "inline": "",
+              "priority": ""
+            }
+          }
+        },
+        "tag": "div"
+      },
+      {
+        "id": null,
+        "properties": {
+          "after": {
+            "height": {
+              "computed": "11186.3px",
+              "inline": "auto",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "none",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "0px",
+              "inline": "auto",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "visible",
+              "inline": "visible",
+              "priority": ""
+            },
+            "position": {
+              "computed": "relative",
+              "inline": "relative",
+              "priority": ""
+            }
+          },
+          "before": {
+            "height": {
+              "computed": "11186.3px",
+              "inline": "",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "0px",
+              "inline": "",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "visible",
+              "inline": "",
+              "priority": ""
+            },
+            "position": {
+              "computed": "static",
+              "inline": "",
+              "priority": ""
+            }
+          }
+        },
+        "tag": "body"
+      },
+      {
+        "id": null,
+        "properties": {
+          "after": {
+            "height": {
+              "computed": "11186.3px",
+              "inline": "auto",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "none",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "0px",
+              "inline": "auto",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "visible",
+              "inline": "visible",
+              "priority": ""
+            },
+            "position": {
+              "computed": "relative",
+              "inline": "relative",
+              "priority": ""
+            }
+          },
+          "before": {
+            "height": {
+              "computed": "11186.3px",
+              "inline": "",
+              "priority": ""
+            },
+            "max-height": {
+              "computed": "none",
+              "inline": "",
+              "priority": ""
+            },
+            "min-height": {
+              "computed": "0px",
+              "inline": "",
+              "priority": ""
+            },
+            "overflow": {
+              "computed": "visible",
+              "inline": "",
+              "priority": ""
+            },
+            "position": {
+              "computed": "static",
+              "inline": "",
+              "priority": ""
+            }
+          }
+        },
+        "tag": "html"
+      }
+    ],
+    "normalization_contract": "marimo-full-page-normalization-v1",
+    "normalization_evidence": "validation-artifacts/forecast-analysis-dashboard-ui-normalization-expanded.json",
+    "normalized": true,
+    "normalized_capture": {
+      "application": {
+        "clientHeight": 11186,
+        "clientWidth": 6650,
+        "scrollHeight": 11186,
+        "scrollWidth": 6650
+      },
+      "body": {
+        "clientHeight": 11186,
+        "clientWidth": 1280,
+        "scrollHeight": 11186,
+        "scrollWidth": 6650
+      },
+      "content_probe": {
+        "appScrollHeight": 11186,
+        "appTextLength": 7857,
+        "bodyTextLength": 7857,
+        "maxVisibleElementBottom": 11186.28125
+      },
+      "document": {
+        "clientHeight": 800,
+        "clientWidth": 1280,
+        "scrollHeight": 11186,
+        "scrollWidth": 6650
+      },
+      "normalization_contract": "marimo-full-page-normalization-v1",
+      "normalized": true,
+      "screenshot": {
+        "height": 11186,
+        "path": "validation-artifacts/forecast-analysis-dashboard-expanded.png",
+        "sha256": "02131ea641894398e066800cccc0c43b2cf71e39b539bcd1e70f7d31f844e745",
+        "width": 6650
+      },
+      "state": "expanded-open",
+      "viewport": {
+        "devicePixelRatio": 1,
+        "height": 800,
+        "width": 1280
+      }
+    },
+    "pre_normalization": {
+      "application": {
+        "clientHeight": 11186,
+        "clientWidth": 6650,
+        "scrollHeight": 11186,
+        "scrollWidth": 6650
+      },
+      "body": {
+        "clientHeight": 800,
+        "clientWidth": 1280,
+        "scrollHeight": 800,
+        "scrollWidth": 1280
+      },
+      "document": {
+        "clientHeight": 800,
+        "clientWidth": 1280,
+        "scrollHeight": 800,
+        "scrollWidth": 1280
+      },
+      "viewport": {
+        "devicePixelRatio": 1,
+        "height": 800,
+        "width": 1280
+      }
+    },
+    "state": "expanded-open",
+    "state_evidence": "validation-artifacts/forecast-analysis-dashboard-ui-raw-expanded.json",
+    "viewport": {
+      "devicePixelRatio": 1,
+      "height": 800,
+      "width": 1280
+    }
+  },
+  "normalized_capture": {
+    "application": {
+      "clientHeight": 11186,
+      "clientWidth": 6650,
+      "scrollHeight": 11186,
+      "scrollWidth": 6650
+    },
+    "body": {
+      "clientHeight": 11186,
+      "clientWidth": 1280,
+      "scrollHeight": 11186,
+      "scrollWidth": 6650
+    },
+    "content_probe": {
+      "appScrollHeight": 11186,
+      "appTextLength": 7857,
+      "bodyTextLength": 7857,
+      "maxVisibleElementBottom": 11186.28125
+    },
+    "document": {
+      "clientHeight": 800,
+      "clientWidth": 1280,
+      "scrollHeight": 11186,
+      "scrollWidth": 6650
+    },
+    "normalization_contract": "marimo-full-page-normalization-v1",
+    "normalized": true,
+    "screenshot": {
+      "height": 11186,
+      "path": "validation-artifacts/forecast-analysis-dashboard-expanded.png",
+      "sha256": "02131ea641894398e066800cccc0c43b2cf71e39b539bcd1e70f7d31f844e745",
+      "width": 6650
+    },
+    "state": "expanded-open",
+    "viewport": {
+      "devicePixelRatio": 1,
+      "height": 800,
+      "width": 1280
+    }
+  },
+  "origin": "http://127.0.0.1:8765/",
+  "overflow_tolerance_px": 2,
+  "pre_normalization": {
+    "application": {
+      "clientHeight": 800,
+      "clientWidth": 1280,
+      "scrollHeight": 12025,
+      "scrollWidth": 2000
+    },
+    "body": {
+      "clientHeight": 800,
+      "clientWidth": 1280,
+      "scrollHeight": 800,
+      "scrollWidth": 1280
+    },
+    "document": {
+      "clientHeight": 800,
+      "clientWidth": 1280,
+      "scrollHeight": 800,
+      "scrollWidth": 1280
+    },
+    "viewport": {
+      "devicePixelRatio": 1,
+      "height": 800,
+      "width": 1280
+    }
+  },
+  "raw_evidence": {
+    "default_normalization": "validation-artifacts/forecast-analysis-dashboard-ui-normalization-default.json",
+    "default_state": "validation-artifacts/forecast-analysis-dashboard-ui-raw-default.json",
+    "expanded_normalization": "validation-artifacts/forecast-analysis-dashboard-ui-normalization-expanded.json",
+    "expanded_state": "validation-artifacts/forecast-analysis-dashboard-ui-raw-expanded.json"
+  },
+  "schema_version": 2,
+  "screenshots": {
+    "default": {
+      "height": 11082,
+      "path": "validation-artifacts/forecast-analysis-dashboard-default.png",
+      "sha256": "50290e0b328da578717d60c4fea2e6e2abaf39a6fc203c19d76d984147f84fe1",
+      "width": 6650
+    },
+    "expanded": {
+      "height": 11186,
+      "path": "validation-artifacts/forecast-analysis-dashboard-expanded.png",
+      "sha256": "02131ea641894398e066800cccc0c43b2cf71e39b539bcd1e70f7d31f844e745",
+      "width": 6650
+    },
+    "immutable_before_state": {
+      "capture_date": "2026-08-26",
+      "height": 11082,
+      "path": "validation-artifacts/forecast-analysis-dashboard-long-full.png",
+      "sha256": "29cd5651eadfec811b1c0671786f4a807dc846e1c59f9b5bddfab17e7261dfdd",
+      "width": 6650
+    }
+  },
+  "state": "default-closed",
+  "title": "forecast accuracy app",
+  "url": "http://127.0.0.1:8765/",
+  "viewport": {
+    "devicePixelRatio": 1,
+    "height": 800,
+    "width": 1280
+  },
+  "workflow": {
+    "browser_session": "forecast-dashboard-ui-78c4994f9290",
+    "execution_id": "20260827T090002Z-4d98c1867b96",
+    "name": "forecast-dashboard-live-capture-v1",
+    "path": "scripts/capture_forecast_analysis_dashboard_ui.py"
+  }
+}
