@@ -1,0 +1,357 @@
+[
+  {
+    "index": 1,
+    "title": "Define metric governance, targets, and tolerance contracts",
+    "blockedBy": [],
+    "what": "Let planning leaders configure and understand the business rules behind every management metric, then evaluate performance against agreed targets without changing the source-safe population contract.",
+    "criteria": [
+      "Forecast accuracy is explicitly identified as the configured business formula, including denominator eligibility and negative-value behavior.",
+      "Accuracy, bias, revision-effectiveness, coverage, and forecast-completeness targets can be configured globally and overridden by hierarchy or horizon.",
+      "Every target-backed metric exposes actual value, target, variance, and an On target, Watch, or Off target status.",
+      "The dashboard provides a user-facing metric glossary with units, numerator, denominator, population rules, and zero-denominator behavior.",
+      "Refresh language distinguishes last successful refresh, data-current-through date, and period-close status instead of using an ambiguous live-data claim.",
+      "Target and glossary changes are validated against automated metric and browser fixtures."
+    ]
+  },
+  {
+    "index": 2,
+    "title": "Make analysis scopes saveable and shareable",
+    "blockedBy": [],
+    "what": "Let a user preserve, reopen, and share the exact analytical population and view state used in a demand review.",
+    "criteria": [
+      "The URL represents all shared population filters, selected tab, comparison subview, metric selectors, and selected product-target detail.",
+      "Opening a shared URL reconstructs the same population, counts, charts, and view without silently falling back to defaults.",
+      "Users can save a named view, rename it, delete it, and choose a default view.",
+      "Users can bookmark products or brands and return to recent analysis scopes.",
+      "Invalid or no-longer-available values produce an explicit recovery message while preserving the remaining valid scope.",
+      "Saved and shared scopes are covered by browser history, reload, and backward/forward tests."
+    ]
+  },
+  {
+    "index": 3,
+    "title": "Replace portfolio dropdowns with hierarchy-aware search and multi-select",
+    "blockedBy": [],
+    "what": "Let users find and select large product populations quickly across business hierarchies without scrolling through long native dropdowns.",
+    "criteria": [
+      "Brand and product controls support search-as-you-type and multi-selection while remaining keyboard accessible.",
+      "Users can navigate available category, brand, sub-brand, and parent-product hierarchy levels supplied by the dataset.",
+      "Users can paste a list of product codes and receive a clear matched, unmatched, and duplicate summary before applying it.",
+      "Recent and pinned products are available without changing the shared population contract.",
+      "Selection summaries remain compact at hundreds or thousands of selected members and expose the full list on demand.",
+      "Filtering, reset, empty states, exports, and responsive behavior remain correct with single and multiple selections."
+    ]
+  },
+  {
+    "index": 4,
+    "title": "Establish a chart readability and interaction standard",
+    "blockedBy": [],
+    "what": "Give every analytical chart a consistent, meeting-safe contract for scales, units, dates, evidence, accessibility, and interaction.",
+    "criteria": [
+      "Every quantitative chart shows explicit axis titles, units, readable ticks, and year-aware date labels where dates can repeat across years.",
+      "Signed metrics show a visible zero reference and use direction-preserving encodings rather than absolute bar length alone.",
+      "Actuals cutoff, closed periods, and forecast-only future periods are visibly distinguished.",
+      "Tooltips show the metric value, source, product or hierarchy context, period or horizon, actual volume, forecast volume, and eligible count where applicable.",
+      "Targets, tolerance bands, and materiality references use one consistent visual language.",
+      "Charts remain interpretable without hover in screenshots and meeting-room display conditions.",
+      "Keyboard, screen-reader, reduced-motion, contrast, zoom, and responsive tests cover the shared chart contract."
+    ]
+  },
+  {
+    "index": 5,
+    "title": "Deliver the director executive cockpit",
+    "blockedBy": [1, 4],
+    "what": "Give a demand planning director a first screen that answers whether performance is on target, what changed, and what needs intervention now.",
+    "criteria": [
+      "The primary KPI row contains forecast accuracy versus target, bias versus tolerance, absolute error or configured value at risk, and revision effectiveness or forecast value add.",
+      "Coverage and data trust remain visible without competing equally with the four management KPIs.",
+      "Rolling 3-month, rolling 12-month, prior-period, and prior-year comparisons are available when the selected population has sufficient history.",
+      "The page shows the top material risks, top improvement opportunities, and currently open actions from the active population.",
+      "A deterministic summary states the most important measured changes without asserting unsupported causes.",
+      "Population and formula audit detail remains available through progressive disclosure.",
+      "The cockpit passes director-scale readability, empty-state, and responsive browser validation."
+    ]
+  },
+  {
+    "index": 6,
+    "title": "Fix monthly forecast-versus-actual analysis",
+    "blockedBy": [1, 4],
+    "what": "Let users compare forecast and actual volume honestly over time and connect volume variance to accuracy and bias performance.",
+    "criteria": [
+      "Forecast versus actual renders two explicitly labeled, quantitatively comparable series rather than a forecast-only line with actuals available only in hover evidence.",
+      "The view exposes forecast-minus-actual variance in KL and percentage terms with correct zero-denominator handling.",
+      "Accuracy, bias, and absolute-error modes use explicit units and the same period population as the volume comparison.",
+      "Actuals cutoff and forecast-only future months are clearly marked and do not appear as unexplained blank chart space.",
+      "Users can choose monthly granularity, rolling windows, and prior-period or prior-year overlays when data supports them.",
+      "Zoom, brush, or range selection updates the selected period and can feed the active exception population.",
+      "Automated tests prove forecast and actual evidence remains aligned under filtering and comparison mode."
+    ]
+  },
+  {
+    "index": 7,
+    "title": "Upgrade horizon and brand-month diagnosis",
+    "blockedBy": [1, 4],
+    "what": "Let users see where performance deteriorates by forecast horizon and hierarchy, with encodings that preserve sign, target, materiality, and sample context.",
+    "criteria": [
+      "Horizon performance uses a labeled dot or line representation with a zero reference for signed metrics.",
+      "TM and ML can be compared side by side only at aligned horizons, with actual volume and observation counts available at each point.",
+      "Horizon-specific targets and target attainment are visible when configured.",
+      "The brand-by-target-month heatmap uses diverging scales for signed metrics, target-aware scales for accuracy, and sequential scales for magnitude metrics.",
+      "The heatmap displays a legend, year-aware month labels, robust outlier handling, and an explicit statement of how many brands and months are shown versus available.",
+      "Users can change the visible hierarchy depth and select a heatmap cell or horizon point for downstream investigation.",
+      "Tests cover negative accuracy, extreme bias, sparse cells, quality groups, and aligned source comparison."
+    ]
+  },
+  {
+    "index": 8,
+    "title": "Upgrade revision-effectiveness diagnosis",
+    "blockedBy": [1, 4],
+    "what": "Let planning leaders understand when revisions add value, where they cause deterioration, and how revision behavior changes over time.",
+    "criteria": [
+      "Improved, worsened, neutral, and unchanged outcomes show counts and percentages against clearly named denominators.",
+      "Revision effectiveness is trended over target month and can be decomposed by hierarchy and horizon.",
+      "A Pareto view identifies the products or segments responsible for most worsened-revision error.",
+      "The revision scatter has labeled axes, tick values, named quadrants, materiality references, and point evidence.",
+      "Dense populations support zoom and either lasso selection or a density/hexbin representation without hiding outliers.",
+      "Selecting an outcome, segment, or scatter region produces a matching observation set for investigation.",
+      "Revision tolerance and materially revised denominators remain consistent with the configured metric contract."
+    ]
+  },
+  {
+    "index": 9,
+    "title": "Turn TM-versus-ML into a decision view",
+    "blockedBy": [1, 4],
+    "what": "Help a model-governance or planning leader decide where ML or TM performs materially better on an aligned common population.",
+    "criteria": [
+      "The paired-error chart has labeled axes, readable scales, a diagonal equality reference, and a configurable materiality band for ties.",
+      "Large populations remain interpretable through suitable scaling, transparency, density, or aggregation without losing material outliers.",
+      "Users can segment winner results by hierarchy, horizon, volume tier, lifecycle, and other available governed dimensions.",
+      "The view shows winner counts, actual volume, absolute-error difference, accuracy difference, bias difference, and source-only coverage.",
+      "Source adoption evidence distinguishes statistical superiority from coverage gaps and avoids recommending one source on incomparable populations.",
+      "Selecting a point or segment exposes the corresponding products and target months.",
+      "Aligned-population and coverage tests protect against cross-source or cross-horizon leakage."
+    ]
+  },
+  {
+    "index": 10,
+    "title": "Deliver a production-grade product deep dive",
+    "blockedBy": [3, 4],
+    "what": "Let a planner investigate one product-target combination through complete chronological forecast development, actual context, revisions, stability, and related events.",
+    "criteria": [
+      "The default selection is either a representative material observation with positive actual and sufficient history or an explicit choose-an-exception state.",
+      "Product selection supports search, recent and pinned items, and previous or next exception navigation.",
+      "The history chart has a labeled y-axis, value evidence, source-distinct vintage lines, actual reference, and forecast-horizon context.",
+      "The page shows source-specific error, bias, forecast range, volatility, revision count, maximum revision, and insufficient-history rules.",
+      "Consecutive revisions are ordered chronologically and link their amount, direction, and error outcome.",
+      "Governed promotions, overrides, freeze dates, and other available events can be overlaid without claiming causality.",
+      "The selected product, target, and source scope survive reload, sharing, and drill-through."
+    ]
+  },
+  {
+    "index": 11,
+    "title": "Promote forecast exceptions into a portfolio work queue",
+    "blockedBy": [1, 3, 4],
+    "what": "Give planning teams a dedicated, prioritized portfolio queue for finding and triaging the forecast observations that matter most.",
+    "criteria": [
+      "Forecast exceptions are a first-class destination rather than a secondary subview under Product history.",
+      "Columns are sortable, filterable, resizable where appropriate, and configurable through a column chooser with a sticky header.",
+      "The queue supports hierarchy-aware search, bulk selection, and ranking by actual volume, absolute error, deterioration, and configured business materiality.",
+      "A Pareto summary shows cumulative contribution to absolute error and identifies the concentration in the top 10 and top 20 observations or products.",
+      "Rows expose all required metric, vintage, pair, mapping, and source evidence and can open the corresponding product-target investigation.",
+      "Preview limits are clearly distinguished from total active rows, and exports contain exactly the complete active population and advertised audit columns.",
+      "Large-population performance and keyboard accessibility are validated."
+    ]
+  },
+  {
+    "index": 12,
+    "title": "Connect charts, quality exceptions, and tables to drill-down",
+    "blockedBy": [2, 6, 7, 8, 9, 10, 11],
+    "what": "Turn separate reports into one investigative workflow where every signal can open the relevant observation set or product detail without losing context.",
+    "criteria": [
+      "Monthly points and selected ranges can open or filter the matching forecast exceptions.",
+      "Horizon points and heatmap cells open the matching scoped observations.",
+      "Revision and TM-versus-ML scatter selections open a linked table and selected product deep dive.",
+      "Quality exception examples and queue rows open the correct product-target context.",
+      "Back, forward, reload, and shared URLs preserve the originating scope and selected observation.",
+      "A visible breadcrumb or return action takes the user back to the originating analysis without resetting filters.",
+      "Cross-view browser tests prove counts and exports remain consistent after drill-through."
+    ]
+  },
+  {
+    "index": 13,
+    "title": "Turn Data quality into a compact Data trust workspace",
+    "blockedBy": [1],
+    "what": "Give directors, planners, and data stewards a concise view of whether the analysis is trustworthy and a focused path to remediate material data problems.",
+    "criteria": [
+      "Hierarchy, actual, pair, source, forecast-completeness, and refresh states show count, percentage, affected products, affected periods, and actual-volume impact.",
+      "Data-current-through date, expected refresh SLA, last successful refresh, and refresh failures are visible.",
+      "Exception previews avoid repetitive rows by summarizing affected products first while preserving product-month detail on expansion.",
+      "Each issue category shows first-seen date, current status, remediation owner when available, and a category-specific export.",
+      "Severity reflects business impact and recency rather than treating every non-good state equally.",
+      "Technical provenance, source files, metric version, and processing details are consolidated in a Data and metric lineage drawer.",
+      "Director and data-steward presentations use the same facts at different density levels."
+    ]
+  },
+  {
+    "index": 14,
+    "title": "Add accountable exception-management workflow",
+    "blockedBy": [11],
+    "what": "Let teams assign, investigate, resolve, and audit material forecast exceptions without editing the forecast itself.",
+    "criteria": [
+      "An exception can have an owner, status, due date, root-cause category, comment thread, agreed action, and expected impact.",
+      "Users can assign and update multiple selected exceptions in bulk with role-appropriate validation.",
+      "Resolution requires a disposition and supporting evidence; resolved items can be reopened with a recorded reason.",
+      "Overdue, unassigned, escalated, and repeatedly reopened items are visible as dedicated queue states.",
+      "Every workflow change records actor, timestamp, previous value, and new value in an audit history.",
+      "The director cockpit and product deep dive show related open actions without changing analytical metrics.",
+      "Workflow tests cover concurrency, permissions-ready ownership boundaries, and export of the current action state."
+    ]
+  },
+  {
+    "index": 15,
+    "title": "Add threshold alerts and subscriptions",
+    "blockedBy": [1, 13, 14],
+    "what": "Notify the right users when forecast performance, data trust, or exception workflow crosses an agreed management threshold.",
+    "criteria": [
+      "Users can subscribe to governed alert rules at portfolio, hierarchy, product, source, and horizon scopes.",
+      "Supported rules include sustained bias, accuracy deterioration, material worsened revisions, missing actuals beyond SLA, lost source coverage, and overdue or unassigned actions.",
+      "Alerts state the triggering metric, threshold, population, evidence, and direct link to the relevant dashboard scope.",
+      "Deduplication and cooldown rules prevent repeated notifications for the same unresolved condition.",
+      "Users can acknowledge, mute, or unsubscribe within their permitted scope without altering the underlying exception.",
+      "Alert delivery and failure states are auditable and covered by deterministic rule tests."
+    ]
+  },
+  {
+    "index": 16,
+    "title": "Add the first end-to-end forecast-value-add stage comparison",
+    "blockedBy": [1],
+    "what": "Prove the forecast-value-add architecture with one complete comparison between a governed baseline forecast and the final approved forecast.",
+    "criteria": [
+      "The analysis contract represents forecast stage separately from source and vintage without combining incompatible rows.",
+      "Baseline and final stages align on source-safe product-target populations and expose stage-only coverage.",
+      "The view reports accuracy, bias, absolute error, incremental error improvement, percentage improved, and material deterioration for each stage.",
+      "Users can filter and drill by period, hierarchy, horizon, and source while retaining the common population.",
+      "Missing stages and zero-denominator populations remain explicit in metrics, coverage, and exports.",
+      "Hand-calculated fixtures and browser tests prove the complete data-to-UI slice before additional stages are added."
+    ]
+  },
+  {
+    "index": 17,
+    "title": "Expand forecast value add across the full planning chain",
+    "blockedBy": [16],
+    "what": "Let planning leaders govern value added or destroyed across naive, statistical or ML, planner, commercial, consensus, and final approved forecast stages.",
+    "criteria": [
+      "Configured planning stages appear in a deterministic business order and preserve stage, source, vintage, product, target, and horizon identity.",
+      "A value-add waterfall and stage table show accuracy, bias, absolute error, incremental value add, improved share, deterioration, and coverage at every stage.",
+      "Users can attribute stage transitions to available planner, team, function, hierarchy, or market actors without inventing missing ownership.",
+      "Late revisions and changes inside configured frozen horizons are separately measurable.",
+      "Stage comparisons support hierarchy, horizon, lifecycle, promotion, and forecastability segmentation when those dimensions are available.",
+      "Exports contain the exact aligned stage population and transition evidence.",
+      "Tests prevent averaging subgroup percentages or comparing unmatched stages."
+    ]
+  },
+  {
+    "index": 18,
+    "title": "Add governed demand-event context and segmentation",
+    "blockedBy": [3, 4, 10],
+    "what": "Let users place forecast performance alongside validated demand events and product characteristics while keeping observation separate from causal claims.",
+    "criteria": [
+      "The data contract can ingest governed promotion, price, distribution, customer, lifecycle, launch, discontinuation, seasonality, supply-constraint, and lost-sales event records with provenance.",
+      "Users can filter or segment performance by available event and product characteristics without silently excluding unclassified observations.",
+      "Monthly and product-history charts can overlay event windows and source labels.",
+      "Exception and product detail views show relevant events as context with source, date, and confidence or status where supplied.",
+      "Interface copy describes association or context and never states that an event caused an error without a separately validated causal model.",
+      "Missing, overlapping, and conflicting event data remain visible in data trust diagnostics.",
+      "Tests cover event joins, duplicate prevention, period boundaries, and unchanged core metric populations."
+    ]
+  },
+  {
+    "index": 19,
+    "title": "Translate forecast exceptions into business impact",
+    "blockedBy": [1, 11],
+    "what": "Prioritize forecast exceptions using optional validated revenue, margin, inventory, working-capital, waste, service, and lost-sales impact measures.",
+    "criteria": [
+      "Business-impact inputs have explicit grain, currency, unit, effective-date, provenance, and missing-data contracts.",
+      "The queue can rank by configured business impact while retaining KL error and actual-volume evidence.",
+      "Over-forecast and under-forecast observations use distinct impact interpretations where validated inputs support them.",
+      "Missing commercial or supply inputs never generate fabricated impact values and remain visible as unavailable coverage.",
+      "The director cockpit shows top business risks and opportunities with the contributing metric and population.",
+      "Impact currency and aggregation rules are configurable for multi-market populations.",
+      "Hand-calculated fixtures and reconciliation exports prove every impact measure."
+    ]
+  },
+  {
+    "index": 20,
+    "title": "Reorganize the product around role-based planning workflows",
+    "blockedBy": [5, 7, 8, 9, 10, 11, 13, 14, 21],
+    "what": "Present the analytical foundation through role-appropriate planning workflows rather than one identical navigation hierarchy for every user.",
+    "criteria": [
+      "The primary information architecture provides Executive cockpit, Performance diagnosis, Forecast value add, Exceptions and actions, Product deep dive, and Data trust destinations.",
+      "Directors land on target status, material risks, and open actions; planners land on their exception queue; data stewards land on remediation; model owners land on source comparison.",
+      "Role-specific defaults change presentation and landing location without changing metric definitions or silently narrowing authorized populations.",
+      "Forecast exceptions are removed from the Product history subview and become a dedicated workflow destination.",
+      "Technical provenance is moved out of permanent executive screen space into the governed lineage experience.",
+      "Navigation remains keyboard accessible, responsive, collapsible, history-aware, and shareable.",
+      "End-to-end browser suites cover every role and destination."
+    ]
+  },
+  {
+    "index": 21,
+    "title": "Add enterprise identity, permissions, and audit governance",
+    "blockedBy": [],
+    "what": "Give enterprise customers authenticated access, governed visibility, accountable ownership, and an auditable record of user activity.",
+    "criteria": [
+      "Users authenticate through a configurable enterprise SSO integration with a documented local-development alternative.",
+      "Role-based access controls govern populations, exports, workflow actions, administration, and sensitive business-impact data.",
+      "Ownership and comments use stable user identities rather than free-text names.",
+      "Security-relevant access, export, configuration, and workflow changes are recorded in an immutable audit log.",
+      "Data-retention and deletion policies are configurable and documented for analytical, workflow, and audit records.",
+      "Unauthorized data is not fetched or exposed through URLs, downloads, client state, or error messages.",
+      "Automated authorization and audit tests cover representative director, planner, data-steward, model-owner, and administrator roles."
+    ]
+  },
+  {
+    "index": 22,
+    "title": "Add scheduled reporting and governed integration APIs",
+    "blockedBy": [2, 13, 21],
+    "what": "Let authorized users distribute reproducible dashboard views and integrate governed forecast-performance data into enterprise workflows.",
+    "criteria": [
+      "Users can schedule authorized saved views for email delivery and generate reproducible PDF and presentation-ready outputs.",
+      "Scheduled outputs include scope, metric definitions, refresh timestamp, data-current-through date, and coverage warnings.",
+      "A governed API exposes versioned metric, exception, quality, and workflow contracts with the same authorization rules as the UI.",
+      "Exports and API responses preserve exact active filters, aligned populations, units, and audit fields.",
+      "Delivery, refresh, and integration failures are monitored, retried according to policy, and visible to administrators.",
+      "Rate limits, pagination, schema versioning, and deprecation behavior are documented and tested.",
+      "No scheduled or API output can bypass row-level permissions or data-retention rules."
+    ]
+  },
+  {
+    "index": 23,
+    "title": "Add scenario comparison and decision tracking",
+    "blockedBy": [2, 14, 19],
+    "what": "Let planning teams compare named analytical scenarios, record a decision, and later evaluate whether the expected outcome was achieved.",
+    "criteria": [
+      "Users can create named scenarios from saved scopes without mutating canonical forecast or actual data.",
+      "Two or more scenarios can be compared side by side with explicit differences in population, metrics, assumptions, and business impact.",
+      "A decision record captures selected scenario, owner, approver, rationale, expected impact, date, and linked exceptions or actions.",
+      "Decision status and approvals are permission-controlled and auditable.",
+      "When actuals become available, the product can compare realized outcome with the recorded expectation without asserting causality.",
+      "Scenario and decision links are shareable and remain reproducible against their saved input versions.",
+      "Tests cover stale inputs, conflicting updates, unauthorized approvals, and outcome follow-up."
+    ]
+  },
+  {
+    "index": 24,
+    "title": "Prove enterprise scale and operational readiness",
+    "blockedBy": [20, 21, 22, 23],
+    "what": "Demonstrate that the product can be operated, secured, supported, and trusted at Fortune 500 portfolio scale.",
+    "criteria": [
+      "Performance benchmarks cover agreed SKU-location-customer volumes, concurrent users, complex filters, charts, drill-through, exports, and scheduled jobs.",
+      "The system has defined service objectives for availability, refresh completion, interactive latency, export latency, and recovery.",
+      "Backup, restore, disaster recovery, deployment rollback, and schema migration procedures are tested with recorded evidence.",
+      "Security review covers authentication, authorization, secrets, dependencies, input validation, exports, APIs, and audit integrity.",
+      "Refresh, job, delivery, and application health are observable with actionable alerts and runbooks.",
+      "Release, environment, support, incident, and data-governance responsibilities are documented.",
+      "A production-readiness review reports measured pass, fail, and deferred outcomes rather than a blanket readiness claim."
+    ]
+  }
+]

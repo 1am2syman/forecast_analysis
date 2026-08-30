@@ -1,0 +1,353 @@
+{
+  "generatedAt": "2026-08-27T22:20:07.176Z",
+  "baseUrl": "http://127.0.0.1:43639/",
+  "semantic": {
+    "lang": "en",
+    "tabs": [
+      {
+        "name": "Overview",
+        "controls": "pane-overview"
+      },
+      {
+        "name": "Trends",
+        "controls": "pane-trends"
+      },
+      {
+        "name": "Comparison",
+        "controls": "pane-comparison"
+      },
+      {
+        "name": "Product history",
+        "controls": "pane-history"
+      },
+      {
+        "name": "Data quality",
+        "controls": "pane-quality"
+      }
+    ],
+    "panes": [
+      {
+        "id": "pane-overview",
+        "labelledBy": "tab-overview"
+      },
+      {
+        "id": "pane-trends",
+        "labelledBy": "tab-trends"
+      },
+      {
+        "id": "pane-comparison",
+        "labelledBy": "tab-comparison"
+      },
+      {
+        "id": "pane-history",
+        "labelledBy": "tab-history"
+      },
+      {
+        "id": "pane-quality",
+        "labelledBy": "tab-quality"
+      }
+    ],
+    "selected": 1,
+    "visible": 1,
+    "kpis": 8,
+    "liveChip": "Live data",
+    "syntheticText": false,
+    "scopeControls": 27,
+    "metricAttribution": "canonical dataset ready\npopulation · 16,035 forecast rows\nforecast_history_waterfall.csv · PH_FG.xlsx · secondary_sales\nmetrics computed by forecast_analysis",
+    "pageText": "Forecast performance\nAccuracy · bias · revisions · coverage\nInputs refreshed 8/25/2026, 11:16:15 AM\nLIVE DATA\nFILTERS · 0\nRESET\n\nNAVIGATE\n\nOverview\nKPIs · population\nTrends\nmonth · horizon · brand\nComparison\nvintages · TM vs ML\nProduct history\nstability · exceptions\nData quality\nstatuses · downloads\n4\nCANONICAL ANALYSIS DATA\nMETRIC CONTRACT · V2\nMODE\nSingle source\nSOURCE\nTM\nTARGET\nMay 2025–Dec 2026\nPRODUCTS\n141\nHORIZONS\nAll available\nACTUAL 31,930.4 KL\nELIGIBLE 1,203\nCOMPARABLE 1,203\nCOVERAGE 31,695.9 KL / 31,930.4 KL · 99.3%\n\nACTIVE POPULATION\n\nPerformance at a glance\nCANONICAL · OLDEST_AVAILABLE → LATEST_AVAILABLE\nFORECAST ROWS\n8,515\nPAIR ROWS\n2,260\nCOMPLETE PAIRS\n1,203\nMISSING VINTAGES\n0\nVINTAGE A\noldest_available\nVINTAGE B\nlatest_available\nZERO ACTUAL\n0\nMISSING ACTUAL\n1,057\n\nFORECAST ACCURACY\n\n73.9%\n-1.6 pp\n\n1 − 8,276.6 KL / 31,695.9 KL · n 1,203\n\nBIAS\n\n20.5%\nover forecast\n\n+6,505.7 KL / 31,695.9 KL\n\nABSOLUTE ERROR\n\n8,276.6 KL\n-506.6 KL\n\nΣ|forecast − actual| · n 1,203\n\nCOVERAGE\n\n99.3%\n2,260 keys\n\n31,695.9 KL / 31,930.4 KL actual\n\nACTUAL VOLUME\n\n31,695.9 KL\n2,260 rows\n\nselected actual population\n\nFORECAST VOLUME\n\n38,201.6 KL\n+6,505.7 KL net\n\nselected Vintage B forecast\n\nMAE\n\n6.9 KL\n1,203 obs\n\n8,276.6 KL / observations\n\nREVISION EFFECTIVENESS\n\n49.1%\n417 / 850\n\nimproved / materially revised\n\nMonthly accuracy and volume\n\nAggregate metrics retain numerator, denominator, actual and forecast evidence\n\nACCURACY\nACTUAL KL\n87\n81\n75\n68\n62\nMay\nJun\nJul\nAug\nSep\nOct\nNov\nDec\nJan\nFeb\nMar\nApr\nMay\nJun\nJul\nAug\nSep\nOct\nNov\nDec\ncanonical dataset ready\npopulation · 16,035 forecast rows\nforecast_history_waterfall.csv · PH_FG.xlsx · secondary_sales\nmetrics computed by forecast_analysis\nComputing active population"
+  },
+  "filtered": {
+    "filters": "Filters · 1",
+    "product": "703584",
+    "population": "FORECAST ROWS\n80\nPAIR ROWS\n20\nCOMPLETE PAIRS\n12\nMISSING VINTAGES\n0\nVINTAGE A\noldest_available\nVINTAGE B\nlatest_available\nZERO ACTUAL\n0\nMISSING ACTUAL\n8",
+    "scope": "MODE\nSingle source\nSOURCE\nTM\nTARGET\nMay 2025–Dec 2026\nPRODUCTS\n1\nHORIZONS\nAll available"
+  },
+  "comparison": "ALIGNED\nExact M−1 · 1,275 common product-target observations\nAligned at 1 month(s) ahead: 1,275 common observations, 430 TM-only, and 229 ML-only. Source-only observations are excluded from like-for-like accuracy, bias, and absolute-error KPIs but are included in source coverage and remain visible in counts and actual volumes.\nTM\nCOMMON POPULATION\nACCURACY\n77.0%\nBIAS\n17.8%\nABSOLUTE ERROR\n6,499.5 KL\nCOVERAGE\n89.9%\nML\nCOMMON POPULATION\nACCURACY\n81.3%\nBIAS\n3.1%\nABSOLUTE ERROR\n5,294.6 KL\nCOVERAGE\n97.6%\nML − TM FORECAST ACCURACY\n+4.3 pp\nML − TM BIAS\n-14.8 pp\nML − TM ABSOLUTE ERROR\n-1,204.9 KL\nML − TM COVERAGE\n+7.7 pp\nPaired absolute error\n\nPoints below the diagonal favour ML\n\nTM better 376 · ML better 563 · Tied 24\nAligned population\n\nCommon metrics and source coverage remain distinct\n\nactual KL\nPOPULATION\nOBS\nACTUAL\nSTATUS\nCommon\n1,275\n28,261.1 KL\nboth_sources\nTm Only\n430\n450.7 KL\ntm_only\nMl Only\n229\n2,917.9 KL\nml_only",
+  "product": {
+    "selected": "999173",
+    "summary": "PRODUCT\n999173\nDESCRIPTION\nPNS NC 70ML CHILD (F W Aloe Vera 250ML)\nBRAND\nUnmapped\nMAPPING\nUnmapped\nACTUAL\n—\nHISTORY\nEach selected source has at least two available vintages.",
+    "points": 2,
+    "stability": 1
+  },
+  "downloads": [
+    "forecast_tm_filtered_vintages.csv"
+  ],
+  "layouts": [
+    {
+      "viewport": "desktop",
+      "tab": "overview",
+      "pane": "pane-overview",
+      "pageVertical": 0,
+      "pageHorizontal": 0,
+      "bodyVertical": 0,
+      "railWidth": 232,
+      "tabNamesVisible": true,
+      "paneInsideViewport": true,
+      "visibleLoading": false
+    },
+    {
+      "viewport": "desktop",
+      "tab": "trends",
+      "pane": "pane-trends",
+      "pageVertical": 0,
+      "pageHorizontal": 0,
+      "bodyVertical": 0,
+      "railWidth": 232,
+      "tabNamesVisible": true,
+      "paneInsideViewport": true,
+      "visibleLoading": false
+    },
+    {
+      "viewport": "desktop",
+      "tab": "comparison",
+      "pane": "pane-comparison",
+      "pageVertical": 0,
+      "pageHorizontal": 0,
+      "bodyVertical": 0,
+      "railWidth": 232,
+      "tabNamesVisible": true,
+      "paneInsideViewport": true,
+      "visibleLoading": false
+    },
+    {
+      "viewport": "desktop",
+      "tab": "history",
+      "pane": "pane-history",
+      "pageVertical": 0,
+      "pageHorizontal": 0,
+      "bodyVertical": 0,
+      "railWidth": 232,
+      "tabNamesVisible": true,
+      "paneInsideViewport": true,
+      "visibleLoading": false
+    },
+    {
+      "viewport": "desktop",
+      "tab": "quality",
+      "pane": "pane-quality",
+      "pageVertical": 0,
+      "pageHorizontal": 0,
+      "bodyVertical": 0,
+      "railWidth": 232,
+      "tabNamesVisible": true,
+      "paneInsideViewport": true,
+      "visibleLoading": false
+    },
+    {
+      "viewport": "short",
+      "tab": "overview",
+      "pane": "pane-overview",
+      "pageVertical": 0,
+      "pageHorizontal": 0,
+      "bodyVertical": 0,
+      "railWidth": 232,
+      "tabNamesVisible": true,
+      "paneInsideViewport": true,
+      "visibleLoading": false
+    },
+    {
+      "viewport": "short",
+      "tab": "trends",
+      "pane": "pane-trends",
+      "pageVertical": 0,
+      "pageHorizontal": 0,
+      "bodyVertical": 0,
+      "railWidth": 232,
+      "tabNamesVisible": true,
+      "paneInsideViewport": true,
+      "visibleLoading": false
+    },
+    {
+      "viewport": "short",
+      "tab": "comparison",
+      "pane": "pane-comparison",
+      "pageVertical": 0,
+      "pageHorizontal": 0,
+      "bodyVertical": 0,
+      "railWidth": 232,
+      "tabNamesVisible": true,
+      "paneInsideViewport": true,
+      "visibleLoading": false
+    },
+    {
+      "viewport": "short",
+      "tab": "history",
+      "pane": "pane-history",
+      "pageVertical": 0,
+      "pageHorizontal": 0,
+      "bodyVertical": 0,
+      "railWidth": 232,
+      "tabNamesVisible": true,
+      "paneInsideViewport": true,
+      "visibleLoading": false
+    },
+    {
+      "viewport": "short",
+      "tab": "quality",
+      "pane": "pane-quality",
+      "pageVertical": 0,
+      "pageHorizontal": 0,
+      "bodyVertical": 0,
+      "railWidth": 232,
+      "tabNamesVisible": true,
+      "paneInsideViewport": true,
+      "visibleLoading": false
+    },
+    {
+      "viewport": "narrow",
+      "tab": "overview",
+      "pane": "pane-overview",
+      "pageVertical": 0,
+      "pageHorizontal": 0,
+      "bodyVertical": 0,
+      "railWidth": 76,
+      "tabNamesVisible": false,
+      "paneInsideViewport": true,
+      "visibleLoading": false
+    },
+    {
+      "viewport": "narrow",
+      "tab": "trends",
+      "pane": "pane-trends",
+      "pageVertical": 0,
+      "pageHorizontal": 0,
+      "bodyVertical": 0,
+      "railWidth": 76,
+      "tabNamesVisible": false,
+      "paneInsideViewport": true,
+      "visibleLoading": false
+    },
+    {
+      "viewport": "narrow",
+      "tab": "comparison",
+      "pane": "pane-comparison",
+      "pageVertical": 0,
+      "pageHorizontal": 0,
+      "bodyVertical": 0,
+      "railWidth": 76,
+      "tabNamesVisible": false,
+      "paneInsideViewport": true,
+      "visibleLoading": false
+    },
+    {
+      "viewport": "narrow",
+      "tab": "history",
+      "pane": "pane-history",
+      "pageVertical": 0,
+      "pageHorizontal": 0,
+      "bodyVertical": 0,
+      "railWidth": 76,
+      "tabNamesVisible": false,
+      "paneInsideViewport": true,
+      "visibleLoading": false
+    },
+    {
+      "viewport": "narrow",
+      "tab": "quality",
+      "pane": "pane-quality",
+      "pageVertical": 0,
+      "pageHorizontal": 0,
+      "bodyVertical": 0,
+      "railWidth": 76,
+      "tabNamesVisible": false,
+      "paneInsideViewport": true,
+      "visibleLoading": false
+    }
+  ],
+  "screenshots": [
+    {
+      "name": "1440-900-overview.png",
+      "tab": "overview",
+      "viewport": "desktop",
+      "sha256": "f8c3f720722d8ea68ea5fbd103f25f5ecd720e1107f58b503a0d1cedca2e5a23"
+    },
+    {
+      "name": "1440-900-trends.png",
+      "tab": "trends",
+      "viewport": "desktop",
+      "sha256": "501d7783920849d52f177d83bb3e36550a7488133984351409774d9f9e193828"
+    },
+    {
+      "name": "1440-900-comparison.png",
+      "tab": "comparison",
+      "viewport": "desktop",
+      "sha256": "4fa0b3cb85902c6c5dd70f3edb2609012a628f88ccf4fd9feb0caf11dbb4d30d"
+    },
+    {
+      "name": "1440-900-history.png",
+      "tab": "history",
+      "viewport": "desktop",
+      "sha256": "2e8c8a9bc2ce04f38328d6678b70ebe9c056cdff323720edafacb87efd39a012"
+    },
+    {
+      "name": "1440-900-quality.png",
+      "tab": "quality",
+      "viewport": "desktop",
+      "sha256": "ea50d4c88343acf8a25243a4cc913258c581d1f99a59d943b75b72c9f4ede04f"
+    },
+    {
+      "name": "1440-720-overview.png",
+      "tab": "overview",
+      "viewport": "short",
+      "sha256": "3ebdf84f34a8afcea45049fd4337cc35c5e3a99bea59d4ba3450535983cd5613"
+    },
+    {
+      "name": "1440-720-trends.png",
+      "tab": "trends",
+      "viewport": "short",
+      "sha256": "f4ef581aba44e6095e8c0c36282a0a548c1e2e5ace028d49a1a7603521090fd7"
+    },
+    {
+      "name": "1440-720-comparison.png",
+      "tab": "comparison",
+      "viewport": "short",
+      "sha256": "ce26fe904f06dca9aafcfa3904bc776400d432d97978e6b302b0024fceea592b"
+    },
+    {
+      "name": "1440-720-history.png",
+      "tab": "history",
+      "viewport": "short",
+      "sha256": "b10c3def2babfc83a163a3bfd282b483a8313ea9ee09f050c2965839927da959"
+    },
+    {
+      "name": "1440-720-quality.png",
+      "tab": "quality",
+      "viewport": "short",
+      "sha256": "4878168aff4fd72ced72c3e244a565a88a3a8732c9d7581259f1578c091fb43e"
+    },
+    {
+      "name": "800-700-overview.png",
+      "tab": "overview",
+      "viewport": "narrow",
+      "sha256": "b5bce17053b38e687e291e12a112e23be92d5d9bfe9e5974a82bdbf096f5346c"
+    },
+    {
+      "name": "800-700-trends.png",
+      "tab": "trends",
+      "viewport": "narrow",
+      "sha256": "74ec460bf57b816b218a4e919cfec9d48391d590b437a25eb6ce6c78942355bb"
+    },
+    {
+      "name": "800-700-comparison.png",
+      "tab": "comparison",
+      "viewport": "narrow",
+      "sha256": "3ab2143e9b156bd9fe33376fe39d974cfc2e2c285f7ddf0a7f389daeb1c0e7e5"
+    },
+    {
+      "name": "800-700-history.png",
+      "tab": "history",
+      "viewport": "narrow",
+      "sha256": "d20414f671f9b7cd193b4f60c3d279cf8923221f7ce0e21f42446f96f042fb70"
+    },
+    {
+      "name": "800-700-quality.png",
+      "tab": "quality",
+      "viewport": "narrow",
+      "sha256": "962b74c8a9f05c51b7737ccebb458f9f69f81f8d8a445016743c981c9afa5497"
+    }
+  ],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "networkFailures": [],
+  "httpErrors": []
+}

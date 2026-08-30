@@ -1,0 +1,780 @@
+{
+  "repository": "1am2syman/forecast_analysis",
+  "issues": [
+    {
+      "index": 1,
+      "number": 3,
+      "databaseId": 5272958769,
+      "title": "Define metric governance, targets, and tolerance contracts",
+      "url": "https://github.com/1am2syman/forecast_analysis/issues/3",
+      "blockedByIndexes": [],
+      "blockedByIssues": [],
+      "nativeDependencyEdges": []
+    },
+    {
+      "index": 2,
+      "number": 4,
+      "databaseId": 5272958985,
+      "title": "Make analysis scopes saveable and shareable",
+      "url": "https://github.com/1am2syman/forecast_analysis/issues/4",
+      "blockedByIndexes": [],
+      "blockedByIssues": [],
+      "nativeDependencyEdges": []
+    },
+    {
+      "index": 3,
+      "number": 5,
+      "databaseId": 5272959185,
+      "title": "Replace portfolio dropdowns with hierarchy-aware search and multi-select",
+      "url": "https://github.com/1am2syman/forecast_analysis/issues/5",
+      "blockedByIndexes": [],
+      "blockedByIssues": [],
+      "nativeDependencyEdges": []
+    },
+    {
+      "index": 4,
+      "number": 6,
+      "databaseId": 5272959413,
+      "title": "Establish a chart readability and interaction standard",
+      "url": "https://github.com/1am2syman/forecast_analysis/issues/6",
+      "blockedByIndexes": [],
+      "blockedByIssues": [],
+      "nativeDependencyEdges": []
+    },
+    {
+      "index": 21,
+      "number": 7,
+      "databaseId": 5272959627,
+      "title": "Add enterprise identity, permissions, and audit governance",
+      "url": "https://github.com/1am2syman/forecast_analysis/issues/7",
+      "blockedByIndexes": [],
+      "blockedByIssues": [],
+      "nativeDependencyEdges": []
+    },
+    {
+      "index": 5,
+      "number": 8,
+      "databaseId": 5272959849,
+      "title": "Deliver the director executive cockpit",
+      "url": "https://github.com/1am2syman/forecast_analysis/issues/8",
+      "blockedByIndexes": [
+        1,
+        4
+      ],
+      "blockedByIssues": [
+        3,
+        6
+      ],
+      "nativeDependencyEdges": [
+        {
+          "blockerIndex": 1,
+          "blockerIssue": 3,
+          "created": true,
+          "fallback": null,
+          "error": null
+        },
+        {
+          "blockerIndex": 4,
+          "blockerIssue": 6,
+          "created": true,
+          "fallback": null,
+          "error": null
+        }
+      ]
+    },
+    {
+      "index": 6,
+      "number": 9,
+      "databaseId": 5272960337,
+      "title": "Fix monthly forecast-versus-actual analysis",
+      "url": "https://github.com/1am2syman/forecast_analysis/issues/9",
+      "blockedByIndexes": [
+        1,
+        4
+      ],
+      "blockedByIssues": [
+        3,
+        6
+      ],
+      "nativeDependencyEdges": [
+        {
+          "blockerIndex": 1,
+          "blockerIssue": 3,
+          "created": true,
+          "fallback": null,
+          "error": null
+        },
+        {
+          "blockerIndex": 4,
+          "blockerIssue": 6,
+          "created": true,
+          "fallback": null,
+          "error": null
+        }
+      ]
+    },
+    {
+      "index": 7,
+      "number": 10,
+      "databaseId": 5272960781,
+      "title": "Upgrade horizon and brand-month diagnosis",
+      "url": "https://github.com/1am2syman/forecast_analysis/issues/10",
+      "blockedByIndexes": [
+        1,
+        4
+      ],
+      "blockedByIssues": [
+        3,
+        6
+      ],
+      "nativeDependencyEdges": [
+        {
+          "blockerIndex": 1,
+          "blockerIssue": 3,
+          "created": true,
+          "fallback": null,
+          "error": null
+        },
+        {
+          "blockerIndex": 4,
+          "blockerIssue": 6,
+          "created": true,
+          "fallback": null,
+          "error": null
+        }
+      ]
+    },
+    {
+      "index": 8,
+      "number": 11,
+      "databaseId": 5272961205,
+      "title": "Upgrade revision-effectiveness diagnosis",
+      "url": "https://github.com/1am2syman/forecast_analysis/issues/11",
+      "blockedByIndexes": [
+        1,
+        4
+      ],
+      "blockedByIssues": [
+        3,
+        6
+      ],
+      "nativeDependencyEdges": [
+        {
+          "blockerIndex": 1,
+          "blockerIssue": 3,
+          "created": true,
+          "fallback": null,
+          "error": null
+        },
+        {
+          "blockerIndex": 4,
+          "blockerIssue": 6,
+          "created": true,
+          "fallback": null,
+          "error": null
+        }
+      ]
+    },
+    {
+      "index": 9,
+      "number": 12,
+      "databaseId": 5272961682,
+      "title": "Turn TM-versus-ML into a decision view",
+      "url": "https://github.com/1am2syman/forecast_analysis/issues/12",
+      "blockedByIndexes": [
+        1,
+        4
+      ],
+      "blockedByIssues": [
+        3,
+        6
+      ],
+      "nativeDependencyEdges": [
+        {
+          "blockerIndex": 1,
+          "blockerIssue": 3,
+          "created": true,
+          "fallback": null,
+          "error": null
+        },
+        {
+          "blockerIndex": 4,
+          "blockerIssue": 6,
+          "created": true,
+          "fallback": null,
+          "error": null
+        }
+      ]
+    },
+    {
+      "index": 10,
+      "number": 13,
+      "databaseId": 5272962301,
+      "title": "Deliver a production-grade product deep dive",
+      "url": "https://github.com/1am2syman/forecast_analysis/issues/13",
+      "blockedByIndexes": [
+        3,
+        4
+      ],
+      "blockedByIssues": [
+        5,
+        6
+      ],
+      "nativeDependencyEdges": [
+        {
+          "blockerIndex": 3,
+          "blockerIssue": 5,
+          "created": true,
+          "fallback": null,
+          "error": null
+        },
+        {
+          "blockerIndex": 4,
+          "blockerIssue": 6,
+          "created": true,
+          "fallback": null,
+          "error": null
+        }
+      ]
+    },
+    {
+      "index": 11,
+      "number": 14,
+      "databaseId": 5272963176,
+      "title": "Promote forecast exceptions into a portfolio work queue",
+      "url": "https://github.com/1am2syman/forecast_analysis/issues/14",
+      "blockedByIndexes": [
+        1,
+        3,
+        4
+      ],
+      "blockedByIssues": [
+        3,
+        5,
+        6
+      ],
+      "nativeDependencyEdges": [
+        {
+          "blockerIndex": 1,
+          "blockerIssue": 3,
+          "created": true,
+          "fallback": null,
+          "error": null
+        },
+        {
+          "blockerIndex": 3,
+          "blockerIssue": 5,
+          "created": true,
+          "fallback": null,
+          "error": null
+        },
+        {
+          "blockerIndex": 4,
+          "blockerIssue": 6,
+          "created": true,
+          "fallback": null,
+          "error": null
+        }
+      ]
+    },
+    {
+      "index": 13,
+      "number": 15,
+      "databaseId": 5272964467,
+      "title": "Turn Data quality into a compact Data trust workspace",
+      "url": "https://github.com/1am2syman/forecast_analysis/issues/15",
+      "blockedByIndexes": [
+        1
+      ],
+      "blockedByIssues": [
+        3
+      ],
+      "nativeDependencyEdges": [
+        {
+          "blockerIndex": 1,
+          "blockerIssue": 3,
+          "created": true,
+          "fallback": null,
+          "error": null
+        }
+      ]
+    },
+    {
+      "index": 16,
+      "number": 16,
+      "databaseId": 5272964884,
+      "title": "Add the first end-to-end forecast-value-add stage comparison",
+      "url": "https://github.com/1am2syman/forecast_analysis/issues/16",
+      "blockedByIndexes": [
+        1
+      ],
+      "blockedByIssues": [
+        3
+      ],
+      "nativeDependencyEdges": [
+        {
+          "blockerIndex": 1,
+          "blockerIssue": 3,
+          "created": true,
+          "fallback": null,
+          "error": null
+        }
+      ]
+    },
+    {
+      "index": 12,
+      "number": 17,
+      "databaseId": 5272965204,
+      "title": "Connect charts, quality exceptions, and tables to drill-down",
+      "url": "https://github.com/1am2syman/forecast_analysis/issues/17",
+      "blockedByIndexes": [
+        2,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "blockedByIssues": [
+        4,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "nativeDependencyEdges": [
+        {
+          "blockerIndex": 2,
+          "blockerIssue": 4,
+          "created": true,
+          "fallback": null,
+          "error": null
+        },
+        {
+          "blockerIndex": 6,
+          "blockerIssue": 9,
+          "created": true,
+          "fallback": null,
+          "error": null
+        },
+        {
+          "blockerIndex": 7,
+          "blockerIssue": 10,
+          "created": true,
+          "fallback": null,
+          "error": null
+        },
+        {
+          "blockerIndex": 8,
+          "blockerIssue": 11,
+          "created": true,
+          "fallback": null,
+          "error": null
+        },
+        {
+          "blockerIndex": 9,
+          "blockerIssue": 12,
+          "created": true,
+          "fallback": null,
+          "error": null
+        },
+        {
+          "blockerIndex": 10,
+          "blockerIssue": 13,
+          "created": true,
+          "fallback": null,
+          "error": null
+        },
+        {
+          "blockerIndex": 11,
+          "blockerIssue": 14,
+          "created": true,
+          "fallback": null,
+          "error": null
+        }
+      ]
+    },
+    {
+      "index": 14,
+      "number": 18,
+      "databaseId": 5272965975,
+      "title": "Add accountable exception-management workflow",
+      "url": "https://github.com/1am2syman/forecast_analysis/issues/18",
+      "blockedByIndexes": [
+        11
+      ],
+      "blockedByIssues": [
+        14
+      ],
+      "nativeDependencyEdges": [
+        {
+          "blockerIndex": 11,
+          "blockerIssue": 14,
+          "created": true,
+          "fallback": null,
+          "error": null
+        }
+      ]
+    },
+    {
+      "index": 17,
+      "number": 19,
+      "databaseId": 5272966273,
+      "title": "Expand forecast value add across the full planning chain",
+      "url": "https://github.com/1am2syman/forecast_analysis/issues/19",
+      "blockedByIndexes": [
+        16
+      ],
+      "blockedByIssues": [
+        16
+      ],
+      "nativeDependencyEdges": [
+        {
+          "blockerIndex": 16,
+          "blockerIssue": 16,
+          "created": true,
+          "fallback": null,
+          "error": null
+        }
+      ]
+    },
+    {
+      "index": 18,
+      "number": 20,
+      "databaseId": 5272966588,
+      "title": "Add governed demand-event context and segmentation",
+      "url": "https://github.com/1am2syman/forecast_analysis/issues/20",
+      "blockedByIndexes": [
+        3,
+        4,
+        10
+      ],
+      "blockedByIssues": [
+        5,
+        6,
+        13
+      ],
+      "nativeDependencyEdges": [
+        {
+          "blockerIndex": 3,
+          "blockerIssue": 5,
+          "created": true,
+          "fallback": null,
+          "error": null
+        },
+        {
+          "blockerIndex": 4,
+          "blockerIssue": 6,
+          "created": true,
+          "fallback": null,
+          "error": null
+        },
+        {
+          "blockerIndex": 10,
+          "blockerIssue": 13,
+          "created": true,
+          "fallback": null,
+          "error": null
+        }
+      ]
+    },
+    {
+      "index": 19,
+      "number": 21,
+      "databaseId": 5272967072,
+      "title": "Translate forecast exceptions into business impact",
+      "url": "https://github.com/1am2syman/forecast_analysis/issues/21",
+      "blockedByIndexes": [
+        1,
+        11
+      ],
+      "blockedByIssues": [
+        3,
+        14
+      ],
+      "nativeDependencyEdges": [
+        {
+          "blockerIndex": 1,
+          "blockerIssue": 3,
+          "created": true,
+          "fallback": null,
+          "error": null
+        },
+        {
+          "blockerIndex": 11,
+          "blockerIssue": 14,
+          "created": true,
+          "fallback": null,
+          "error": null
+        }
+      ]
+    },
+    {
+      "index": 22,
+      "number": 22,
+      "databaseId": 5272967464,
+      "title": "Add scheduled reporting and governed integration APIs",
+      "url": "https://github.com/1am2syman/forecast_analysis/issues/22",
+      "blockedByIndexes": [
+        2,
+        13,
+        21
+      ],
+      "blockedByIssues": [
+        4,
+        15,
+        7
+      ],
+      "nativeDependencyEdges": [
+        {
+          "blockerIndex": 2,
+          "blockerIssue": 4,
+          "created": true,
+          "fallback": null,
+          "error": null
+        },
+        {
+          "blockerIndex": 13,
+          "blockerIssue": 15,
+          "created": true,
+          "fallback": null,
+          "error": null
+        },
+        {
+          "blockerIndex": 21,
+          "blockerIssue": 7,
+          "created": true,
+          "fallback": null,
+          "error": null
+        }
+      ]
+    },
+    {
+      "index": 15,
+      "number": 23,
+      "databaseId": 5272967939,
+      "title": "Add threshold alerts and subscriptions",
+      "url": "https://github.com/1am2syman/forecast_analysis/issues/23",
+      "blockedByIndexes": [
+        1,
+        13,
+        14
+      ],
+      "blockedByIssues": [
+        3,
+        15,
+        18
+      ],
+      "nativeDependencyEdges": [
+        {
+          "blockerIndex": 1,
+          "blockerIssue": 3,
+          "created": true,
+          "fallback": null,
+          "error": null
+        },
+        {
+          "blockerIndex": 13,
+          "blockerIssue": 15,
+          "created": true,
+          "fallback": null,
+          "error": null
+        },
+        {
+          "blockerIndex": 14,
+          "blockerIssue": 18,
+          "created": true,
+          "fallback": null,
+          "error": null
+        }
+      ]
+    },
+    {
+      "index": 20,
+      "number": 24,
+      "databaseId": 5272968347,
+      "title": "Reorganize the product around role-based planning workflows",
+      "url": "https://github.com/1am2syman/forecast_analysis/issues/24",
+      "blockedByIndexes": [
+        5,
+        7,
+        8,
+        9,
+        10,
+        11,
+        13,
+        14,
+        21
+      ],
+      "blockedByIssues": [
+        8,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        18,
+        7
+      ],
+      "nativeDependencyEdges": [
+        {
+          "blockerIndex": 5,
+          "blockerIssue": 8,
+          "created": true,
+          "fallback": null,
+          "error": null
+        },
+        {
+          "blockerIndex": 7,
+          "blockerIssue": 10,
+          "created": true,
+          "fallback": null,
+          "error": null
+        },
+        {
+          "blockerIndex": 8,
+          "blockerIssue": 11,
+          "created": true,
+          "fallback": null,
+          "error": null
+        },
+        {
+          "blockerIndex": 9,
+          "blockerIssue": 12,
+          "created": true,
+          "fallback": null,
+          "error": null
+        },
+        {
+          "blockerIndex": 10,
+          "blockerIssue": 13,
+          "created": true,
+          "fallback": null,
+          "error": null
+        },
+        {
+          "blockerIndex": 11,
+          "blockerIssue": 14,
+          "created": true,
+          "fallback": null,
+          "error": null
+        },
+        {
+          "blockerIndex": 13,
+          "blockerIssue": 15,
+          "created": true,
+          "fallback": null,
+          "error": null
+        },
+        {
+          "blockerIndex": 14,
+          "blockerIssue": 18,
+          "created": true,
+          "fallback": null,
+          "error": null
+        },
+        {
+          "blockerIndex": 21,
+          "blockerIssue": 7,
+          "created": true,
+          "fallback": null,
+          "error": null
+        }
+      ]
+    },
+    {
+      "index": 23,
+      "number": 25,
+      "databaseId": 5272969298,
+      "title": "Add scenario comparison and decision tracking",
+      "url": "https://github.com/1am2syman/forecast_analysis/issues/25",
+      "blockedByIndexes": [
+        2,
+        14,
+        19
+      ],
+      "blockedByIssues": [
+        4,
+        18,
+        21
+      ],
+      "nativeDependencyEdges": [
+        {
+          "blockerIndex": 2,
+          "blockerIssue": 4,
+          "created": true,
+          "fallback": null,
+          "error": null
+        },
+        {
+          "blockerIndex": 14,
+          "blockerIssue": 18,
+          "created": true,
+          "fallback": null,
+          "error": null
+        },
+        {
+          "blockerIndex": 19,
+          "blockerIssue": 21,
+          "created": true,
+          "fallback": null,
+          "error": null
+        }
+      ]
+    },
+    {
+      "index": 24,
+      "number": 26,
+      "databaseId": 5272970026,
+      "title": "Prove enterprise scale and operational readiness",
+      "url": "https://github.com/1am2syman/forecast_analysis/issues/26",
+      "blockedByIndexes": [
+        20,
+        21,
+        22,
+        23
+      ],
+      "blockedByIssues": [
+        24,
+        7,
+        22,
+        25
+      ],
+      "nativeDependencyEdges": [
+        {
+          "blockerIndex": 20,
+          "blockerIssue": 24,
+          "created": true,
+          "fallback": null,
+          "error": null
+        },
+        {
+          "blockerIndex": 21,
+          "blockerIssue": 7,
+          "created": true,
+          "fallback": null,
+          "error": null
+        },
+        {
+          "blockerIndex": 22,
+          "blockerIssue": 22,
+          "created": true,
+          "fallback": null,
+          "error": null
+        },
+        {
+          "blockerIndex": 23,
+          "blockerIssue": 25,
+          "created": true,
+          "fallback": null,
+          "error": null
+        }
+      ]
+    }
+  ],
+  "publishedAt": "2026-08-27T23:13:13.815Z"
+}

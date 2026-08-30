@@ -277,7 +277,67 @@
     "normalized_document_overflows": true,
     "pre_normalization_application_overflows": true
   },
-  "capture_contract": "forecast-analysis-dashboard-ui-baseline-v1",
+  "capture_anchor": {
+    "algorithm": "sha256-canonical-json-v1",
+    "anchor_sha256": "d183946cec95d425ab2259253e462886aaa17f536935ae3968c3d31a8e0c64f3",
+    "capture_artifact_path": "validation-artifacts/forecast-analysis-dashboard-ui-baseline.json",
+    "contract": "forecast-analysis-dashboard-ui-capture-anchor-v1",
+    "execution_id": "20260827T090002Z-4d98c1867b96",
+    "immutable_before_state": {
+      "height": 11082,
+      "path": "validation-artifacts/forecast-analysis-dashboard-long-full.png",
+      "sha256": "29cd5651eadfec811b1c0671786f4a807dc846e1c59f9b5bddfab17e7261dfdd",
+      "width": 6650
+    },
+    "session": "forecast-dashboard-ui-78c4994f9290",
+    "states": {
+      "default-closed": {
+        "binding_sha256": "25905142221c8e2c9dc6461573023d49638597fa240c0195644a14022b9d407c",
+        "disclosure_sha256": "bdb291cc062ab46e23d334f1851e7c78837a14f440a4e1a99cbd4336da0657bd",
+        "expected_disclosure": {
+          "label": "Data-quality filters",
+          "open": false
+        },
+        "geometry_sha256": "413779fe5da0ade9e156d22e2a0cd4658a3ddf10b60361353bf613c3a7009384",
+        "normalization_artifact_path": "validation-artifacts/forecast-analysis-dashboard-ui-normalization-default.json",
+        "normalization_artifact_sha256": "ae918e1e9bb19c2fd017553ac82c86801c64506ee398abe91903a7ee852482de",
+        "screenshot_command_sha256": "11016468ed9ffa32f16ab01fcb296ab62089f1250fe1c5f925791da99a3620f4",
+        "screenshot_height": 11082,
+        "screenshot_path": "validation-artifacts/forecast-analysis-dashboard-default.png",
+        "screenshot_sha256": "50290e0b328da578717d60c4fea2e6e2abaf39a6fc203c19d76d984147f84fe1",
+        "screenshot_width": 6650,
+        "state": "default-closed",
+        "state_artifact_path": "validation-artifacts/forecast-analysis-dashboard-ui-raw-default.json",
+        "state_artifact_sha256": "8b8e181239de119060c0d0a9ec95b1e4b381eaec151662f03cc0dda6d5fcab48",
+        "state_proof_sha256": "3a53e015c6ec2a3e78ba1cb50714995f95face982309493c6aa5d8b450cc5b4c"
+      },
+      "expanded-open": {
+        "binding_sha256": "8990bfb6401016e061ea3115d5fc4783b216a70bc6e3282650843a7f88822e2d",
+        "disclosure_sha256": "47f5e5103eda89b58acc70392fd990f864c08cac38db865ad3d76cfb0c852b88",
+        "expected_disclosure": {
+          "label": "Data-quality filters",
+          "open": true
+        },
+        "geometry_sha256": "6c1b54079fc037f191f4d82a979f58b9af1cd86f33bab1c009e3db4bf1290130",
+        "normalization_artifact_path": "validation-artifacts/forecast-analysis-dashboard-ui-normalization-expanded.json",
+        "normalization_artifact_sha256": "8e02b715037cc8507c6f06bc77c244020c0e9455850739b6c01b512536168c37",
+        "screenshot_command_sha256": "b534f5f32c722185b7f07c204ef4813d6ffbf0b427dd82e249621c4a1fcdd27e",
+        "screenshot_height": 11186,
+        "screenshot_path": "validation-artifacts/forecast-analysis-dashboard-expanded.png",
+        "screenshot_sha256": "02131ea641894398e066800cccc0c43b2cf71e39b539bcd1e70f7d31f844e745",
+        "screenshot_width": 6650,
+        "state": "expanded-open",
+        "state_artifact_path": "validation-artifacts/forecast-analysis-dashboard-ui-raw-expanded.json",
+        "state_artifact_sha256": "4ee0c8b249dd14dbefe1071d8ef9a22c8c085a88487820c6c1f675f465af2d36",
+        "state_proof_sha256": "e7dbec489d1336b7db12675b40eeeac0890ad7f9cb378d49bedcc4ebf36027e1"
+      }
+    },
+    "workflow": {
+      "name": "forecast-dashboard-live-capture-v1",
+      "path": "scripts/capture_forecast_analysis_dashboard_ui.py"
+    }
+  },
+  "capture_contract": "forecast-analysis-dashboard-ui-baseline-v2",
   "capture_date": "2026-08-27",
   "default_capture": {
     "normalization_actions": [
@@ -793,6 +853,7 @@
       "normalization_contract": "marimo-full-page-normalization-v1",
       "normalized": true,
       "screenshot": {
+        "binding_sha256": "25905142221c8e2c9dc6461573023d49638597fa240c0195644a14022b9d407c",
         "height": 11082,
         "path": "validation-artifacts/forecast-analysis-dashboard-default.png",
         "sha256": "50290e0b328da578717d60c4fea2e6e2abaf39a6fc203c19d76d984147f84fe1",
@@ -830,7 +891,163 @@
         "width": 1280
       }
     },
+    "screenshot_binding": {
+      "algorithm": "sha256-canonical-json-v1",
+      "binding_sha256": "25905142221c8e2c9dc6461573023d49638597fa240c0195644a14022b9d407c",
+      "contract": "forecast-analysis-dashboard-ui-screenshot-binding-v1",
+      "disclosure": {
+        "ariaExpanded": "false",
+        "contentLength": 0,
+        "controlId": "radix-_r_21_",
+        "expected_open": false,
+        "kind": "marimo-accordion",
+        "label": "Data-quality filters",
+        "open": false,
+        "regionId": "radix-_r_22_",
+        "regionState": "closed",
+        "regionVisible": false,
+        "state": "closed"
+      },
+      "disclosure_sha256": "bdb291cc062ab46e23d334f1851e7c78837a14f440a4e1a99cbd4336da0657bd",
+      "execution_id": "20260827T090002Z-4d98c1867b96",
+      "expected_repository_path": "validation-artifacts/forecast-analysis-dashboard-default.png",
+      "geometry": {
+        "post": {
+          "application": {
+            "clientHeight": 11082,
+            "clientWidth": 6650,
+            "scrollHeight": 11082,
+            "scrollWidth": 6650
+          },
+          "body": {
+            "clientHeight": 11082,
+            "clientWidth": 1280,
+            "scrollHeight": 11082,
+            "scrollWidth": 6650
+          },
+          "contentProbe": {
+            "appScrollHeight": 11082,
+            "appTextLength": 7857,
+            "bodyTextLength": 7857,
+            "maxVisibleElementBottom": 11081.703125
+          },
+          "document": {
+            "clientHeight": 800,
+            "clientWidth": 1280,
+            "scrollHeight": 11082,
+            "scrollWidth": 6650
+          },
+          "viewport": {
+            "devicePixelRatio": 1,
+            "height": 800,
+            "width": 1280
+          }
+        },
+        "post_content_probe": {
+          "appScrollHeight": 11082,
+          "appTextLength": 7857,
+          "bodyTextLength": 7857,
+          "maxVisibleElementBottom": 11081.703125
+        },
+        "pre": {
+          "application": {
+            "clientHeight": 800,
+            "clientWidth": 1280,
+            "scrollHeight": 12025,
+            "scrollWidth": 2000
+          },
+          "body": {
+            "clientHeight": 800,
+            "clientWidth": 1280,
+            "scrollHeight": 800,
+            "scrollWidth": 1280
+          },
+          "document": {
+            "clientHeight": 800,
+            "clientWidth": 1280,
+            "scrollHeight": 800,
+            "scrollWidth": 1280
+          },
+          "viewport": {
+            "devicePixelRatio": 1,
+            "height": 800,
+            "width": 1280
+          }
+        },
+        "pre_content_probe": {
+          "appScrollHeight": 12025,
+          "appTextLength": 7857,
+          "bodyTextLength": 7857,
+          "maxVisibleElementBottom": 11560.03125
+        }
+      },
+      "geometry_sha256": "413779fe5da0ade9e156d22e2a0cd4658a3ddf10b60361353bf613c3a7009384",
+      "normalization_artifact_path": "validation-artifacts/forecast-analysis-dashboard-ui-normalization-default.json",
+      "screenshot": {
+        "height": 11082,
+        "path": "validation-artifacts/forecast-analysis-dashboard-default.png",
+        "sha256": "50290e0b328da578717d60c4fea2e6e2abaf39a6fc203c19d76d984147f84fe1",
+        "width": 6650
+      },
+      "screenshot_command_sha256": "11016468ed9ffa32f16ab01fcb296ab62089f1250fe1c5f925791da99a3620f4",
+      "session": "forecast-dashboard-ui-78c4994f9290",
+      "state": "default-closed",
+      "state_artifact": {
+        "path": "validation-artifacts/forecast-analysis-dashboard-ui-raw-default.json",
+        "sha256": "8b8e181239de119060c0d0a9ec95b1e4b381eaec151662f03cc0dda6d5fcab48"
+      },
+      "state_proof_sha256": "3a53e015c6ec2a3e78ba1cb50714995f95face982309493c6aa5d8b450cc5b4c"
+    },
+    "screenshot_command_proof": {
+      "argv": [
+        "agent-browser",
+        "--session",
+        "forecast-dashboard-ui-78c4994f9290",
+        "--json",
+        "screenshot",
+        "--full",
+        "validation-artifacts/forecast-analysis-dashboard-default.png"
+      ],
+      "data": {
+        "lifecycle": {
+          "effectiveLaunch": {
+            "browserLaunched": true,
+            "engine": "chrome",
+            "launchHash": 7707568497978554591
+          },
+          "launched": false,
+          "relaunchedBrowser": false,
+          "restartedBackground": false,
+          "restoreStatus": "not_configured",
+          "reused": true,
+          "saveStatus": "not_attempted"
+        },
+        "path": "validation-artifacts/forecast-analysis-dashboard-default.png"
+      },
+      "envelope": {
+        "data": {
+          "lifecycle": {
+            "effectiveLaunch": {
+              "browserLaunched": true,
+              "engine": "chrome",
+              "launchHash": 7707568497978554591
+            },
+            "launched": false,
+            "relaunchedBrowser": false,
+            "restartedBackground": false,
+            "restoreStatus": "not_configured",
+            "reused": true,
+            "saveStatus": "not_attempted"
+          },
+          "path": "validation-artifacts/forecast-analysis-dashboard-default.png"
+        },
+        "error": null,
+        "success": true
+      },
+      "exit_code": 0
+    },
     "state": "default-closed",
+    "state_artifact_sha256": "8b8e181239de119060c0d0a9ec95b1e4b381eaec151662f03cc0dda6d5fcab48",
     "state_evidence": "validation-artifacts/forecast-analysis-dashboard-ui-raw-default.json",
     "viewport": {
       "devicePixelRatio": 1,
@@ -1352,6 +1569,7 @@
       "normalization_contract": "marimo-full-page-normalization-v1",
       "normalized": true,
       "screenshot": {
+        "binding_sha256": "8990bfb6401016e061ea3115d5fc4783b216a70bc6e3282650843a7f88822e2d",
         "height": 11186,
         "path": "validation-artifacts/forecast-analysis-dashboard-expanded.png",
         "sha256": "02131ea641894398e066800cccc0c43b2cf71e39b539bcd1e70f7d31f844e745",
@@ -1389,7 +1607,163 @@
         "width": 1280
       }
     },
+    "screenshot_binding": {
+      "algorithm": "sha256-canonical-json-v1",
+      "binding_sha256": "8990bfb6401016e061ea3115d5fc4783b216a70bc6e3282650843a7f88822e2d",
+      "contract": "forecast-analysis-dashboard-ui-screenshot-binding-v1",
+      "disclosure": {
+        "ariaExpanded": "true",
+        "contentLength": 457,
+        "controlId": "radix-_r_21_",
+        "expected_open": true,
+        "kind": "marimo-accordion",
+        "label": "Data-quality filters",
+        "open": true,
+        "regionId": "radix-_r_22_",
+        "regionState": "open",
+        "regionVisible": true,
+        "state": "open"
+      },
+      "disclosure_sha256": "47f5e5103eda89b58acc70392fd990f864c08cac38db865ad3d76cfb0c852b88",
+      "execution_id": "20260827T090002Z-4d98c1867b96",
+      "expected_repository_path": "validation-artifacts/forecast-analysis-dashboard-expanded.png",
+      "geometry": {
+        "post": {
+          "application": {
+            "clientHeight": 11186,
+            "clientWidth": 6650,
+            "scrollHeight": 11186,
+            "scrollWidth": 6650
+          },
+          "body": {
+            "clientHeight": 11186,
+            "clientWidth": 1280,
+            "scrollHeight": 11186,
+            "scrollWidth": 6650
+          },
+          "contentProbe": {
+            "appScrollHeight": 11186,
+            "appTextLength": 7857,
+            "bodyTextLength": 7857,
+            "maxVisibleElementBottom": 11186.28125
+          },
+          "document": {
+            "clientHeight": 800,
+            "clientWidth": 1280,
+            "scrollHeight": 11186,
+            "scrollWidth": 6650
+          },
+          "viewport": {
+            "devicePixelRatio": 1,
+            "height": 800,
+            "width": 1280
+          }
+        },
+        "post_content_probe": {
+          "appScrollHeight": 11186,
+          "appTextLength": 7857,
+          "bodyTextLength": 7857,
+          "maxVisibleElementBottom": 11186.28125
+        },
+        "pre": {
+          "application": {
+            "clientHeight": 11186,
+            "clientWidth": 6650,
+            "scrollHeight": 11186,
+            "scrollWidth": 6650
+          },
+          "body": {
+            "clientHeight": 800,
+            "clientWidth": 1280,
+            "scrollHeight": 800,
+            "scrollWidth": 1280
+          },
+          "document": {
+            "clientHeight": 800,
+            "clientWidth": 1280,
+            "scrollHeight": 800,
+            "scrollWidth": 1280
+          },
+          "viewport": {
+            "devicePixelRatio": 1,
+            "height": 800,
+            "width": 1280
+          }
+        },
+        "pre_content_probe": {
+          "appScrollHeight": 11186,
+          "appTextLength": 7857,
+          "bodyTextLength": 7857,
+          "maxVisibleElementBottom": 11186.28125
+        }
+      },
+      "geometry_sha256": "6c1b54079fc037f191f4d82a979f58b9af1cd86f33bab1c009e3db4bf1290130",
+      "normalization_artifact_path": "validation-artifacts/forecast-analysis-dashboard-ui-normalization-expanded.json",
+      "screenshot": {
+        "height": 11186,
+        "path": "validation-artifacts/forecast-analysis-dashboard-expanded.png",
+        "sha256": "02131ea641894398e066800cccc0c43b2cf71e39b539bcd1e70f7d31f844e745",
+        "width": 6650
+      },
+      "screenshot_command_sha256": "b534f5f32c722185b7f07c204ef4813d6ffbf0b427dd82e249621c4a1fcdd27e",
+      "session": "forecast-dashboard-ui-78c4994f9290",
+      "state": "expanded-open",
+      "state_artifact": {
+        "path": "validation-artifacts/forecast-analysis-dashboard-ui-raw-expanded.json",
+        "sha256": "4ee0c8b249dd14dbefe1071d8ef9a22c8c085a88487820c6c1f675f465af2d36"
+      },
+      "state_proof_sha256": "e7dbec489d1336b7db12675b40eeeac0890ad7f9cb378d49bedcc4ebf36027e1"
+    },
+    "screenshot_command_proof": {
+      "argv": [
+        "agent-browser",
+        "--session",
+        "forecast-dashboard-ui-78c4994f9290",
+        "--json",
+        "screenshot",
+        "--full",
+        "validation-artifacts/forecast-analysis-dashboard-expanded.png"
+      ],
+      "data": {
+        "lifecycle": {
+          "effectiveLaunch": {
+            "browserLaunched": true,
+            "engine": "chrome",
+            "launchHash": 7707568497978554591
+          },
+          "launched": false,
+          "relaunchedBrowser": false,
+          "restartedBackground": false,
+          "restoreStatus": "not_configured",
+          "reused": true,
+          "saveStatus": "not_attempted"
+        },
+        "path": "validation-artifacts/forecast-analysis-dashboard-expanded.png"
+      },
+      "envelope": {
+        "data": {
+          "lifecycle": {
+            "effectiveLaunch": {
+              "browserLaunched": true,
+              "engine": "chrome",
+              "launchHash": 7707568497978554591
+            },
+            "launched": false,
+            "relaunchedBrowser": false,
+            "restartedBackground": false,
+            "restoreStatus": "not_configured",
+            "reused": true,
+            "saveStatus": "not_attempted"
+          },
+          "path": "validation-artifacts/forecast-analysis-dashboard-expanded.png"
+        },
+        "error": null,
+        "success": true
+      },
+      "exit_code": 0
+    },
     "state": "expanded-open",
+    "state_artifact_sha256": "4ee0c8b249dd14dbefe1071d8ef9a22c8c085a88487820c6c1f675f465af2d36",
     "state_evidence": "validation-artifacts/forecast-analysis-dashboard-ui-raw-expanded.json",
     "viewport": {
       "devicePixelRatio": 1,
@@ -1425,6 +1799,7 @@
     "normalization_contract": "marimo-full-page-normalization-v1",
     "normalized": true,
     "screenshot": {
+      "binding_sha256": "8990bfb6401016e061ea3115d5fc4783b216a70bc6e3282650843a7f88822e2d",
       "height": 11186,
       "path": "validation-artifacts/forecast-analysis-dashboard-expanded.png",
       "sha256": "02131ea641894398e066800cccc0c43b2cf71e39b539bcd1e70f7d31f844e745",
@@ -1470,15 +1845,17 @@
     "expanded_normalization": "validation-artifacts/forecast-analysis-dashboard-ui-normalization-expanded.json",
     "expanded_state": "validation-artifacts/forecast-analysis-dashboard-ui-raw-expanded.json"
   },
-  "schema_version": 2,
+  "schema_version": 3,
   "screenshots": {
     "default": {
+      "binding_sha256": "25905142221c8e2c9dc6461573023d49638597fa240c0195644a14022b9d407c",
       "height": 11082,
       "path": "validation-artifacts/forecast-analysis-dashboard-default.png",
       "sha256": "50290e0b328da578717d60c4fea2e6e2abaf39a6fc203c19d76d984147f84fe1",
       "width": 6650
     },
     "expanded": {
+      "binding_sha256": "8990bfb6401016e061ea3115d5fc4783b216a70bc6e3282650843a7f88822e2d",
       "height": 11186,
       "path": "validation-artifacts/forecast-analysis-dashboard-expanded.png",
       "sha256": "02131ea641894398e066800cccc0c43b2cf71e39b539bcd1e70f7d31f844e745",

@@ -1,0 +1,830 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Forecast performance · live analysis</title>
+    <meta
+      name="description"
+      content="Source-aware forecast performance dashboard backed by the canonical analysis dataset."
+    />
+    <meta name="theme-color" content="#ffffff" />
+    <link rel="icon" href="favicon.ico" sizes="64x64" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <div class="topbar__sig">
+          <span class="lamp lamp--live" aria-hidden="true"></span>
+          <h1 class="topbar__title">Forecast performance</h1>
+          <span class="topbar__ctx"
+            >Accuracy · bias · revisions · coverage</span
+          >
+        </div>
+        <div class="topbar__right">
+          <span class="refresh" data-refresh>Loading canonical data…</span>
+          <span class="chip chip--live">Live data</span>
+          <button
+            class="btn btn--accent"
+            data-action="scope"
+            type="button"
+            aria-expanded="false"
+            aria-controls="scope-drawer"
+          >
+            Filters · 0
+          </button>
+          <button class="btn" data-action="reset" type="button">Reset</button>
+        </div>
+      </header>
+
+      <div class="body">
+        <nav class="rail" id="dashboard-nav" aria-label="Dashboard sections">
+          <div class="rail__head">
+            <p class="rail__label">Navigate</p>
+            <button
+              class="rail__toggle"
+              data-action="rail"
+              type="button"
+              aria-label="Collapse navigation"
+              aria-controls="dashboard-nav"
+              aria-expanded="true"
+              title="Collapse navigation"
+            >
+              <svg viewBox="0 0 16 16" aria-hidden="true">
+                <path d="M10 3 5 8l5 5" />
+              </svg>
+            </button>
+          </div>
+          <ul class="rail__list" role="tablist" aria-orientation="vertical">
+            <li role="presentation">
+              <button
+                class="tab is-active"
+                id="tab-overview"
+                role="tab"
+                aria-label="Overview"
+                aria-selected="true"
+                aria-controls="pane-overview"
+                tabindex="0"
+                data-target="overview"
+                type="button"
+              >
+                <span class="lamp lamp--live" aria-hidden="true"></span
+                ><span class="tab__name">Overview</span
+                ><span class="tab__meta">KPIs · population</span>
+              </button>
+            </li>
+            <li role="presentation">
+              <button
+                class="tab"
+                id="tab-trends"
+                role="tab"
+                aria-label="Trends"
+                aria-selected="false"
+                aria-controls="pane-trends"
+                tabindex="-1"
+                data-target="trends"
+                type="button"
+              >
+                <span class="lamp" aria-hidden="true"></span
+                ><span class="tab__name">Trends</span
+                ><span class="tab__meta">month · horizon · brand</span>
+              </button>
+            </li>
+            <li role="presentation">
+              <button
+                class="tab"
+                id="tab-comparison"
+                role="tab"
+                aria-label="Comparison"
+                aria-selected="false"
+                aria-controls="pane-comparison"
+                tabindex="-1"
+                data-target="comparison"
+                type="button"
+              >
+                <span class="lamp" aria-hidden="true"></span
+                ><span class="tab__name">Comparison</span
+                ><span class="tab__meta">vintages · TM vs ML</span>
+              </button>
+            </li>
+            <li role="presentation">
+              <button
+                class="tab"
+                id="tab-history"
+                role="tab"
+                aria-label="Product history"
+                aria-selected="false"
+                aria-controls="pane-history"
+                tabindex="-1"
+                data-target="history"
+                type="button"
+              >
+                <span class="lamp" aria-hidden="true"></span
+                ><span class="tab__name">Product history</span
+                ><span class="tab__meta">stability · exceptions</span>
+              </button>
+            </li>
+            <li role="presentation">
+              <button
+                class="tab"
+                id="tab-quality"
+                role="tab"
+                aria-label="Data quality"
+                aria-selected="false"
+                aria-controls="pane-quality"
+                tabindex="-1"
+                data-target="quality"
+                type="button"
+              >
+                <span class="lamp lamp--warn" aria-hidden="true"></span
+                ><span class="tab__name">Data quality</span
+                ><span class="tab__meta">statuses · downloads</span
+                ><span class="tab__badge" data-quality-badge aria-hidden="true"
+                  >–</span
+                >
+              </button>
+            </li>
+          </ul>
+          <div class="rail__foot">
+            canonical analysis data<br />metric contract · v2
+          </div>
+        </nav>
+
+        <div class="workspace">
+          <div class="scopebar" aria-label="Active population ledger">
+            <div class="scopebar__primary" data-scope-primary></div>
+            <div class="scopebar__audit" data-scope-audit></div>
+          </div>
+
+          <aside
+            class="scope-drawer"
+            id="scope-drawer"
+            aria-label="Dashboard filters"
+            hidden
+          >
+            <header class="scope-drawer__head">
+              <div>
+                <p class="eyebrow">Shared population</p>
+                <h2>Filter workbench</h2>
+              </div>
+              <span
+                >Every tab, count and download recomputes from this scope</span
+              >
+            </header>
+            <div class="filter-groups">
+              <fieldset class="filter-group">
+                <legend>Primary scope</legend>
+                <label class="compact-field"
+                  ><span>Mode</span
+                  ><select data-control="comparison_mode">
+                    <option value="false">Single source</option>
+                    <option value="true">Compare TM vs ML</option>
+                  </select></label
+                >
+                <label class="compact-field"
+                  ><span>Source</span
+                  ><select data-control="source">
+                    <option value="tm">TM</option>
+                    <option value="ml">ML</option>
+                  </select></label
+                >
+                <label class="compact-field"
+                  ><span>Target start</span
+                  ><select data-control="target_start"></select
+                ></label>
+                <label class="compact-field"
+                  ><span>Target end</span
+                  ><select data-control="target_end"></select
+                ></label>
+                <label class="compact-field"
+                  ><span>Brand</span
+                  ><select data-control="brand"></select
+                ></label>
+                <label class="compact-field"
+                  ><span>Parent product</span
+                  ><select data-control="parent_code"></select
+                ></label>
+                <label class="compact-field"
+                  ><span>Horizon</span
+                  ><select data-control="horizon"></select
+                ></label>
+                <label class="compact-field"
+                  ><span>Minimum actual</span
+                  ><input
+                    data-control="minimum_actual_volume"
+                    type="number"
+                    min="0"
+                    step="1"
+                    value="0"
+                /></label>
+              </fieldset>
+
+              <fieldset class="filter-group" data-vintage-group>
+                <legend>Vintage comparison</legend>
+                <label class="compact-field"
+                  ><span>Vintage A</span
+                  ><select data-control="vintage_a_kind">
+                    <option value="oldest_available">Oldest available</option>
+                    <option value="latest_available">Latest available</option>
+                    <option value="specific_calculation_month">
+                      Exact calculation month
+                    </option>
+                    <option value="specific_horizon">Exact horizon</option>
+                  </select></label
+                >
+                <label class="compact-field"
+                  ><span>A value</span
+                  ><select data-control="vintage_a_value"></select
+                ></label>
+                <label class="compact-field"
+                  ><span>Vintage B</span
+                  ><select data-control="vintage_b_kind">
+                    <option value="latest_available">Latest available</option>
+                    <option value="oldest_available">Oldest available</option>
+                    <option value="specific_calculation_month">
+                      Exact calculation month
+                    </option>
+                    <option value="specific_horizon">Exact horizon</option>
+                  </select></label
+                >
+                <label class="compact-field"
+                  ><span>B value</span
+                  ><select data-control="vintage_b_value"></select
+                ></label>
+                <label class="compact-field"
+                  ><span>Revision direction</span
+                  ><select data-control="revision_direction">
+                    <option value="">All directions</option>
+                    <option value="up">Up</option>
+                    <option value="down">Down</option>
+                    <option value="unchanged">Unchanged</option>
+                  </select></label
+                >
+                <label class="compact-field"
+                  ><span>Revision outcome</span
+                  ><select data-control="revision_outcome">
+                    <option value="">All outcomes</option>
+                    <option value="improved">Improved</option>
+                    <option value="worsened">Worsened</option>
+                    <option value="neutral">Neutral</option>
+                  </select></label
+                >
+                <label class="compact-field"
+                  ><span>Tolerance KL</span
+                  ><input
+                    data-control="revision_tolerance_kl"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value="0.01"
+                /></label>
+              </fieldset>
+
+              <fieldset class="filter-group" data-performance-group>
+                <legend>Performance</legend>
+                <label class="compact-field"
+                  ><span>Direction</span
+                  ><select data-control="forecast_direction">
+                    <option value="">All directions</option>
+                    <option value="over">Over forecast</option>
+                    <option value="under">Under forecast</option>
+                    <option value="within_tolerance">Within tolerance</option>
+                  </select></label
+                >
+                <label class="compact-field"
+                  ><span>Accuracy band</span
+                  ><select data-control="accuracy_band">
+                    <option value="">All bands</option>
+                    <option value="below_0">Below 0%</option>
+                    <option value="0_50">0–50%</option>
+                    <option value="50_100">50–100%</option>
+                    <option value="above_100">Above 100%</option>
+                  </select></label
+                >
+                <label class="compact-field"
+                  ><span>Bias band</span
+                  ><select data-control="bias_band">
+                    <option value="">All bands</option>
+                    <option value="below_0">Below 0%</option>
+                    <option value="0_50">0–50%</option>
+                    <option value="above_50">Above 50%</option>
+                  </select></label
+                >
+                <label class="compact-field"
+                  ><span>Minimum abs error</span
+                  ><input
+                    data-control="minimum_absolute_error_kl"
+                    type="number"
+                    min="0"
+                    step="1"
+                    value="0"
+                /></label>
+                <label class="compact-field"
+                  ><span>Top N</span
+                  ><select data-control="top_n">
+                    <option value="">All products</option>
+                    <option value="10">Top 10</option>
+                    <option value="20">Top 20</option>
+                    <option value="50">Top 50</option>
+                  </select></label
+                >
+                <label class="compact-field"
+                  ><span>Top N ranking</span
+                  ><select data-control="top_n_metric">
+                    <option value="actual_volume">Actual volume</option>
+                    <option value="absolute_error">Absolute error</option>
+                    <option value="deterioration">Deterioration</option>
+                  </select></label
+                >
+              </fieldset>
+
+              <fieldset class="filter-group">
+                <legend>Quality</legend>
+                <label class="compact-field"
+                  ><span>Hierarchy</span
+                  ><select data-control="hierarchy_status">
+                    <option value="">All statuses</option>
+                    <option value="mapped">Mapped</option>
+                    <option value="unmapped">Unmapped</option>
+                    <option value="conflict">Conflict</option>
+                  </select></label
+                >
+                <label class="compact-field"
+                  ><span>Actual status</span
+                  ><select data-control="actual_status">
+                    <option value="">All statuses</option>
+                    <option value="matched_positive">Positive actual</option>
+                    <option value="matched_zero">Zero actual</option>
+                    <option value="missing">Missing actual</option>
+                  </select></label
+                >
+                <label class="compact-field"
+                  ><span>Pair status</span
+                  ><select data-control="pair_status">
+                    <option value="">All statuses</option>
+                    <option value="complete">Complete</option>
+                    <option value="missing_a">Missing A</option>
+                    <option value="missing_b">Missing B</option>
+                    <option value="missing_both">Missing both</option>
+                    <option value="missing_actual">Missing actual</option>
+                    <option value="zero_actual">Zero actual</option>
+                  </select></label
+                >
+                <label class="compact-field"
+                  ><span>Source availability</span
+                  ><select data-control="source_availability">
+                    <option value="">All statuses</option>
+                    <option value="tm_only">TM only</option>
+                    <option value="ml_only">ML only</option>
+                    <option value="both_sources">Both sources</option>
+                  </select></label
+                >
+                <label class="check-field"
+                  ><input type="checkbox" data-control="zero_forecast_only" />
+                  Zero forecasts only</label
+                >
+                <label class="check-field"
+                  ><input
+                    type="checkbox"
+                    data-control="complete_vintage_history_only"
+                  />
+                  Complete vintage history only</label
+                >
+                <p class="filter-note" data-filter-note>
+                  Changes apply automatically.
+                </p>
+              </fieldset>
+            </div>
+          </aside>
+
+          <div class="state-banner" role="status" aria-live="polite" hidden>
+            <strong data-state-title></strong><span data-state-copy></span>
+          </div>
+
+          <main class="stage" aria-live="polite" aria-busy="true">
+            <section
+              class="pane is-active"
+              id="pane-overview"
+              role="tabpanel"
+              aria-labelledby="tab-overview"
+            >
+              <div class="pane__head">
+                <div>
+                  <p class="eyebrow">Active population</p>
+                  <h2 class="pane__title">Performance at a glance</h2>
+                </div>
+                <span class="stamp" data-overview-stamp>canonical data</span>
+              </div>
+              <div class="population" data-population></div>
+              <div class="kpis" data-kpis></div>
+              <section class="frame" aria-labelledby="overview-chart-title">
+                <header class="frame__head">
+                  <div>
+                    <h3 class="frame__title" id="overview-chart-title">
+                      Monthly accuracy and volume
+                    </h3>
+                    <p class="frame__sub">
+                      Aggregate metrics retain numerator, denominator, actual
+                      and forecast evidence
+                    </p>
+                  </div>
+                  <div class="legend">
+                    <span><i class="key key--teal"></i>Accuracy</span
+                    ><span><i class="key key--blue"></i>Actual KL</span>
+                  </div>
+                </header>
+                <div
+                  class="frame__body frame__body--wide"
+                  data-overview-chart
+                ></div>
+              </section>
+            </section>
+
+            <section
+              class="pane"
+              id="pane-trends"
+              role="tabpanel"
+              aria-labelledby="tab-trends"
+            >
+              <div class="pane__head">
+                <div>
+                  <p class="eyebrow">Performance</p>
+                  <h2 class="pane__title">How performance moves</h2>
+                </div>
+                <span class="stamp">active real-data scope</span>
+              </div>
+              <div class="metricbar" aria-label="Trend metric selectors">
+                <label
+                  ><span>Monthly metric</span
+                  ><select data-metric-selector="monthly">
+                    <option value="forecast_accuracy_pct">
+                      Forecast accuracy
+                    </option>
+                    <option value="bias_pct">Bias</option>
+                    <option value="absolute_error_kl">Absolute error</option>
+                    <option value="forecast_kl">Forecast vs actual</option>
+                  </select></label
+                >
+                <label
+                  ><span>Horizon metric</span
+                  ><select data-metric-selector="horizon">
+                    <option value="forecast_accuracy_pct">
+                      Forecast accuracy
+                    </option>
+                    <option value="bias_pct">Bias</option>
+                    <option value="absolute_error_kl">Absolute error</option>
+                  </select></label
+                >
+                <label
+                  ><span>Heatmap metric</span
+                  ><select data-metric-selector="heatmap">
+                    <option value="forecast_accuracy_pct">
+                      Forecast accuracy
+                    </option>
+                    <option value="bias_pct">Bias</option>
+                    <option value="absolute_error_kl">Absolute error</option>
+                    <option value="vintage_a_accuracy_pct">
+                      Vintage A accuracy
+                    </option>
+                    <option value="vintage_b_accuracy_pct">
+                      Vintage B accuracy
+                    </option>
+                    <option value="accuracy_delta_pp">Accuracy delta</option>
+                    <option value="revision_effectiveness_pct">
+                      Revision effectiveness
+                    </option>
+                  </select></label
+                >
+                <span class="metricbar__note"
+                  >Every point is derived from the active population.</span
+                >
+              </div>
+              <section class="frame trend-main">
+                <header class="frame__head">
+                  <div>
+                    <h3 class="frame__title" data-trend-title>
+                      Monthly performance
+                    </h3>
+                    <p class="frame__sub" data-trend-subtitle></p>
+                  </div>
+                  <div class="legend" data-trend-legend></div>
+                </header>
+                <div class="frame__body" data-trend-chart></div>
+              </section>
+              <div class="grid2 trend-lower">
+                <section class="frame">
+                  <header class="frame__head">
+                    <div>
+                      <h3 class="frame__title">Performance by horizon</h3>
+                      <p class="frame__sub">
+                        Selected source or exact aligned comparison
+                      </p>
+                    </div>
+                    <span class="frame__metric" data-horizon-range></span>
+                  </header>
+                  <div class="frame__body">
+                    <div class="dual-bars" data-horizon-bars></div>
+                  </div>
+                </section>
+                <section class="frame">
+                  <header class="frame__head">
+                    <div>
+                      <h3 class="frame__title">Brand × target month</h3>
+                      <p class="frame__sub">
+                        Worst-first with explicit quality groups
+                      </p>
+                    </div>
+                    <span class="frame__metric" data-heatmap-range></span>
+                  </header>
+                  <div class="frame__body">
+                    <div class="heatmap" data-heatmap></div>
+                  </div>
+                </section>
+              </div>
+            </section>
+
+            <section
+              class="pane"
+              id="pane-comparison"
+              role="tabpanel"
+              aria-labelledby="tab-comparison"
+            >
+              <div class="pane__head">
+                <div>
+                  <p class="eyebrow">Comparable populations</p>
+                  <h2 class="pane__title">TM vs ML, and how revisions land</h2>
+                </div>
+                <span class="stamp">explicit analytical modes</span>
+              </div>
+              <div
+                class="subtabs"
+                data-subtabs="comparison"
+                role="group"
+                aria-label="Comparison analysis mode"
+              >
+                <button
+                  class="subtab is-active"
+                  aria-pressed="true"
+                  data-subtab-target="revision"
+                  type="button"
+                >
+                  Vintage revisions</button
+                ><button
+                  class="subtab"
+                  aria-pressed="false"
+                  data-subtab-target="sources"
+                  type="button"
+                >
+                  TM vs ML
+                </button>
+              </div>
+              <div
+                class="subpanel is-active"
+                data-subpanel="comparison:revision"
+                data-revision-panel
+              ></div>
+              <div
+                class="subpanel"
+                data-subpanel="comparison:sources"
+                data-source-panel
+                hidden
+              ></div>
+            </section>
+
+            <section
+              class="pane"
+              id="pane-history"
+              role="tabpanel"
+              aria-labelledby="tab-history"
+            >
+              <div class="pane__head">
+                <div>
+                  <p class="eyebrow">Drill-down</p>
+                  <h2 class="pane__title">Product vintage history</h2>
+                </div>
+                <span class="stamp">active-scope detail</span>
+              </div>
+              <div
+                class="subtabs"
+                data-subtabs="history"
+                role="group"
+                aria-label="Product investigation mode"
+              >
+                <button
+                  class="subtab is-active"
+                  aria-pressed="true"
+                  data-subtab-target="product"
+                  type="button"
+                >
+                  Product history</button
+                ><button
+                  class="subtab"
+                  aria-pressed="false"
+                  data-subtab-target="exceptions"
+                  type="button"
+                >
+                  Forecast exceptions
+                </button>
+              </div>
+              <div class="subpanel is-active" data-subpanel="history:product">
+                <div
+                  class="toolbar history-toolbar"
+                  aria-label="Product drill-down filters"
+                >
+                  <label class="field field--grow"
+                    ><span class="field__k">Product</span
+                    ><select
+                      class="field__ctl"
+                      data-product-control="parent"
+                    ></select></label
+                  ><label class="field"
+                    ><span class="field__k">Target month</span
+                    ><select
+                      class="field__ctl"
+                      data-product-control="month"
+                    ></select
+                  ></label>
+                  <div class="field">
+                    <span class="field__k">Source scope</span
+                    ><strong
+                      class="field__readout"
+                      data-product-source
+                    ></strong>
+                  </div>
+                </div>
+                <div class="product-summary" data-product-summary></div>
+                <div class="history-layout">
+                  <section class="frame">
+                    <header class="frame__head">
+                      <div>
+                        <h3 class="frame__title">
+                          Chronological forecast development
+                        </h3>
+                        <p class="frame__sub">
+                          Calculation month, horizon, forecast, actual, error
+                          and bias
+                        </p>
+                      </div>
+                      <div class="legend">
+                        <span><i class="key key--amber"></i>TM</span
+                        ><span><i class="key key--teal"></i>ML</span
+                        ><span><i class="key key--blue"></i>Actual</span>
+                      </div>
+                    </header>
+                    <div class="frame__body" data-history-chart></div>
+                  </section>
+                  <section class="stability" data-stability></section>
+                </div>
+                <div
+                  class="revision-table"
+                  role="table"
+                  aria-label="Consecutive source-specific revisions"
+                  data-product-revisions
+                ></div>
+              </div>
+              <div class="subpanel" data-subpanel="history:exceptions" hidden>
+                <div class="exception-toolbar">
+                  <label class="field field--grow"
+                    ><span class="field__k"
+                      >Search products, brands or statuses</span
+                    ><input
+                      class="field__ctl"
+                      type="search"
+                      data-exception-search /></label
+                  ><label class="field"
+                    ><span class="field__k">Rows</span
+                    ><select class="field__ctl" data-exception-limit>
+                      <option value="10">Top 10</option>
+                      <option value="20">Top 20</option>
+                      <option value="80">All loaded</option>
+                    </select></label
+                  ><button
+                    class="btn"
+                    type="button"
+                    data-export-kind="vintages"
+                  >
+                    Filtered vintages · CSV
+                  </button>
+                </div>
+                <div class="exception-summary" data-exception-summary></div>
+                <div
+                  class="audit-table"
+                  role="table"
+                  aria-label="Filtered forecast exceptions"
+                  data-exception-table
+                ></div>
+              </div>
+            </section>
+
+            <section
+              class="pane"
+              id="pane-quality"
+              role="tabpanel"
+              aria-labelledby="tab-quality"
+            >
+              <div class="pane__head">
+                <div>
+                  <p class="eyebrow">Diagnostics</p>
+                  <h2 class="pane__title">What the population hides</h2>
+                </div>
+                <span class="stamp stamp--warn" data-quality-stamp
+                  >Loading diagnostics</span
+                >
+              </div>
+              <div class="blocking" data-blocking></div>
+              <div class="ql" data-quality-cards></div>
+              <div
+                class="subtabs quality-tabs"
+                data-subtabs="quality"
+                role="group"
+                aria-label="Quality diagnostic category"
+              >
+                <button
+                  class="subtab is-active"
+                  aria-pressed="true"
+                  data-subtab-target="hierarchy"
+                  type="button"
+                >
+                  Hierarchy</button
+                ><button
+                  class="subtab"
+                  aria-pressed="false"
+                  data-subtab-target="actual"
+                  type="button"
+                >
+                  Actuals</button
+                ><button
+                  class="subtab"
+                  aria-pressed="false"
+                  data-subtab-target="pairs"
+                  type="button"
+                >
+                  Vintage pairs</button
+                ><button
+                  class="subtab"
+                  aria-pressed="false"
+                  data-subtab-target="source_availability"
+                  type="button"
+                >
+                  Source availability
+                </button>
+              </div>
+              <div
+                class="quality-panel subpanel is-active"
+                data-subpanel="quality:hierarchy"
+              ></div>
+              <div
+                class="quality-panel subpanel"
+                data-subpanel="quality:actual"
+                hidden
+              ></div>
+              <div
+                class="quality-panel subpanel"
+                data-subpanel="quality:pairs"
+                hidden
+              ></div>
+              <div
+                class="quality-panel subpanel"
+                data-subpanel="quality:source_availability"
+                hidden
+              ></div>
+              <details class="baseline">
+                <summary data-baseline-summary>
+                  Baseline scope exclusions
+                </summary>
+                <div data-baseline></div>
+              </details>
+            </section>
+          </main>
+        </div>
+      </div>
+
+      <footer class="statusbar">
+        <span class="statusbar__seg"
+          ><i class="lamp lamp--live" aria-hidden="true"></i
+          ><span data-status>Loading canonical dataset</span></span
+        ><span class="statusbar__seg" data-status-population></span
+        ><span
+          class="statusbar__seg statusbar__seg--mono"
+          data-status-source
+        ></span
+        ><span class="statusbar__seg statusbar__seg--right"
+          >metrics computed by forecast_analysis</span
+        >
+      </footer>
+    </div>
+
+    <div class="loading" role="status" aria-live="polite">
+      <span class="loading__spinner" aria-hidden="true"></span
+      ><strong>Computing active population</strong>
+    </div>
+    <div
+      class="toast"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+    ></div>
+    <script src="app.js"></script>
+  </body>
+</html>

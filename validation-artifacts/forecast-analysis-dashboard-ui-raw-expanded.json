@@ -1,4 +1,5 @@
 {
+  "artifact_path": "validation-artifacts/forecast-analysis-dashboard-ui-raw-expanded.json",
   "disclosure_transition": {
     "desiredOpen": true,
     "targets": [
@@ -15,7 +16,7 @@
       }
     ]
   },
-  "evidence_version": 1,
+  "evidence_version": 2,
   "execution_id": "20260827T090002Z-4d98c1867b96",
   "raw_browser_result": {
     "command": [
@@ -2654,5 +2655,61 @@
   },
   "session": "forecast-dashboard-ui-78c4994f9290",
   "source": "agent-browser-eval",
-  "state": "expanded-open"
+  "state": "expanded-open",
+  "state_proof": {
+    "algorithm": "sha256-canonical-json-v1",
+    "contract": "forecast-analysis-dashboard-ui-state-proof-v1",
+    "payload": {
+      "content_probe": {
+        "appScrollHeight": 11186,
+        "appTextLength": 7857,
+        "bodyTextLength": 7857,
+        "maxVisibleElementBottom": 11186.28125
+      },
+      "disclosure": {
+        "ariaExpanded": "true",
+        "contentLength": 457,
+        "controlId": "radix-_r_21_",
+        "kind": "marimo-accordion",
+        "label": "Data-quality filters",
+        "open": true,
+        "regionId": "radix-_r_22_",
+        "regionState": "open",
+        "regionVisible": true,
+        "state": "open"
+      },
+      "expected_disclosure": {
+        "label": "Data-quality filters",
+        "open": true
+      },
+      "geometry": {
+        "application": {
+          "clientHeight": 11186,
+          "clientWidth": 6650,
+          "scrollHeight": 11186,
+          "scrollWidth": 6650
+        },
+        "body": {
+          "clientHeight": 800,
+          "clientWidth": 1280,
+          "scrollHeight": 800,
+          "scrollWidth": 1280
+        },
+        "document": {
+          "clientHeight": 800,
+          "clientWidth": 1280,
+          "scrollHeight": 800,
+          "scrollWidth": 1280
+        },
+        "viewport": {
+          "devicePixelRatio": 1,
+          "height": 800,
+          "width": 1280
+        }
+      },
+      "state": "expanded-open"
+    },
+    "proof_sha256": "e7dbec489d1336b7db12675b40eeeac0890ad7f9cb378d49bedcc4ebf36027e1"
+  },
+  "state_proof_contract": "forecast-analysis-dashboard-ui-state-proof-v1"
 }

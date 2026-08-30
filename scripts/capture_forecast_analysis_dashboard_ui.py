@@ -32,10 +32,30 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Mapping
 
-CAPTURE_SCHEMA_VERSION = 2
-CAPTURE_CONTRACT = "forecast-analysis-dashboard-ui-baseline-v1"
-NORMALIZATION_CONTRACT = "marimo-full-page-normalization-v1"
-WORKFLOW_VERSION = "forecast-dashboard-live-capture-v1"
+from forecast_analysis_dashboard_ui_contract import (  # pyright: ignore[reportMissingImports]
+    CAPTURE_ARTIFACT_RELATIVE_PATH,
+    CAPTURE_CONTRACT,
+    CAPTURE_SCHEMA_VERSION,
+    EXPECTED_DISCLOSURE_LABEL,
+    IMMUTABLE_BASELINE_RELATIVE_PATH,
+    NORMALIZATION_CONTRACT,
+    OVERFLOW_TOLERANCE_PX,
+    PROVENANCE_HASH_ALGORITHM,
+    SCREENSHOT_BINDING_CONTRACT,
+    STATE_PROOF_CONTRACT,
+    WORKFLOW_VERSION,
+    capture_anchor,
+    disclosure_evidence,
+    expected_normalization_artifact,
+    expected_screenshot,
+    expected_state_artifact,
+    geometry_evidence,
+    screenshot_binding,
+    screenshot_command_contract,
+    sha256_json,
+    sha256_json_file,
+    state_proof,
+)
 DEFAULT_URL = "http://127.0.0.1:8765/"
 DEFAULT_OUTPUT_DIR = Path("validation-artifacts")
 DEFAULT_VIEWPORT = (1280, 800)
@@ -501,7 +521,17 @@ NORMALIZE_SCRIPT = r"""
     }
     actions.push({ tag: node.tagName.toLowerCase(), id: node.id || null, properties: { before, after } });
   }
-  await sleep(120);
+  let previousMeasurement = null;
+  let stableSamples = 0;
+  for (let attempt = 0; attempt < 80; attempt += 1) {
+    const currentMeasurement = JSON.stringify(measure());
+    if (currentMeasurement === previousMeasurement) stableSamples += 1;
+    else stableSamples = 0;
+    if (stableSamples >= 8) break;
+    previousMeasurement = currentMeasurement;
+    await sleep(250);
+  }
+  if (stableSamples < 8) throw new Error(`normalized layout did not stabilize: ${JSON.stringify(measure())}`);
   const appAfter = document.querySelector('#App');
   const appText = (appAfter?.innerText || appAfter?.textContent || '').replace(/\s+/g, ' ').trim();
   const elements = appAfter ? [...appAfter.querySelectorAll('*')] : [];
@@ -531,6 +561,46 @@ NORMALIZE_SCRIPT = r"""
     },
   };
 })();
+"""
+
+
+STABLE_LAYOUT_SCRIPT = r"""
+(async () => {
+  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+  const signature = () => {
+    const app = document.querySelector('#App');
+    const text = (app?.innerText || app?.textContent || '').replace(/\s+/g, ' ').trim();
+    const elements = app ? [...app.querySelectorAll('*')] : [];
+    let maxBottom = 0;
+    for (const element of elements) {
+      const rect = element.getBoundingClientRect();
+      if (rect.height > 0) maxBottom = Math.max(maxBottom, rect.bottom);
+    }
+    const loadingCount = elements.filter((element) =>
+      /(?:loading|stale)/i.test(String(element.className))
+    ).length;
+    return JSON.stringify({
+      appScrollHeight: app?.scrollHeight || 0,
+      appTextLength: text.length,
+      appHtmlLength: app?.innerHTML.length || 0,
+      maxVisibleElementBottom: maxBottom,
+      loadingCount,
+    });
+  };
+  let previous = null;
+  let stableSamples = 0;
+  for (let attempt = 0; attempt < 240; attempt += 1) {
+    const current = signature();
+    if (current === previous) stableSamples += 1;
+    else stableSamples = 0;
+    if (stableSamples >= 8 && JSON.parse(current).loadingCount === 0) {
+      return { stable: true, signature: JSON.parse(current) };
+    }
+    previous = current;
+    await sleep(250);
+  }
+  throw new Error(`dashboard layout did not stabilize: ${signature()}`);
+})()
 """
 
 
@@ -594,6 +664,10 @@ def _set_disclosures(
 
 def _read_live_state(browser: str, session: str) -> dict[str, Any]:
     return _eval(browser, session, CONTROL_STATE_SCRIPT, timeout=240.0)
+
+
+def _wait_for_stable_layout(browser: str, session: str) -> None:
+    _eval(browser, session, STABLE_LAYOUT_SCRIPT, timeout=240.0)
 
 
 def _sha256(path: Path) -> str:
@@ -792,13 +866,39 @@ def _capture_state(
     normalization_artifact_name: str,
     disclosure_transition: Mapping[str, Any],
 ) -> tuple[dict[str, Any], dict[str, Any]]:
+    state_artifact = output_dir / state_artifact_name
+    normalization_artifact = output_dir / normalization_artifact_name
+    expected_state_path = expected_state_artifact(state_name).as_posix()
+    expected_normalization_path = expected_normalization_artifact(state_name).as_posix()
+    expected_screenshot_path = expected_screenshot(state_name).as_posix()
+    state_path = _relative(state_artifact, root)
+    normalization_path = _relative(normalization_artifact, root)
+    if state_path != expected_state_path:
+        raise CaptureWorkflowError(
+            f"state artifact path is not the contract path: {state_path} != {expected_state_path}"
+        )
+    if normalization_path != expected_normalization_path:
+        raise CaptureWorkflowError(
+            "normalization artifact path is not the contract path: "
+            f"{normalization_path} != {expected_normalization_path}"
+        )
+
     state_result = _read_live_state(browser, session)
     state_data = _data(state_result)
     _assert_default_controls(state_data)
     _assert_disclosures(state_data, expected_open)
-    state_artifact = output_dir / state_artifact_name
+    try:
+        disclosure = {
+            **disclosure_evidence(state_data, EXPECTED_DISCLOSURE_LABEL),
+            "expected_open": expected_open,
+        }
+        state_proof_payload = state_proof(state=state_name, rendered_state=state_data)
+    except ValueError as exc:
+        raise CaptureWorkflowError(str(exc)) from exc
     state_payload = {
-        "evidence_version": 1,
+        "evidence_version": 2,
+        "state_proof_contract": STATE_PROOF_CONTRACT,
+        "artifact_path": state_path,
         "execution_id": execution_id,
         "session": session,
         "state": state_name,
@@ -806,8 +906,11 @@ def _capture_state(
         "disclosure_transition": dict(disclosure_transition),
         "raw_browser_result": state_result,
         "rendered_state": state_data,
+        "state_proof": state_proof_payload,
     }
     _write_json(state_artifact, state_payload)
+    state_artifact_sha256 = sha256_json_file(state_artifact, root)
+    _wait_for_stable_layout(browser, session)
 
     normalization_result = _eval(
         browser,
@@ -824,28 +927,83 @@ def _capture_state(
         output_dir,
         screenshot_name,
     )
+    screenshot_path = _relative(screenshot["path"], root)
+    if screenshot_path != expected_screenshot_path:
+        raise CaptureWorkflowError(
+            "screenshot path is not the state-specific contract path: "
+            f"{screenshot_path} != {expected_screenshot_path}"
+        )
     post_result = _eval(browser, session, POST_MEASURE_SCRIPT, timeout=240.0)
     post_data = _data(post_result)
     restore_result = _eval(browser, session, RESTORE_SCRIPT)
-    screenshot_record = {
-        "path": str((root / screenshot["path"]).resolve().relative_to(root.resolve())),
+    screenshot_core = {
+        "path": screenshot_path,
         "width": screenshot["width"],
         "height": screenshot["height"],
         "sha256": screenshot["sha256"],
     }
-    normalization_artifact = output_dir / normalization_artifact_name
-    normalization_payload = {
-        "evidence_version": 1,
+    command_contract = screenshot_command_contract(
+        screenshot["command_result"],
+        root,
+        expected_screenshot_path,
+    )
+    command_sha256 = sha256_json(command_contract)
+    geometry = geometry_evidence(
+        state_data,
+        {"normalization": normalization_data, "post_measurement": post_data},
+    )
+    binding = screenshot_binding(
+        execution_id=execution_id,
+        session=session,
+        state=state_name,
+        expected_repository_path=expected_screenshot_path,
+        state_artifact_path=state_path,
+        state_artifact_sha256=state_artifact_sha256,
+        state_proof_sha256=state_proof_payload["proof_sha256"],
+        normalization_artifact_path=normalization_path,
+        command_sha256=command_sha256,
+        disclosure=disclosure,
+        geometry=geometry,
+        screenshot=screenshot_core,
+    )
+    screenshot_command = dict(screenshot["command_result"])
+    screenshot_command["capture_output"] = {
+        "contract": SCREENSHOT_BINDING_CONTRACT,
+        "algorithm": PROVENANCE_HASH_ALGORITHM,
         "execution_id": execution_id,
         "session": session,
         "state": state_name,
-        "source_state_artifact": str(state_artifact.relative_to(root)),
+        "expected_repository_path": expected_screenshot_path,
+        "state_artifact_path": state_path,
+        "state_artifact_sha256": state_artifact_sha256,
+        "normalization_artifact_path": normalization_path,
+        "screenshot_command_sha256": command_sha256,
+        "state_proof_sha256": binding["state_proof_sha256"],
+        "disclosure_sha256": binding["disclosure_sha256"],
+        "geometry_sha256": binding["geometry_sha256"],
+        "width": screenshot["width"],
+        "height": screenshot["height"],
+        "sha256": screenshot["sha256"],
+        "binding_sha256": binding["binding_sha256"],
+    }
+    screenshot_record = {**screenshot_core, "binding_sha256": binding["binding_sha256"]}
+    normalization_payload = {
+        "evidence_version": 2,
+        "screenshot_binding_contract": SCREENSHOT_BINDING_CONTRACT,
+        "artifact_path": normalization_path,
+        "execution_id": execution_id,
+        "session": session,
+        "state": state_name,
+        "source_state_artifact": state_path,
+        "state_artifact_sha256": state_artifact_sha256,
         "normalization_contract": NORMALIZATION_CONTRACT,
         "normalization_eval": normalization_result,
         "normalization": normalization_data,
         "post_measurement_eval": post_result,
         "post_measurement": post_data,
-        "screenshot_command": screenshot["command_result"],
+        "screenshot_command": screenshot_command,
+        "screenshot_command_proof": command_contract,
+        "screenshot_binding": binding,
         "screenshot": screenshot_record,
         "restore_eval": restore_result,
     }
@@ -868,6 +1026,9 @@ def _state_summary(
         "state": normalization_payload["state"],
         "state_evidence": str(state_artifact),
         "normalization_evidence": str(normalization_artifact.relative_to(root)),
+        "state_artifact_sha256": normalization_payload["state_artifact_sha256"],
+        "screenshot_binding": normalization_payload["screenshot_binding"],
+        "screenshot_command_proof": normalization_payload["screenshot_command_proof"],
         "viewport": state.get("viewport"),
         "pre_normalization": state.get("geometry"),
         "normalized": True,
@@ -887,6 +1048,7 @@ def _state_summary(
                 "width": screenshot.get("width"),
                 "height": screenshot.get("height"),
                 "sha256": screenshot.get("sha256"),
+                "binding_sha256": screenshot.get("binding_sha256"),
             },
         },
     }
@@ -993,6 +1155,12 @@ def capture(
     browser_path = shutil.which(browser) if os.path.sep not in browser else browser
     if not browser_path:
         raise CaptureWorkflowError(f"browser executable not found: {browser}")
+    expected_output_dir = (root / "validation-artifacts").resolve()
+    if output_dir.resolve() != expected_output_dir:
+        raise CaptureWorkflowError(
+            "baseline capture output must be the repository validation-artifacts directory: "
+            f"{output_dir} != {expected_output_dir}"
+        )
     output_dir.mkdir(parents=True, exist_ok=True)
     execution_id = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ") + "-" + uuid.uuid4().hex[:12]
     session = f"forecast-dashboard-ui-{uuid.uuid4().hex[:12]}"
@@ -1012,7 +1180,9 @@ def capture(
             timeout=240.0,
         )
         _run_browser(browser_path, session, ["wait", "--load", "networkidle"], timeout=240.0)
+        _wait_for_stable_layout(browser_path, session)
         default_transition = _set_disclosures(browser_path, session, False)
+        _wait_for_stable_layout(browser_path, session)
         default_state, default_normalization = _capture_state(
             browser=browser_path,
             session=session,
@@ -1027,6 +1197,7 @@ def capture(
             disclosure_transition=_data(default_transition),
         )
         expanded_transition = _set_disclosures(browser_path, session, True)
+        _wait_for_stable_layout(browser_path, session)
         expanded_state, expanded_normalization = _capture_state(
             browser=browser_path,
             session=session,
@@ -1064,7 +1235,7 @@ def capture(
         expanded_summary["normalization_evidence"] = _relative(
             output_dir / "forecast-analysis-dashboard-ui-normalization-expanded.json", root
         )
-        baseline_image = output_dir / "forecast-analysis-dashboard-long-full.png"
+        baseline_image = root / IMMUTABLE_BASELINE_RELATIVE_PATH
         baseline_width, baseline_height = _png_dimensions(baseline_image)
         baseline_digest = _sha256(baseline_image)
         default_screenshot = _require_mapping(
@@ -1075,6 +1246,60 @@ def capture(
             _require_mapping(expanded_summary["normalized_capture"], "expanded capture")["screenshot"],
             "expanded screenshot",
         )
+        anchor_states = {}
+        for state_name, normalization_payload in (
+            ("default-closed", default_normalization),
+            ("expanded-open", expanded_normalization),
+        ):
+            binding = _require_mapping(
+                normalization_payload["screenshot_binding"],
+                f"{state_name} screenshot binding",
+            )
+            state_artifact = _require_mapping(
+                binding["state_artifact"],
+                f"{state_name} state artifact binding",
+            )
+            screenshot_binding_record = _require_mapping(
+                binding["screenshot"],
+                f"{state_name} screenshot binding",
+            )
+            anchor_states[state_name] = {
+                "state": state_name,
+                "expected_disclosure": {
+                    "label": EXPECTED_DISCLOSURE_LABEL,
+                    "open": state_name == "expanded-open",
+                },
+                "state_artifact_path": state_artifact["path"],
+                "state_artifact_sha256": state_artifact["sha256"],
+                "state_proof_sha256": binding["state_proof_sha256"],
+                "normalization_artifact_path": binding["normalization_artifact_path"],
+                "normalization_artifact_sha256": sha256_json_file(
+                    (root / str(binding["normalization_artifact_path"])).resolve(),
+                    root,
+                ),
+                "screenshot_path": binding["expected_repository_path"],
+                "screenshot_width": screenshot_binding_record["width"],
+                "screenshot_height": screenshot_binding_record["height"],
+                "screenshot_sha256": screenshot_binding_record["sha256"],
+                "screenshot_command_sha256": binding["screenshot_command_sha256"],
+                "disclosure_sha256": binding["disclosure_sha256"],
+                "geometry_sha256": binding["geometry_sha256"],
+                "binding_sha256": binding["binding_sha256"],
+            }
+        anchor = capture_anchor(
+            execution_id=execution_id,
+            session=session,
+            workflow_name=WORKFLOW_VERSION,
+            workflow_path="scripts/capture_forecast_analysis_dashboard_ui.py",
+            capture_artifact_path=CAPTURE_ARTIFACT_RELATIVE_PATH,
+            immutable_before_state={
+                "path": IMMUTABLE_BASELINE_RELATIVE_PATH.as_posix(),
+                "width": baseline_width,
+                "height": baseline_height,
+                "sha256": baseline_digest,
+            },
+            states=anchor_states,
+        )
         artifact = {
             "schema_version": CAPTURE_SCHEMA_VERSION,
             "capture_contract": CAPTURE_CONTRACT,
@@ -1084,13 +1309,14 @@ def capture(
                 "execution_id": execution_id,
                 "browser_session": session,
             },
+            "capture_anchor": anchor,
             "capture_date": datetime.now(UTC).date().isoformat(),
             "origin": url,
             "url": url,
             "title": "forecast accuracy app",
             "state": "default-closed",
             "viewport": {"width": viewport[0], "height": viewport[1], "devicePixelRatio": 1},
-            "overflow_tolerance_px": 2,
+            "overflow_tolerance_px": OVERFLOW_TOLERANCE_PX,
             "analytical_state": _analytical_state(default_state),
             "raw_evidence": {
                 "default_state": default_summary["state_evidence"],

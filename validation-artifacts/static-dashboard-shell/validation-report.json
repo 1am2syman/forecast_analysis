@@ -1,0 +1,779 @@
+{
+  "generatedAt": "2026-08-27T19:36:18.206Z",
+  "dashboard": "dashboard/index.html",
+  "screenshots": [
+    {
+      "name": "1440-900-overview.png",
+      "width": 1440,
+      "height": 900,
+      "entropy": 0.2762,
+      "sha256": "ad33dbb2cb31a766f479a4fc0cf99e08d5ce7730e5aad2b4291a9135a17917e2",
+      "ocr": "Accuracy bias - zevisions - coverage RESET e Forecast performance NAVIGATE ODE Single source SOURCE TH “TARGET Jan-Jun 2026 PROOUCTS 148, HORIZONS M-LLN-6 ‘ACTUAL 22,480 KL ELIGIBLE 144 COMPARABLE 222 (COVERAGE 12,756 / 12,488 KL 94.28 Overview Wels population ACTIVE POPULATION SYNTHETIC OLDEST ~ LATEST Performance at a glance Trends orth horizon be ronscasr rows pase rows conpcere ares gsetns venvases vowrase & vowrace 8 zero ACTUAL asstns Acruat 367 Oldest available atest avaddable Comparison vintages ™ FORECAST ACCURACY BIAS [ABSOLUTE ERROR ‘COVERAGE 78.4% oer -3:1% 2.4 pp better 2,696 KL oe 94.2% 10.9 Product history stabal. 2 ame (22.480 nue a7 / 32,460 0. ner forecast slferecest ~ actual! cue 27s / 22.460 actu ML ACTUAL VOLUME FORECAST VOLUME Mae ELIGIBLE OBSERVATIONS. Data quality statuse. (3) 12,480 KL months 12,093 KL ser moet 18.7 KL cam 144 2 paiee positive © gro actual cbeertione vintage @ elected forecast 2.050 AL / 264 obeervations positivecactul metzic popiation ‘Monthly accuracy and volume a sccunsey = AcTAL dggrepete etrice retain actual, forecast, umeratar and cheervation evidence Jan Feb Mar Apr May gun SYNTHETIC APPROVAL BUILD METRIC CONTRACT v2 © sono dataset ready population 41,367 foxecast rons synthetic: //£orecast-history/netzic-contract-v2 not production data formulas sizror dashboard =pec"
+    },
+    {
+      "name": "1440-900-trends.png",
+      "width": 1440,
+      "height": 900,
+      "entropy": 0.2535,
+      "sha256": "68e3e43455d904dccf864f5f9fa05f770e87a061b286930d50a9de395dc77087",
+      "ocr": "Accuracy bias - zevisions - coverage RESET e Forecast performance Refreshed 27 Aug 2826 - 08:40 { Fruters - 0 NAVIGATE MODE Single source SOURCE TH ‘TARGET Jan-Jun 2026 ‘PRODUCTS 248 HORIZONS M-LLN-6 ‘ACTUAL 12,436 KL ELIGIBLE 144 COMPARABLE 132 COVERAGE 11,756 / 12,489 KL 94.28 Overview Wis population PERFORMANCE SYNTHETIC ‘SHARED POPULATION How performance moves Trends sonth horizon be wowrucy weraze onazon nevezC weavwae veraze Toole ipes source actual focecst numerator ereninator 5 rorecast accuracy v — v ——— v Comparison vintages ™ ‘TM and ML accuracy by target month an om oe Performance by aligned horizon mem exact horizon Leads in Hive of six mothe; signed viens retain a zero reference ong range frst ‘ctun] vole and n retained Product history stsbili_ Data quality <tetuce. (3) ma 2 / oan a 0 fom ns elem nim os om es Brand x target month range 45-918 weeet-fiest ‘igred netics center on 2e20 vo > ree a cmflict Lanes — veidian —_— as | sethetar Ss eT uted aE SYNTHETIC APPROVAL BUILD METRIC CONTRACT v2 © sono dataset ready population 41,367 forecast rows synthetic: //forecast-histozy/setric-contzact-v2 not production data formulas sizror dashboard =pec"
+    },
+    {
+      "name": "1440-900-comparison.png",
+      "width": 1440,
+      "height": 900,
+      "entropy": 0.2432,
+      "sha256": "02a95015edd9afaab338b82c8402e3ed845d85f60eaa5054ddc35c3b0b2bb25b",
+      "ocr": "Accuracy bias - zevisions - coverage RESET e Forecast performance Refreshed 27 Aug 2826 - 08:40 { Fruters - 0 NAVIGATE MODE Single source SOURCE TH ‘TARGET Jan-Jun 2026 ‘PRODUCTS 148 | | HORIZONS R-LLN-6 ‘ACTUAL 12,436 KL ELIGIBLE 144 COMPARABLE 132 COVERAGE 11,756 / 12,489 KL 94.28 Overview Wels population COMPARABLE POPULATIONS SYNTHETIC EXPLICIT MODES TM vs ML, and how revisions land Trends sonth horizon be Vintage revisions Wve mL ma Comparison vintages ™ vovrase & eldest avasiabie VoNTAGe @ Latest avatiabie ToLeRaNce 9.02 HL comers 232 snconruere 22 VINTAGE ACCURACY DELTA REVISION EFFECTIVENESS TOTAL ERROR IMPROVEMENT Product history stabal. +49 pp impos = 64.0% os 7 200 +613 KL positive impeovee 23 mL error Seprovenent 22,460 xb snproved / materially zeviced (lessor A lesser 81) nas Data quality <tetuce. (3) Revision outcomes. Revision amount vs error Improvement ep 508 ~ down 428 point size actual a Unchanged ron excluded fron effect Sve (uadrants show whether up/down revisions helped 34 osecrzo8 owe evasion wt ston avesovenenT SS aN SSD Lo ® os wae = wu on unchanged Revision amount KL > SYNTHETIC APPROVAL BUILD METRIC CONTRACT v2 © sono dataset ready population 41,367 forecast rows synthetic: //forecast-histozy/setric-contzact-v2 not production data formulas sizror dashboard =pec"
+    },
+    {
+      "name": "1440-900-history.png",
+      "width": 1440,
+      "height": 900,
+      "entropy": 0.2325,
+      "sha256": "25011d3fc6b69f25e925ef854f5849c7c7d09056c41de3b4f089ee9dacff9c4d",
+      "ocr": "Accuracy bias - zevisions - coverage RESET e Forecast performance Refreshed 27 Aug 2826 - 08:40 { Fruters - 0 NAVIGATE ODE Single source SOURCE TH ‘TARGET Jan-Jun 2026 PRODUCTS 148 | | HORIZONS W-1_H-6 [ACTUAL 12,436 KL ELIGIBLE 142 COMPARABLE 132 (COVERAGE 12,756 / 12,488 KL 94.28 Overview Wels population DRILL-D0WN SYWTHETIC AUDITABLE DETATL Product vintage history Trends orth horizon be Product history Forecast exceptions psoover source asset wows Comparison vintages ™ WTH-021 - Northstar Citrus aL Hm v ‘Jun 2026 Product history =t2bi1i_ eroouer sescrzerion a napezns ava vzevorr wie Northetar Citrus aL Northstar Napped 2am Sufficient - 6 vintages/source Data quality statuse. (3) Chronological forecast development a Sc very point cazriee calculation ronth, horizon, actu, erzer and bie (2) ovina roveast see vournay a2 KL 1.6 KL revtson coat secon mize 5 aa KL tao 9 corey Ss SS = =S = SSS ss = SS. ees ole SS SS = ===as5 =) ovina roveast see vournay sa KL 37.2 KL revtson coat secon mize 16 1s na m3 m2 ma 5 28 KL tao 9 corey source Fron «10 vorszo8 sevteron oosecrzo8 censor aren ics) (ot ape = 02 may vase wa » oe oo wae a SYNTHETIC APPROVAL BUILD & (tape = 08 may » METRIC CONTRACT v2 © sono dataset ready population 41,367 foxecast rons synthetic: //£orecast-history/netzic-contract-v2 not production data formulas sizzor dashboard spec"
+    },
+    {
+      "name": "1440-900-quality.png",
+      "width": 1440,
+      "height": 900,
+      "entropy": 0.3446,
+      "sha256": "fc787e91750513717dba03f28f70a5dc8f59476aa366a481146be7311064bc06",
+      "ocr": "Accuracy bias - zevisions - coverage RESET e Forecast performance Refreshed 27 Aug 2826 - 08:40 { Fruters - 0 NAVIGATE ODE Single source SOURCE TH ‘TARGET Jan-Jun 2026 PRODUCTS 148 | | HORIZONS W-1_H-6 [ACTUAL 12,436 KL ELIGIBLE 142 COMPARABLE 132 (COVERAGE 12,756 / 12,488 KL 94.28 Overview Wels population DIAGNOSTICS What the population hides Trends sonth horizon be (HPO WEI) mocking input exxore: none rnvelid or zejected input rows sould zenain ianediately vistble here Comparison vintages ™ HIERARCHY MAPPING VINTAGE PAIRS ‘SOURCE AVAILABILITY erro (meme) || ACTUAL avanLaBILITY (<>) 141/148 130/144 132/144 118 both 2 conflicts aie 1 both Product history stsbili_ 1 urnapped 9 sissing acunle 7 miccing 4 4 niccing @ ue monty 7M only Hierarchy Actuals Vintage pairs Source availability Data quality <tstuce. (3) Hierarchy mapping HIERARCHY EXCEPTIONS - CSV Cleaned brand azsigreent zemine visible for mapped, unmapped and conflicting products ocd — ( cowrezer ) ATL-330- atlas Matt330m1 Sense cl Core seporting brads. 11 3) am a 2 [UNM-£11- Sparking AL a daoeet actu 2a acta te octal (5) Ne cleaned peaueeuerzchy zecord is avaiable > saccline scope exclusions ‘forecast rows ovtside the active aetric population SYNTHETIC APPROVAL BUILD METRIC CONTRACT v2 © sono dataset ready population 41,367 foxecast rons synthetic: //£orecast-history/netzic-contract-v2 not production data formulas sizror dashboard =pec"
+    },
+    {
+      "name": "1440-720-overview.png",
+      "width": 1440,
+      "height": 720,
+      "entropy": 0.3084,
+      "sha256": "ab6821c9616166ec27dc1d422c36da04bbae4486091f59529c0ef05dce424400",
+      "ocr": "Accuracy bias - zevisions - coverage RESET e Forecast performance NAVIGATE ODE Single source SOURCE TH “TARGET Jan-Jun 2026 ‘PRODUCTS 348 HORIZONS M-LLN-6 ‘ACTUAL 22,480 KL ELIGIBLE 144 COMPARABLE 222 (COVERAGE 12,756 / 12,488 KL 94.28 Overview Wels population ACTIVE POPULATION SYNTHETIC OLDEST ~ LATEST Performance at a glance Trends orth horizon be rongcasr rows pase rows conpcere azn gsstne vewvases vawrase & vowrace © zero ACTUAL assnns Acruat Oldest available atest avaddable 367 FORECAST ACCURACY BIAS [ABSOLUTE ERROR ‘COVERAGE Comparison vintages ™ 784% oer 31% 2.4 pp better 2,696 KL oe 94.2% 10.9 2 ame (22.480 nue 07 / 22,460 0. eer forecast sldcrecest ~ actus! oe 27s / 22.460 actu HL Product history stabal. ACTUAL VOLUME FORECAST VOLUME Mae ELIGIBLE OBSERVATIONS months ser moet 18.7 KL cam 144 Data quality <tetuce. (3) 12,480 KL 12,093 KL 2 paiee positive 6 zero actual cbeertione vintage @ selected forecast 2.050 AL / 164 obeervations positive-actul metzic popiation ‘Monthly accuracy and volume a sccunsey = AcTAL dggrepete etrice retain actual, forecast, numerator and cheervation evidence Jan Feb Mar aun Apr Nay SYNTHETIC APPROVAL BUILD METRIC CONTRACT v2 © sono dataset ready population 41,367 foxecast rons synthetic: //£orecast-history/netzic-contract-v2 not production data formulas sizror dashboard =pec"
+    },
+    {
+      "name": "1440-720-trends.png",
+      "width": 1440,
+      "height": 720,
+      "entropy": 0.2848,
+      "sha256": "74c852f8ffaf14b4cda276f3be32af9e88ae502a6a90338b3a8df0589fcfd53e",
+      "ocr": "Accuracy bias - zevisions - coverage RESET e Forecast performance Refreshed 27 Aug 2826 - 08:40 { Fruters - 0 NAVIGATE MODE Single source SOURCE TH ‘TARGET Jan-Jun 2026 ‘PRODUCTS 248 HORIZONS M-LLN-6 ‘ACTUAL 12,436 KL ELIGIBLE 144 COMPARABLE 132 COVERAGE 11,756 / 12,489 KL 94.28 Overview Wis population PERFORMANCE SYNTHETIC ‘SHARED POPULATION How performance moves Trends sonth horizon be wowrucy weraze ‘onszon nevezE westvae veraze Toole ipes source actual focecst numerator ereninator 5 rorecast accuracy v — v ——— v Comparison vintages ™ ‘TM and ML accuracy by target month an om ae Performance by aligned horizon mem exact horizon DM Lends in Hive of six months; signed views retain a zero reference ong range fist ‘sctonl vole and n retained Product history stsbili_ ma of oan me 0 fom Data quality <tetuce. (3) - melon nim oom oem Brand x target month range 45-918 veret-fiest ‘iared attics center on 2=20 = ve 2 mice sels Eanes ad — as CT sertistar as a TF brands aE SYNTHETIC APPROVAL BUILD METRIC CONTRACT v2 © sono dataset ready population 41,367 forecast rows synthetic: //forecast-histozy/setric-contzact-v2 not production data formulas sizror dashboard =pec"
+    },
+    {
+      "name": "1440-720-comparison.png",
+      "width": 1440,
+      "height": 720,
+      "entropy": 0.2673,
+      "sha256": "264739e9cacaa4a94b3d24e9780b0a758b928a9c089424ffa023ed4fc8b8aea8",
+      "ocr": "Accuracy bias - zevisions - coverage RESET e Forecast performance Refreshed 27 Aug 2826 - 08:40 { Fruters - 0 NAVIGATE MODE Single source SOURCE TH ‘TARGET Jan-Jun 2026 ‘PRODUCTS 148 | | HORIZONS R-LLN-6 ‘ACTUAL 12,436 KL ELIGIBLE 144 COMPARABLE 132 COVERAGE 11,756 / 12,489 KL 94.28 Overview Wels population COMPARABLE POPULATIONS SYNTHETIC EXPLICIT MODES TM vs ML, and how revisions land Trends sonth horizon be Wve mL ma Vintage revisions ivTaGe A oldest available VINTAGE @ Latest available TOLERANCE 0.02 ML comers a2 saconPuere a2 Comparison vintages ™ VINTAGE ACCURACY DELTA REVISION EFFECTIVENESS TOTAL ERROR IMPROVEMENT +613 KL Product history stabal. +49 pp esepsoes 64.0% os 7 200 positive impeovee 23 mL error Seprovenent 22,460 4L nproved / materially zeviced (lessor lessor) oan Revision outcomes, Data quality <tetuce. (3) ep 508 - down 2m Revision amount vs error Improvement point size actual a Unchanged rns excluded fom effect Svensz (usdrants show whether up/down revisions helped a 64 osecrzo8 owe sevzston mt enon oeerovenext SS SSS OSS LO ee wa = wu om, unchanged Revision amount KL > SYNTHETIC APPROVAL BUILD METRIC CONTRACT v2 © sono dataset ready population 41,367 forecast rows synthetic: //forecast-histozy/setric-contzact-v2 not production data formulas sizror dashboard =pec"
+    },
+    {
+      "name": "1440-720-history.png",
+      "width": 1440,
+      "height": 720,
+      "entropy": 0.2612,
+      "sha256": "00e3471964248e1e6a7c0dd59ec044bf58884577fd3931c85d856d61810f0499",
+      "ocr": "Accuracy bias - zevisions - coverage RESET e Forecast performance Refreshed 27 Aug 2826 - 08:40 { Fruters - 0 NAVIGATE ODE Single source SOURCE TH ‘TARGET Jan-Jun 2026 PRODUCTS 148 HORIZONS M-LLN-6 [ACTUAL 12,436 KL ELIGIBLE 142 COMPARABLE 132 (COVERAGE 12,756 / 12,488 KL 94.28 Overview Wels population DRILL-D0WN SYWTHETIC AUDITABLE DETATL Product vintage history Trends orth horizon be Product history Forecast exceptions psoover ‘source asser now WTH-021 - Northstar Citrus aL Hm v ‘Jun 2026 Comparison vintages ™ froouer cescrzrrion sean ae sews vaevorr wie Northetar Citrus aL Northstar 2a kL Sufficient - 6 vintages/source Product history =tabili_ Chronological forecast development a Sc (c) ovina very point cazriee calculation ronth, horizon, actu, erzer and bie Data quality statuse. (3) roveast see vournay a2 KL 1.6 KL revtson coat secon mize 5 a3 KL aan SSPE SIAL S DIE SIS DAE SDI DAE NS SAS SS SS eee tao 9 corey ovina roneast see vournay sa KL 37.2 KL revtson coat secon mize 5 ae KL tao 9 corey 16 1s na m3 m2 ma source Fron «10 vorszo8 sevteron oosecrzon cnsor aren ics) (ot ape = 02 may or wa » oe SYNTHETIC APPROVAL BUILD & ot ape = 02 may meses aa & a METRIC CONTRACT v2 © sono dataset ready population 41,367 foxecast rons synthetic: //£orecast-history/netzic-contract-v2 not production data formulas sizzor dashboard spec"
+    },
+    {
+      "name": "1440-720-quality.png",
+      "width": 1440,
+      "height": 720,
+      "entropy": 0.3575,
+      "sha256": "1555e66f2fba5c3550059a02f8c9268ebe632ffeb649f9a6a77c086e8e780384",
+      "ocr": "Accuracy bias - zevisions - coverage RESET e Forecast performance Refreshed 27 Aug 2826 - 08:40 { Fruters - 0 NAVIGATE ODE Single source SOURCE TH ‘TARGET Jan-Jun 2026 ‘PRODUCTS 148 | | HORIZONS R-LLN-6 [ACTUAL 12,436 KL ELIGIBLE 142 COMPARABLE 132 (COVERAGE 12,756 / 12,488 KL 94.28 Overview Wels population DIAGNOSTICS (3 earecoezes weeo arrention What the population hides Trends sonth horizon be (HieTS WALID) mocking input exxore: none Invalid or zejected input rows sould zenain immediately visible here HIERARCHY MAPPING VINTAGE PAIRS ‘SOURCE AVAILABILITY serzon (mee) | | AcTUaL avaiasttrTy (<>) (=) Comparison vintages ™ 141/148 130/144 132/144 118 both 2 conflicts a 2 both 1 urnapped 9 sissing actunle 7 missing & 4 niscing @ a 7m only Product histozy stabili_ Hierarchy Actuals Vintage pairs Source availability Hierarchy mapping Data quality <tstuse. (3) HIERARCHY EXCEPTIONS - CSV Cleaned brand azsigreent zemine visible for mapped, unmapped and conflicting products — ocd (courcer ) ATL-390- Alas Matt 330m1 SS enes ‘clas Core seporting brads. 141 3) am a 2 a daoeet actu 2a acta te octal (5) [UNM-£11- Sparking AL Ne cleaned peace uerzchy zecord Ss arash. SYNTHETIC APPROVAL BUILD > saccline scope exclusions ‘forecast rows ovtside the active aetric population METRIC CONTRACT v2 © sono dataset ready population 41,367 foxecast rons synthetic: //£orecast-history/netzic-contract-v2 not production data formulas sizror dashboard =pec"
+    },
+    {
+      "name": "800-700-overview.png",
+      "width": 800,
+      "height": 700,
+      "entropy": 0.3147,
+      "sha256": "f11d374e607ab0f0ab39d765f7cd68dba4a98eed8ede93a6919f958e596cbd73",
+      "ocr": "FILTERS e RESET e Forecast performance MODE Single source SOURCE TH “TARGET Jan-Jun 2026 (COVERAGE 12,756 / 12,488 KL 94.28 ACTIVE POPULATION SYNTHETIC ‘OLDEST ~ LATEST Performance at a glance ongcasr noes a a vamace 2 vamace ye Aron ae costs rae pees pn sc FORECAST ACCURACY BIAS [ABSOLUTE ERROR COVERAGE 784% ase 31% sa poe 2,696 KL sen 94.2% woo 2 ate aa a“ a as . ast ctu a 2 12.48 act ACTUAL VOLUME FORECAST VOLUME Mae ELIGIBLE OBSERVATIONS 12,480 KL emethe 12,093 KL set 18.7 KL aan 144 2 piss soa cnet tage # areca freast tem 14 eet . ~ — ‘Monthly accuracy and volume a sccunsey = AcTAL dggregete etrice retain actual, forecast nunerator and obcervation evidence 7 SS ———— = ae oa 41,367 foxecast rons ‘ © sono dataset ready population synthetic: //£orecast-history/netzic-contract-v2 not production data"
+    },
+    {
+      "name": "800-700-trends.png",
+      "width": 800,
+      "height": 700,
+      "entropy": 0.3125,
+      "sha256": "e68b80ab2f72610e54497582f6bac2904f386fc99accfa4742c57c0d3c4719dd",
+      "ocr": "e Forecast performance FILTERS e RESET ‘TARGET Jan-Jun 2026 (COVERAGE 12,756 / 12,488 KL 94.28 MODE Single source SOURCE TH PERFORMANCE SYNTHETIC ‘SHARED POPULATION How performance moves vowracy wereze ‘onazon verze vexrvae weraze v v rorecast accuracy rorecest accuracy rorecast accuracy ‘TM and ML accuracy by target month Performance by aligned horizon tm leads in ive of six nonths; signed views an am oe ong zange it sctuel volime and 9 mem exact horizon Teenie soso seference Barn ma of oan a fom me elem nim oom otro rand x target month range 45-918 veret-fiest Tgred netic center on 2220 — a, = - see — ewes eae ee sas a ‘ © sono dataset ready population 41,367 forecast rows synthetic: //forecast-histozy/setric-contzact-v2 not production data"
+    },
+    {
+      "name": "800-700-comparison.png",
+      "width": 800,
+      "height": 700,
+      "entropy": 0.2933,
+      "sha256": "645522bac82589b97f822b2b466564bf1592669f7012bb625beaf2d7565325e4",
+      "ocr": "FILTERS e RESET Forecast performance MODE Single source SOURCE TH ‘TARGET Jan-Jun 2026 (COVERAGE 12,756 / 12,488 KL 94.28 COMPARABLE POPULATIONS SYNTHETIC EXPLICIT MODES TM vs ML, and how revisions land Vintage revisions Wve mL ma \\ivTAGE A oldest available VINTAGE © Latest available COmPLeTE 232 ZACOHPLETE 22 VINTAGE ACCURACY DELTA REVISION EFFECTIVENESS ‘TOTAL ERROR IMPROVEMENT +49 pp 2 peat 64.0% oye +613 KL peste spree 3 rer Sprovent acm Sager /steialy revised ler A sr os Revision outcomes, ep 508 ~ down 428 Revision amount vs error Unchanged rns excluded fom effect Svensz actual a Improvement point size Cuadeante show shetherup/doen revisions Sipe pero a 64 34 2 secrs08 sevzsz0¥ mt enon oeerovenext see we ore wou = om unchanged Say © sono dataset ready population 41,367 foxecast rons synthetic: //£orecast-history/netzic-contract-v2 not production data ‘"
+    },
+    {
+      "name": "800-700-history.png",
+      "width": 800,
+      "height": 700,
+      "entropy": 0.2847,
+      "sha256": "eaa572be713d5d6ba3e07db2dd8478c42ac30cf4dbede612c0d9c004295da11c",
+      "ocr": "FILTERS e RESET Forecast performance MODE Single source SOURCE TH ‘TARGET Jan-Jun 2026 (COVERAGE 12,756 / 12,488 KL 94.28 DRILL-D0WN SYWTHETIC ‘AUDITABLE DETAIL Product vintage history Product history Forecast exceptions psoover ‘source asser now WTH-021 - Northstar Citrus aL v Hm ‘Jun 2026 srosucr sescreerion oan arene sero ‘stony sweat Sovthetae citrus at ie 9 vintages/source Chronological forecast development a mS acr o vntagee very point cazriee calculation ronth, horizon, actu, erzer and bie (c2) roreast mace vournary an a6 KL revtson coo aco riz. 5 aa fess 9 Bias 30 er Soba SS = = = = ia) o vntagee roreast mace vournary sux 2K evasion coat suc riz. > = “ = Ss o 5 ae kL fess 9 Bias 30 source aon = 70 orszo8 sevzszon oosecrzon enon sere ics) on ape = 8 may mame a » ae & en ape = may mame a & a © sono dataset ready population 41,367 foxecast rons synthetic: //£orecast-history/netzic-contract-v2 not production data ‘"
+    },
+    {
+      "name": "800-700-quality.png",
+      "width": 800,
+      "height": 700,
+      "entropy": 0.388,
+      "sha256": "cb26b45e4a9cbcc3390b1a7f4cf9bd7c91246a080a8874f6bc5910a7ee8bde80",
+      "ocr": "FILTERS e RESET e Forecast performance MODE Single source SOURCE TH ‘TARGET Jan-Jun 2026 (COVERAGE 12,756 / 12,488 KL 94.28 DIAGNOSTICS CATEGORIES NEED ATTENTION | What the population hides (HieTS WALID) mocking input exxore: none Invalid or zejected input rows sould zenain immediately visible here ACTUAL VINTAGE PAIRS SOURCE serzon HIERARCHY MAPPING [seve | (<>) (<>) AVAILABILITY AVAILABILITY 141/148 132/144 130/144 118 both met 2 conflicts sero «9 slning ecu Feieing Ae ateig th a only Tm oy Hierarchy Actuals Vintage pairs Source availability Hierarchy mapping HIERARCHY EXCEPTIONS - CSV Cleaned brand azsigreent zamine visible for sapped, unmapped and conflicting products — res wourees comsscr ‘oarizer | ATL-390-Attas Malt 330m ‘eclaes to Atlas an Aes Cone ‘sporing trae 141 4 3 am am ae ‘UNM-A11- Sparking 1L a ‘Bleed ctu bat acta doe actual te cleaned prosct herarchy record Ss =a > saccline scope exclusions ‘forecast rows ovtside the active aetric population © sono dataset ready population 41,367 foxecast rons synthetic: //£orecast-history/netzic-contract-v2 not production data ‘"
+    },
+    {
+      "name": "1440-900-focus-overview.png",
+      "width": 1440,
+      "height": 900,
+      "entropy": 0.2771,
+      "sha256": "8364231dc79b1b6aa131a5224879cb3a47af20e1db7f8e5f080825887acbccbd",
+      "ocr": "Accuracy bias - zevisions - coverage RESET e Forecast performance NAVIGATE ODE Single source SOURCE TH “TARGET Jan-Jun 2026 PROOUCTS 148, HORIZONS M-LLN-6 ‘ACTUAL 22,480 KL ELIGIBLE 144 COMPARABLE 222 (COVERAGE 12,756 / 12,488 KL 94.28 Overview Wels population ACTIVE POPULATION SYNTHETIC OLDEST ~ LATEST Performance at a glance Trends orth horizon be ronscasr rows pase rows conpcere ares gsetns venvases vowrase & vowrace 8 zero ACTUAL asstns Acruat 367 Oldest available atest avaddable Comparison vintages ™ FORECAST ACCURACY BIAS [ABSOLUTE ERROR ‘COVERAGE 78.4% oer -3:1% 2.4 pp better 2,696 KL oe 94.2% 10.9 Product history stabal. 2 ame (22.480 nue a7 / 32,460 0. ner forecast slferecest ~ actual! cue 27s / 22.460 actu ML ACTUAL VOLUME FORECAST VOLUME Mae ELIGIBLE OBSERVATIONS. Data quality statuse. (3) 12,480 KL months 12,093 KL ser moet 18.7 KL cam 144 2 paiee positive © gro actual cbeertione vintage @ elected forecast 2.050 AL / 264 obeervations positivecactul metzic popiation ‘Monthly accuracy and volume a sccunsey = AcTAL dggrepete etrice retain actual, forecast, umeratar and cheervation evidence Jan Feb Mar Apr May gun SYNTHETIC APPROVAL BUILD METRIC CONTRACT v2 © sono dataset ready population 41,367 foxecast rons synthetic: //£orecast-history/netzic-contract-v2 not production data formulas sizror dashboard =pec"
+    },
+    {
+      "name": "1440-900-hover-comparison.png",
+      "width": 1440,
+      "height": 900,
+      "entropy": 0.2828,
+      "sha256": "24521e38c63787ef87e735c6708e1e944154e5eab68fc08ab13fa0716ebde047",
+      "ocr": "Accuracy bias - zevisions - coverage RESET e Forecast performance NAVIGATE ODE Single source SOURCE TH “TARGET Jan-Jun 2026 PROOUCTS 148, HORIZONS M-LLN-6 ‘ACTUAL 22,480 KL ELIGIBLE 144 COMPARABLE 222 (COVERAGE 12,756 / 12,488 KL 94.28 Overview Wels population ACTIVE POPULATION SYNTHETIC OLDEST ~ LATEST Performance at a glance Trends orth horizon be ronscasr rows pase rows conpcere ares gsetns venvases vowrase & vowrace 8 zero ACTUAL asstns Acruat 367 Oldest available atest avaddable Comparison vintages ™ FORECAST ACCURACY BIAS [ABSOLUTE ERROR ‘COVERAGE 78.4% oer -3:1% 2.4 pp better 2,696 KL oe 94.2% 10.9 Product history stabal. 2 ame (22.480 nue a7 / 32,460 0. ner forecast slferecest ~ actual! cue 27s / 22.460 actu ML ACTUAL VOLUME FORECAST VOLUME Mae ELIGIBLE OBSERVATIONS. Data quality statuse. (3) 12,480 KL months 12,093 KL ser moet 18.7 KL cam 144 2 paiee positive © gro actual cbeertione vintage @ elected forecast 2.050 AL / 264 obeervations positivecactul metzic popiation ‘Monthly accuracy and volume a sccunsey = AcTAL dggrepete etrice retain actual, forecast, umeratar and cheervation evidence Jan Feb Mar Apr May gun SYNTHETIC APPROVAL BUILD METRIC CONTRACT v2 © sono dataset ready population 41,367 foxecast rons synthetic: //£orecast-history/netzic-contract-v2 not production data formulas sizror dashboard =pec"
+    },
+    {
+      "name": "1440-900-rail-detail.png",
+      "width": 464,
+      "height": 860,
+      "entropy": 0.1851,
+      "sha256": "7cb22c2fa6cbc24350559bfae12a839e07e2f6a01e6451d0ad1fa765412ad08b",
+      "ocr": "NAVIGATE @ Overview KPIs population Trends month horizon br... Comparison vintages - TM Product history stabili.. Data quality statuse.. @"
+    }
+  ],
+  "semantic": {
+    "title": "Forecast performance · metric-faithful demo",
+    "lang": "en",
+    "tabs": 5,
+    "panes": 5,
+    "selected": [
+      "overview"
+    ],
+    "visiblePanes": [
+      "pane-overview"
+    ],
+    "tabContracts": [
+      {
+        "id": "overview",
+        "controls": "pane-overview",
+        "controlsExists": true,
+        "labelledPane": "tab-overview"
+      },
+      {
+        "id": "trends",
+        "controls": "pane-trends",
+        "controlsExists": true,
+        "labelledPane": "tab-trends"
+      },
+      {
+        "id": "comparison",
+        "controls": "pane-comparison",
+        "controlsExists": true,
+        "labelledPane": "tab-comparison"
+      },
+      {
+        "id": "history",
+        "controls": "pane-history",
+        "controlsExists": true,
+        "labelledPane": "tab-history"
+      },
+      {
+        "id": "quality",
+        "controls": "pane-quality",
+        "controlsExists": true,
+        "labelledPane": "tab-quality"
+      }
+    ],
+    "headings": [
+      "Forecast performance",
+      "Filter workbench",
+      "Performance at a glance",
+      "Monthly accuracy and volume",
+      "How performance moves",
+      "TM and ML accuracy by target month",
+      "Performance by aligned horizon",
+      "Brand × target month",
+      "TM vs ML, and how revisions land",
+      "Revision outcomes",
+      "Revision amount vs error improvement",
+      "Paired absolute error",
+      "Aligned population and winners",
+      "Product vintage history",
+      "Chronological forecast development",
+      "What the population hides",
+      "Hierarchy mapping",
+      "Actual availability",
+      "Vintage pair completeness",
+      "Source availability"
+    ],
+    "demoValues": 17,
+    "svgCharts": 5,
+    "skeletons": 0,
+    "placeholderText": 0,
+    "enabledExports": 6,
+    "scopeControls": 23,
+    "metricSelectorOptions": {
+      "monthly": [
+        "Forecast accuracy",
+        "Bias",
+        "Absolute error",
+        "Forecast versus actual volume"
+      ],
+      "horizon": [
+        "Forecast accuracy",
+        "Bias"
+      ],
+      "heatmap": [
+        "Forecast accuracy",
+        "Bias",
+        "Absolute error",
+        "Vintage A accuracy",
+        "Vintage B accuracy",
+        "Accuracy delta",
+        "Revision effectiveness"
+      ]
+    },
+    "comparisonModes": 2,
+    "historyModes": 2,
+    "qualityCategories": 4,
+    "exceptionRows": 6,
+    "qualityExceptions": 8,
+    "qualityStatuses": 13,
+    "stabilityMetrics": 8,
+    "stateOptions": [
+      "populated",
+      "empty",
+      "blocked",
+      "zero"
+    ],
+    "absoluteErrorText": "Ab olute error\n                  \n                    2,696 KL−349 KL\n                  \n                  Σ|foreca t − actual| · n 144",
+    "errorImprovementText": "Total error improvement\n                    \n                      +613 KLpo itive improve \n                    \n                    Σ(|error A| − |error B|) · n 132",
+    "populationLedger": "ModeSingle  ource\n              SourceTM\n              TargetJan–Jun 2026\n              Product 148\n              Horizon M−1…M−6\n            \n            \n              Actual 12,480 KL\n              Eligible 144\n              Comparable 132\n              Coverage 11,756 / 12,480 KL · 94.2%",
+    "sourceComparisonText": "AlignedExact M−1 · 118 common product-target ob ervation 14 TM-only · 7 ML-only ·  ource-only row  affect coverage,\n                    not like-for-like metric \n                \n                \n                  \n                    \n                      TMcommon population\n                    \n                    \n                      Accuracy77.7%\n                    \n                    Bia −4.8%\n                    Ab olute error2,512 KL\n                    Coverage91.8%\n                  \n                  \n                    \n                      MLcommon population\n                    \n                    \n                      Accuracy83.4%\n                    \n                    Bia −1.9%\n                    Ab olute error1,870 KL\n                    Coverage95.1%\n                  \n                  \n                    ML − TM accuracy+5.7 ppML − TM bia +2.9 ppML − TM ab olute error−642 KLML − TM coverage+3.3 pp\n                  \n                \n                \n                  \n                    \n                      \n                        Paired ab olute error\n                        \n                          Point  below diagonal favour ML\n                        \n                      \n                      72 ML · 38 TM · 8 tie \n                    \n                    \n                      \n                        Paired ab olute error\n                        \n                          \n                          \n                          \n                          \n                          \n                        \n                        \n                        \n                          \n                          \n                          \n                          \n                          \n                          \n                          \n                          \n                          \n                          \n                          \n                          \n                          \n                          \n                        \n                        \n                          TM ab olute error KL →\n                          \n                            ML ab olute error KL →\n                          \n                        \n                      \n                    \n                  \n                  \n                    \n                      \n                        \n                          Aligned population and winner \n                        \n                        \n                          Coverage and common metric  remain di tinct\n                        \n                      \n                      actual KL\n                    \n                    \n                      \n                        PopulationOb ActualWinner\n                      \n                      \n                        Common11810,944 KLcomparable\n                      \n                      \n                        TM only14812 KLcoverage only\n                      \n                      \n                        ML only7446 KLcoverage only\n                      \n                      \n                        ML better726,420 KL61%\n                      \n                      \n                        TM better383,814 KL32%\n                      \n                      \n                        Tie8710 KL7%",
+    "landmarks": {
+      "header": true,
+      "nav": true,
+      "main": true,
+      "footer": true
+    }
+  },
+  "accessibility": {
+    "tabs": [
+      "Overview",
+      "Trends",
+      "Comparison",
+      "Product history",
+      "Data quality, attention"
+    ],
+    "buttons": [
+      "FILTERS · 0",
+      "RESET"
+    ],
+    "targets": [
+      {
+        "name": "Filters · 0",
+        "width": 95.0625,
+        "height": 29
+      },
+      {
+        "name": "Reset",
+        "width": 56.3125,
+        "height": 29
+      },
+      {
+        "name": "Overview",
+        "width": 211,
+        "height": 44
+      },
+      {
+        "name": "Trends",
+        "width": 211,
+        "height": 44
+      },
+      {
+        "name": "Comparison",
+        "width": 211,
+        "height": 44
+      },
+      {
+        "name": "Product history",
+        "width": 211,
+        "height": 44
+      },
+      {
+        "name": "Data quality, attention",
+        "width": 211,
+        "height": 44
+      }
+    ]
+  },
+  "interaction": {
+    "clickSequence": [
+      {
+        "tab": "overview",
+        "pane": "pane-overview",
+        "hash": "overview"
+      },
+      {
+        "tab": "trends",
+        "pane": "pane-trends",
+        "hash": "trends"
+      },
+      {
+        "tab": "comparison",
+        "pane": "pane-comparison",
+        "hash": "comparison"
+      },
+      {
+        "tab": "history",
+        "pane": "pane-history",
+        "hash": "history"
+      },
+      {
+        "tab": "quality",
+        "pane": "pane-quality",
+        "hash": "quality"
+      }
+    ],
+    "keyboardTarget": "trends",
+    "endTarget": "quality",
+    "homeTarget": "overview",
+    "resetState": {
+      "tab": "overview",
+      "focused": "overview"
+    },
+    "filterState": {
+      "drawerOpened": true,
+      "sharedScopeChanged": true,
+      "drawerClosedByNavigation": true,
+      "visibleAfterFilter": 1,
+      "scopeReset": true,
+      "visibleAfterReset": 6
+    },
+    "hashSequence": [
+      "pane-overview",
+      "pane-trends",
+      "pane-overview",
+      "pane-quality"
+    ],
+    "focus": {
+      "outline": "rgb(8, 127, 117) solid 2px",
+      "offset": "2px"
+    },
+    "hover": {
+      "beforeHover": "rgba(0, 0, 0, 0)",
+      "afterHover": "rgba(8, 127, 117, 0.055)",
+      "paneAfterHover": "pane-overview"
+    }
+  },
+  "motionFonts": {
+    "normalMotion": {
+      "lamp": "breathe"
+    },
+    "reducedMotion": {
+      "lamp": "none"
+    },
+    "fonts": {
+      "chakra600": true,
+      "plexSans400": true,
+      "plexSans600": true,
+      "plexMono400": true,
+      "plexMono500": true
+    }
+  },
+  "contrast": {
+    "colors": {
+      "text": "#172421",
+      "muted": "#536762",
+      "faint": "#586b66",
+      "faint2": "#5d6f6a",
+      "teal": "#087f75",
+      "amber": "#9a5e00",
+      "panel": "#ffffff",
+      "panel3": "#e8f3f0",
+      "bg2": "#f4f7f6"
+    },
+    "pairs": [
+      {
+        "name": "text/panel",
+        "foreground": "#172421",
+        "background": "#ffffff",
+        "ratio": 16.02
+      },
+      {
+        "name": "muted/panel3",
+        "foreground": "#536762",
+        "background": "#e8f3f0",
+        "ratio": 5.31
+      },
+      {
+        "name": "faint/panel3",
+        "foreground": "#586b66",
+        "background": "#e8f3f0",
+        "ratio": 4.99
+      },
+      {
+        "name": "faint2/panel3",
+        "foreground": "#5d6f6a",
+        "background": "#e8f3f0",
+        "ratio": 4.69
+      },
+      {
+        "name": "teal/panel",
+        "foreground": "#087f75",
+        "background": "#ffffff",
+        "ratio": 4.88
+      },
+      {
+        "name": "amber/panel",
+        "foreground": "#9a5e00",
+        "background": "#ffffff",
+        "ratio": 5.28
+      }
+    ]
+  },
+  "layout": [
+    {
+      "viewportName": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "tab": "overview",
+      "activeTab": "overview",
+      "activePane": "pane-overview",
+      "pageScroll": 0,
+      "horizontalOverflow": 0,
+      "paneScroll": 0,
+      "clipped": [],
+      "outside": [],
+      "pane": {
+        "top": 105,
+        "bottom": 869
+      },
+      "lastChildBottomGap": 22,
+      "railWidth": 232,
+      "tabNamesVisible": true
+    },
+    {
+      "viewportName": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "tab": "trends",
+      "activeTab": "trends",
+      "activePane": "pane-trends",
+      "pageScroll": 0,
+      "horizontalOverflow": 0,
+      "paneScroll": 0,
+      "clipped": [],
+      "outside": [],
+      "pane": {
+        "top": 105,
+        "bottom": 869
+      },
+      "lastChildBottomGap": 22,
+      "railWidth": 232,
+      "tabNamesVisible": true
+    },
+    {
+      "viewportName": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "tab": "comparison",
+      "activeTab": "comparison",
+      "activePane": "pane-comparison",
+      "pageScroll": 0,
+      "horizontalOverflow": 0,
+      "paneScroll": 0,
+      "clipped": [],
+      "outside": [],
+      "pane": {
+        "top": 105,
+        "bottom": 869
+      },
+      "lastChildBottomGap": 22,
+      "railWidth": 232,
+      "tabNamesVisible": true
+    },
+    {
+      "viewportName": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "tab": "history",
+      "activeTab": "history",
+      "activePane": "pane-history",
+      "pageScroll": 0,
+      "horizontalOverflow": 0,
+      "paneScroll": 0,
+      "clipped": [],
+      "outside": [],
+      "pane": {
+        "top": 105,
+        "bottom": 869
+      },
+      "lastChildBottomGap": 22,
+      "railWidth": 232,
+      "tabNamesVisible": true
+    },
+    {
+      "viewportName": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "tab": "quality",
+      "activeTab": "quality",
+      "activePane": "pane-quality",
+      "pageScroll": 0,
+      "horizontalOverflow": 0,
+      "paneScroll": 0,
+      "clipped": [],
+      "outside": [],
+      "pane": {
+        "top": 105,
+        "bottom": 869
+      },
+      "lastChildBottomGap": 22,
+      "railWidth": 232,
+      "tabNamesVisible": true
+    },
+    {
+      "viewportName": "short",
+      "viewport": {
+        "width": 1440,
+        "height": 720
+      },
+      "tab": "overview",
+      "activeTab": "overview",
+      "activePane": "pane-overview",
+      "pageScroll": 0,
+      "horizontalOverflow": 0,
+      "paneScroll": 0,
+      "clipped": [],
+      "outside": [],
+      "pane": {
+        "top": 105,
+        "bottom": 689
+      },
+      "lastChildBottomGap": 20,
+      "railWidth": 232,
+      "tabNamesVisible": true
+    },
+    {
+      "viewportName": "short",
+      "viewport": {
+        "width": 1440,
+        "height": 720
+      },
+      "tab": "trends",
+      "activeTab": "trends",
+      "activePane": "pane-trends",
+      "pageScroll": 0,
+      "horizontalOverflow": 0,
+      "paneScroll": 0,
+      "clipped": [],
+      "outside": [],
+      "pane": {
+        "top": 105,
+        "bottom": 689
+      },
+      "lastChildBottomGap": 20,
+      "railWidth": 232,
+      "tabNamesVisible": true
+    },
+    {
+      "viewportName": "short",
+      "viewport": {
+        "width": 1440,
+        "height": 720
+      },
+      "tab": "comparison",
+      "activeTab": "comparison",
+      "activePane": "pane-comparison",
+      "pageScroll": 0,
+      "horizontalOverflow": 0,
+      "paneScroll": 0,
+      "clipped": [],
+      "outside": [],
+      "pane": {
+        "top": 105,
+        "bottom": 689
+      },
+      "lastChildBottomGap": 20,
+      "railWidth": 232,
+      "tabNamesVisible": true
+    },
+    {
+      "viewportName": "short",
+      "viewport": {
+        "width": 1440,
+        "height": 720
+      },
+      "tab": "history",
+      "activeTab": "history",
+      "activePane": "pane-history",
+      "pageScroll": 0,
+      "horizontalOverflow": 0,
+      "paneScroll": 0,
+      "clipped": [],
+      "outside": [],
+      "pane": {
+        "top": 105,
+        "bottom": 689
+      },
+      "lastChildBottomGap": 20,
+      "railWidth": 232,
+      "tabNamesVisible": true
+    },
+    {
+      "viewportName": "short",
+      "viewport": {
+        "width": 1440,
+        "height": 720
+      },
+      "tab": "quality",
+      "activeTab": "quality",
+      "activePane": "pane-quality",
+      "pageScroll": 0,
+      "horizontalOverflow": 0,
+      "paneScroll": 0,
+      "clipped": [],
+      "outside": [],
+      "pane": {
+        "top": 105,
+        "bottom": 689
+      },
+      "lastChildBottomGap": 20,
+      "railWidth": 232,
+      "tabNamesVisible": true
+    },
+    {
+      "viewportName": "narrow",
+      "viewport": {
+        "width": 800,
+        "height": 700
+      },
+      "tab": "overview",
+      "activeTab": "overview",
+      "activePane": "pane-overview",
+      "pageScroll": 0,
+      "horizontalOverflow": 0,
+      "paneScroll": 0,
+      "clipped": [],
+      "outside": [],
+      "pane": {
+        "top": 105,
+        "bottom": 669
+      },
+      "lastChildBottomGap": 20,
+      "railWidth": 76,
+      "tabNamesVisible": false
+    },
+    {
+      "viewportName": "narrow",
+      "viewport": {
+        "width": 800,
+        "height": 700
+      },
+      "tab": "trends",
+      "activeTab": "trends",
+      "activePane": "pane-trends",
+      "pageScroll": 0,
+      "horizontalOverflow": 0,
+      "paneScroll": 0,
+      "clipped": [],
+      "outside": [],
+      "pane": {
+        "top": 105,
+        "bottom": 669
+      },
+      "lastChildBottomGap": 20,
+      "railWidth": 76,
+      "tabNamesVisible": false
+    },
+    {
+      "viewportName": "narrow",
+      "viewport": {
+        "width": 800,
+        "height": 700
+      },
+      "tab": "comparison",
+      "activeTab": "comparison",
+      "activePane": "pane-comparison",
+      "pageScroll": 0,
+      "horizontalOverflow": 0,
+      "paneScroll": 0,
+      "clipped": [],
+      "outside": [],
+      "pane": {
+        "top": 105,
+        "bottom": 669
+      },
+      "lastChildBottomGap": 20,
+      "railWidth": 76,
+      "tabNamesVisible": false
+    },
+    {
+      "viewportName": "narrow",
+      "viewport": {
+        "width": 800,
+        "height": 700
+      },
+      "tab": "history",
+      "activeTab": "history",
+      "activePane": "pane-history",
+      "pageScroll": 0,
+      "horizontalOverflow": 0,
+      "paneScroll": 0,
+      "clipped": [],
+      "outside": [],
+      "pane": {
+        "top": 105,
+        "bottom": 669
+      },
+      "lastChildBottomGap": 20,
+      "railWidth": 76,
+      "tabNamesVisible": false
+    },
+    {
+      "viewportName": "narrow",
+      "viewport": {
+        "width": 800,
+        "height": 700
+      },
+      "tab": "quality",
+      "activeTab": "quality",
+      "activePane": "pane-quality",
+      "pageScroll": 0,
+      "horizontalOverflow": 0,
+      "paneScroll": 0,
+      "clipped": [],
+      "outside": [],
+      "pane": {
+        "top": 105,
+        "bottom": 669
+      },
+      "lastChildBottomGap": 20,
+      "railWidth": 76,
+      "tabNamesVisible": false
+    }
+  ],
+  "browserDiagnostics": {
+    "consoleErrors": [],
+    "pageErrors": [],
+    "networkFailures": [],
+    "httpErrors": []
+  }
+}

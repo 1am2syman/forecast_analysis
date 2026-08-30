@@ -12,30 +12,50 @@ import argparse
 import hashlib
 import json
 import math
+import shutil
 import struct
 import sys
+import tempfile
 import zlib
 from pathlib import Path
-from typing import Any, Iterator, Mapping
+from typing import Any, Callable, Iterator, Mapping
 
-SCHEMA_VERSION = 2
-CAPTURE_CONTRACT = "forecast-analysis-dashboard-ui-baseline-v1"
-NORMALIZATION_CONTRACT = "marimo-full-page-normalization-v1"
-WORKFLOW_VERSION = "forecast-dashboard-live-capture-v1"
-OVERFLOW_TOLERANCE_PX = 2
-IMMUTABLE_BASELINE_RELATIVE_PATH = Path(
-    "validation-artifacts/forecast-analysis-dashboard-long-full.png"
+from forecast_analysis_dashboard_ui_contract import (  # pyright: ignore[reportMissingImports]
+    CAPTURE_ARTIFACT_RELATIVE_PATH,
+    CAPTURE_CONTRACT,
+    CAPTURE_SCHEMA_VERSION,
+    capture_anchor,
+    EXPECTED_DISCLOSURE_LABEL,
+    IMMUTABLE_BASELINE_RELATIVE_PATH,
+    NORMALIZATION_ARTIFACT_RELATIVE_PATHS,
+    NORMALIZATION_CONTRACT,
+    OVERFLOW_TOLERANCE_PX,
+    PROVENANCE_HASH_ALGORITHM,
+    SCREENSHOT_BINDING_CONTRACT,
+    SCREENSHOT_RELATIVE_PATHS,
+    STATE_ARTIFACT_RELATIVE_PATHS,
+    STATE_PROOF_CONTRACT,
+    WORKFLOW_VERSION,
+    disclosure_evidence,
+    geometry_evidence,
+    screenshot_binding,
+    screenshot_command_contract,
+    sha256_json,
+    expected_state_artifact,
+    sha256_json_file,
+    state_proof,
 )
+
+SCHEMA_VERSION = CAPTURE_SCHEMA_VERSION
 IMMUTABLE_BASELINE_SHA256 = (
     "29cd5651eadfec811b1c0671786f4a807dc846e1c59f9b5bddfab17e7261dfdd"
-)
-CAPTURE_ARTIFACT_RELATIVE_PATH = Path(
-    "validation-artifacts/forecast-analysis-dashboard-ui-baseline.json"
 )
 MIN_APP_TEXT_LENGTH = 100
 MIN_MEANINGFUL_ACTIVE_BANDS = 6
 MIN_LAST_BAND_CONTENT_RATIO = 0.02
 MIN_STATE_DIFFERENCE_RATIO = 0.0005
+LIVE_CAPTURE_DEFAULT_URL = "http://127.0.0.1:8765/"
+LIVE_CAPTURE_DEFAULT_BROWSER = "agent-browser"
 
 
 class CaptureValidationError(ValueError):
@@ -128,13 +148,21 @@ def _paeth(left: int, above: int, upper_left: int) -> int:
     return upper_left
 
 
-def _rgb_rows(path: Path, samples_per_row: int = 160) -> Iterator[tuple[int, bytes]]:
+def _rgb_rows(
+    path: Path,
+    samples_per_row: int = 160,
+    x_positions: tuple[int, ...] | None = None,
+) -> Iterator[tuple[int, bytes]]:
     """Yield sampled RGB bytes for each decoded PNG row."""
     width, height, channels, scanlines = _png_scanlines(path)
     stride = width * channels
     previous = bytearray(stride)
     offset = 0
-    sample_step = max(1, width // samples_per_row)
+    sample_positions = (
+        x_positions
+        if x_positions is not None
+        else tuple(range(0, width, max(1, width // samples_per_row)))
+    )
     for row_index in range(height):
         filter_type = scanlines[offset]
         filtered = scanlines[offset + 1 : offset + 1 + stride]
@@ -160,7 +188,11 @@ def _rgb_rows(path: Path, samples_per_row: int = 160) -> Iterator[tuple[int, byt
                 )
             row[index] = (value + predictor) & 0xFF
         sampled = bytearray()
-        for x in range(0, width, sample_step):
+        for x in sample_positions:
+            if x >= width:
+                raise CaptureValidationError(
+                    f"PNG comparison sample x={x} exceeds image width {width}: {path}"
+                )
             pixel = row[x * channels : (x + 1) * channels]
             if channels == 1:
                 sampled.extend((pixel[0], pixel[0], pixel[0]))
@@ -243,24 +275,39 @@ def png_content_evidence(path: Path) -> dict[str, Any]:
     }
 
 
+def _comparison_x_positions(width: int, sample_count: int = 160) -> tuple[int, ...]:
+    """Choose stable absolute x-coordinates for an overlapping image region."""
+    if width <= 0:
+        raise CaptureValidationError("PNG comparison has no overlapping width")
+    count = min(width, sample_count)
+    if count == 1:
+        return (0,)
+    return tuple(
+        round(index * (width - 1) / (count - 1)) for index in range(count)
+    )
+
+
 def png_difference_evidence(first: Path, second: Path) -> dict[str, Any]:
-    """Compare two PNGs using independent sampled decoded pixels."""
+    """Compare the overlapping decoded content of two PNGs.
+
+    Different dimensions are not evidence of different UI states.  Compare
+    the shared top-left image region so a closed screenshot padded with blank
+    rows cannot masquerade as the expanded state.
+    """
     first_width, first_height = png_dimensions(first)
     second_width, second_height = png_dimensions(second)
-    if (first_width, first_height) != (second_width, second_height):
-        return {
-            "same_dimensions": False,
-            "width": [first_width, second_width],
-            "height": [first_height, second_height],
-            "sampled_pixels": 0,
-            "changed_pixels": 0,
-            "difference_ratio": 1.0,
-        }
+    overlap_width = min(first_width, second_width)
+    overlap_height = min(first_height, second_height)
+    x_positions = _comparison_x_positions(overlap_width)
     changed = 0
     sampled = 0
-    first_rows = _rgb_rows(first)
-    second_rows = _rgb_rows(second)
-    for (_, first_row), (_, second_row) in zip(first_rows, second_rows):
+    first_rows = _rgb_rows(first, x_positions=x_positions)
+    second_rows = _rgb_rows(second, x_positions=x_positions)
+    for row_index, ((_, first_row), (_, second_row)) in enumerate(
+        zip(first_rows, second_rows)
+    ):
+        if row_index >= overlap_height:
+            break
         if len(first_row) != len(second_row):
             raise CaptureValidationError("PNG row samples have different lengths")
         for index in range(0, len(first_row), 3):
@@ -268,15 +315,38 @@ def png_difference_evidence(first: Path, second: Path) -> dict[str, Any]:
             if first_row[index : index + 3] != second_row[index : index + 3]:
                 changed += 1
     if sampled == 0:
-        raise CaptureValidationError("PNG comparison produced no samples")
+        raise CaptureValidationError("PNG comparison produced no overlapping samples")
+    difference_ratio = changed / sampled
     return {
-        "same_dimensions": True,
-        "width": first_width,
-        "height": first_height,
+        "same_dimensions": (first_width, first_height) == (second_width, second_height),
+        "width": first_width if first_width == second_width else [first_width, second_width],
+        "height": first_height if first_height == second_height else [first_height, second_height],
+        "overlap_width": overlap_width,
+        "overlap_height": overlap_height,
         "sampled_pixels": sampled,
         "changed_pixels": changed,
-        "difference_ratio": changed / sampled,
+        "overlap_difference_ratio": difference_ratio,
+        "difference_ratio": difference_ratio,
+        "state_difference": difference_ratio >= MIN_STATE_DIFFERENCE_RATIO,
     }
+
+
+def validate_state_transition(default: Path, expanded: Path) -> dict[str, Any]:
+    """Require both expanded dimensions and changed overlapping UI content."""
+    evidence = png_difference_evidence(default, expanded)
+    if not evidence["state_difference"]:
+        raise CaptureValidationError(
+            "default and expanded screenshots lack changed overlapping content: "
+            f"{evidence}"
+        )
+    _, default_height = png_dimensions(default)
+    _, expanded_height = png_dimensions(expanded)
+    if not evidence["same_dimensions"] and expanded_height <= default_height:
+        raise CaptureValidationError(
+            "expanded screenshot is not larger than default screenshot: "
+            f"{evidence}"
+        )
+    return evidence
 
 
 def _integer(value: object, label: str) -> int:
@@ -411,6 +481,20 @@ def _assert_equal(actual: object, expected: object, label: str) -> None:
         )
 
 
+def _assert_screenshot_identity(
+    actual: Mapping[str, Any],
+    expected: Mapping[str, Any],
+    label: str,
+) -> None:
+    """Bind summary screenshot records to their state-specific capture records."""
+    for field in ("path", "width", "height", "sha256", "binding_sha256"):
+        _assert_equal(
+            actual.get(field),
+            expected.get(field),
+            f"{label}.{field} state-specific screenshot binding",
+        )
+
+
 def _load_json(root: Path, value: object, label: str) -> tuple[Path, Mapping[str, Any]]:
     path = _resolve_path(root, value, label)
     if not path.is_file():
@@ -422,11 +506,12 @@ def _load_json(root: Path, value: object, label: str) -> tuple[Path, Mapping[str
     return path, _mapping(payload, label)
 
 
-def _validate_screenshot(
+def _screenshot_identity(
     root: Path,
     screenshot: Mapping[str, Any],
     label: str,
 ) -> dict[str, Any]:
+    """Recompute screenshot path, dimensions, and file digest without pixel scans."""
     path = _resolve_path(root, screenshot.get("path"), f"{label}.screenshot")
     if not path.is_file():
         raise CaptureValidationError(f"{label}.screenshot does not exist: {path}")
@@ -438,18 +523,349 @@ def _validate_screenshot(
     if not isinstance(expected_digest, str) or len(expected_digest) != 64:
         raise CaptureValidationError(f"{label}.sha256 is missing or malformed")
     _assert_equal(digest, expected_digest, f"{label}.sha256")
-    content = png_content_evidence(path)
-    if not content["meaningful"]:
-        raise CaptureValidationError(
-            f"{label} is not meaningful full-height content: {content}"
-        )
     return {
         "path": str(path),
         "width": width,
         "height": height,
         "sha256": digest,
-        "content": content,
+        "binding_sha256": screenshot.get("binding_sha256"),
     }
+
+
+def _validate_screenshot(
+    root: Path,
+    screenshot: Mapping[str, Any],
+    label: str,
+    *,
+    verify_content: bool = True,
+) -> dict[str, Any]:
+    result = _screenshot_identity(root, screenshot, label)
+    if not verify_content:
+        return result
+    content = png_content_evidence(Path(result["path"]))
+    if not content["meaningful"]:
+        raise CaptureValidationError(
+            f"{label} is not meaningful full-height content: {content}"
+        )
+    return {**result, "content": content}
+
+
+def _validate_screenshot_command(
+    root: Path,
+    command_result: Mapping[str, Any],
+    expected_repository_path: Path,
+    session: str,
+    label: str,
+) -> dict[str, Any]:
+    """Validate the exact state-specific screenshot command and its output path."""
+    command = command_result.get("command")
+    if not isinstance(command, list) or len(command) != 7:
+        raise CaptureValidationError(f"{label}.command has unexpected argv")
+    expected_path = str((root / expected_repository_path).resolve())
+    _assert_equal(Path(str(command[0])).name, "agent-browser", f"{label}.command executable")
+    _assert_equal(
+        command[1:],
+        ["--session", session, "--json", "screenshot", "--full", expected_path],
+        f"{label}.command argv",
+    )
+    _assert_equal(command_result.get("exit_code"), 0, f"{label}.exit_code")
+    envelope = _mapping(command_result.get("envelope"), f"{label}.envelope")
+    if "success" in envelope:
+        _assert_equal(envelope.get("success"), True, f"{label}.envelope.success")
+    elif "ok" in envelope:
+        _assert_equal(envelope.get("ok"), True, f"{label}.envelope.ok")
+    else:
+        raise CaptureValidationError(f"{label}.envelope has no success marker")
+    data = _mapping(command_result.get("data"), f"{label}.data")
+    _assert_equal(data.get("path"), expected_path, f"{label}.data.path")
+    try:
+        return screenshot_command_contract(
+            command_result,
+            root,
+            expected_repository_path,
+        )
+    except (TypeError, ValueError) as exc:
+        raise CaptureValidationError(f"{label} cannot be fingerprinted: {exc}") from exc
+
+
+def _validate_screenshot_binding(
+    *,
+    root: Path,
+    path: Path,
+    payload: Mapping[str, Any],
+    state_payload: Mapping[str, Any],
+    expected_state_artifact_path: Path,
+    expected_normalization_path: Path,
+    expected_screenshot_path: Path,
+    expected_state: str,
+    expected_open: bool,
+    execution_id: str,
+    session: str,
+    screenshot_result: dict[str, Any],
+) -> Mapping[str, Any]:
+    """Verify the content-addressed receipt joining a screenshot to its state."""
+    label = str(path)
+    binding = _mapping(payload.get("screenshot_binding"), f"{label}.screenshot_binding")
+    _assert_equal(
+        binding.get("contract"),
+        SCREENSHOT_BINDING_CONTRACT,
+        f"{label}.screenshot_binding.contract",
+    )
+    _assert_equal(
+        binding.get("algorithm"),
+        PROVENANCE_HASH_ALGORITHM,
+        f"{label}.screenshot_binding.algorithm",
+    )
+    _assert_equal(binding.get("execution_id"), execution_id, f"{label}.binding.execution_id")
+    _assert_equal(binding.get("session"), session, f"{label}.binding.session")
+    _assert_equal(binding.get("state"), expected_state, f"{label}.binding.state")
+    _assert_equal(
+        binding.get("expected_repository_path"),
+        expected_screenshot_path.as_posix(),
+        f"{label}.binding.expected_repository_path",
+    )
+    _assert_equal(
+        binding.get("normalization_artifact_path"),
+        expected_normalization_path.as_posix(),
+        f"{label}.binding.normalization_artifact_path",
+    )
+
+    state_binding = _mapping(binding.get("state_artifact"), f"{label}.binding.state_artifact")
+    _assert_equal(
+        state_binding.get("path"),
+        expected_state_artifact_path.as_posix(),
+        f"{label}.binding.state_artifact.path",
+    )
+    state_path = (root / expected_state_artifact_path).resolve()
+    _assert_equal(
+        state_binding.get("sha256"),
+        sha256_json_file(state_path, root),
+        f"{label}.binding.state_artifact.sha256",
+    )
+    _assert_equal(
+        payload.get("state_artifact_sha256"),
+        state_binding.get("sha256"),
+        f"{label}.state_artifact_sha256",
+    )
+    state_proof = _mapping(state_payload.get("state_proof"), f"{label}.state_proof")
+    _assert_equal(
+        binding.get("state_proof_sha256"),
+        state_proof.get("proof_sha256"),
+        f"{label}.binding.state_proof_sha256",
+    )
+    _assert_equal(
+        payload.get("state_artifact_sha256"),
+        sha256_json_file(state_path, root),
+        f"{label}.state_artifact_sha256 recomputation",
+    )
+
+    command_result = _mapping(payload.get("screenshot_command"), f"{label}.screenshot_command")
+    command_proof = _validate_screenshot_command(
+        root,
+        command_result,
+        expected_screenshot_path,
+        session,
+        f"{label}.screenshot_command",
+    )
+    _assert_equal(
+        payload.get("screenshot_command_proof"),
+        command_proof,
+        f"{label}.screenshot_command_proof",
+    )
+    _assert_equal(
+        binding.get("screenshot_command_sha256"),
+        sha256_json(command_proof),
+        f"{label}.binding.screenshot_command_sha256",
+    )
+
+    screenshot = _mapping(binding.get("screenshot"), f"{label}.binding.screenshot")
+    expected_screenshot = {
+        "path": expected_screenshot_path.as_posix(),
+        "width": screenshot_result["width"],
+        "height": screenshot_result["height"],
+        "sha256": screenshot_result["sha256"],
+    }
+    _assert_equal(screenshot, expected_screenshot, f"{label}.binding.screenshot")
+    _assert_equal(
+        _mapping(payload.get("screenshot"), f"{label}.screenshot").get("binding_sha256"),
+        binding.get("binding_sha256"),
+        f"{label}.screenshot.binding_sha256",
+    )
+
+    rendered = _mapping(state_payload.get("rendered_state"), f"{label}.rendered_state")
+    expected_disclosure = {
+        **disclosure_evidence(rendered, EXPECTED_DISCLOSURE_LABEL),
+        "expected_open": expected_open,
+    }
+    _assert_equal(
+        binding.get("disclosure"),
+        expected_disclosure,
+        f"{label}.binding.disclosure",
+    )
+    expected_geometry = geometry_evidence(rendered, payload)
+    _assert_equal(
+        binding.get("geometry"),
+        expected_geometry,
+        f"{label}.binding.geometry",
+    )
+    _assert_equal(
+        binding.get("disclosure_sha256"),
+        sha256_json(expected_disclosure),
+        f"{label}.binding.disclosure_sha256",
+    )
+    _assert_equal(
+        binding.get("geometry_sha256"),
+        sha256_json(expected_geometry),
+        f"{label}.binding.geometry_sha256",
+    )
+
+    expected_receipt = {
+        "contract": SCREENSHOT_BINDING_CONTRACT,
+        "algorithm": PROVENANCE_HASH_ALGORITHM,
+        "execution_id": execution_id,
+        "session": session,
+        "state": expected_state,
+        "expected_repository_path": expected_screenshot_path.as_posix(),
+        "state_artifact_path": expected_state_artifact_path.as_posix(),
+        "state_artifact_sha256": state_binding.get("sha256"),
+        "normalization_artifact_path": expected_normalization_path.as_posix(),
+        "screenshot_command_sha256": binding.get("screenshot_command_sha256"),
+        "state_proof_sha256": binding.get("state_proof_sha256"),
+        "disclosure_sha256": binding.get("disclosure_sha256"),
+        "geometry_sha256": binding.get("geometry_sha256"),
+        "width": screenshot_result["width"],
+        "height": screenshot_result["height"],
+        "sha256": screenshot_result["sha256"],
+        "binding_sha256": binding.get("binding_sha256"),
+    }
+    _assert_equal(
+        _mapping(command_result.get("capture_output"), f"{label}.screenshot_command.capture_output"),
+        expected_receipt,
+        f"{label}.screenshot_command.capture_output",
+    )
+
+    unsigned = {key: value for key, value in binding.items() if key != "binding_sha256"}
+    _assert_equal(
+        binding.get("binding_sha256"),
+        sha256_json(unsigned),
+        f"{label}.binding_sha256",
+    )
+    return binding
+
+
+def _validate_capture_anchor(
+    *,
+    root: Path,
+    document: Mapping[str, Any],
+    workflow: Mapping[str, Any],
+    default_binding: Mapping[str, Any],
+    expanded_binding: Mapping[str, Any],
+    default_normalization_path: Path,
+    expanded_normalization_path: Path,
+) -> None:
+    """Verify the cross-state receipt for one capture execution."""
+    def anchor_state(
+        state: str,
+        binding: Mapping[str, Any],
+        normalization_path: Path,
+    ) -> dict[str, Any]:
+        state_artifact = _mapping(binding.get("state_artifact"), f"{state}.state_artifact")
+        screenshot = _mapping(binding.get("screenshot"), f"{state}.screenshot")
+        expected_state_path = STATE_ARTIFACT_RELATIVE_PATHS[state]
+        expected_normalization_path = NORMALIZATION_ARTIFACT_RELATIVE_PATHS[state]
+        expected_screenshot_path = SCREENSHOT_RELATIVE_PATHS[state]
+        state_path = (root / expected_state_path).resolve()
+        screenshot_path = (root / expected_screenshot_path).resolve()
+        _assert_equal(
+            state_artifact.get("path"),
+            expected_state_path.as_posix(),
+            f"{state}.anchor.state_artifact_path",
+        )
+        _assert_equal(
+            binding.get("normalization_artifact_path"),
+            expected_normalization_path.as_posix(),
+            f"{state}.anchor.normalization_artifact_path",
+        )
+        _assert_equal(
+            binding.get("expected_repository_path"),
+            expected_screenshot_path.as_posix(),
+            f"{state}.anchor.screenshot_path",
+        )
+        if not state_path.is_file() or not screenshot_path.is_file() or not normalization_path.is_file():
+            raise CaptureValidationError(f"{state}.anchor references missing evidence")
+        actual_width, actual_height = png_dimensions(screenshot_path)
+        _assert_equal(actual_width, screenshot.get("width"), f"{state}.anchor.screenshot_width")
+        _assert_equal(actual_height, screenshot.get("height"), f"{state}.anchor.screenshot_height")
+        _assert_equal(
+            sha256_file(screenshot_path),
+            screenshot.get("sha256"),
+            f"{state}.anchor.screenshot_sha256",
+        )
+        _assert_equal(
+            sha256_json_file(state_path, root),
+            state_artifact.get("sha256"),
+            f"{state}.anchor.state_artifact_sha256",
+        )
+        _assert_equal(
+            sha256_json_file(normalization_path, root),
+            anchor_normalization_sha256[state],
+            f"{state}.anchor.normalization_artifact_sha256",
+        )
+        return {
+            "state": state,
+            "expected_disclosure": {
+                "label": EXPECTED_DISCLOSURE_LABEL,
+                "open": state == "expanded-open",
+            },
+            "state_artifact_path": state_artifact.get("path"),
+            "state_artifact_sha256": state_artifact.get("sha256"),
+            "state_proof_sha256": binding.get("state_proof_sha256"),
+            "normalization_artifact_path": binding.get("normalization_artifact_path"),
+            "normalization_artifact_sha256": sha256_json_file(normalization_path, root),
+            "screenshot_path": binding.get("expected_repository_path"),
+            "screenshot_width": screenshot.get("width"),
+            "screenshot_height": screenshot.get("height"),
+            "screenshot_sha256": screenshot.get("sha256"),
+            "screenshot_command_sha256": binding.get("screenshot_command_sha256"),
+            "disclosure_sha256": binding.get("disclosure_sha256"),
+            "geometry_sha256": binding.get("geometry_sha256"),
+            "binding_sha256": binding.get("binding_sha256"),
+        }
+
+    anchor_normalization_sha256 = {
+        "default-closed": sha256_json_file(default_normalization_path, root),
+        "expanded-open": sha256_json_file(expanded_normalization_path, root),
+    }
+    actual = _mapping(document.get("capture_anchor"), "capture_anchor")
+    try:
+        expected = capture_anchor(
+            execution_id=str(workflow.get("execution_id")),
+            session=str(workflow.get("browser_session")),
+            workflow_name=WORKFLOW_VERSION,
+            workflow_path="scripts/capture_forecast_analysis_dashboard_ui.py",
+            capture_artifact_path=CAPTURE_ARTIFACT_RELATIVE_PATH,
+            immutable_before_state={
+                "path": IMMUTABLE_BASELINE_RELATIVE_PATH.as_posix(),
+                "width": 6650,
+                "height": 11082,
+                "sha256": IMMUTABLE_BASELINE_SHA256,
+            },
+            states={
+                "default-closed": anchor_state(
+                    "default-closed",
+                    default_binding,
+                    default_normalization_path,
+                ),
+                "expanded-open": anchor_state(
+                    "expanded-open",
+                    expanded_binding,
+                    expanded_normalization_path,
+                ),
+            },
+        )
+    except (TypeError, ValueError, OSError) as exc:
+        raise CaptureValidationError(f"capture_anchor cannot be recomputed: {exc}") from exc
+    _assert_equal(actual, expected, "capture_anchor")
 
 
 def _label_map(state: Mapping[str, Any]) -> dict[str, Mapping[str, Any]]:
@@ -617,6 +1033,7 @@ def _validate_disclosures(state: Mapping[str, Any], expected_open: bool, label: 
 def _validate_raw_state(
     root: Path,
     path: Path,
+    expected_path: Path,
     expected_state: str,
     expected_open: bool,
     execution_id: str,
@@ -626,7 +1043,17 @@ def _validate_raw_state(
         payload = _mapping(json.loads(path.read_text(encoding="utf-8")), str(path))
     except (OSError, json.JSONDecodeError) as exc:
         raise CaptureValidationError(f"raw state evidence is not valid JSON: {path}") from exc
-    _assert_equal(payload.get("evidence_version"), 1, f"{path}.evidence_version")
+    _assert_equal(payload.get("evidence_version"), 2, f"{path}.evidence_version")
+    _assert_equal(
+        payload.get("state_proof_contract"),
+        STATE_PROOF_CONTRACT,
+        f"{path}.state_proof_contract",
+    )
+    _assert_equal(
+        payload.get("artifact_path"),
+        expected_path.as_posix(),
+        f"{path}.artifact_path",
+    )
     _assert_equal(payload.get("execution_id"), execution_id, f"{path}.execution_id")
     _assert_equal(payload.get("session"), session, f"{path}.session")
     _assert_equal(payload.get("state"), expected_state, f"{path}.state")
@@ -645,21 +1072,41 @@ def _validate_raw_state(
     probe = _mapping(rendered.get("contentProbe"), f"{path}.rendered_state.contentProbe")
     if _integer(probe.get("appTextLength"), f"{path}.appTextLength") < MIN_APP_TEXT_LENGTH:
         raise CaptureValidationError(f"{path} has too little rendered app text")
+    try:
+        expected_proof = state_proof(state=expected_state, rendered_state=rendered)
+    except ValueError as exc:
+        raise CaptureValidationError(f"{path}.state_proof cannot be recomputed: {exc}") from exc
+    _assert_equal(payload.get("state_proof"), expected_proof, f"{path}.state_proof")
     return payload
 
 
 def _validate_normalization(
     root: Path,
     path: Path,
+    expected_path: Path,
+    expected_state_artifact_path: Path,
+    expected_screenshot_path: Path,
     expected_state: str,
+    expected_open: bool,
     execution_id: str,
     session: str,
+    state_payload: Mapping[str, Any],
 ) -> tuple[Mapping[str, Any], Mapping[str, Any]]:
     try:
         payload = _mapping(json.loads(path.read_text(encoding="utf-8")), str(path))
     except (OSError, json.JSONDecodeError) as exc:
         raise CaptureValidationError(f"normalization evidence is not valid JSON: {path}") from exc
-    _assert_equal(payload.get("evidence_version"), 1, f"{path}.evidence_version")
+    _assert_equal(payload.get("evidence_version"), 2, f"{path}.evidence_version")
+    _assert_equal(
+        payload.get("screenshot_binding_contract"),
+        SCREENSHOT_BINDING_CONTRACT,
+        f"{path}.screenshot_binding_contract",
+    )
+    _assert_equal(
+        payload.get("artifact_path"),
+        expected_path.as_posix(),
+        f"{path}.artifact_path",
+    )
     _assert_equal(payload.get("execution_id"), execution_id, f"{path}.execution_id")
     _assert_equal(payload.get("session"), session, f"{path}.session")
     _assert_equal(payload.get("state"), expected_state, f"{path}.state")
@@ -669,6 +1116,11 @@ def _validate_normalization(
         f"{path}.normalization_contract",
     )
     state_path = _resolve_path(root, payload.get("source_state_artifact"), f"{path}.source_state_artifact")
+    _assert_equal(
+        payload.get("source_state_artifact"),
+        expected_state_artifact_path.as_posix(),
+        f"{path}.source_state_artifact",
+    )
     if not state_path.is_file():
         raise CaptureValidationError(f"{path}.source_state_artifact does not exist: {state_path}")
     normalization = _mapping(payload.get("normalization"), f"{path}.normalization")
@@ -733,17 +1185,37 @@ def _validate_normalization(
     if _integer(probe.get("appTextLength"), f"{path}.normalization.appTextLength") < MIN_APP_TEXT_LENGTH:
         raise CaptureValidationError(f"{path}.normalization has too little rendered app text")
     screenshot = _mapping(payload.get("screenshot"), f"{path}.screenshot")
-    screenshot_result = _validate_screenshot(root, screenshot, str(path))
+    _assert_equal(
+        screenshot.get("path"),
+        expected_screenshot_path.as_posix(),
+        f"{path}.screenshot.path",
+    )
+    screenshot_identity = _screenshot_identity(root, screenshot, str(path))
     document = _measurement(post.get("document"), f"{path}.post_measurement.document")
-    _assert_equal(screenshot_result["width"], document["scrollWidth"], f"{path}.screenshot width")
-    _assert_equal(screenshot_result["height"], document["scrollHeight"], f"{path}.screenshot height")
+    _assert_equal(screenshot_identity["width"], document["scrollWidth"], f"{path}.screenshot width")
+    _assert_equal(screenshot_identity["height"], document["scrollHeight"], f"{path}.screenshot height")
     raw_normalization = _mapping(payload.get("normalization_eval"), f"{path}.normalization_eval")
     raw_post = _mapping(payload.get("post_measurement_eval"), f"{path}.post_measurement_eval")
     if "data" not in raw_normalization and "result" not in raw_normalization:
         raise CaptureValidationError(f"{path}.normalization_eval has no raw browser payload")
     if "data" not in raw_post and "result" not in raw_post:
         raise CaptureValidationError(f"{path}.post_measurement_eval has no raw browser payload")
-    return payload, screenshot_result
+    binding = _validate_screenshot_binding(
+        root=root,
+        path=path,
+        payload=payload,
+        state_payload=state_payload,
+        expected_state_artifact_path=expected_state_artifact_path,
+        expected_normalization_path=expected_path,
+        expected_screenshot_path=expected_screenshot_path,
+        expected_state=expected_state,
+        expected_open=expected_open,
+        execution_id=execution_id,
+        session=session,
+        screenshot_result=screenshot_identity,
+    )
+    screenshot_identity["binding_sha256"] = binding["binding_sha256"]
+    return payload, screenshot_identity
 
 
 def _validate_analytical_state(
@@ -782,13 +1254,254 @@ def _validate_analytical_state(
     _assert_equal(state.get("source"), rendered_controls["Forecast source (single-source mode)"].get("value"), "analytical_state.rendered.source")
 
 
+def _stable_disclosure(value: object, label: str) -> dict[str, Any]:
+    source = _mapping(value, label)
+    return {
+        field: source.get(field)
+        for field in (
+            "kind",
+            "label",
+            "ariaExpanded",
+            "state",
+            "open",
+            "regionVisible",
+            "regionState",
+            "contentLength",
+        )
+    }
+
+
+def _live_state_projection(rendered: Mapping[str, Any]) -> dict[str, Any]:
+    controls = _label_map(rendered)
+    control_fields = (
+        "tag",
+        "display",
+        "value",
+        "values",
+        "checked",
+        "expanded",
+        "selectedValues",
+        "selectedCount",
+        "optionCount",
+        "selectionSource",
+    )
+    return {
+        "state": rendered.get("state"),
+        "url": rendered.get("url"),
+        "title": rendered.get("title"),
+        "viewport": rendered.get("viewport"),
+        "controls": {
+            label: {field: control.get(field) for field in control_fields}
+            for label, control in sorted(controls.items())
+        },
+        "disclosures": [
+            _stable_disclosure(item, "live disclosure")
+            for item in rendered.get("disclosures", [])
+            if isinstance(item, Mapping)
+        ],
+        "disclosureActions": rendered.get("disclosureActions"),
+        "geometry": rendered.get("geometry"),
+        "contentProbe": rendered.get("contentProbe"),
+    }
+
+
+def _live_state_proof_projection(raw_state: Mapping[str, Any]) -> dict[str, Any]:
+    rendered = _mapping(raw_state.get("rendered_state"), "live rendered state")
+    proof = _mapping(raw_state.get("state_proof"), "live state proof")
+    proof_payload = _mapping(proof.get("payload"), "live state proof payload")
+    return {
+        "contract": proof.get("contract"),
+        "algorithm": proof.get("algorithm"),
+        "payload": {
+            "state": proof_payload.get("state"),
+            "expected_disclosure": proof_payload.get("expected_disclosure"),
+            "disclosure": _stable_disclosure(
+                proof_payload.get("disclosure"),
+                "live state proof disclosure",
+            ),
+            "geometry": proof_payload.get("geometry"),
+            "content_probe": proof_payload.get("content_probe"),
+        },
+        "rendered": _live_state_projection(rendered),
+    }
+
+
+def _normalization_action_projection(value: object) -> list[dict[str, Any]]:
+    actions = value if isinstance(value, list) else []
+    projection = []
+    for index, action_value in enumerate(actions):
+        action = _mapping(action_value, f"normalization action {index}")
+        properties = _mapping(action.get("properties"), f"normalization action {index}.properties")
+        after = _mapping(properties.get("after"), f"normalization action {index}.after")
+        projection.append(
+            {
+                "tag": action.get("tag"),
+                "after": {
+                    property_name: _mapping(
+                        after.get(property_name),
+                        f"normalization action {index}.after.{property_name}",
+                    ).get("inline")
+                    for property_name in (
+                        "height",
+                        "min-height",
+                        "max-height",
+                        "overflow",
+                        "position",
+                    )
+                },
+            }
+        )
+    return projection
+
+
+def _live_normalization_projection(
+    normalization: Mapping[str, Any],
+) -> dict[str, Any]:
+    raw_normalization = _mapping(normalization.get("normalization"), "live normalization")
+    return {
+        "normalization_contract": normalization.get("normalization_contract"),
+        "normalization": {
+            "normalizationContract": raw_normalization.get("normalizationContract"),
+            "actionContract": raw_normalization.get("actionContract"),
+            "actions": _normalization_action_projection(raw_normalization.get("actions")),
+            "measurements": raw_normalization.get("measurements"),
+            "contentProbe": raw_normalization.get("contentProbe"),
+        },
+        "post_measurement": normalization.get("post_measurement"),
+    }
+
+
+def _read_evidence(root: Path, value: object, label: str) -> Mapping[str, Any]:
+    _, payload = _load_json(root, value, label)
+    return payload
+
+
+def _live_capture_contract_view(
+    root: Path,
+    validation: Mapping[str, Any],
+) -> dict[str, Any]:
+    document = _mapping(validation.get("payload"), "validated capture payload")
+    raw_evidence = _mapping(document.get("raw_evidence"), "validated raw evidence")
+    states: dict[str, Any] = {}
+    for state, raw_key, normalization_key in (
+        ("default-closed", "default_state", "default_normalization"),
+        ("expanded-open", "expanded_state", "expanded_normalization"),
+    ):
+        raw_state = _read_evidence(root, raw_evidence.get(raw_key), f"{state} raw state")
+        normalization = _read_evidence(
+            root,
+            raw_evidence.get(normalization_key),
+            f"{state} normalization",
+        )
+        states[state] = {
+            "state": raw_state.get("state"),
+            "rendered": _live_state_projection(
+                _mapping(raw_state.get("rendered_state"), f"{state} rendered state")
+            ),
+            "state_proof": _live_state_proof_projection(raw_state),
+            "normalization": _live_normalization_projection(normalization),
+        }
+
+    screenshots = _mapping(document.get("screenshots"), "validated screenshots")
+    screenshot_view = {}
+    for name in ("immutable_before_state", "default", "expanded"):
+        screenshot = _mapping(screenshots.get(name), f"validated screenshot {name}")
+        screenshot_view[name] = {
+            "path": screenshot.get("path"),
+            "width": screenshot.get("width"),
+            "height": screenshot.get("height"),
+            "sha256": screenshot.get("sha256"),
+        }
+    return {
+        "analytical_state": document.get("analytical_state"),
+        "viewport": document.get("viewport"),
+        "pre_normalization": document.get("pre_normalization"),
+        "states": states,
+        "screenshots": screenshot_view,
+    }
+
+
+def _copy_live_baseline(root: Path, capture_root: Path) -> None:
+    source = (root / IMMUTABLE_BASELINE_RELATIVE_PATH).resolve()
+    if not source.is_file():
+        raise CaptureValidationError(f"immutable baseline does not exist: {source}")
+    destination = capture_root / IMMUTABLE_BASELINE_RELATIVE_PATH
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(source, destination)
+
+
+def _run_live_recapture(
+    capture_root: Path,
+    url: str,
+    browser: str,
+) -> Mapping[str, Any]:
+    from capture_forecast_analysis_dashboard_ui import capture
+
+    artifact = capture(
+        root=capture_root,
+        url=url,
+        browser=browser,
+        output_dir=capture_root / "validation-artifacts",
+        viewport=(1280, 800),
+    )
+    return validate_capture_artifact(
+        capture_root,
+        artifact,
+        require_normalized=True,
+        verify_content=False,
+    )
+
+
+def verify_live_capture(
+    root: Path,
+    artifact: Path,
+    *,
+    url: str = LIVE_CAPTURE_DEFAULT_URL,
+    browser: str = LIVE_CAPTURE_DEFAULT_BROWSER,
+    recapture: Callable[[Path, str, str], Mapping[str, Any]] | None = None,
+    validator: Callable[..., Mapping[str, Any]] | None = None,
+) -> dict[str, Any]:
+    """Require a fresh two-state browser capture to match the checked-in contract."""
+    validate = validator or validate_capture_artifact
+    checked_in = validate(
+        root,
+        artifact,
+        require_normalized=True,
+        verify_content=False,
+    )
+    runner = recapture or _run_live_recapture
+    with tempfile.TemporaryDirectory(prefix="forecast-dashboard-ui-live-") as directory:
+        capture_root = Path(directory)
+        _copy_live_baseline(root, capture_root)
+        fresh = runner(capture_root, url, browser)
+        if not isinstance(fresh, Mapping):
+            raise CaptureValidationError("live recapture did not return validation evidence")
+        expected_view = _live_capture_contract_view(root, checked_in)
+        fresh_view = _live_capture_contract_view(capture_root, fresh)
+        if expected_view != fresh_view:
+            raise CaptureValidationError(
+                "live recapture does not match the checked-in capture contract"
+            )
+        return {
+            "checked_in": checked_in,
+            "fresh": fresh,
+            "contract": expected_view,
+        }
+
+
 def validate_capture_artifact(
     root: Path,
     artifact: Path,
     *,
     require_normalized: bool = False,
+    verify_content: bool = True,
 ) -> dict[str, Any]:
-    """Validate a live-browser capture artifact and return recomputed evidence."""
+    """Validate a live-browser capture artifact and return recomputed evidence.
+
+    ``verify_content=False`` keeps receipt and geometry checks fast for injected
+    unit-test recaptures; strict live verification still compares the fresh
+    screenshot bytes against the checked-in contract.
+    """
     if not artifact.is_file():
         raise CaptureValidationError(f"capture artifact does not exist: {artifact}")
     try:
@@ -816,12 +1529,36 @@ def validate_capture_artifact(
     analytical_state = _mapping(document.get("analytical_state"), "analytical_state")
 
     raw_evidence = _mapping(document.get("raw_evidence"), "raw_evidence")
+    expected_raw_paths = {
+        "default_state": STATE_ARTIFACT_RELATIVE_PATHS["default-closed"],
+        "expanded_state": STATE_ARTIFACT_RELATIVE_PATHS["expanded-open"],
+        "default_normalization": NORMALIZATION_ARTIFACT_RELATIVE_PATHS["default-closed"],
+        "expanded_normalization": NORMALIZATION_ARTIFACT_RELATIVE_PATHS["expanded-open"],
+    }
+    for key, expected_path in expected_raw_paths.items():
+        _assert_equal(raw_evidence.get(key), expected_path.as_posix(), f"raw_evidence.{key}")
     default_state_path = _resolve_path(root, raw_evidence.get("default_state"), "raw_evidence.default_state")
     expanded_state_path = _resolve_path(root, raw_evidence.get("expanded_state"), "raw_evidence.expanded_state")
     default_norm_path = _resolve_path(root, raw_evidence.get("default_normalization"), "raw_evidence.default_normalization")
     expanded_norm_path = _resolve_path(root, raw_evidence.get("expanded_normalization"), "raw_evidence.expanded_normalization")
-    default_raw = _validate_raw_state(root, default_state_path, "default-closed", False, execution_id, session)
-    expanded_raw = _validate_raw_state(root, expanded_state_path, "expanded-open", True, execution_id, session)
+    default_raw = _validate_raw_state(
+        root,
+        default_state_path,
+        STATE_ARTIFACT_RELATIVE_PATHS["default-closed"],
+        "default-closed",
+        False,
+        execution_id,
+        session,
+    )
+    expanded_raw = _validate_raw_state(
+        root,
+        expanded_state_path,
+        STATE_ARTIFACT_RELATIVE_PATHS["expanded-open"],
+        "expanded-open",
+        True,
+        execution_id,
+        session,
+    )
     default_rendered = _mapping(default_raw.get("rendered_state"), "default rendered state")
     expanded_rendered = _mapping(expanded_raw.get("rendered_state"), "expanded rendered state")
     _validate_live_controls(default_rendered, "default controls")
@@ -834,11 +1571,72 @@ def validate_capture_artifact(
     _validate_analytical_state(analytical_state, default_rendered)
 
     default_norm, default_norm_screenshot = _validate_normalization(
-        root, default_norm_path, "default-closed", execution_id, session
+        root,
+        default_norm_path,
+        NORMALIZATION_ARTIFACT_RELATIVE_PATHS["default-closed"],
+        STATE_ARTIFACT_RELATIVE_PATHS["default-closed"],
+        SCREENSHOT_RELATIVE_PATHS["default-closed"],
+        "default-closed",
+        False,
+        execution_id,
+        session,
+        default_raw,
     )
     expanded_norm, expanded_norm_screenshot = _validate_normalization(
-        root, expanded_norm_path, "expanded-open", execution_id, session
+        root,
+        expanded_norm_path,
+        NORMALIZATION_ARTIFACT_RELATIVE_PATHS["expanded-open"],
+        STATE_ARTIFACT_RELATIVE_PATHS["expanded-open"],
+        SCREENSHOT_RELATIVE_PATHS["expanded-open"],
+        "expanded-open",
+        True,
+        execution_id,
+        session,
+        expanded_raw,
     )
+    _validate_capture_anchor(
+        root=root,
+        document=document,
+        workflow=workflow,
+        default_binding=_mapping(
+            default_norm.get("screenshot_binding"),
+            "default screenshot binding",
+        ),
+        expanded_binding=_mapping(
+            expanded_norm.get("screenshot_binding"),
+            "expanded screenshot binding",
+        ),
+        default_normalization_path=default_norm_path,
+        expanded_normalization_path=expanded_norm_path,
+    )
+    for summary_key, norm, norm_screenshot in (
+        ("default_capture", default_norm, default_norm_screenshot),
+        ("expanded_capture", expanded_norm, expanded_norm_screenshot),
+    ):
+        summary = _mapping(document.get(summary_key), summary_key)
+        _assert_equal(
+            summary.get("state_artifact_sha256"),
+            norm.get("state_artifact_sha256"),
+            f"{summary_key}.state_artifact_sha256",
+        )
+        _assert_equal(
+            summary.get("screenshot_command_proof"),
+            norm.get("screenshot_command_proof"),
+            f"{summary_key}.screenshot_command_proof",
+        )
+        _assert_equal(
+            summary.get("screenshot_binding"),
+            norm.get("screenshot_binding"),
+            f"{summary_key}.screenshot_binding",
+        )
+        summary_capture = _mapping(summary.get("normalized_capture"), f"{summary_key}.normalized_capture")
+        summary_screenshot = _mapping(summary_capture.get("screenshot"), f"{summary_key}.screenshot")
+        for field in ("path", "width", "height", "sha256", "binding_sha256"):
+            _assert_equal(
+                summary_screenshot.get(field),
+                norm_screenshot.get(field) if field != "path" else SCREENSHOT_RELATIVE_PATHS["default-closed" if summary_key == "default_capture" else "expanded-open"].as_posix(),
+                f"{summary_key}.screenshot.{field}",
+            )
     _assert_equal(
         default_norm.get("source_state_artifact"),
         str(default_state_path.relative_to(root.resolve())),
@@ -876,27 +1674,71 @@ def validate_capture_artifact(
     _assert_equal(normalized_screenshot.get("sha256"), expanded_norm_screenshot["sha256"], "normalized_capture.screenshot.sha256")
     _assert_equal(normalized_screenshot.get("width"), expanded_norm_screenshot["width"], "normalized_capture.screenshot.width")
     _assert_equal(normalized_screenshot.get("height"), expanded_norm_screenshot["height"], "normalized_capture.screenshot.height")
+    _assert_equal(normalized_screenshot.get("binding_sha256"), expanded_norm_screenshot["binding_sha256"], "normalized_capture.screenshot.binding_sha256")
 
     screenshots = _mapping(document.get("screenshots"), "screenshots")
-    immutable = _validate_screenshot(root, _mapping(screenshots.get("immutable_before_state"), "screenshots.immutable_before_state"), "screenshots.immutable_before_state")
-    if immutable["path"] == str((root / IMMUTABLE_BASELINE_RELATIVE_PATH).resolve()):
-        _assert_equal(immutable["width"], 6650, "immutable baseline width")
-        _assert_equal(immutable["height"], 11082, "immutable baseline height")
-        _assert_equal(immutable["sha256"], IMMUTABLE_BASELINE_SHA256, "immutable baseline SHA256")
-    default_screenshot = _validate_screenshot(root, _mapping(screenshots.get("default"), "screenshots.default"), "screenshots.default")
-    expanded_screenshot = _validate_screenshot(root, _mapping(screenshots.get("expanded"), "screenshots.expanded"), "screenshots.expanded")
+    immutable_record = _mapping(
+        screenshots.get("immutable_before_state"),
+        "screenshots.immutable_before_state",
+    )
+    _assert_equal(
+        immutable_record.get("path"),
+        IMMUTABLE_BASELINE_RELATIVE_PATH.as_posix(),
+        "screenshots.immutable_before_state.path",
+    )
+    immutable = _validate_screenshot(
+        root,
+        immutable_record,
+        "screenshots.immutable_before_state",
+        verify_content=verify_content,
+    )
+    _assert_equal(immutable["width"], 6650, "immutable baseline width")
+    _assert_equal(immutable["height"], 11082, "immutable baseline height")
+    _assert_equal(immutable["sha256"], IMMUTABLE_BASELINE_SHA256, "immutable baseline SHA256")
+    default_record = _mapping(screenshots.get("default"), "screenshots.default")
+    expanded_record = _mapping(screenshots.get("expanded"), "screenshots.expanded")
+    _assert_equal(
+        default_record.get("path"),
+        SCREENSHOT_RELATIVE_PATHS["default-closed"].as_posix(),
+        "screenshots.default.path",
+    )
+    _assert_equal(
+        expanded_record.get("path"),
+        SCREENSHOT_RELATIVE_PATHS["expanded-open"].as_posix(),
+        "screenshots.expanded.path",
+    )
+    default_screenshot = _validate_screenshot(
+        root,
+        default_record,
+        "screenshots.default",
+        verify_content=verify_content,
+    )
+    expanded_screenshot = _validate_screenshot(
+        root,
+        expanded_record,
+        "screenshots.expanded",
+        verify_content=verify_content,
+    )
+    _assert_screenshot_identity(
+        default_screenshot,
+        default_norm_screenshot,
+        "default screenshot",
+    )
+    _assert_screenshot_identity(
+        expanded_screenshot,
+        expanded_norm_screenshot,
+        "expanded screenshot",
+    )
     if default_screenshot["sha256"] == expanded_screenshot["sha256"]:
         raise CaptureValidationError("default and expanded screenshots are the same file content")
-    difference = png_difference_evidence(Path(default_screenshot["path"]), Path(expanded_screenshot["path"]))
-    if difference["same_dimensions"]:
-        if difference["difference_ratio"] < MIN_STATE_DIFFERENCE_RATIO:
-            raise CaptureValidationError(
-                f"default and expanded screenshots lack structural difference: {difference}"
-            )
-    elif expanded_screenshot["height"] <= default_screenshot["height"]:
-        raise CaptureValidationError(
-            f"expanded screenshot is not larger than default screenshot: {difference}"
+    difference = (
+        validate_state_transition(
+            Path(default_screenshot["path"]),
+            Path(expanded_screenshot["path"]),
         )
+        if verify_content
+        else {"verified": False}
+    )
 
     observations = _mapping(document.get("baseline_observations"), "baseline_observations")
     pre_overflow = evaluate_overflow(
@@ -992,6 +1834,9 @@ def _parser() -> argparse.ArgumentParser:
     capture.add_argument("--root", type=Path, default=Path("."))
     capture.add_argument("--artifact", type=Path, required=True)
     capture.add_argument("--require-normalized", action="store_true")
+    capture.add_argument("--live-recapture", action="store_true")
+    capture.add_argument("--url", default=LIVE_CAPTURE_DEFAULT_URL)
+    capture.add_argument("--browser", default=LIVE_CAPTURE_DEFAULT_BROWSER)
     return parser
 
 
@@ -1015,11 +1860,21 @@ def main(argv: list[str] | None = None) -> int:
             return 0
 
         artifact = _resolve_path(root, str(args.artifact), "capture artifact")
-        result = validate_capture_artifact(
-            root,
-            artifact,
-            require_normalized=args.require_normalized,
-        )
+        if args.live_recapture:
+            result = verify_live_capture(
+                root,
+                artifact,
+                url=args.url,
+                browser=args.browser,
+            )
+            result = result["checked_in"]
+            print("live recapture verification passed")
+        else:
+            result = validate_capture_artifact(
+                root,
+                artifact,
+                require_normalized=args.require_normalized,
+            )
         pre = result["pre_overflow"]
         normalized = result["normalized_overflow"]
         print("capture verification passed")
