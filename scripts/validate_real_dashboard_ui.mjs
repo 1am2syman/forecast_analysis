@@ -722,7 +722,8 @@ async function main() {
         selected: document.querySelector('[data-product-control="parent"]').value,
         summary: document.querySelector('[data-product-summary]').innerText,
         points: document.querySelectorAll('[data-history-chart] circle').length,
-        stability: document.querySelectorAll('[data-stability] article').length,
+        metrics: document.querySelectorAll('[data-postmortem-metrics] .postmortem-metric').length,
+        commentary: document.querySelectorAll('[data-postmortem-commentary] .postmortem-comment').length,
       })`),
     );
     assert(
@@ -731,8 +732,10 @@ async function main() {
       "Product drill-down selection drifted",
     );
     assert(
-      productState.points > 0 && productState.stability > 0,
-      "Product history did not render points and stability",
+      productState.points > 0 &&
+        productState.metrics === 6 &&
+        productState.commentary > 0,
+      "Product history did not render points, post-mortem ledger and commentary",
     );
 
     await page.send("Page.setDownloadBehavior", {

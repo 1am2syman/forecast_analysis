@@ -1,0 +1,81 @@
+{
+  "baseUrl": "http://127.0.0.1:8876/",
+  "audits": [
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "selected": "702082",
+      "paneActive": true,
+      "metrics": 6,
+      "performancePaths": 2,
+      "revisionPoints": 5,
+      "revisionZero": true,
+      "commentary": 3,
+      "peers": 3,
+      "treatment": 479,
+      "documentHorizontalOverflow": 0,
+      "bodyHorizontalOverflow": 0,
+      "paneHorizontalOverflow": 0,
+      "overlap": false,
+      "displayFont": "\"Chakra Petch\", system-ui, sans-serif",
+      "bodyFont": "\"IBM Plex Sans\", system-ui, sans-serif",
+      "background": "rgb(237, 243, 241)",
+      "title": "How performance moves"
+    },
+    {
+      "viewport": {
+        "width": 1680,
+        "height": 1050
+      },
+      "selected": "702082",
+      "paneActive": true,
+      "metrics": 6,
+      "performancePaths": 2,
+      "revisionPoints": 5,
+      "revisionZero": true,
+      "commentary": 3,
+      "peers": 3,
+      "treatment": 479,
+      "documentHorizontalOverflow": 0,
+      "bodyHorizontalOverflow": 0,
+      "paneHorizontalOverflow": 0,
+      "overlap": false,
+      "displayFont": "\"Chakra Petch\", system-ui, sans-serif",
+      "bodyFont": "\"IBM Plex Sans\", system-ui, sans-serif",
+      "background": "rgb(237, 243, 241)",
+      "title": "How performance moves"
+    },
+    {
+      "viewport": {
+        "width": 800,
+        "height": 700
+      },
+      "selected": "702082",
+      "paneActive": true,
+      "metrics": 6,
+      "performancePaths": 2,
+      "revisionPoints": 5,
+      "revisionZero": true,
+      "commentary": 3,
+      "peers": 3,
+      "treatment": 479,
+      "documentHorizontalOverflow": 0,
+      "bodyHorizontalOverflow": 0,
+      "paneHorizontalOverflow": 0,
+      "overlap": false,
+      "displayFont": "\"Chakra Petch\", system-ui, sans-serif",
+      "bodyFont": "\"IBM Plex Sans\", system-ui, sans-serif",
+      "background": "rgb(237, 243, 241)",
+      "title": "How performance moves"
+    }
+  ],
+  "screenshots": [
+    "/root/GitHub/forecast_analysis-worktrees/sku-postmortem/validation-artifacts/sku-postmortem/desktop-1440x900.png",
+    "/root/GitHub/forecast_analysis-worktrees/sku-postmortem/validation-artifacts/sku-postmortem/desktop-1440x900-lower.png",
+    "/root/GitHub/forecast_analysis-worktrees/sku-postmortem/validation-artifacts/sku-postmortem/wide-1680x1050.png",
+    "/root/GitHub/forecast_analysis-worktrees/sku-postmortem/validation-artifacts/sku-postmortem/compact-800x700.png",
+    "/root/GitHub/forecast_analysis-worktrees/sku-postmortem/validation-artifacts/sku-postmortem/compact-800x700-lower.png"
+  ]
+}

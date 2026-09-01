@@ -950,9 +950,9 @@ async function main() {
       );
       assert(
         await page.evaluate(
-          `document.querySelectorAll('[data-history-chart] circle').length > 0 && document.querySelectorAll('[data-stability] article').length > 0`,
+          `document.querySelectorAll('[data-history-chart] circle').length > 0 && document.querySelectorAll('[data-postmortem-metrics] .postmortem-metric').length === 6 && document.querySelectorAll('[data-postmortem-commentary] .postmortem-comment').length > 0`,
         ),
-        "Product detail did not render chart and stability",
+        "Product detail did not render chart, post-mortem ledger and commentary",
       );
       return { parent, month };
     });
