@@ -60,6 +60,7 @@
   ],
   "metric_expected": {
     "forecast_accuracy_pct": 80.0,
+    "wape_pct": 20.0,
     "bias_pct": 6.666666666666667,
     "absolute_error_kl": 35.0,
     "mae_kl": 11.666666666666666,

@@ -1,0 +1,1838 @@
+{
+  "generatedAt": "2026-08-31T12:18:57.843Z",
+  "baseUrl": "http://127.0.0.1:40463/",
+  "checks": [
+    {
+      "name": "compact bootstrap paints overview without eager modules",
+      "status": "pass",
+      "durationMs": 7,
+      "detail": {
+        "bootstrap": {
+          "name": "http://127.0.0.1:40463/api/bootstrap",
+          "durationMs": 21.90000009536743,
+          "transferSize": 21035,
+          "encodedBodySize": 20735
+        },
+        "apiResources": [
+          {
+            "name": "http://127.0.0.1:40463/api/bootstrap",
+            "durationMs": 21.90000009536743,
+            "transferSize": 21035,
+            "encodedBodySize": 20735
+          }
+        ]
+      }
+    },
+    {
+      "name": "shared control · source",
+      "status": "pass",
+      "durationMs": 1329,
+      "detail": {
+        "selected": "tm",
+        "requestValue": "tm"
+      }
+    },
+    {
+      "name": "shared control · target_start",
+      "status": "pass",
+      "durationMs": 1444,
+      "detail": {
+        "selected": "2025-06-01",
+        "requestValue": "2025-06-01"
+      }
+    },
+    {
+      "name": "shared control · target_end",
+      "status": "pass",
+      "durationMs": 1309,
+      "detail": {
+        "selected": "2026-11-01",
+        "requestValue": "2026-11-01"
+      }
+    },
+    {
+      "name": "shared control · brand",
+      "status": "pass",
+      "durationMs": 706,
+      "detail": {
+        "selected": "BBEL-PO-R",
+        "requestValue": "BBEL-PO-R"
+      }
+    },
+    {
+      "name": "shared control · sku_class",
+      "status": "pass",
+      "durationMs": 697,
+      "detail": {
+        "selected": "A",
+        "requestValue": "A"
+      }
+    },
+    {
+      "name": "shared control · parent_code",
+      "status": "pass",
+      "durationMs": 570,
+      "detail": {
+        "selected": 702082,
+        "requestValue": 702082
+      }
+    },
+    {
+      "name": "shared control · horizon",
+      "status": "pass",
+      "durationMs": 902,
+      "detail": {
+        "selected": 5,
+        "requestValue": 5
+      }
+    },
+    {
+      "name": "shared control · minimum_actual_volume",
+      "status": "pass",
+      "durationMs": 1285,
+      "detail": {
+        "selected": 1,
+        "requestValue": 1
+      }
+    },
+    {
+      "name": "shared control · revision_direction",
+      "status": "pass",
+      "durationMs": 1103,
+      "detail": {
+        "selected": "up",
+        "requestValue": "up"
+      }
+    },
+    {
+      "name": "shared control · revision_outcome",
+      "status": "pass",
+      "durationMs": 1065,
+      "detail": {
+        "selected": "improved",
+        "requestValue": "improved"
+      }
+    },
+    {
+      "name": "shared control · revision_tolerance_kl",
+      "status": "pass",
+      "durationMs": 1434,
+      "detail": {
+        "selected": 1,
+        "requestValue": 1
+      }
+    },
+    {
+      "name": "shared control · forecast_direction",
+      "status": "pass",
+      "durationMs": 1184,
+      "detail": {
+        "selected": "over",
+        "requestValue": "over"
+      }
+    },
+    {
+      "name": "shared control · accuracy_band",
+      "status": "pass",
+      "durationMs": 959,
+      "detail": {
+        "selected": "0_50",
+        "requestValue": "0_50"
+      }
+    },
+    {
+      "name": "shared control · bias_band",
+      "status": "pass",
+      "durationMs": 1052,
+      "detail": {
+        "selected": "0_50",
+        "requestValue": "0_50"
+      }
+    },
+    {
+      "name": "shared control · minimum_absolute_error_kl",
+      "status": "pass",
+      "durationMs": 1167,
+      "detail": {
+        "selected": 1,
+        "requestValue": 1
+      }
+    },
+    {
+      "name": "shared control · top_n",
+      "status": "pass",
+      "durationMs": 936,
+      "detail": {
+        "selected": 10,
+        "requestValue": 10
+      }
+    },
+    {
+      "name": "shared control · top_n_metric",
+      "status": "pass",
+      "durationMs": 1275,
+      "detail": {
+        "selected": "absolute_error",
+        "requestValue": "absolute_error"
+      }
+    },
+    {
+      "name": "shared control · hierarchy_status",
+      "status": "pass",
+      "durationMs": 1290,
+      "detail": {
+        "selected": "mapped",
+        "requestValue": "mapped"
+      }
+    },
+    {
+      "name": "shared control · actual_status",
+      "status": "pass",
+      "durationMs": 1218,
+      "detail": {
+        "selected": "matched_positive",
+        "requestValue": "matched_positive"
+      }
+    },
+    {
+      "name": "shared control · pair_status",
+      "status": "pass",
+      "durationMs": 1166,
+      "detail": {
+        "selected": "complete",
+        "requestValue": "complete"
+      }
+    },
+    {
+      "name": "shared control · source_availability",
+      "status": "pass",
+      "durationMs": 801,
+      "detail": {
+        "selected": "tm_only",
+        "requestValue": "tm_only"
+      }
+    },
+    {
+      "name": "shared control · zero_forecast_only",
+      "status": "pass",
+      "durationMs": 883,
+      "detail": {
+        "selected": true,
+        "requestValue": true
+      }
+    },
+    {
+      "name": "shared control · complete_vintage_history_only",
+      "status": "pass",
+      "durationMs": 1150,
+      "detail": {
+        "selected": true,
+        "requestValue": true
+      }
+    },
+    {
+      "name": "shared control · comparison_mode and disabled groups",
+      "status": "pass",
+      "durationMs": 1160,
+      "detail": {
+        "selected": true,
+        "requestValue": true,
+        "disabled": {
+          "source": true,
+          "vintage": true,
+          "performance": true,
+          "horizon": "1"
+        }
+      }
+    },
+    {
+      "name": "shared control · vintage_a_kind",
+      "status": "pass",
+      "durationMs": 1183,
+      "detail": {
+        "selected": "specific_horizon",
+        "requestValue": "specific_horizon"
+      }
+    },
+    {
+      "name": "shared control · vintage_a_value",
+      "status": "pass",
+      "durationMs": 1300,
+      "detail": {
+        "selected": 1
+      }
+    },
+    {
+      "name": "shared control · vintage_b_kind",
+      "status": "pass",
+      "durationMs": 1167,
+      "detail": {
+        "selected": "specific_horizon",
+        "requestValue": "specific_horizon"
+      }
+    },
+    {
+      "name": "shared control · vintage_b_value",
+      "status": "pass",
+      "durationMs": 1351,
+      "detail": {
+        "selected": 1
+      }
+    },
+    {
+      "name": "all shared controls exercised",
+      "status": "pass",
+      "durationMs": 1,
+      "detail": {
+        "count": 28
+      }
+    },
+    {
+      "name": "discrete filters dispatch without artificial delay",
+      "status": "pass",
+      "durationMs": 270,
+      "detail": {
+        "elapsedMs": 35
+      }
+    },
+    {
+      "name": "same-state filter changes coalesce",
+      "status": "pass",
+      "durationMs": 307,
+      "detail": {
+        "compactRequests": 1
+      }
+    },
+    {
+      "name": "superseded compact requests abort without an error toast",
+      "status": "pass",
+      "durationMs": 582,
+      "detail": {
+        "aborted": true,
+        "latestStatus": 200
+      }
+    },
+    {
+      "name": "lazy modules load only for the active tab",
+      "status": "pass",
+      "durationMs": 348,
+      "detail": {
+        "urls": [
+          "http://127.0.0.1:40463/api/module/trends",
+          "http://127.0.0.1:40463/api/module/heatmap"
+        ]
+      }
+    },
+    {
+      "name": "filter drawer toggle and Escape",
+      "status": "pass",
+      "durationMs": 200,
+      "detail": null
+    },
+    {
+      "name": "primary tabs, keyboard navigation, and hash history",
+      "status": "pass",
+      "durationMs": 571,
+      "detail": {
+        "beforeLength": 3,
+        "afterLength": 7
+      }
+    },
+    {
+      "name": "every subview toggle",
+      "status": "pass",
+      "durationMs": 132,
+      "detail": null
+    },
+    {
+      "name": "all trend metric options render",
+      "status": "pass",
+      "durationMs": 436,
+      "detail": {
+        "monthly": [
+          "forecast_accuracy_pct",
+          "bias_pct",
+          "absolute_error_kl",
+          "forecast_kl"
+        ],
+        "horizon": [
+          "forecast_accuracy_pct",
+          "bias_pct",
+          "absolute_error_kl"
+        ],
+        "heatmap": [
+          "forecast_accuracy_pct",
+          "bias_pct",
+          "absolute_error_kl",
+          "vintage_a_accuracy_pct",
+          "vintage_b_accuracy_pct",
+          "accuracy_delta_pp",
+          "revision_effectiveness_pct"
+        ]
+      }
+    },
+    {
+      "name": "horizon bars have visible geometry",
+      "status": "pass",
+      "durationMs": 59,
+      "detail": [
+        {
+          "before": 0,
+          "after": 320.234
+        },
+        {
+          "before": 0,
+          "after": 359.594
+        },
+        {
+          "before": 0,
+          "after": 350.75
+        },
+        {
+          "before": 0,
+          "after": 339.391
+        },
+        {
+          "before": 0,
+          "after": 360.281
+        }
+      ]
+    },
+    {
+      "name": "product parent and target-month drill-down",
+      "status": "pass",
+      "durationMs": 595,
+      "detail": {
+        "parent": "703584",
+        "month": "2026-12-01"
+      }
+    },
+    {
+      "name": "exception search and row limits",
+      "status": "pass",
+      "durationMs": 244,
+      "detail": {
+        "product": "723536",
+        "searched": 10
+      }
+    },
+    {
+      "name": "revision chart respects the selected source",
+      "status": "pass",
+      "durationMs": 10489,
+      "detail": {
+        "ml": {
+          "title": "Forecast revision paths · ML",
+          "ledger": "ML Source scope ML onlyVintage A oldest_availableVintage B latest_availableTolerance 0.01 KLComplete 1,558Incomplete 0",
+          "queue": "ML action queue",
+          "sources": [
+            "ML"
+          ],
+          "queueRows": 589,
+          "materialDescription": "SAFF ACTIVE 5 LTR JAR BD",
+          "scrollable": true,
+          "gridFont": 11,
+          "axisFont": 11,
+          "legendFont": 10,
+          "hasFullscreen": true,
+          "hasDownload": true,
+          "revisionBands": 6,
+          "revisionPaths": 24,
+          "revisionSegments": 24,
+          "revisionImprovedSegments": 12,
+          "revisionWorsenedSegments": 12,
+          "revisionNeutralSegments": 0,
+          "revisionSegmentHits": 24,
+          "revisionEndpoints": 6,
+          "revisionCircles": 0,
+          "revisionSmooth": 0,
+          "revisionLinear": 24,
+          "revisionAxis": "Delta vs oldest forecast (%)",
+          "revisionMonths": [
+            "2026-03-01",
+            "2026-04-01",
+            "2026-05-01",
+            "2026-06-01",
+            "2026-07-01",
+            "2026-08-01"
+          ],
+          "oneEndpointPerBand": true,
+          "pathsStayInsideBands": true
+        },
+        "fullscreen": {
+          "title": "Revision amount vs error improvement · ML",
+          "sources": [
+            "ML"
+          ],
+          "legendFont": 12
+        },
+        "tm": {
+          "title": "Forecast revision paths · TM",
+          "ledger": "TM Source scope TM onlyVintage A oldest_availableVintage B latest_availableTolerance 0.01 KLComplete 1,612Incomplete 0",
+          "queue": "TM action queue",
+          "sources": [
+            "TM"
+          ],
+          "queueRows": 564,
+          "materialDescription": "PN SHMP NC SCHT 2TK 960X5.5ML",
+          "scrollable": true,
+          "revisionEndpoints": 6,
+          "revisionBands": 6
+        }
+      }
+    },
+    {
+      "name": "dynamic comparison mode action buttons",
+      "status": "pass",
+      "durationMs": 5756,
+      "detail": null
+    },
+    {
+      "name": "all CSV export buttons download",
+      "status": "pass",
+      "durationMs": 3983,
+      "detail": {
+        "files": [
+          "forecast_ml_actual_exceptions.csv",
+          "forecast_ml_filtered_vintages.csv",
+          "forecast_ml_hierarchy_exceptions.csv",
+          "forecast_ml_pairs_exceptions.csv",
+          "forecast_ml_revision_action_queue.csv",
+          "forecast_ml_source_availability_exceptions.csv"
+        ],
+        "scopeExportAvailable": false
+      }
+    },
+    {
+      "name": "baseline details toggle",
+      "status": "pass",
+      "durationMs": 23,
+      "detail": null
+    },
+    {
+      "name": "Reset restores local and shared UI state",
+      "status": "pass",
+      "durationMs": 149,
+      "detail": {
+        "monthly": "forecast_accuracy_pct",
+        "search": "",
+        "limit": "10",
+        "source": "ml",
+        "tab": "overview"
+      }
+    },
+    {
+      "name": "collapsible navigation rail",
+      "status": "pass",
+      "durationMs": 1131,
+      "detail": {
+        "initial": {
+          "button": true,
+          "rail": 232,
+          "workspace": 1208
+        },
+        "collapsed": {
+          "rail": 72,
+          "workspace": 1368,
+          "names": "none",
+          "expanded": "false",
+          "label": "Expand navigation",
+          "overflowX": 0
+        }
+      }
+    },
+    {
+      "name": "zoom and responsive fixed-viewport states",
+      "status": "pass",
+      "durationMs": 1188,
+      "detail": {
+        "rail": 72,
+        "pageVertical": 0,
+        "pageHorizontal": 0,
+        "names": "none"
+      }
+    },
+    {
+      "name": "all buttons classified and operable",
+      "status": "pass",
+      "durationMs": 4,
+      "detail": {
+        "count": 44
+      }
+    },
+    {
+      "name": "no console, page, network, or HTTP failures",
+      "status": "pass",
+      "durationMs": 0,
+      "detail": null
+    }
+  ],
+  "failures": [],
+  "controlInventory": [
+    {
+      "name": "comparison_mode",
+      "tag": "SELECT",
+      "type": "select-one",
+      "disabled": false,
+      "options": [
+        {
+          "value": "false",
+          "label": "Single source"
+        },
+        {
+          "value": "true",
+          "label": "Compare TM vs ML"
+        }
+      ]
+    },
+    {
+      "name": "source",
+      "tag": "SELECT",
+      "type": "select-one",
+      "disabled": false,
+      "options": [
+        {
+          "value": "tm",
+          "label": "TM"
+        },
+        {
+          "value": "ml",
+          "label": "ML"
+        }
+      ]
+    },
+    {
+      "name": "target_start",
+      "tag": "SELECT",
+      "type": "select-one",
+      "disabled": false,
+      "options": [
+        {
+          "value": "2025-05-01",
+          "label": "May 2025"
+        },
+        {
+          "value": "2025-06-01",
+          "label": "Jun 2025"
+        },
+        {
+          "value": "2025-07-01",
+          "label": "Jul 2025"
+        },
+        {
+          "value": "2025-08-01",
+          "label": "Aug 2025"
+        },
+        {
+          "value": "2025-09-01",
+          "label": "Sep 2025"
+        },
+        {
+          "value": "2025-10-01",
+          "label": "Oct 2025"
+        },
+        {
+          "value": "2025-11-01",
+          "label": "Nov 2025"
+        },
+        {
+          "value": "2025-12-01",
+          "label": "Dec 2025"
+        },
+        {
+          "value": "2026-01-01",
+          "label": "Jan 2026"
+        },
+        {
+          "value": "2026-02-01",
+          "label": "Feb 2026"
+        },
+        {
+          "value": "2026-03-01",
+          "label": "Mar 2026"
+        },
+        {
+          "value": "2026-04-01",
+          "label": "Apr 2026"
+        },
+        {
+          "value": "2026-05-01",
+          "label": "May 2026"
+        },
+        {
+          "value": "2026-06-01",
+          "label": "Jun 2026"
+        },
+        {
+          "value": "2026-07-01",
+          "label": "Jul 2026"
+        },
+        {
+          "value": "2026-08-01",
+          "label": "Aug 2026"
+        },
+        {
+          "value": "2026-09-01",
+          "label": "Sep 2026"
+        },
+        {
+          "value": "2026-10-01",
+          "label": "Oct 2026"
+        },
+        {
+          "value": "2026-11-01",
+          "label": "Nov 2026"
+        },
+        {
+          "value": "2026-12-01",
+          "label": "Dec 2026"
+        }
+      ]
+    },
+    {
+      "name": "target_end",
+      "tag": "SELECT",
+      "type": "select-one",
+      "disabled": false,
+      "options": [
+        {
+          "value": "2025-05-01",
+          "label": "May 2025"
+        },
+        {
+          "value": "2025-06-01",
+          "label": "Jun 2025"
+        },
+        {
+          "value": "2025-07-01",
+          "label": "Jul 2025"
+        },
+        {
+          "value": "2025-08-01",
+          "label": "Aug 2025"
+        },
+        {
+          "value": "2025-09-01",
+          "label": "Sep 2025"
+        },
+        {
+          "value": "2025-10-01",
+          "label": "Oct 2025"
+        },
+        {
+          "value": "2025-11-01",
+          "label": "Nov 2025"
+        },
+        {
+          "value": "2025-12-01",
+          "label": "Dec 2025"
+        },
+        {
+          "value": "2026-01-01",
+          "label": "Jan 2026"
+        },
+        {
+          "value": "2026-02-01",
+          "label": "Feb 2026"
+        },
+        {
+          "value": "2026-03-01",
+          "label": "Mar 2026"
+        },
+        {
+          "value": "2026-04-01",
+          "label": "Apr 2026"
+        },
+        {
+          "value": "2026-05-01",
+          "label": "May 2026"
+        },
+        {
+          "value": "2026-06-01",
+          "label": "Jun 2026"
+        },
+        {
+          "value": "2026-07-01",
+          "label": "Jul 2026"
+        },
+        {
+          "value": "2026-08-01",
+          "label": "Aug 2026"
+        },
+        {
+          "value": "2026-09-01",
+          "label": "Sep 2026"
+        },
+        {
+          "value": "2026-10-01",
+          "label": "Oct 2026"
+        },
+        {
+          "value": "2026-11-01",
+          "label": "Nov 2026"
+        },
+        {
+          "value": "2026-12-01",
+          "label": "Dec 2026"
+        }
+      ]
+    },
+    {
+      "name": "brand",
+      "tag": "SELECT",
+      "type": "select-one",
+      "disabled": false,
+      "options": [
+        {
+          "value": "",
+          "label": "All brands + quality groups"
+        },
+        {
+          "value": "BBEL-PO-R",
+          "label": "BBEL-PO-R"
+        },
+        {
+          "value": "BBEL_LUP",
+          "label": "BBEL_LUP"
+        },
+        {
+          "value": "BELPHL_MV",
+          "label": "BELPHL_MV"
+        },
+        {
+          "value": "BHAIRCODE",
+          "label": "BHAIRCODE"
+        },
+        {
+          "value": "BNHR-AMLA",
+          "label": "BNHR-AMLA"
+        },
+        {
+          "value": "BPA-ALO-H",
+          "label": "BPA-ALO-H"
+        },
+        {
+          "value": "BPADV-EXC",
+          "label": "BPADV-EXC"
+        },
+        {
+          "value": "BPAR-ADV",
+          "label": "BPAR-ADV"
+        },
+        {
+          "value": "BPA_PET_J",
+          "label": "BPA_PET_J"
+        },
+        {
+          "value": "BPCNO-LP",
+          "label": "BPCNO-LP"
+        },
+        {
+          "value": "BPCNO-SP",
+          "label": "BPCNO-SP"
+        },
+        {
+          "value": "BPCNO_LUP",
+          "label": "BPCNO_LUP"
+        },
+        {
+          "value": "HC_CL_SMP",
+          "label": "HC_CL_SMP"
+        },
+        {
+          "value": "JFB_COMBO",
+          "label": "JFB_COMBO"
+        },
+        {
+          "value": "JFB_CREAM",
+          "label": "JFB_CREAM"
+        },
+        {
+          "value": "JFB_GELTP",
+          "label": "JFB_GELTP"
+        },
+        {
+          "value": "JFB_LOTN",
+          "label": "JFB_LOTN"
+        },
+        {
+          "value": "JFB_MGBWS",
+          "label": "JFB_MGBWS"
+        },
+        {
+          "value": "JFB_MGFCR",
+          "label": "JFB_MGFCR"
+        },
+        {
+          "value": "JFB_MGLTN",
+          "label": "JFB_MGLTN"
+        },
+        {
+          "value": "JFB_MGSOP",
+          "label": "JFB_MGSOP"
+        },
+        {
+          "value": "JFB_OIL",
+          "label": "JFB_OIL"
+        },
+        {
+          "value": "JFB_POWDR",
+          "label": "JFB_POWDR"
+        },
+        {
+          "value": "JFB_SHMP",
+          "label": "JFB_SHMP"
+        },
+        {
+          "value": "JFB_SOAP",
+          "label": "JFB_SOAP"
+        },
+        {
+          "value": "JFB_WASH",
+          "label": "JFB_WASH"
+        },
+        {
+          "value": "JFB_WIPES",
+          "label": "JFB_WIPES"
+        },
+        {
+          "value": "LIVON SLP",
+          "label": "LIVON SLP"
+        },
+        {
+          "value": "PA-BDYLOT",
+          "label": "PA-BDYLOT"
+        },
+        {
+          "value": "PAR.AMLA",
+          "label": "PAR.AMLA"
+        },
+        {
+          "value": "PA_SECRT",
+          "label": "PA_SECRT"
+        },
+        {
+          "value": "PA_VIT_E",
+          "label": "PA_VIT_E"
+        },
+        {
+          "value": "PN_SHMP_R",
+          "label": "PN_SHMP_R"
+        },
+        {
+          "value": "PN_SHMP_S",
+          "label": "PN_SHMP_S"
+        },
+        {
+          "value": "P_EN_ONI",
+          "label": "P_EN_ONI"
+        },
+        {
+          "value": "P_SP_AGEL",
+          "label": "P_SP_AGEL"
+        },
+        {
+          "value": "RK_CLO_R",
+          "label": "RK_CLO_R"
+        },
+        {
+          "value": "RK_CLO_S",
+          "label": "RK_CLO_S"
+        },
+        {
+          "value": "SAFF ACTV",
+          "label": "SAFF ACTV"
+        },
+        {
+          "value": "SAF_HONEY",
+          "label": "SAF_HONEY"
+        }
+      ]
+    },
+    {
+      "name": "sku_class",
+      "tag": "SELECT",
+      "type": "select-one",
+      "disabled": false,
+      "options": [
+        {
+          "value": "",
+          "label": "All SKU classes"
+        },
+        {
+          "value": "A",
+          "label": "A"
+        },
+        {
+          "value": "B",
+          "label": "B"
+        },
+        {
+          "value": "C",
+          "label": "C"
+        },
+        {
+          "value": "Unclassified",
+          "label": "Unclassified"
+        }
+      ]
+    },
+    {
+      "name": "parent_code",
+      "tag": "SELECT",
+      "type": "select-one",
+      "disabled": false,
+      "options": [
+        {
+          "value": "",
+          "label": "All 101 products"
+        },
+        {
+          "value": "702082",
+          "label": "702082 · PCNO 20ml FT BOT NEW"
+        },
+        {
+          "value": "703584",
+          "label": "703584 · PCNO ADV 300ml FT"
+        },
+        {
+          "value": "706059",
+          "label": "706059 · PCNO 100ml FT BOT NEW PB"
+        },
+        {
+          "value": "706088",
+          "label": "706088 · PCNO 200ml FT BOT- (PB)"
+        },
+        {
+          "value": "706090",
+          "label": "706090 · PCNO 500ml FT BOT - (PB)"
+        },
+        {
+          "value": "707066",
+          "label": "707066 · SAFF ACTIVE 5 LTR JAR BD"
+        },
+        {
+          "value": "707719",
+          "label": "707719 · PCNO 50ml FT BOT(324) NEW PB"
+        },
+        {
+          "value": "707789",
+          "label": "707789 · NIHAR SHANTI BDM AMLA 300ML"
+        },
+        {
+          "value": "707905",
+          "label": "707905 · PCNO 350ml FT BOT - (PB)"
+        },
+        {
+          "value": "707936",
+          "label": "707936 · NIHAR SHANTI BDM AMLA 200ML-N"
+        },
+        {
+          "value": "707989",
+          "label": "707989 · PCNO ADV EXTRA CARE 150ml FT"
+        },
+        {
+          "value": "710085",
+          "label": "710085 · P BELIPHOOL 100ml -144 (BD)"
+        },
+        {
+          "value": "711198",
+          "label": "711198 · HRC Hair Dye 5gm Sac (BD)-EXP"
+        },
+        {
+          "value": "711378",
+          "label": "711378 · P BELIPHOOL 300ml -(New)"
+        },
+        {
+          "value": "711379",
+          "label": "711379 · PCNO ADV EXTRA CARE 300ml FT-New"
+        },
+        {
+          "value": "711848",
+          "label": "711848 · P BELIPHOOL 200ml"
+        },
+        {
+          "value": "713088",
+          "label": "713088 · P BELIPHOOL 400ml"
+        },
+        {
+          "value": "713680",
+          "label": "713680 · P ALOE VERA 250ML-(BD)"
+        },
+        {
+          "value": "713681",
+          "label": "713681 · P ALOE VERA 150ML-(BD)"
+        },
+        {
+          "value": "715161",
+          "label": "715161 · JFB WASH 200ML"
+        },
+        {
+          "value": "715162",
+          "label": "715162 · JFB WASH 100ML"
+        },
+        {
+          "value": "715164",
+          "label": "715164 · JFB LOTION 200ML"
+        },
+        {
+          "value": "715166",
+          "label": "715166 · JFB LOTION 100ML"
+        },
+        {
+          "value": "715167",
+          "label": "715167 · JFB OIL 200ML"
+        },
+        {
+          "value": "715169",
+          "label": "715169 · JFB OIL 100ML"
+        },
+        {
+          "value": "715677",
+          "label": "715677 · JFB SOAP 125G"
+        },
+        {
+          "value": "715678",
+          "label": "715678 · JFB SOAP 75G"
+        },
+        {
+          "value": "716306",
+          "label": "716306 · JFB TALCUM POWDER 200G"
+        },
+        {
+          "value": "716308",
+          "label": "716308 · JFB TALCUM POWDER 100G"
+        },
+        {
+          "value": "716621",
+          "label": "716621 · SP PETROLEUM JELLY 15ML"
+        },
+        {
+          "value": "716622",
+          "label": "716622 · SP PETROLEUM JELLY 50ML"
+        },
+        {
+          "value": "716624",
+          "label": "716624 · SP PETROLEUM JELLY 100ML"
+        },
+        {
+          "value": "716653",
+          "label": "716653 · SP LOTION NATURAL MOISTURE 100ML"
+        },
+        {
+          "value": "716654",
+          "label": "716654 · SP LOTION NATURAL MOISTURE 200ML"
+        },
+        {
+          "value": "716655",
+          "label": "716655 · SP LOTION NATURAL MOISTURE 300ML"
+        },
+        {
+          "value": "716658",
+          "label": "716658 · SP LOTION NATURAL WHITE 100ML"
+        },
+        {
+          "value": "716659",
+          "label": "716659 · SP LOTION NATURAL WHITE 200ML"
+        },
+        {
+          "value": "716660",
+          "label": "716660 · SP LOTION NATURAL WHITE 300ML"
+        },
+        {
+          "value": "716662",
+          "label": "716662 · SP LOTION DEEP MOISTURE 200ML"
+        },
+        {
+          "value": "716663",
+          "label": "716663 · SP LOTION DEEP MOISTURE 300ML"
+        },
+        {
+          "value": "716830",
+          "label": "716830 · PCNO 500ml EJ - (PB) NEW"
+        },
+        {
+          "value": "716831",
+          "label": "716831 · PCNO 200ml EJ - (PB) NEW"
+        },
+        {
+          "value": "717612",
+          "label": "717612 · SP ALOE GEL 50ML"
+        },
+        {
+          "value": "717613",
+          "label": "717613 · SP AlOE GEL 100ML"
+        },
+        {
+          "value": "718021",
+          "label": "718021 · JFB FACE CREAM 50G"
+        },
+        {
+          "value": "718033",
+          "label": "718033 · JFB FACE CREAM 100G"
+        },
+        {
+          "value": "719462",
+          "label": "719462 · SAFFOLA HONEY 250G GLS-MBL"
+        },
+        {
+          "value": "719463",
+          "label": "719463 · SAFFOLA HONEY 500G GLS-MBL"
+        },
+        {
+          "value": "719578",
+          "label": "719578 · PAEC 75ML APPLICATOR"
+        },
+        {
+          "value": "719861",
+          "label": "719861 · BELIPHOOL 35ML"
+        },
+        {
+          "value": "720100",
+          "label": "720100 · JFB SHAMPOO 100ML"
+        },
+        {
+          "value": "720101",
+          "label": "720101 · JFB SHAMPOO 200ML"
+        },
+        {
+          "value": "720181",
+          "label": "720181 · LIVON SERUM 20ML MBL"
+        },
+        {
+          "value": "720182",
+          "label": "720182 · LIVON SERUM 50ML MBL"
+        },
+        {
+          "value": "720183",
+          "label": "720183 · LIVON SERUM 100ML MBL"
+        },
+        {
+          "value": "720359",
+          "label": "720359 · REDKING COOLING OIL 2.5ML-N"
+        },
+        {
+          "value": "720360",
+          "label": "720360 · REDKING COOLING OIL 100ML-N"
+        },
+        {
+          "value": "720361",
+          "label": "720361 · REDKING COOLING OIL 200ML-N"
+        },
+        {
+          "value": "720704",
+          "label": "720704 · SAFFOLA HONEY 100G INHOUSE"
+        },
+        {
+          "value": "720814",
+          "label": "720814 · JFB COMBO PACK OLWPF 450ML"
+        },
+        {
+          "value": "721129",
+          "label": "721129 · HC BROWN PASTE 25G"
+        },
+        {
+          "value": "721172",
+          "label": "721172 · HC COLOR SHAMPOO 18ML"
+        },
+        {
+          "value": "722024",
+          "label": "722024 · PA ONION HAIR OIL 200ML"
+        },
+        {
+          "value": "723527",
+          "label": "723527 · PN SHMP DM 200TK 24X170ML"
+        },
+        {
+          "value": "723532",
+          "label": "723532 · PN SHMP NC 370TK 24X340ML"
+        },
+        {
+          "value": "723533",
+          "label": "723533 · PN SHMP ONION 240TK 24X175ML"
+        },
+        {
+          "value": "723534",
+          "label": "723534 · PN SHMP ONION 390TK 24X345ML"
+        },
+        {
+          "value": "723536",
+          "label": "723536 · PN SHMP NC SCHT 2TK 960X5.5ML"
+        },
+        {
+          "value": "723538",
+          "label": "723538 · PN SHMP NC 230TK 24X170ML"
+        },
+        {
+          "value": "723540",
+          "label": "723540 · PN SHMP AHF 370TK 24X340ML"
+        },
+        {
+          "value": "723541",
+          "label": "723541 · PN SHMP AHF SCHT 2TK 960X5.5ML"
+        },
+        {
+          "value": "723542",
+          "label": "723542 · PN SHMP DM SCHT 2TK 960X5.5ML"
+        },
+        {
+          "value": "723543",
+          "label": "723543 · PN SHMP DM 370TK 24X340ML"
+        },
+        {
+          "value": "723546",
+          "label": "723546 · PN SHMP AHF 230TK 24X170ML"
+        },
+        {
+          "value": "724058",
+          "label": "724058 · JFB FACE CREAM MG 140TK 36X50ML"
+        },
+        {
+          "value": "724059",
+          "label": "724059 · JFB FACE CREAM MG 245TK 36X100ML"
+        },
+        {
+          "value": "724060",
+          "label": "724060 · JFB LOTION MG 340TK 48X200ML"
+        },
+        {
+          "value": "724061",
+          "label": "724061 · JFB LOTION MG 200TK 36X100ML"
+        },
+        {
+          "value": "724119",
+          "label": "724119 · PN SHMP ONION SCHT 3TK 960X5.5ML"
+        },
+        {
+          "value": "724120",
+          "label": "724120 · JFB WASH MG 215TK 36X100ML"
+        },
+        {
+          "value": "724121",
+          "label": "724121 · JFB WASH MG 325TK 48X200ML"
+        },
+        {
+          "value": "725248",
+          "label": "725248 · PN SHMP EGG SHINE SCHT 2TK 1080X5.25ML"
+        },
+        {
+          "value": "725314",
+          "label": "725314 · PN SHMP EGG SHINE 230TK 24X170ML"
+        },
+        {
+          "value": "725315",
+          "label": "725315 · PN SHMP EGG SHINE 370TK 24X330ML"
+        },
+        {
+          "value": "725947",
+          "label": "725947 · PA SECRETS ALMOND 240TK 96X200ML"
+        },
+        {
+          "value": "725948",
+          "label": "725948 · PA SECRETS ROSEMARY 240TK 96X200ML"
+        },
+        {
+          "value": "725949",
+          "label": "725949 · PA SECRETS BLACKSEED 240TK 96X200ML"
+        },
+        {
+          "value": "726121",
+          "label": "726121 · PA BELI MULTIVITAMIN 200TK 96X200ML"
+        },
+        {
+          "value": "726286",
+          "label": "726286 · BELI 15TK 360X18ML"
+        },
+        {
+          "value": "726657",
+          "label": "726657 · JFB TPST GEL OR 100TK 48X45G"
+        },
+        {
+          "value": "726658",
+          "label": "726658 · JFB TPST GEL MNG 100TK 48X45G"
+        },
+        {
+          "value": "726677",
+          "label": "726677 · JFB MILKY GLOW SOAP 110TK 48X75G"
+        },
+        {
+          "value": "726858",
+          "label": "726858 · BELI 15TK 360X18ML"
+        },
+        {
+          "value": "726865",
+          "label": "726865 · PCNO 20TK 352X20ML"
+        },
+        {
+          "value": "726985",
+          "label": "726985 · PA AMLA 55TK 144X75ML"
+        },
+        {
+          "value": "726986",
+          "label": "726986 · PA AMLA 100TK 96X150ML"
+        },
+        {
+          "value": "727423",
+          "label": "727423 · JFB WIPES 230TK 24X80PC 24X383G"
+        },
+        {
+          "value": "727425",
+          "label": "727425 · JFB WIPES 285TK 24X120PC 24X575G"
+        },
+        {
+          "value": "727975",
+          "label": "727975 · PA ADV VIT E 150TK 96X150ML"
+        },
+        {
+          "value": "728926",
+          "label": "728926 · SAF HONEY 50TK 120X40G"
+        },
+        {
+          "value": "732128",
+          "label": "732128 · SP LOTION DM 170TK 48X100ML"
+        }
+      ]
+    },
+    {
+      "name": "horizon",
+      "tag": "SELECT",
+      "type": "select-one",
+      "disabled": false,
+      "options": [
+        {
+          "value": "",
+          "label": "All available horizons"
+        },
+        {
+          "value": "5",
+          "label": "M−5"
+        },
+        {
+          "value": "4",
+          "label": "M−4"
+        },
+        {
+          "value": "3",
+          "label": "M−3"
+        },
+        {
+          "value": "2",
+          "label": "M−2"
+        },
+        {
+          "value": "1",
+          "label": "M−1"
+        }
+      ]
+    },
+    {
+      "name": "minimum_actual_volume",
+      "tag": "INPUT",
+      "type": "number",
+      "disabled": false,
+      "options": []
+    },
+    {
+      "name": "vintage_a_kind",
+      "tag": "SELECT",
+      "type": "select-one",
+      "disabled": false,
+      "options": [
+        {
+          "value": "oldest_available",
+          "label": "Oldest available"
+        },
+        {
+          "value": "latest_available",
+          "label": "Latest available"
+        },
+        {
+          "value": "specific_calculation_month",
+          "label": "\n                      Exact calculation month\n                    "
+        },
+        {
+          "value": "specific_horizon",
+          "label": "Exact horizon"
+        }
+      ]
+    },
+    {
+      "name": "vintage_a_value",
+      "tag": "SELECT",
+      "type": "select-one",
+      "disabled": true,
+      "options": [
+        {
+          "value": "",
+          "label": "Not required"
+        }
+      ]
+    },
+    {
+      "name": "vintage_b_kind",
+      "tag": "SELECT",
+      "type": "select-one",
+      "disabled": false,
+      "options": [
+        {
+          "value": "latest_available",
+          "label": "Latest available"
+        },
+        {
+          "value": "oldest_available",
+          "label": "Oldest available"
+        },
+        {
+          "value": "specific_calculation_month",
+          "label": "\n                      Exact calculation month\n                    "
+        },
+        {
+          "value": "specific_horizon",
+          "label": "Exact horizon"
+        }
+      ]
+    },
+    {
+      "name": "vintage_b_value",
+      "tag": "SELECT",
+      "type": "select-one",
+      "disabled": true,
+      "options": [
+        {
+          "value": "",
+          "label": "Not required"
+        }
+      ]
+    },
+    {
+      "name": "revision_direction",
+      "tag": "SELECT",
+      "type": "select-one",
+      "disabled": false,
+      "options": [
+        {
+          "value": "",
+          "label": "All directions"
+        },
+        {
+          "value": "up",
+          "label": "Up"
+        },
+        {
+          "value": "down",
+          "label": "Down"
+        },
+        {
+          "value": "unchanged",
+          "label": "Unchanged"
+        }
+      ]
+    },
+    {
+      "name": "revision_outcome",
+      "tag": "SELECT",
+      "type": "select-one",
+      "disabled": false,
+      "options": [
+        {
+          "value": "",
+          "label": "All outcomes"
+        },
+        {
+          "value": "improved",
+          "label": "Improved"
+        },
+        {
+          "value": "worsened",
+          "label": "Worsened"
+        },
+        {
+          "value": "neutral",
+          "label": "Neutral"
+        }
+      ]
+    },
+    {
+      "name": "revision_tolerance_kl",
+      "tag": "INPUT",
+      "type": "number",
+      "disabled": false,
+      "options": []
+    },
+    {
+      "name": "forecast_direction",
+      "tag": "SELECT",
+      "type": "select-one",
+      "disabled": false,
+      "options": [
+        {
+          "value": "",
+          "label": "All directions"
+        },
+        {
+          "value": "over",
+          "label": "Over forecast"
+        },
+        {
+          "value": "under",
+          "label": "Under forecast"
+        },
+        {
+          "value": "within_tolerance",
+          "label": "Within tolerance"
+        }
+      ]
+    },
+    {
+      "name": "accuracy_band",
+      "tag": "SELECT",
+      "type": "select-one",
+      "disabled": false,
+      "options": [
+        {
+          "value": "",
+          "label": "All bands"
+        },
+        {
+          "value": "below_0",
+          "label": "Below 0%"
+        },
+        {
+          "value": "0_50",
+          "label": "0–50%"
+        },
+        {
+          "value": "50_100",
+          "label": "50–100%"
+        },
+        {
+          "value": "above_100",
+          "label": "Above 100%"
+        }
+      ]
+    },
+    {
+      "name": "bias_band",
+      "tag": "SELECT",
+      "type": "select-one",
+      "disabled": false,
+      "options": [
+        {
+          "value": "",
+          "label": "All bands"
+        },
+        {
+          "value": "below_0",
+          "label": "Below 0%"
+        },
+        {
+          "value": "0_50",
+          "label": "0–50%"
+        },
+        {
+          "value": "above_50",
+          "label": "Above 50%"
+        }
+      ]
+    },
+    {
+      "name": "minimum_absolute_error_kl",
+      "tag": "INPUT",
+      "type": "number",
+      "disabled": false,
+      "options": []
+    },
+    {
+      "name": "top_n",
+      "tag": "SELECT",
+      "type": "select-one",
+      "disabled": false,
+      "options": [
+        {
+          "value": "",
+          "label": "All products"
+        },
+        {
+          "value": "10",
+          "label": "Top 10"
+        },
+        {
+          "value": "20",
+          "label": "Top 20"
+        },
+        {
+          "value": "50",
+          "label": "Top 50"
+        }
+      ]
+    },
+    {
+      "name": "top_n_metric",
+      "tag": "SELECT",
+      "type": "select-one",
+      "disabled": false,
+      "options": [
+        {
+          "value": "actual_volume",
+          "label": "Actual volume"
+        },
+        {
+          "value": "absolute_error",
+          "label": "Absolute error"
+        },
+        {
+          "value": "deterioration",
+          "label": "Deterioration"
+        }
+      ]
+    },
+    {
+      "name": "hierarchy_status",
+      "tag": "SELECT",
+      "type": "select-one",
+      "disabled": false,
+      "options": [
+        {
+          "value": "",
+          "label": "All statuses"
+        },
+        {
+          "value": "mapped",
+          "label": "Mapped"
+        },
+        {
+          "value": "unmapped",
+          "label": "Unmapped"
+        },
+        {
+          "value": "conflict",
+          "label": "Conflict"
+        }
+      ]
+    },
+    {
+      "name": "actual_status",
+      "tag": "SELECT",
+      "type": "select-one",
+      "disabled": false,
+      "options": [
+        {
+          "value": "",
+          "label": "All statuses"
+        },
+        {
+          "value": "matched_positive",
+          "label": "Positive actual"
+        },
+        {
+          "value": "matched_zero",
+          "label": "Zero actual"
+        },
+        {
+          "value": "missing",
+          "label": "Missing actual"
+        }
+      ]
+    },
+    {
+      "name": "pair_status",
+      "tag": "SELECT",
+      "type": "select-one",
+      "disabled": false,
+      "options": [
+        {
+          "value": "",
+          "label": "All statuses"
+        },
+        {
+          "value": "complete",
+          "label": "Complete"
+        },
+        {
+          "value": "missing_a",
+          "label": "Missing A"
+        },
+        {
+          "value": "missing_b",
+          "label": "Missing B"
+        },
+        {
+          "value": "missing_both",
+          "label": "Missing both"
+        },
+        {
+          "value": "missing_actual",
+          "label": "Missing actual"
+        },
+        {
+          "value": "zero_actual",
+          "label": "Zero actual"
+        }
+      ]
+    },
+    {
+      "name": "source_availability",
+      "tag": "SELECT",
+      "type": "select-one",
+      "disabled": false,
+      "options": [
+        {
+          "value": "",
+          "label": "All statuses"
+        },
+        {
+          "value": "tm_only",
+          "label": "TM only"
+        },
+        {
+          "value": "ml_only",
+          "label": "ML only"
+        },
+        {
+          "value": "both_sources",
+          "label": "Both sources"
+        }
+      ]
+    },
+    {
+      "name": "zero_forecast_only",
+      "tag": "INPUT",
+      "type": "checkbox",
+      "disabled": false,
+      "options": []
+    },
+    {
+      "name": "complete_vintage_history_only",
+      "tag": "INPUT",
+      "type": "checkbox",
+      "disabled": false,
+      "options": []
+    }
+  ],
+  "screenshots": [
+    {
+      "name": "desktop-expanded.png",
+      "label": "Desktop · expanded rail",
+      "sha256": "f70c3882f3abd4ba212e5ea40878b7e6ec3b925e556b812ea602f77eb0baa2ff"
+    },
+    {
+      "name": "desktop-collapsed.png",
+      "label": "Desktop · collapsed rail",
+      "sha256": "75d913434ff88b580e2943cc6bfa17be818bb76a0a811e83a9a211564558c6e9"
+    },
+    {
+      "name": "narrow-collapsed.png",
+      "label": "Narrow · collapsed rail",
+      "sha256": "389d0a735d656ce045b69252718747118c727bffdfd925b284c403bbbc2af749"
+    },
+    {
+      "name": "narrow-expanded.png",
+      "label": "Narrow · responsive rail",
+      "sha256": "d45dc8d8c166e2e248ae0d220be4e75658fa2b993d33da9cc7b77eabe431b5bb"
+    }
+  ],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "networkFailures": [],
+  "httpErrors": []
+}

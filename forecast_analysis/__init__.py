@@ -55,6 +55,13 @@ from .metrics import (  # pyright: ignore[reportMissingImports]
     format_metric,
     format_revision_tolerance,
 )
+from .sku_classification import (  # pyright: ignore[reportMissingImports]
+    SKU_CLASSES,
+    SKU_CLASS_UNCLASSIFIED,
+    attach_sku_classification,
+    build_sku_classifications,
+    required_sku_class_actual_months,
+)
 from .product_history import (  # pyright: ignore[reportMissingImports]
     ProductHistoryView,
     build_product_history,
@@ -85,6 +92,8 @@ __all__ = [
     "HierarchyResult",
     "SOURCE_COLORS",
     "SOURCE_LABELS",
+    "SKU_CLASSES",
+    "SKU_CLASS_UNCLASSIFIED",
     "VINTAGE_COLORS",
     "VINTAGE_LABELS",
     "ZERO_REFERENCE_COLOR",
@@ -97,6 +106,7 @@ __all__ = [
     "build_horizon_audit",
     "build_horizon_performance",
     "build_source_comparison",
+    "build_sku_classifications",
     "build_monthly_audit",
     "build_monthly_performance",
     "build_dashboard_diagnostics",
@@ -109,6 +119,7 @@ __all__ = [
     "brand_target_month_order",
     "calculate_metrics",
     "calculate_revision_metrics",
+    "attach_sku_classification",
     "clean_hierarchy",
     "load_actuals",
     "load_analysis_inputs",
@@ -118,6 +129,7 @@ __all__ = [
     "format_metric",
     "normalize_forecast_history",
     "normalize_hierarchy",
+    "required_sku_class_actual_months",
     "format_horizon_label",
     "format_revision_tolerance",
     "search_parent_products",

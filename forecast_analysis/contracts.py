@@ -73,6 +73,15 @@ HIERARCHY_DIAGNOSTIC_COLUMNS = [
     "diagnostic",
 ]
 ACTUAL_COLUMNS = ["parent_code", "snop_month", "actual_kl"]
+SKU_CLASS_CONTEXT_COLUMNS = [
+    "sku_class",
+    "sku_class_as_of_month",
+    "sku_class_window_start",
+    "sku_class_actual_6m_kl",
+    "sku_class_contribution_pct",
+    "sku_class_cumulative_pct",
+    "sku_class_is_carried_forward",
+]
 ACTUAL_POPULATION_COLUMNS = [
     "parent_code",
     "snop_month",
@@ -81,6 +90,7 @@ ACTUAL_POPULATION_COLUMNS = [
     "brand",
     "mapping_status",
     "mapping_diagnostic",
+    *SKU_CLASS_CONTEXT_COLUMNS,
 ]
 ANALYSIS_COLUMNS = [
     "source",
@@ -97,6 +107,7 @@ ANALYSIS_COLUMNS = [
     "actual_kl",
     "actual_status",
 ]
+ANALYSIS_DATASET_COLUMNS = [*ANALYSIS_COLUMNS, *SKU_CLASS_CONTEXT_COLUMNS]
 DIAGNOSTIC_COLUMNS = [
     "diagnostic_group",
     "source",
@@ -137,6 +148,7 @@ class AnalysisInputs:
     hierarchy: pl.DataFrame
     actuals: pl.DataFrame
     hierarchy_diagnostics: pl.DataFrame | None = None
+    actual_history: pl.DataFrame | None = None
 
 
 @dataclass(frozen=True)

@@ -70,6 +70,17 @@ class DashboardHandler(BaseHTTPRequestHandler):
             if path == "/api/view":
                 self._send_json(self.dashboard_server.service.view(payload))
                 return
+            if path == "/api/view/compact":
+                self._send_json(self.dashboard_server.service.compact_view(payload))
+                return
+            if path.startswith("/api/module/"):
+                module_name = path.removeprefix("/api/module/")
+                if not module_name or "/" in module_name:
+                    raise DashboardRequestError("dashboard module name is required")
+                self._send_json(
+                    self.dashboard_server.service.module(module_name, payload)
+                )
+                return
             if path == "/api/product":
                 self._send_json({"product_detail": self.dashboard_server.service.product_detail(payload)})
                 return
@@ -78,7 +89,12 @@ class DashboardHandler(BaseHTTPRequestHandler):
                 if not isinstance(request, dict):
                     raise DashboardRequestError("export request must contain a request object")
                 kind = payload.get("kind")
-                if kind not in {"vintages", "quality", "scope_exclusions"}:
+                if kind not in {
+                    "vintages",
+                    "revision_actions",
+                    "quality",
+                    "scope_exclusions",
+                }:
                     raise DashboardRequestError("unsupported export kind")
                 category = payload.get("category")
                 if category is not None and not isinstance(category, str):

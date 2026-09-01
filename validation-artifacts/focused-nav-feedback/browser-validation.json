@@ -1,0 +1,541 @@
+{
+  "open": {
+    "data": {
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": true,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": false,
+        "saveStatus": "not_attempted"
+      },
+      "targetId": "2244612BFB8B70FA2B0C3B93A20C80AB",
+      "title": "Forecast performance · live analysis",
+      "url": "http://127.0.0.1:8766/#overview"
+    },
+    "details": {
+      "pageChangeSummary": {
+        "changeType": "navigation",
+        "command": "open",
+        "nextActionIds": [
+          "inspect-opened-page"
+        ],
+        "observed": true,
+        "summary": "open → navigation → Forecast performance · live analysis → http://127.0.0.1:8766/#overview",
+        "title": "Forecast performance · live analysis",
+        "url": "http://127.0.0.1:8766/#overview"
+      },
+      "resultCategory": "success",
+      "successCategory": "completed"
+    },
+    "nextActions": [
+      {
+        "id": "inspect-opened-page",
+        "params": {
+          "args": [
+            "snapshot",
+            "-i"
+          ]
+        },
+        "reason": "Inspect the opened page before choosing interactive refs.",
+        "tool": "agent_browser"
+      }
+    ],
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "completed",
+    "summary": "Forecast performance · live analysis",
+    "text": "Forecast performance · live analysis\nhttp://127.0.0.1:8766/#overview"
+  },
+  "viewport": {
+    "data": {
+      "deviceScaleFactor": 1,
+      "height": 900,
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      },
+      "mobile": false,
+      "width": 1440
+    },
+    "details": {
+      "resultCategory": "success",
+      "successCategory": "completed"
+    },
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "completed",
+    "summary": "set completed",
+    "text": "{\n  \"deviceScaleFactor\": 1,\n  \"height\": 900,\n  \"mobile\": false,\n  \"width\": 1440\n}"
+  },
+  "wait": {
+    "data": {
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      },
+      "text": "Performance at a glance",
+      "waited": "text"
+    },
+    "details": {
+      "resultCategory": "success",
+      "successCategory": "completed"
+    },
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "completed",
+    "summary": "Wait completed: Performance at a glance",
+    "text": "Wait completed: Performance at a glance"
+  },
+  "expandedState": {
+    "data": {
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      },
+      "origin": "http://127.0.0.1:8766/#overview",
+      "result": {
+        "collapsed": false,
+        "tabs": [
+          {
+            "copyDirection": "column",
+            "iconDisplay": "none",
+            "label": "Overview",
+            "metaDisplay": "block",
+            "metaTop": 134.25,
+            "nameDisplay": "block",
+            "nameTop": 115
+          },
+          {
+            "copyDirection": "column",
+            "iconDisplay": "none",
+            "label": "Trends",
+            "metaDisplay": "block",
+            "metaTop": 189.125,
+            "nameDisplay": "block",
+            "nameTop": 169.875
+          },
+          {
+            "copyDirection": "column",
+            "iconDisplay": "none",
+            "label": "Comparison",
+            "metaDisplay": "block",
+            "metaTop": 244,
+            "nameDisplay": "block",
+            "nameTop": 224.75
+          },
+          {
+            "copyDirection": "column",
+            "iconDisplay": "none",
+            "label": "Product history",
+            "metaDisplay": "block",
+            "metaTop": 298.875,
+            "nameDisplay": "block",
+            "nameTop": 279.625
+          },
+          {
+            "copyDirection": "column",
+            "iconDisplay": "none",
+            "label": "Data quality",
+            "metaDisplay": "block",
+            "metaTop": 353.75,
+            "nameDisplay": "block",
+            "nameTop": 334.5
+          }
+        ]
+      }
+    },
+    "details": {
+      "resultCategory": "success",
+      "successCategory": "completed"
+    },
+    "nextActions": [
+      {
+        "id": "inspect-after-mutation",
+        "params": {
+          "args": [
+            "snapshot",
+            "-i"
+          ]
+        },
+        "reason": "Refresh interactive refs after a browser mutation, navigation, scroll, or rerender.",
+        "safety": "Do not reuse prior @refs until a fresh snapshot confirms they still exist.",
+        "tool": "agent_browser"
+      }
+    ],
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "completed",
+    "summary": "Eval result: {",
+    "text": "{\n  \"collapsed\": false,\n  \"tabs\": [\n    {\n      \"copyDirection\": \"column\",\n      \"iconDisplay\": \"none\",\n      \"label\": \"Overview\",\n      \"metaDisplay\": \"block\",\n      \"metaTop\": 134.25,\n      \"nameDisplay\": \"block\",\n      \"nameTop\": 115\n    },\n    {\n      \"copyDirection\": \"column\",\n      \"iconDisplay\": \"none\",\n      \"label\": \"Trends\",\n      \"metaDisplay\": \"block\",\n      \"metaTop\": 189.125,\n      \"nameDisplay\": \"block\",\n      \"nameTop\": 169.875\n    },\n    {\n      \"copyDirection\": \"column\",\n      \"iconDisplay\": \"none\",\n      \"label\": \"Comparison\",\n      \"metaDisplay\": \"block\",\n      \"metaTop\": 244,\n      \"nameDisplay\": \"block\",\n      \"nameTop\": 224.75\n    },\n    {\n      \"copyDirection\": \"column\",\n      \"iconDisplay\": \"none\",\n      \"label\": \"Product history\",\n      \"metaDisplay\": \"block\",\n      \"metaTop\": 298.875,\n      \"nameDisplay\": \"block\",\n      \"nameTop\": 279.625\n    },\n    {\n      \"copyDirection\": \"column\",\n      \"iconDisplay\": \"none\",\n      \"label\": \"Data quality\",\n      \"metaDisplay\": \"block\",\n      \"metaTop\": 353.75,\n      \"nameDisplay\": \"block\",\n      \"nameTop\": 334.5\n    }\n  ]\n}\n\nOrigin: http://127.0.0.1:8766/#overview"
+  },
+  "expandedShot": {
+    "data": {
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      },
+      "path": "/root/GitHub/forecast_analysis/validation-artifacts/focused-nav-feedback/navigation-expanded.png"
+    },
+    "details": {
+      "artifactVerification": {
+        "artifacts": [
+          {
+            "absolutePath": "/root/GitHub/forecast_analysis/validation-artifacts/focused-nav-feedback/navigation-expanded.png",
+            "exists": true,
+            "kind": "image",
+            "mediaType": "image/png",
+            "path": "validation-artifacts/focused-nav-feedback/navigation-expanded.png",
+            "requestedPath": "validation-artifacts/focused-nav-feedback/navigation-expanded.png",
+            "retentionState": "live",
+            "sizeBytes": 67643,
+            "state": "verified",
+            "status": "saved",
+            "storageScope": "explicit-path",
+            "updatedAtMs": 1788087869751.6746
+          }
+        ],
+        "missingCount": 0,
+        "pendingCount": 0,
+        "unverifiedCount": 0,
+        "verified": true,
+        "verifiedCount": 1
+      },
+      "artifacts": [
+        {
+          "absolutePath": "/root/GitHub/forecast_analysis/validation-artifacts/focused-nav-feedback/navigation-expanded.png",
+          "artifactType": "image",
+          "command": "screenshot",
+          "cwd": "/root/GitHub/forecast_analysis",
+          "exists": true,
+          "extension": ".png",
+          "kind": "image",
+          "mediaType": "image/png",
+          "namespace": "",
+          "path": "validation-artifacts/focused-nav-feedback/navigation-expanded.png",
+          "requestedPath": "validation-artifacts/focused-nav-feedback/navigation-expanded.png",
+          "session": "piab-script-f05b5a12-a360-4c9d-8290-95e208a8929f",
+          "sizeBytes": 67643,
+          "status": "saved",
+          "subcommand": "/root/GitHub/forecast_analysis/validation-artifacts/focused-nav-feedback/navigation-expanded.png",
+          "updatedAtMs": 1788087869751.6746
+        }
+      ],
+      "pageChangeSummary": {
+        "artifactCount": 1,
+        "changeType": "artifact",
+        "command": "screenshot",
+        "nextActionIds": [
+          "use-saved-artifact"
+        ],
+        "observed": true,
+        "summary": "screenshot → artifact → 1 artifact"
+      },
+      "resultCategory": "success",
+      "successCategory": "artifact-saved"
+    },
+    "nextActions": [
+      {
+        "artifactPath": "validation-artifacts/focused-nav-feedback/navigation-expanded.png",
+        "id": "use-saved-artifact",
+        "reason": "Use the saved artifact path from the structured result instead of scraping it from text.",
+        "safety": "Verify artifact metadata such as exists/status before treating the file as durable.",
+        "tool": "agent_browser"
+      }
+    ],
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "artifact-saved",
+    "summary": "Saved image: validation-artifacts/focused-nav-feedback/navigation-expanded.png",
+    "text": "Saved image: validation-artifacts/focused-nav-feedback/navigation-expanded.png\nArtifact type: image\nRequested path: validation-artifacts/focused-nav-feedback/navigation-expanded.png\nAbsolute path: /root/GitHub/forecast_analysis/validation-artifacts/focused-nav-feedback/navigation-expanded.png\nExists: true\nSize: 66.1 KiB\nSize bytes: 67643\nStatus: saved\nMedia type: image/png\nSession: piab-script-f05b5a12-a360-4c9d-8290-95e208a8929f\nCWD: /root/GitHub/forecast_analysis\nMachine data: details.artifacts[0]"
+  },
+  "collapsedState": {
+    "data": {
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      },
+      "origin": "http://127.0.0.1:8766/#overview",
+      "result": {
+        "collapsed": true,
+        "tabs": [
+          {
+            "copyDisplay": "none",
+            "iconDisplay": "grid",
+            "iconSize": {
+              "bottom": 137,
+              "height": 20,
+              "left": 105.5,
+              "right": 125.5,
+              "top": 117,
+              "width": 20,
+              "x": 105.5,
+              "y": 117
+            },
+            "label": "Overview",
+            "lampDisplay": "none",
+            "title": "Overview"
+          },
+          {
+            "copyDisplay": "none",
+            "iconDisplay": "grid",
+            "iconSize": {
+              "bottom": 186,
+              "height": 20,
+              "left": 105.5,
+              "right": 125.5,
+              "top": 166,
+              "width": 20,
+              "x": 105.5,
+              "y": 166
+            },
+            "label": "Trends",
+            "lampDisplay": "none",
+            "title": "Trends"
+          },
+          {
+            "copyDisplay": "none",
+            "iconDisplay": "grid",
+            "iconSize": {
+              "bottom": 235,
+              "height": 20,
+              "left": 105.5,
+              "right": 125.5,
+              "top": 215,
+              "width": 20,
+              "x": 105.5,
+              "y": 215
+            },
+            "label": "Comparison",
+            "lampDisplay": "none",
+            "title": "Comparison"
+          },
+          {
+            "copyDisplay": "none",
+            "iconDisplay": "grid",
+            "iconSize": {
+              "bottom": 284,
+              "height": 20,
+              "left": 105.5,
+              "right": 125.5,
+              "top": 264,
+              "width": 20,
+              "x": 105.5,
+              "y": 264
+            },
+            "label": "Product history",
+            "lampDisplay": "none",
+            "title": "Product history"
+          },
+          {
+            "copyDisplay": "none",
+            "iconDisplay": "grid",
+            "iconSize": {
+              "bottom": 333,
+              "height": 20,
+              "left": 105.5,
+              "right": 125.5,
+              "top": 313,
+              "width": 20,
+              "x": 105.5,
+              "y": 313
+            },
+            "label": "Data quality",
+            "lampDisplay": "none",
+            "title": "Data quality"
+          }
+        ],
+        "toggleLabel": "Expand navigation"
+      }
+    },
+    "details": {
+      "resultCategory": "success",
+      "successCategory": "completed"
+    },
+    "nextActions": [
+      {
+        "id": "inspect-after-mutation",
+        "params": {
+          "args": [
+            "snapshot",
+            "-i"
+          ]
+        },
+        "reason": "Refresh interactive refs after a browser mutation, navigation, scroll, or rerender.",
+        "safety": "Do not reuse prior @refs until a fresh snapshot confirms they still exist.",
+        "tool": "agent_browser"
+      }
+    ],
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "completed",
+    "summary": "Eval result: {",
+    "text": "{\n  \"collapsed\": true,\n  \"tabs\": [\n    {\n      \"copyDisplay\": \"none\",\n      \"iconDisplay\": \"grid\",\n      \"iconSize\": {\n        \"bottom\": 137,\n        \"height\": 20,\n        \"left\": 105.5,\n        \"right\": 125.5,\n        \"top\": 117,\n        \"width\": 20,\n        \"x\": 105.5,\n        \"y\": 117\n      },\n      \"label\": \"Overview\",\n      \"lampDisplay\": \"none\",\n      \"title\": \"Overview\"\n    },\n    {\n      \"copyDisplay\": \"none\",\n      \"iconDisplay\": \"grid\",\n      \"iconSize\": {\n        \"bottom\": 186,\n        \"height\": 20,\n        \"left\": 105.5,\n        \"right\": 125.5,\n        \"top\": 166,\n        \"width\": 20,\n        \"x\": 105.5,\n        \"y\": 166\n      },\n      \"label\": \"Trends\",\n      \"lampDisplay\": \"none\",\n      \"title\": \"Trends\"\n    },\n    {\n      \"copyDisplay\": \"none\",\n      \"iconDisplay\": \"grid\",\n      \"iconSize\": {\n        \"bottom\": 235,\n        \"height\": 20,\n        \"left\": 105.5,\n        \"right\": 125.5,\n        \"top\": 215,\n        \"width\": 20,\n        \"x\": 105.5,\n        \"y\": 215\n      },\n      \"label\": \"Comparison\",\n      \"lampDisplay\": \"none\",\n      \"title\": \"Comparison\"\n    },\n    {\n      \"copyDisplay\": \"none\",\n      \"iconDisplay\": \"grid\",\n      \"iconSize\": {\n        \"bottom\": 284,\n        \"height\": 20,\n        \"left\": 105.5,\n        \"right\": 125.5,\n        \"top\": 264,\n        \"width\": 20,\n        \"x\": 105.5,\n        \"y\": 264\n      },\n      \"label\": \"Product history\",\n      \"lampDisplay\": \"none\",\n      \"title\": \"Product history\"\n    },\n    {\n      \"copyDisplay\": \"none\",\n      \"iconDisplay\": \"grid\",\n      \"iconSize\": {\n        \"bottom\": 333,\n        \"height\": 20,\n        \"left\": 105.5,\n        \"right\": 125.5,\n        \"top\": 313,\n        \"width\": 20,\n        \"x\": 105.5,\n        \"y\": 313\n      },\n      \"label\": \"Data quality\",\n      \"lampDisplay\": \"none\",\n      \"title\": \"Data quality\"\n    }\n  ],\n  \"toggleLabel\": \"Expand navigation\"\n}\n\nOrigin: http://127.0.0.1:8766/#overview"
+  },
+  "collapsedShot": {
+    "data": {
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      },
+      "path": "/root/GitHub/forecast_analysis/validation-artifacts/focused-nav-feedback/navigation-collapsed.png"
+    },
+    "details": {
+      "artifactVerification": {
+        "artifacts": [
+          {
+            "absolutePath": "/root/GitHub/forecast_analysis/validation-artifacts/focused-nav-feedback/navigation-collapsed.png",
+            "exists": true,
+            "kind": "image",
+            "mediaType": "image/png",
+            "path": "validation-artifacts/focused-nav-feedback/navigation-collapsed.png",
+            "requestedPath": "validation-artifacts/focused-nav-feedback/navigation-collapsed.png",
+            "retentionState": "live",
+            "sizeBytes": 51959,
+            "state": "verified",
+            "status": "saved",
+            "storageScope": "explicit-path",
+            "updatedAtMs": 1788087870296.6648
+          }
+        ],
+        "missingCount": 0,
+        "pendingCount": 0,
+        "unverifiedCount": 0,
+        "verified": true,
+        "verifiedCount": 1
+      },
+      "artifacts": [
+        {
+          "absolutePath": "/root/GitHub/forecast_analysis/validation-artifacts/focused-nav-feedback/navigation-collapsed.png",
+          "artifactType": "image",
+          "command": "screenshot",
+          "cwd": "/root/GitHub/forecast_analysis",
+          "exists": true,
+          "extension": ".png",
+          "kind": "image",
+          "mediaType": "image/png",
+          "namespace": "",
+          "path": "validation-artifacts/focused-nav-feedback/navigation-collapsed.png",
+          "requestedPath": "validation-artifacts/focused-nav-feedback/navigation-collapsed.png",
+          "session": "piab-script-f05b5a12-a360-4c9d-8290-95e208a8929f",
+          "sizeBytes": 51959,
+          "status": "saved",
+          "subcommand": "/root/GitHub/forecast_analysis/validation-artifacts/focused-nav-feedback/navigation-collapsed.png",
+          "updatedAtMs": 1788087870296.6648
+        }
+      ],
+      "pageChangeSummary": {
+        "artifactCount": 1,
+        "changeType": "artifact",
+        "command": "screenshot",
+        "nextActionIds": [
+          "use-saved-artifact"
+        ],
+        "observed": true,
+        "summary": "screenshot → artifact → 1 artifact"
+      },
+      "resultCategory": "success",
+      "successCategory": "artifact-saved"
+    },
+    "nextActions": [
+      {
+        "artifactPath": "validation-artifacts/focused-nav-feedback/navigation-collapsed.png",
+        "id": "use-saved-artifact",
+        "reason": "Use the saved artifact path from the structured result instead of scraping it from text.",
+        "safety": "Verify artifact metadata such as exists/status before treating the file as durable.",
+        "tool": "agent_browser"
+      }
+    ],
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "artifact-saved",
+    "summary": "Saved image: validation-artifacts/focused-nav-feedback/navigation-collapsed.png",
+    "text": "Saved image: validation-artifacts/focused-nav-feedback/navigation-collapsed.png\nArtifact type: image\nRequested path: validation-artifacts/focused-nav-feedback/navigation-collapsed.png\nAbsolute path: /root/GitHub/forecast_analysis/validation-artifacts/focused-nav-feedback/navigation-collapsed.png\nExists: true\nSize: 50.7 KiB\nSize bytes: 51959\nStatus: saved\nMedia type: image/png\nSession: piab-script-f05b5a12-a360-4c9d-8290-95e208a8929f\nCWD: /root/GitHub/forecast_analysis\nMachine data: details.artifacts[0]"
+  },
+  "errors": {
+    "data": {
+      "errors": [],
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      }
+    },
+    "details": {
+      "resultCategory": "success",
+      "successCategory": "completed"
+    },
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "completed",
+    "summary": "Page errors: 0",
+    "text": "No page errors."
+  }
+}

@@ -1,0 +1,305 @@
+{
+  "fixed": {
+    "data": {
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      },
+      "origin": "http://127.0.0.1:8766/#overview",
+      "result": {
+        "axisDivider": 1,
+        "monthHitZones": 20,
+        "nativeTitle": 0,
+        "roundedBiasBars": 0,
+        "tooltipHidden": false,
+        "tooltipLength": 81,
+        "tooltipRows": 3,
+        "tooltipText": "May 2025\nTM\nVintage A accuracy\n78.8%\nVintage B accuracy\n78.8%\nVintage B bias\n8.4%"
+      }
+    },
+    "details": {
+      "resultCategory": "success",
+      "successCategory": "completed"
+    },
+    "nextActions": [
+      {
+        "id": "inspect-after-mutation",
+        "params": {
+          "args": [
+            "snapshot",
+            "-i"
+          ]
+        },
+        "reason": "Refresh interactive refs after a browser mutation, navigation, scroll, or rerender.",
+        "safety": "Do not reuse prior @refs until a fresh snapshot confirms they still exist.",
+        "tool": "agent_browser"
+      }
+    ],
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "completed",
+    "summary": "Eval result: {",
+    "text": "{\n  \"axisDivider\": 1,\n  \"monthHitZones\": 20,\n  \"nativeTitle\": 0,\n  \"roundedBiasBars\": 0,\n  \"tooltipHidden\": false,\n  \"tooltipLength\": 81,\n  \"tooltipRows\": 3,\n  \"tooltipText\": \"May 2025\\nTM\\nVintage A accuracy\\n78.8%\\nVintage B accuracy\\n78.8%\\nVintage B bias\\n8.4%\"\n}\n\nOrigin: http://127.0.0.1:8766/#overview"
+  },
+  "shot": {
+    "data": {
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      },
+      "path": "/root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/overview-tooltip-repaired.png"
+    },
+    "details": {
+      "artifactVerification": {
+        "artifacts": [
+          {
+            "absolutePath": "/root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/overview-tooltip-repaired.png",
+            "exists": true,
+            "kind": "image",
+            "mediaType": "image/png",
+            "path": "validation-artifacts/focused-overview-chart/overview-tooltip-repaired.png",
+            "requestedPath": "validation-artifacts/focused-overview-chart/overview-tooltip-repaired.png",
+            "retentionState": "live",
+            "sizeBytes": 175734,
+            "state": "verified",
+            "status": "saved",
+            "storageScope": "explicit-path",
+            "updatedAtMs": 1788094434277.076
+          }
+        ],
+        "missingCount": 0,
+        "pendingCount": 0,
+        "unverifiedCount": 0,
+        "verified": true,
+        "verifiedCount": 1
+      },
+      "artifacts": [
+        {
+          "absolutePath": "/root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/overview-tooltip-repaired.png",
+          "artifactType": "image",
+          "command": "screenshot",
+          "cwd": "/root/GitHub/forecast_analysis",
+          "exists": true,
+          "extension": ".png",
+          "kind": "image",
+          "mediaType": "image/png",
+          "namespace": "",
+          "path": "validation-artifacts/focused-overview-chart/overview-tooltip-repaired.png",
+          "requestedPath": "validation-artifacts/focused-overview-chart/overview-tooltip-repaired.png",
+          "session": "piab-script-d1a4caa9-f914-49c8-9ff4-7d311532cb51",
+          "sizeBytes": 175734,
+          "status": "saved",
+          "subcommand": "/root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/overview-tooltip-repaired.png",
+          "updatedAtMs": 1788094434277.076
+        }
+      ],
+      "pageChangeSummary": {
+        "artifactCount": 1,
+        "changeType": "artifact",
+        "command": "screenshot",
+        "nextActionIds": [
+          "use-saved-artifact"
+        ],
+        "observed": true,
+        "summary": "screenshot → artifact → 1 artifact"
+      },
+      "resultCategory": "success",
+      "successCategory": "artifact-saved"
+    },
+    "nextActions": [
+      {
+        "artifactPath": "validation-artifacts/focused-overview-chart/overview-tooltip-repaired.png",
+        "id": "use-saved-artifact",
+        "reason": "Use the saved artifact path from the structured result instead of scraping it from text.",
+        "safety": "Verify artifact metadata such as exists/status before treating the file as durable.",
+        "tool": "agent_browser"
+      }
+    ],
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "artifact-saved",
+    "summary": "Saved image: validation-artifacts/focused-overview-chart/overview-tooltip-repaired.png",
+    "text": "Saved image: validation-artifacts/focused-overview-chart/overview-tooltip-repaired.png\nArtifact type: image\nRequested path: validation-artifacts/focused-overview-chart/overview-tooltip-repaired.png\nAbsolute path: /root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/overview-tooltip-repaired.png\nExists: true\nSize: 171.6 KiB\nSize bytes: 175734\nStatus: saved\nMedia type: image/png\nSession: piab-script-d1a4caa9-f914-49c8-9ff4-7d311532cb51\nCWD: /root/GitHub/forecast_analysis\nMachine data: details.artifacts[0]"
+  },
+  "fullAudit": {
+    "data": {
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      },
+      "origin": "http://127.0.0.1:8766/#overview",
+      "result": {
+        "chart": true,
+        "divider": 1,
+        "hitZones": 20,
+        "rounded": 0
+      }
+    },
+    "details": {
+      "resultCategory": "success",
+      "successCategory": "completed"
+    },
+    "nextActions": [
+      {
+        "id": "inspect-after-mutation",
+        "params": {
+          "args": [
+            "snapshot",
+            "-i"
+          ]
+        },
+        "reason": "Refresh interactive refs after a browser mutation, navigation, scroll, or rerender.",
+        "safety": "Do not reuse prior @refs until a fresh snapshot confirms they still exist.",
+        "tool": "agent_browser"
+      }
+    ],
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "completed",
+    "summary": "Eval result: {",
+    "text": "{\n  \"chart\": true,\n  \"divider\": 1,\n  \"hitZones\": 20,\n  \"rounded\": 0\n}\n\nOrigin: http://127.0.0.1:8766/#overview"
+  },
+  "fullShot": {
+    "data": {
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      },
+      "path": "/root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/overview-fullscreen-repaired.png"
+    },
+    "details": {
+      "artifactVerification": {
+        "artifacts": [
+          {
+            "absolutePath": "/root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/overview-fullscreen-repaired.png",
+            "exists": true,
+            "kind": "image",
+            "mediaType": "image/png",
+            "path": "validation-artifacts/focused-overview-chart/overview-fullscreen-repaired.png",
+            "requestedPath": "validation-artifacts/focused-overview-chart/overview-fullscreen-repaired.png",
+            "retentionState": "live",
+            "sizeBytes": 136304,
+            "state": "verified",
+            "status": "saved",
+            "storageScope": "explicit-path",
+            "updatedAtMs": 1788094435098.0576
+          }
+        ],
+        "missingCount": 0,
+        "pendingCount": 0,
+        "unverifiedCount": 0,
+        "verified": true,
+        "verifiedCount": 1
+      },
+      "artifacts": [
+        {
+          "absolutePath": "/root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/overview-fullscreen-repaired.png",
+          "artifactType": "image",
+          "command": "screenshot",
+          "cwd": "/root/GitHub/forecast_analysis",
+          "exists": true,
+          "extension": ".png",
+          "kind": "image",
+          "mediaType": "image/png",
+          "namespace": "",
+          "path": "validation-artifacts/focused-overview-chart/overview-fullscreen-repaired.png",
+          "requestedPath": "validation-artifacts/focused-overview-chart/overview-fullscreen-repaired.png",
+          "session": "piab-script-d1a4caa9-f914-49c8-9ff4-7d311532cb51",
+          "sizeBytes": 136304,
+          "status": "saved",
+          "subcommand": "/root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/overview-fullscreen-repaired.png",
+          "updatedAtMs": 1788094435098.0576
+        }
+      ],
+      "pageChangeSummary": {
+        "artifactCount": 1,
+        "changeType": "artifact",
+        "command": "screenshot",
+        "nextActionIds": [
+          "use-saved-artifact"
+        ],
+        "observed": true,
+        "summary": "screenshot → artifact → 1 artifact"
+      },
+      "resultCategory": "success",
+      "successCategory": "artifact-saved"
+    },
+    "nextActions": [
+      {
+        "artifactPath": "validation-artifacts/focused-overview-chart/overview-fullscreen-repaired.png",
+        "id": "use-saved-artifact",
+        "reason": "Use the saved artifact path from the structured result instead of scraping it from text.",
+        "safety": "Verify artifact metadata such as exists/status before treating the file as durable.",
+        "tool": "agent_browser"
+      }
+    ],
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "artifact-saved",
+    "summary": "Saved image: validation-artifacts/focused-overview-chart/overview-fullscreen-repaired.png",
+    "text": "Saved image: validation-artifacts/focused-overview-chart/overview-fullscreen-repaired.png\nArtifact type: image\nRequested path: validation-artifacts/focused-overview-chart/overview-fullscreen-repaired.png\nAbsolute path: /root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/overview-fullscreen-repaired.png\nExists: true\nSize: 133.1 KiB\nSize bytes: 136304\nStatus: saved\nMedia type: image/png\nSession: piab-script-d1a4caa9-f914-49c8-9ff4-7d311532cb51\nCWD: /root/GitHub/forecast_analysis\nMachine data: details.artifacts[0]"
+  },
+  "errors": {
+    "data": {
+      "errors": [],
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      }
+    },
+    "details": {
+      "resultCategory": "success",
+      "successCategory": "completed"
+    },
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "completed",
+    "summary": "Page errors: 0",
+    "text": "No page errors."
+  }
+}

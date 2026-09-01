@@ -1,0 +1,611 @@
+{
+  "open": {
+    "data": {
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": true,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": false,
+        "saveStatus": "not_attempted"
+      },
+      "targetId": "44801F5BFF01985CC213B5922AB6B65E",
+      "title": "Forecast performance · live analysis",
+      "url": "http://127.0.0.1:8766/#overview"
+    },
+    "details": {
+      "pageChangeSummary": {
+        "changeType": "navigation",
+        "command": "open",
+        "nextActionIds": [
+          "inspect-opened-page"
+        ],
+        "observed": true,
+        "summary": "open → navigation → Forecast performance · live analysis → http://127.0.0.1:8766/#overview",
+        "title": "Forecast performance · live analysis",
+        "url": "http://127.0.0.1:8766/#overview"
+      },
+      "resultCategory": "success",
+      "successCategory": "completed"
+    },
+    "nextActions": [
+      {
+        "id": "inspect-opened-page",
+        "params": {
+          "args": [
+            "snapshot",
+            "-i"
+          ]
+        },
+        "reason": "Inspect the opened page before choosing interactive refs.",
+        "tool": "agent_browser"
+      }
+    ],
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "completed",
+    "summary": "Forecast performance · live analysis",
+    "text": "Forecast performance · live analysis\nhttp://127.0.0.1:8766/#overview"
+  },
+  "viewport": {
+    "data": {
+      "deviceScaleFactor": 1,
+      "height": 900,
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      },
+      "mobile": false,
+      "width": 1440
+    },
+    "details": {
+      "resultCategory": "success",
+      "successCategory": "completed"
+    },
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "completed",
+    "summary": "set completed",
+    "text": "{\n  \"deviceScaleFactor\": 1,\n  \"height\": 900,\n  \"mobile\": false,\n  \"width\": 1440\n}"
+  },
+  "wait": {
+    "data": {
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      },
+      "text": "Monthly vintage accuracy and bias",
+      "waited": "text"
+    },
+    "details": {
+      "resultCategory": "success",
+      "successCategory": "completed"
+    },
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "completed",
+    "summary": "Wait completed: Monthly vintage accuracy and bias",
+    "text": "Wait completed: Monthly vintage accuracy and bias"
+  },
+  "base": {
+    "data": {
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      },
+      "origin": "http://127.0.0.1:8766/#overview",
+      "result": {
+        "actualBars": 0,
+        "actualLegend": false,
+        "dialogHidden": true,
+        "expandVisible": "flex"
+      }
+    },
+    "details": {
+      "resultCategory": "success",
+      "successCategory": "completed"
+    },
+    "nextActions": [
+      {
+        "id": "inspect-after-mutation",
+        "params": {
+          "args": [
+            "snapshot",
+            "-i"
+          ]
+        },
+        "reason": "Refresh interactive refs after a browser mutation, navigation, scroll, or rerender.",
+        "safety": "Do not reuse prior @refs until a fresh snapshot confirms they still exist.",
+        "tool": "agent_browser"
+      }
+    ],
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "completed",
+    "summary": "Eval result: {",
+    "text": "{\n  \"actualBars\": 0,\n  \"actualLegend\": false,\n  \"dialogHidden\": true,\n  \"expandVisible\": \"flex\"\n}\n\nOrigin: http://127.0.0.1:8766/#overview"
+  },
+  "baseShot": {
+    "data": {
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      },
+      "path": "/root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/overview-accuracy-bias.png"
+    },
+    "details": {
+      "artifactVerification": {
+        "artifacts": [
+          {
+            "absolutePath": "/root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/overview-accuracy-bias.png",
+            "exists": true,
+            "kind": "image",
+            "mediaType": "image/png",
+            "path": "validation-artifacts/focused-overview-chart/overview-accuracy-bias.png",
+            "requestedPath": "validation-artifacts/focused-overview-chart/overview-accuracy-bias.png",
+            "retentionState": "live",
+            "sizeBytes": 70275,
+            "state": "verified",
+            "status": "saved",
+            "storageScope": "explicit-path",
+            "updatedAtMs": 1788092705224.381
+          }
+        ],
+        "missingCount": 0,
+        "pendingCount": 0,
+        "unverifiedCount": 0,
+        "verified": true,
+        "verifiedCount": 1
+      },
+      "artifacts": [
+        {
+          "absolutePath": "/root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/overview-accuracy-bias.png",
+          "artifactType": "image",
+          "command": "screenshot",
+          "cwd": "/root/GitHub/forecast_analysis",
+          "exists": true,
+          "extension": ".png",
+          "kind": "image",
+          "mediaType": "image/png",
+          "namespace": "",
+          "path": "validation-artifacts/focused-overview-chart/overview-accuracy-bias.png",
+          "requestedPath": "validation-artifacts/focused-overview-chart/overview-accuracy-bias.png",
+          "session": "piab-script-516b1007-ba11-4564-b8c6-749792547d80",
+          "sizeBytes": 70275,
+          "status": "saved",
+          "subcommand": "/root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/overview-accuracy-bias.png",
+          "updatedAtMs": 1788092705224.381
+        }
+      ],
+      "pageChangeSummary": {
+        "artifactCount": 1,
+        "changeType": "artifact",
+        "command": "screenshot",
+        "nextActionIds": [
+          "use-saved-artifact"
+        ],
+        "observed": true,
+        "summary": "screenshot → artifact → 1 artifact"
+      },
+      "resultCategory": "success",
+      "successCategory": "artifact-saved"
+    },
+    "nextActions": [
+      {
+        "artifactPath": "validation-artifacts/focused-overview-chart/overview-accuracy-bias.png",
+        "id": "use-saved-artifact",
+        "reason": "Use the saved artifact path from the structured result instead of scraping it from text.",
+        "safety": "Verify artifact metadata such as exists/status before treating the file as durable.",
+        "tool": "agent_browser"
+      }
+    ],
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "artifact-saved",
+    "summary": "Saved image: validation-artifacts/focused-overview-chart/overview-accuracy-bias.png",
+    "text": "Saved image: validation-artifacts/focused-overview-chart/overview-accuracy-bias.png\nArtifact type: image\nRequested path: validation-artifacts/focused-overview-chart/overview-accuracy-bias.png\nAbsolute path: /root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/overview-accuracy-bias.png\nExists: true\nSize: 68.6 KiB\nSize bytes: 70275\nStatus: saved\nMedia type: image/png\nSession: piab-script-516b1007-ba11-4564-b8c6-749792547d80\nCWD: /root/GitHub/forecast_analysis\nMachine data: details.artifacts[0]"
+  },
+  "openDialog": {
+    "data": {
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      },
+      "origin": "http://127.0.0.1:8766/#overview",
+      "result": {
+        "chartPresent": false,
+        "filtersVisible": "block",
+        "focus": "overview-fullscreen-close",
+        "hidden": false,
+        "rect": {
+          "height": 900,
+          "width": 1440,
+          "x": 0,
+          "y": 0
+        },
+        "viewport": {
+          "height": 900,
+          "width": 1440
+        }
+      }
+    },
+    "details": {
+      "resultCategory": "success",
+      "successCategory": "completed"
+    },
+    "nextActions": [
+      {
+        "id": "inspect-after-mutation",
+        "params": {
+          "args": [
+            "snapshot",
+            "-i"
+          ]
+        },
+        "reason": "Refresh interactive refs after a browser mutation, navigation, scroll, or rerender.",
+        "safety": "Do not reuse prior @refs until a fresh snapshot confirms they still exist.",
+        "tool": "agent_browser"
+      }
+    ],
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "completed",
+    "summary": "Eval result: {",
+    "text": "{\n  \"chartPresent\": false,\n  \"filtersVisible\": \"block\",\n  \"focus\": \"overview-fullscreen-close\",\n  \"hidden\": false,\n  \"rect\": {\n    \"height\": 900,\n    \"width\": 1440,\n    \"x\": 0,\n    \"y\": 0\n  },\n  \"viewport\": {\n    \"height\": 900,\n    \"width\": 1440\n  }\n}\n\nOrigin: http://127.0.0.1:8766/#overview"
+  },
+  "fullShot": {
+    "data": {
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      },
+      "path": "/root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/overview-fullscreen.png"
+    },
+    "details": {
+      "artifactVerification": {
+        "artifacts": [
+          {
+            "absolutePath": "/root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/overview-fullscreen.png",
+            "exists": true,
+            "kind": "image",
+            "mediaType": "image/png",
+            "path": "validation-artifacts/focused-overview-chart/overview-fullscreen.png",
+            "requestedPath": "validation-artifacts/focused-overview-chart/overview-fullscreen.png",
+            "retentionState": "live",
+            "sizeBytes": 63422,
+            "state": "verified",
+            "status": "saved",
+            "storageScope": "explicit-path",
+            "updatedAtMs": 1788092705832.3706
+          }
+        ],
+        "missingCount": 0,
+        "pendingCount": 0,
+        "unverifiedCount": 0,
+        "verified": true,
+        "verifiedCount": 1
+      },
+      "artifacts": [
+        {
+          "absolutePath": "/root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/overview-fullscreen.png",
+          "artifactType": "image",
+          "command": "screenshot",
+          "cwd": "/root/GitHub/forecast_analysis",
+          "exists": true,
+          "extension": ".png",
+          "kind": "image",
+          "mediaType": "image/png",
+          "namespace": "",
+          "path": "validation-artifacts/focused-overview-chart/overview-fullscreen.png",
+          "requestedPath": "validation-artifacts/focused-overview-chart/overview-fullscreen.png",
+          "session": "piab-script-516b1007-ba11-4564-b8c6-749792547d80",
+          "sizeBytes": 63422,
+          "status": "saved",
+          "subcommand": "/root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/overview-fullscreen.png",
+          "updatedAtMs": 1788092705832.3706
+        }
+      ],
+      "pageChangeSummary": {
+        "artifactCount": 1,
+        "changeType": "artifact",
+        "command": "screenshot",
+        "nextActionIds": [
+          "use-saved-artifact"
+        ],
+        "observed": true,
+        "summary": "screenshot → artifact → 1 artifact"
+      },
+      "resultCategory": "success",
+      "successCategory": "artifact-saved"
+    },
+    "nextActions": [
+      {
+        "artifactPath": "validation-artifacts/focused-overview-chart/overview-fullscreen.png",
+        "id": "use-saved-artifact",
+        "reason": "Use the saved artifact path from the structured result instead of scraping it from text.",
+        "safety": "Verify artifact metadata such as exists/status before treating the file as durable.",
+        "tool": "agent_browser"
+      }
+    ],
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "artifact-saved",
+    "summary": "Saved image: validation-artifacts/focused-overview-chart/overview-fullscreen.png",
+    "text": "Saved image: validation-artifacts/focused-overview-chart/overview-fullscreen.png\nArtifact type: image\nRequested path: validation-artifacts/focused-overview-chart/overview-fullscreen.png\nAbsolute path: /root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/overview-fullscreen.png\nExists: true\nSize: 61.9 KiB\nSize bytes: 63422\nStatus: saved\nMedia type: image/png\nSession: piab-script-516b1007-ba11-4564-b8c6-749792547d80\nCWD: /root/GitHub/forecast_analysis\nMachine data: details.artifacts[0]"
+  },
+  "openFilters": {
+    "data": {
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      },
+      "origin": "http://127.0.0.1:8766/#overview",
+      "result": {
+        "drawerInDialog": true,
+        "drawerOpen": true,
+        "expanded": "true",
+        "filterCount": 27,
+        "top": 68
+      }
+    },
+    "details": {
+      "resultCategory": "success",
+      "successCategory": "completed"
+    },
+    "nextActions": [
+      {
+        "id": "inspect-after-mutation",
+        "params": {
+          "args": [
+            "snapshot",
+            "-i"
+          ]
+        },
+        "reason": "Refresh interactive refs after a browser mutation, navigation, scroll, or rerender.",
+        "safety": "Do not reuse prior @refs until a fresh snapshot confirms they still exist.",
+        "tool": "agent_browser"
+      }
+    ],
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "completed",
+    "summary": "Eval result: {",
+    "text": "{\n  \"drawerInDialog\": true,\n  \"drawerOpen\": true,\n  \"expanded\": \"true\",\n  \"filterCount\": 27,\n  \"top\": 68\n}\n\nOrigin: http://127.0.0.1:8766/#overview"
+  },
+  "filtersShot": {
+    "data": {
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      },
+      "path": "/root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/overview-fullscreen-filters.png"
+    },
+    "details": {
+      "artifactVerification": {
+        "artifacts": [
+          {
+            "absolutePath": "/root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/overview-fullscreen-filters.png",
+            "exists": true,
+            "kind": "image",
+            "mediaType": "image/png",
+            "path": "validation-artifacts/focused-overview-chart/overview-fullscreen-filters.png",
+            "requestedPath": "validation-artifacts/focused-overview-chart/overview-fullscreen-filters.png",
+            "retentionState": "live",
+            "sizeBytes": 86734,
+            "state": "verified",
+            "status": "saved",
+            "storageScope": "explicit-path",
+            "updatedAtMs": 1788092706452.3599
+          }
+        ],
+        "missingCount": 0,
+        "pendingCount": 0,
+        "unverifiedCount": 0,
+        "verified": true,
+        "verifiedCount": 1
+      },
+      "artifacts": [
+        {
+          "absolutePath": "/root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/overview-fullscreen-filters.png",
+          "artifactType": "image",
+          "command": "screenshot",
+          "cwd": "/root/GitHub/forecast_analysis",
+          "exists": true,
+          "extension": ".png",
+          "kind": "image",
+          "mediaType": "image/png",
+          "namespace": "",
+          "path": "validation-artifacts/focused-overview-chart/overview-fullscreen-filters.png",
+          "requestedPath": "validation-artifacts/focused-overview-chart/overview-fullscreen-filters.png",
+          "session": "piab-script-516b1007-ba11-4564-b8c6-749792547d80",
+          "sizeBytes": 86734,
+          "status": "saved",
+          "subcommand": "/root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/overview-fullscreen-filters.png",
+          "updatedAtMs": 1788092706452.3599
+        }
+      ],
+      "pageChangeSummary": {
+        "artifactCount": 1,
+        "changeType": "artifact",
+        "command": "screenshot",
+        "nextActionIds": [
+          "use-saved-artifact"
+        ],
+        "observed": true,
+        "summary": "screenshot → artifact → 1 artifact"
+      },
+      "resultCategory": "success",
+      "successCategory": "artifact-saved"
+    },
+    "nextActions": [
+      {
+        "artifactPath": "validation-artifacts/focused-overview-chart/overview-fullscreen-filters.png",
+        "id": "use-saved-artifact",
+        "reason": "Use the saved artifact path from the structured result instead of scraping it from text.",
+        "safety": "Verify artifact metadata such as exists/status before treating the file as durable.",
+        "tool": "agent_browser"
+      }
+    ],
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "artifact-saved",
+    "summary": "Saved image: validation-artifacts/focused-overview-chart/overview-fullscreen-filters.png",
+    "text": "Saved image: validation-artifacts/focused-overview-chart/overview-fullscreen-filters.png\nArtifact type: image\nRequested path: validation-artifacts/focused-overview-chart/overview-fullscreen-filters.png\nAbsolute path: /root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/overview-fullscreen-filters.png\nExists: true\nSize: 84.7 KiB\nSize bytes: 86734\nStatus: saved\nMedia type: image/png\nSession: piab-script-516b1007-ba11-4564-b8c6-749792547d80\nCWD: /root/GitHub/forecast_analysis\nMachine data: details.artifacts[0]"
+  },
+  "escape": {
+    "data": {
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      },
+      "origin": "http://127.0.0.1:8766/#overview",
+      "result": {
+        "first": {
+          "dialogHidden": false,
+          "drawerHidden": true,
+          "focus": "fullscreen-filters"
+        },
+        "second": {
+          "dialogHidden": true,
+          "focus": "overview-fullscreen"
+        }
+      }
+    },
+    "details": {
+      "resultCategory": "success",
+      "successCategory": "completed"
+    },
+    "nextActions": [
+      {
+        "id": "inspect-after-mutation",
+        "params": {
+          "args": [
+            "snapshot",
+            "-i"
+          ]
+        },
+        "reason": "Refresh interactive refs after a browser mutation, navigation, scroll, or rerender.",
+        "safety": "Do not reuse prior @refs until a fresh snapshot confirms they still exist.",
+        "tool": "agent_browser"
+      }
+    ],
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "completed",
+    "summary": "Eval result: {",
+    "text": "{\n  \"first\": {\n    \"dialogHidden\": false,\n    \"drawerHidden\": true,\n    \"focus\": \"fullscreen-filters\"\n  },\n  \"second\": {\n    \"dialogHidden\": true,\n    \"focus\": \"overview-fullscreen\"\n  }\n}\n\nOrigin: http://127.0.0.1:8766/#overview"
+  },
+  "errors": {
+    "data": {
+      "errors": [],
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      }
+    },
+    "details": {
+      "resultCategory": "success",
+      "successCategory": "completed"
+    },
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "completed",
+    "summary": "Page errors: 0",
+    "text": "No page errors."
+  }
+}

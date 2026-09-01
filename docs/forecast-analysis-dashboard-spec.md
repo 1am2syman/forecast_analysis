@@ -505,7 +505,33 @@ Maximum Revision KL = max absolute consecutive-vintage change
 
 Stability metrics require at least two vintages. Otherwise they are null and the observation is marked insufficient history.
 
-### 9.15 Coverage metrics
+### 9.15 Parent vintage improvement score
+
+The revision scatter contains one bubble per parent. Its evidence window is the
+selected target-end month plus the preceding five target months, regardless of
+the target-start control. A parent is eligible only when all six target months
+have positive actuals and at least five forecast vintages; the five latest
+vintages are used for each target month.
+
+For each parent-target month, fit ordinary least-squares trends across vintage
+indices `0..4`:
+
+```text
+Monthly Forecast Trend = slope(Forecast / Actual × 100)
+Monthly Vintage Improvement = slope((1 − |Forecast − Actual| / Actual) × 100)
+```
+
+The forecast trend is percentage of actual per vintage. The vintage improvement
+score is forecast-accuracy percentage points per vintage; positive improves and
+negative degrades.
+
+Retain each monthly trend as calculated, including seasonal extremes. The
+parent bubble coordinates are the medians of the six monthly trends, preventing
+one volatile month from dominating without capping seasonal products. The
+six-month window, five vintages per month, 24 consecutive vintage changes, and
+improving/degrading month counts remain available as evidence.
+
+### 9.16 Coverage metrics
 
 Required coverage indicators:
 
@@ -597,6 +623,15 @@ Show:
 - reset-filters action;
 - expandable advanced and data-quality filters.
 
+The primary filters include a monthly `SKU Class` selection. Classification is
+calculated at national parent-product level from the six completed actual months
+immediately preceding each target month. Parents are ranked by rolling actual KL
+with `parent_code` as the deterministic tie-breaker. The parent crossing 70%
+remains Class A, the parent crossing 90% remains Class B, and remaining positive
+volume is Class C. Parents without positive rolling actuals are `Unclassified`.
+When a target month is later than the latest actual month, the latest complete
+classification snapshot is carried forward and its as-of month remains explicit.
+
 ### 11.2 KPI row
 
 For each selected source or comparison mode, show:
@@ -665,9 +700,23 @@ Show:
 - improved, worsened, neutral, and unchanged counts;
 - revised-up and revised-down percentages;
 - total error improvement KL;
-- scatter plot of revision amount versus error improvement;
-- point size by actual volume;
-- color by source or brand.
+- latest six target months ending at the maximum selected actual month as independent bands, excluding forecast-only future months, each containing an angular forecast-revision path;
+- shared delta-percent y-axis indexed to each target month's oldest forecast;
+- one endpoint rectangle for the latest vintage and no start marker;
+- color each within-month segment green, red, or gray based on whether that revision improved, worsened, or did not materially change forecast accuracy;
+- keep the net forecast-accuracy result in the endpoint tooltip rather than adding labels under the month bands;
+- provide a full-screen revision-path view with the same segment and endpoint tooltips;
+- fixed product cohort per target month so changing coverage does not create false oscillation;
+- parent-deduplicated scatter anchored to the selected target-end month;
+- six target months and five vintages per target month for every eligible parent;
+- x-axis: median normalized forecast trend across vintages;
+- y-axis: robust vintage improvement score in forecast-accuracy pp per vintage;
+- six-month median aggregation with seasonal extremes retained;
+- point size by six-month actual volume;
+- color by improvement, degradation, or neutral outcome;
+- a chart-local SKU Class filter whose available values are limited by the active global filter;
+- exclude all SKUs in the super-seasonal PA Bodylot (`PA-BDYLOT`), JFB Powder (`JFB_POWDR`), RK Cooling (`RK_CLO_R` and `RK_CLO_S`), Saff Honey (`SAF_HONEY`), and SP Petroleum Jelly (`BPA_PET_J`) brands;
+- exclude PCNO EJ SKUs whose parent description contains both `PCNO` and `EJ`, with all exclusions displayed in the chart header.
 
 ### 11.7 Source comparison
 

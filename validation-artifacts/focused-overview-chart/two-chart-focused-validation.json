@@ -1,0 +1,122 @@
+{
+  "normal": {
+    "data": {
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      },
+      "origin": "http://127.0.0.1:8766/#overview",
+      "result": {
+        "buttons": 2,
+        "panels": 2,
+        "volumeSeries": true
+      }
+    },
+    "details": {
+      "resultCategory": "success",
+      "successCategory": "completed"
+    },
+    "nextActions": [
+      {
+        "id": "inspect-after-mutation",
+        "params": {
+          "args": [
+            "snapshot",
+            "-i"
+          ]
+        },
+        "reason": "Refresh interactive refs after a browser mutation, navigation, scroll, or rerender.",
+        "safety": "Do not reuse prior @refs until a fresh snapshot confirms they still exist.",
+        "tool": "agent_browser"
+      }
+    ],
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "completed",
+    "summary": "Eval result: {",
+    "text": "{\n  \"buttons\": 2,\n  \"panels\": 2,\n  \"volumeSeries\": true\n}\n\nOrigin: http://127.0.0.1:8766/#overview"
+  },
+  "persist": {
+    "data": {
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      },
+      "origin": "http://127.0.0.1:8766/#overview",
+      "result": {
+        "dialog": true,
+        "drawer": true,
+        "source": "ml",
+        "volume": true
+      }
+    },
+    "details": {
+      "resultCategory": "success",
+      "successCategory": "completed"
+    },
+    "nextActions": [
+      {
+        "id": "inspect-after-mutation",
+        "params": {
+          "args": [
+            "snapshot",
+            "-i"
+          ]
+        },
+        "reason": "Refresh interactive refs after a browser mutation, navigation, scroll, or rerender.",
+        "safety": "Do not reuse prior @refs until a fresh snapshot confirms they still exist.",
+        "tool": "agent_browser"
+      }
+    ],
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "completed",
+    "summary": "Eval result: {",
+    "text": "{\n  \"dialog\": true,\n  \"drawer\": true,\n  \"source\": \"ml\",\n  \"volume\": true\n}\n\nOrigin: http://127.0.0.1:8766/#overview"
+  },
+  "errors": {
+    "data": {
+      "errors": [],
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      }
+    },
+    "details": {
+      "resultCategory": "success",
+      "successCategory": "completed"
+    },
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "completed",
+    "summary": "Page errors: 0",
+    "text": "No page errors."
+  }
+}

@@ -1,0 +1,962 @@
+{
+  "generatedAt": "2026-08-30T18:29:48.966Z",
+  "baseUrl": "http://127.0.0.1:41521/",
+  "semantic": {
+    "lang": "en",
+    "tabs": [
+      {
+        "name": "Overview",
+        "controls": "pane-overview"
+      },
+      {
+        "name": "Trends",
+        "controls": "pane-trends"
+      },
+      {
+        "name": "Comparison",
+        "controls": "pane-comparison"
+      },
+      {
+        "name": "Product history",
+        "controls": "pane-history"
+      },
+      {
+        "name": "Data quality",
+        "controls": "pane-quality"
+      }
+    ],
+    "panes": [
+      {
+        "id": "pane-overview",
+        "labelledBy": "tab-overview"
+      },
+      {
+        "id": "pane-trends",
+        "labelledBy": "tab-trends"
+      },
+      {
+        "id": "pane-comparison",
+        "labelledBy": "tab-comparison"
+      },
+      {
+        "id": "pane-history",
+        "labelledBy": "tab-history"
+      },
+      {
+        "id": "pane-quality",
+        "labelledBy": "tab-quality"
+      }
+    ],
+    "selected": 1,
+    "visible": 1,
+    "kpis": 6,
+    "liveChip": "Live data",
+    "syntheticText": false,
+    "scopeControls": 27,
+    "metricAttribution": "canonical dataset ready\npopulation · 16,035 forecast rows\nforecast_history_waterfall.csv · PH_FG.xlsx · secondary_sales\nmetrics computed by forecast_analysis",
+    "pageText": "Forecast performance\nAccuracy · bias · revisions · coverage\nInputs refreshed 8/30/2026, 9:29:48 AM\nLIVE DATA\nFILTERS · 0\nRESET\n\nNAVIGATE\n\nOverview\nKPIs · population\nTrends\nmonth · horizon · brand\nComparison\nvintages · TM vs ML\nProduct history\nstability · exceptions\nData quality\nstatuses · downloads\n–\nCANONICAL ANALYSIS DATA\nMETRIC CONTRACT · V2\nPerformance at a glance\nMODE\nSingle source\nSOURCE\nTM\nTARGET\nMay 2025–Dec 2026\nPRODUCTS\n141\nHORIZONS\nAll available\nCANONICAL · OLDEST_AVAILABLE → LATEST_AVAILABLE\nFORECAST ROWS\n8,515\nCOMPLETE PAIRS\n1,612\nCOVERAGE\n99.4%\nELIGIBLE ACTUAL\n43,387.7 KL\nData details\n\nFORECAST ACCURACY\n\n76.7%\n+0.5 pp\n\n1 − 10,118.2 KL / 43,387.7 KL · n 1,612\n\nBIAS\n\n17.9%\nover forecast\n\n+7,751.5 KL / 43,387.7 KL\n\nACTUAL VOLUME\n\n2,681.0 KL\n\nFORECAST VOLUME\n\n3,137.4 KL\n\nWAPE\n\n23.3%\n1,612 obs\n\n10,118.2 KL / 43,387.7 KL actual\n\nREVISION EFFECTIVENESS\n\n51.9%\n617 / 1,189\n\nimproved / materially revised\n\nMonthly vintage accuracy and bias\n\nCompare accuracy; bias is for Vintage B\n\nFULL SCREEN\n79%\n87%\n81%\n75%\n75%\n79%\n80%\n70%\n72%\n83%\n74%\n58%\n80%\n81%\n77%\n68%\n79%\n85%\n71%\n71%\n70%\n71%\n69%\n70%\n66%\n80%\n85%\n73%\n82%\n85%\n81%\n83%\nVINTAGE B BIAS\n8%\n13%\n27%\n27%\n29%\n18%\n20%\n19%\n33%\n15%\n12%\n18%\n17%\n8%\n14%\n15%\nMay2025\nJun2025\nJul2025\nAug2025\nSep2025\nOct2025\nNov2025\nDec2025\nJan2026\nFeb2026\nMar2026\nApr2026\nMay2026\nJun2026\nJul2026\nAug2026\nForecast versus actual volume\n\nVintage A, Vintage B and actual share one KL scale\n\nVINTAGE B\nVINTAGE A\nACTUAL\nFULL SCREEN\n'000 KL\n4.1\n3.6\n3.1\n2.6\n2.1\nMay2025\nJun2025\nJul2025\nAug2025\nSep2025\nOct2025\nNov2025\nDec2025\nJan2026\nFeb2026\nMar2026\nApr2026\nMay2026\nJun2026\nJul2026\nAug2026\ncanonical dataset ready\npopulation · 16,035 forecast rows\nforecast_history_waterfall.csv · PH_FG.xlsx · secondary_sales\nmetrics computed by forecast_analysis\nComputing active population"
+  },
+  "filtered": {
+    "filters": "Filters · 1",
+    "product": "703584",
+    "population": "FORECAST ROWS\n80\nCOMPLETE PAIRS\n16\nCOVERAGE\n100.0%\nELIGIBLE ACTUAL\n31.9 KL",
+    "scope": "MODE\nSingle source\nSOURCE\nTM\nTARGET\nMay 2025–Dec 2026\nPRODUCTS\n1\nHORIZONS\nAll available"
+  },
+  "comparison": "ALIGNED\nExact M−1 · 1,275 common product-target observations\nAligned at 1 month(s) ahead: 1,275 common observations, 430 TM-only, and 229 ML-only. Source-only observations are excluded from like-for-like accuracy, bias, and absolute-error KPIs but are included in source coverage and remain visible in counts and actual volumes.\nTM\nCOMMON POPULATION\nACCURACY\n79.2%\nBIAS\n14.2%\nABSOLUTE ERROR\n8,230.4 KL\nCOVERAGE\n92.5%\nML\nCOMMON POPULATION\nACCURACY\n81.8%\nBIAS\n2.3%\nABSOLUTE ERROR\n7,201.4 KL\nCOVERAGE\n97.5%\nML − TM FORECAST ACCURACY\n+2.6 pp\nML − TM BIAS\n-12.0 pp\nML − TM ABSOLUTE ERROR\n-1,029.0 KL\nML − TM COVERAGE\n+5.0 pp\nPaired absolute error\n\nPoints below the diagonal favour ML\n\nTM better 507 · ML better 734 · Tied 34\nAligned population\n\nCommon metrics and source coverage remain distinct\n\nactual KL\nPOPULATION\nOBS\nACTUAL\nSTATUS\nCommon\n1,275\n39,646.6 KL\nboth_sources\nTm Only\n430\n747.9 KL\ntm_only\nMl Only\n229\n2,920.2 KL\nml_only",
+  "product": {
+    "selected": "999173",
+    "summary": "PRODUCT\n999173\nDESCRIPTION\nPNS NC 70ML CHILD (F W Aloe Vera 250ML)\nBRAND\nUnmapped\nMAPPING\nUnmapped\nACTUAL\n—\nHISTORY\nEach selected source has at least two available vintages.",
+    "points": 2,
+    "stability": 1
+  },
+  "downloads": [
+    "forecast_tm_filtered_vintages.csv"
+  ],
+  "layouts": [
+    {
+      "viewport": "desktop",
+      "tab": "overview",
+      "pane": "pane-overview",
+      "pageVertical": 0,
+      "pageHorizontal": 0,
+      "bodyVertical": 0,
+      "railWidth": 232,
+      "tabNamesVisible": true,
+      "paneInsideViewport": true,
+      "visibleLoading": false
+    },
+    {
+      "viewport": "desktop",
+      "tab": "trends",
+      "pane": "pane-trends",
+      "pageVertical": 0,
+      "pageHorizontal": 0,
+      "bodyVertical": 0,
+      "railWidth": 232,
+      "tabNamesVisible": true,
+      "paneInsideViewport": true,
+      "visibleLoading": false
+    },
+    {
+      "viewport": "desktop",
+      "tab": "comparison",
+      "pane": "pane-comparison",
+      "pageVertical": 0,
+      "pageHorizontal": 0,
+      "bodyVertical": 0,
+      "railWidth": 232,
+      "tabNamesVisible": true,
+      "paneInsideViewport": true,
+      "visibleLoading": false
+    },
+    {
+      "viewport": "desktop",
+      "tab": "history",
+      "pane": "pane-history",
+      "pageVertical": 0,
+      "pageHorizontal": 0,
+      "bodyVertical": 0,
+      "railWidth": 232,
+      "tabNamesVisible": true,
+      "paneInsideViewport": true,
+      "visibleLoading": false
+    },
+    {
+      "viewport": "desktop",
+      "tab": "quality",
+      "pane": "pane-quality",
+      "pageVertical": 0,
+      "pageHorizontal": 0,
+      "bodyVertical": 0,
+      "railWidth": 232,
+      "tabNamesVisible": true,
+      "paneInsideViewport": true,
+      "visibleLoading": false
+    },
+    {
+      "viewport": "short",
+      "tab": "overview",
+      "pane": "pane-overview",
+      "pageVertical": 0,
+      "pageHorizontal": 0,
+      "bodyVertical": 0,
+      "railWidth": 232,
+      "tabNamesVisible": true,
+      "paneInsideViewport": true,
+      "visibleLoading": false
+    },
+    {
+      "viewport": "short",
+      "tab": "trends",
+      "pane": "pane-trends",
+      "pageVertical": 0,
+      "pageHorizontal": 0,
+      "bodyVertical": 0,
+      "railWidth": 232,
+      "tabNamesVisible": true,
+      "paneInsideViewport": true,
+      "visibleLoading": false
+    },
+    {
+      "viewport": "short",
+      "tab": "comparison",
+      "pane": "pane-comparison",
+      "pageVertical": 0,
+      "pageHorizontal": 0,
+      "bodyVertical": 0,
+      "railWidth": 232,
+      "tabNamesVisible": true,
+      "paneInsideViewport": true,
+      "visibleLoading": false
+    },
+    {
+      "viewport": "short",
+      "tab": "history",
+      "pane": "pane-history",
+      "pageVertical": 0,
+      "pageHorizontal": 0,
+      "bodyVertical": 0,
+      "railWidth": 232,
+      "tabNamesVisible": true,
+      "paneInsideViewport": true,
+      "visibleLoading": false
+    },
+    {
+      "viewport": "short",
+      "tab": "quality",
+      "pane": "pane-quality",
+      "pageVertical": 0,
+      "pageHorizontal": 0,
+      "bodyVertical": 0,
+      "railWidth": 232,
+      "tabNamesVisible": true,
+      "paneInsideViewport": true,
+      "visibleLoading": false
+    },
+    {
+      "viewport": "narrow",
+      "tab": "overview",
+      "pane": "pane-overview",
+      "pageVertical": 0,
+      "pageHorizontal": 0,
+      "bodyVertical": 0,
+      "railWidth": 76,
+      "tabNamesVisible": false,
+      "paneInsideViewport": true,
+      "visibleLoading": false
+    },
+    {
+      "viewport": "narrow",
+      "tab": "trends",
+      "pane": "pane-trends",
+      "pageVertical": 0,
+      "pageHorizontal": 0,
+      "bodyVertical": 0,
+      "railWidth": 76,
+      "tabNamesVisible": false,
+      "paneInsideViewport": true,
+      "visibleLoading": false
+    },
+    {
+      "viewport": "narrow",
+      "tab": "comparison",
+      "pane": "pane-comparison",
+      "pageVertical": 0,
+      "pageHorizontal": 0,
+      "bodyVertical": 0,
+      "railWidth": 76,
+      "tabNamesVisible": false,
+      "paneInsideViewport": true,
+      "visibleLoading": false
+    },
+    {
+      "viewport": "narrow",
+      "tab": "history",
+      "pane": "pane-history",
+      "pageVertical": 0,
+      "pageHorizontal": 0,
+      "bodyVertical": 0,
+      "railWidth": 76,
+      "tabNamesVisible": false,
+      "paneInsideViewport": true,
+      "visibleLoading": false
+    },
+    {
+      "viewport": "narrow",
+      "tab": "quality",
+      "pane": "pane-quality",
+      "pageVertical": 0,
+      "pageHorizontal": 0,
+      "bodyVertical": 0,
+      "railWidth": 76,
+      "tabNamesVisible": false,
+      "paneInsideViewport": true,
+      "visibleLoading": false
+    }
+  ],
+  "overviewAudits": [
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scopeTitle": "block",
+      "paneHeads": 0,
+      "health": {
+        "top": 117,
+        "left": 250,
+        "right": 1422,
+        "bottom": 149,
+        "width": 1172,
+        "height": 32
+      },
+      "chartTop": 252.5,
+      "detailsOpen": false,
+      "kpiLabels": [
+        "Forecast accuracy",
+        "Bias",
+        "Actual volume",
+        "Forecast volume",
+        "WAPE",
+        "Revision effectiveness"
+      ],
+      "kpiVisible": true,
+      "charts": [
+        {
+          "body": {
+            "top": 297.5,
+            "left": 251,
+            "right": 830.5,
+            "bottom": 846,
+            "width": 579.5,
+            "height": 548.5
+          },
+          "svg": {
+            "top": 297.5,
+            "left": 251,
+            "right": 830.5,
+            "bottom": 846,
+            "width": 579.5,
+            "height": 548.5
+          },
+          "viewBox": {
+            "width": 1000,
+            "height": 947
+          },
+          "aspectError": 0.0005223336371923257,
+          "contained": true
+        },
+        {
+          "body": {
+            "top": 297.5,
+            "left": 841.5,
+            "right": 1421,
+            "bottom": 846,
+            "width": 579.5,
+            "height": 548.5
+          },
+          "svg": {
+            "top": 297.5,
+            "left": 841.5,
+            "right": 1421,
+            "bottom": 846,
+            "width": 579.5,
+            "height": 548.5
+          },
+          "viewBox": {
+            "width": 1000,
+            "height": 947
+          },
+          "aspectError": 0.0005223336371923257,
+          "contained": true
+        }
+      ],
+      "volumeDomain": {
+        "domainMin": 2060.823448650958,
+        "domainMax": 4092.66039959104,
+        "dataMin": 2257.4528309999982,
+        "dataMax": 3896.031017242
+      }
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 720
+      },
+      "scopeTitle": "block",
+      "paneHeads": 0,
+      "health": {
+        "top": 114,
+        "left": 250,
+        "right": 1422,
+        "bottom": 146,
+        "width": 1172,
+        "height": 32
+      },
+      "chartTop": 241.5,
+      "detailsOpen": false,
+      "kpiLabels": [
+        "Forecast accuracy",
+        "Bias",
+        "Actual volume",
+        "Forecast volume",
+        "WAPE",
+        "Revision effectiveness"
+      ],
+      "kpiVisible": true,
+      "charts": [
+        {
+          "body": {
+            "top": 282.5,
+            "left": 251,
+            "right": 830.5,
+            "bottom": 668,
+            "width": 579.5,
+            "height": 385.5
+          },
+          "svg": {
+            "top": 282.5,
+            "left": 251,
+            "right": 830.5,
+            "bottom": 668,
+            "width": 579.5,
+            "height": 385.5
+          },
+          "viewBox": {
+            "width": 1000,
+            "height": 665
+          },
+          "aspectError": 0.00034370946822303905,
+          "contained": true
+        },
+        {
+          "body": {
+            "top": 282.5,
+            "left": 841.5,
+            "right": 1421,
+            "bottom": 668,
+            "width": 579.5,
+            "height": 385.5
+          },
+          "svg": {
+            "top": 282.5,
+            "left": 841.5,
+            "right": 1421,
+            "bottom": 668,
+            "width": 579.5,
+            "height": 385.5
+          },
+          "viewBox": {
+            "width": 1000,
+            "height": 665
+          },
+          "aspectError": 0.00034370946822303905,
+          "contained": true
+        }
+      ],
+      "volumeDomain": {
+        "domainMin": 2060.823448650958,
+        "domainMax": 4092.66039959104,
+        "dataMin": 2257.4528309999982,
+        "dataMax": 3896.031017242
+      }
+    },
+    {
+      "viewport": {
+        "width": 800,
+        "height": 700
+      },
+      "scopeTitle": "block",
+      "paneHeads": 0,
+      "health": {
+        "top": 114,
+        "left": 90,
+        "right": 786,
+        "bottom": 146,
+        "width": 696,
+        "height": 32
+      },
+      "chartTop": 241.5,
+      "detailsOpen": false,
+      "kpiLabels": [
+        "Forecast accuracy",
+        "Bias",
+        "Actual volume",
+        "Forecast volume",
+        "WAPE",
+        "Revision effectiveness"
+      ],
+      "kpiVisible": true,
+      "charts": [
+        {
+          "body": {
+            "top": 282.5,
+            "left": 91,
+            "right": 770,
+            "bottom": 540.5,
+            "width": 679,
+            "height": 258
+          },
+          "svg": {
+            "top": 282.5,
+            "left": 91,
+            "right": 770,
+            "bottom": 540.5,
+            "width": 679,
+            "height": 258
+          },
+          "viewBox": {
+            "width": 1000,
+            "height": 380
+          },
+          "aspectError": 0.00007751937984481038,
+          "contained": true
+        },
+        {
+          "body": {
+            "top": 591.5,
+            "left": 91,
+            "right": 770,
+            "bottom": 849.5,
+            "width": 679,
+            "height": 258
+          },
+          "svg": {
+            "top": 591.5,
+            "left": 91,
+            "right": 770,
+            "bottom": 849.5,
+            "width": 679,
+            "height": 258
+          },
+          "viewBox": {
+            "width": 1000,
+            "height": 380
+          },
+          "aspectError": 0.00007751937984481038,
+          "contained": true
+        }
+      ],
+      "volumeDomain": {
+        "domainMin": 2060.823448650958,
+        "domainMax": 4092.66039959104,
+        "dataMin": 2257.4528309999982,
+        "dataMax": 3896.031017242
+      }
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scopeTitle": "block",
+      "paneHeads": 0,
+      "health": {
+        "top": 117,
+        "left": 250,
+        "right": 1422,
+        "bottom": 149,
+        "width": 1172,
+        "height": 32
+      },
+      "chartTop": 252.5,
+      "detailsOpen": false,
+      "kpiLabels": [
+        "Forecast accuracy",
+        "Bias",
+        "Actual volume",
+        "Forecast volume",
+        "WAPE",
+        "Revision effectiveness"
+      ],
+      "kpiVisible": true,
+      "charts": [
+        {
+          "body": {
+            "top": 297.5,
+            "left": 251,
+            "right": 830.5,
+            "bottom": 846,
+            "width": 579.5,
+            "height": 548.5
+          },
+          "svg": {
+            "top": 297.5,
+            "left": 251,
+            "right": 830.5,
+            "bottom": 846,
+            "width": 579.5,
+            "height": 548.5
+          },
+          "viewBox": {
+            "width": 1000,
+            "height": 947
+          },
+          "aspectError": 0.0005223336371923257,
+          "contained": true
+        },
+        {
+          "body": {
+            "top": 297.5,
+            "left": 841.5,
+            "right": 1421,
+            "bottom": 846,
+            "width": 579.5,
+            "height": 548.5
+          },
+          "svg": {
+            "top": 297.5,
+            "left": 841.5,
+            "right": 1421,
+            "bottom": 846,
+            "width": 579.5,
+            "height": 548.5
+          },
+          "viewBox": {
+            "width": 1000,
+            "height": 947
+          },
+          "aspectError": 0.0005223336371923257,
+          "contained": true
+        }
+      ],
+      "volumeDomain": {
+        "domainMin": 2060.823448650958,
+        "domainMax": 4092.66039959104,
+        "dataMin": 2257.4528309999982,
+        "dataMax": 3896.031017242
+      }
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 720
+      },
+      "scopeTitle": "block",
+      "paneHeads": 0,
+      "health": {
+        "top": 114,
+        "left": 250,
+        "right": 1422,
+        "bottom": 146,
+        "width": 1172,
+        "height": 32
+      },
+      "chartTop": 241.5,
+      "detailsOpen": false,
+      "kpiLabels": [
+        "Forecast accuracy",
+        "Bias",
+        "Actual volume",
+        "Forecast volume",
+        "WAPE",
+        "Revision effectiveness"
+      ],
+      "kpiVisible": true,
+      "charts": [
+        {
+          "body": {
+            "top": 282.5,
+            "left": 251,
+            "right": 830.5,
+            "bottom": 668,
+            "width": 579.5,
+            "height": 385.5
+          },
+          "svg": {
+            "top": 282.5,
+            "left": 251,
+            "right": 830.5,
+            "bottom": 668,
+            "width": 579.5,
+            "height": 385.5
+          },
+          "viewBox": {
+            "width": 1000,
+            "height": 665
+          },
+          "aspectError": 0.00034370946822303905,
+          "contained": true
+        },
+        {
+          "body": {
+            "top": 282.5,
+            "left": 841.5,
+            "right": 1421,
+            "bottom": 668,
+            "width": 579.5,
+            "height": 385.5
+          },
+          "svg": {
+            "top": 282.5,
+            "left": 841.5,
+            "right": 1421,
+            "bottom": 668,
+            "width": 579.5,
+            "height": 385.5
+          },
+          "viewBox": {
+            "width": 1000,
+            "height": 665
+          },
+          "aspectError": 0.00034370946822303905,
+          "contained": true
+        }
+      ],
+      "volumeDomain": {
+        "domainMin": 2060.823448650958,
+        "domainMax": 4092.66039959104,
+        "dataMin": 2257.4528309999982,
+        "dataMax": 3896.031017242
+      }
+    },
+    {
+      "viewport": {
+        "width": 1018,
+        "height": 700
+      },
+      "scopeTitle": "block",
+      "paneHeads": 0,
+      "health": {
+        "top": 114,
+        "left": 90,
+        "right": 1000,
+        "bottom": 146,
+        "width": 910,
+        "height": 32
+      },
+      "chartTop": 241.5,
+      "detailsOpen": false,
+      "kpiLabels": [
+        "Forecast accuracy",
+        "Bias",
+        "Actual volume",
+        "Forecast volume",
+        "WAPE",
+        "Revision effectiveness"
+      ],
+      "kpiVisible": true,
+      "charts": [
+        {
+          "body": {
+            "top": 282.5,
+            "left": 91,
+            "right": 984,
+            "bottom": 540.5,
+            "width": 893,
+            "height": 258
+          },
+          "svg": {
+            "top": 282.5,
+            "left": 91,
+            "right": 984,
+            "bottom": 540.5,
+            "width": 893,
+            "height": 258
+          },
+          "viewBox": {
+            "width": 1000,
+            "height": 289
+          },
+          "aspectError": 0.0002984496124030325,
+          "contained": true
+        },
+        {
+          "body": {
+            "top": 591.5,
+            "left": 91,
+            "right": 984,
+            "bottom": 849.5,
+            "width": 893,
+            "height": 258
+          },
+          "svg": {
+            "top": 591.5,
+            "left": 91,
+            "right": 984,
+            "bottom": 849.5,
+            "width": 893,
+            "height": 258
+          },
+          "viewBox": {
+            "width": 1000,
+            "height": 289
+          },
+          "aspectError": 0.0002984496124030325,
+          "contained": true
+        }
+      ],
+      "volumeDomain": {
+        "domainMin": 2060.823448650958,
+        "domainMax": 4092.66039959104,
+        "dataMin": 2257.4528309999982,
+        "dataMax": 3896.031017242
+      }
+    },
+    {
+      "viewport": {
+        "width": 800,
+        "height": 700
+      },
+      "scopeTitle": "block",
+      "paneHeads": 0,
+      "health": {
+        "top": 114,
+        "left": 90,
+        "right": 786,
+        "bottom": 146,
+        "width": 696,
+        "height": 32
+      },
+      "chartTop": 241.5,
+      "detailsOpen": false,
+      "kpiLabels": [
+        "Forecast accuracy",
+        "Bias",
+        "Actual volume",
+        "Forecast volume",
+        "WAPE",
+        "Revision effectiveness"
+      ],
+      "kpiVisible": true,
+      "charts": [
+        {
+          "body": {
+            "top": 282.5,
+            "left": 91,
+            "right": 770,
+            "bottom": 540.5,
+            "width": 679,
+            "height": 258
+          },
+          "svg": {
+            "top": 282.5,
+            "left": 91,
+            "right": 770,
+            "bottom": 540.5,
+            "width": 679,
+            "height": 258
+          },
+          "viewBox": {
+            "width": 1000,
+            "height": 380
+          },
+          "aspectError": 0.00007751937984481038,
+          "contained": true
+        },
+        {
+          "body": {
+            "top": 591.5,
+            "left": 91,
+            "right": 770,
+            "bottom": 849.5,
+            "width": 679,
+            "height": 258
+          },
+          "svg": {
+            "top": 591.5,
+            "left": 91,
+            "right": 770,
+            "bottom": 849.5,
+            "width": 679,
+            "height": 258
+          },
+          "viewBox": {
+            "width": 1000,
+            "height": 380
+          },
+          "aspectError": 0.00007751937984481038,
+          "contained": true
+        }
+      ],
+      "volumeDomain": {
+        "domainMin": 2060.823448650958,
+        "domainMax": 4092.66039959104,
+        "dataMin": 2257.4528309999982,
+        "dataMax": 3896.031017242
+      }
+    }
+  ],
+  "screenshots": [
+    {
+      "name": "1440-900-overview.png",
+      "tab": "overview",
+      "viewport": "desktop",
+      "sha256": "2407b198f78f4b994b7c165df6a9d050bc533a9691c7484308a1859b045c44fc"
+    },
+    {
+      "name": "1440-900-trends.png",
+      "tab": "trends",
+      "viewport": "desktop",
+      "sha256": "2e427de50cf1ac67136c5456fb07e472e79fd47b71ef3c14842245ca749c9786"
+    },
+    {
+      "name": "1440-900-comparison.png",
+      "tab": "comparison",
+      "viewport": "desktop",
+      "sha256": "069db93c0dc28d0fcf36e0b04bcd30874ea89ce389ce9375d0265da6f273d456"
+    },
+    {
+      "name": "1440-900-history.png",
+      "tab": "history",
+      "viewport": "desktop",
+      "sha256": "951a7377ef954c5de1b92d53994ba2ac23e6f95879d173c37e27a0969bf6b258"
+    },
+    {
+      "name": "1440-900-quality.png",
+      "tab": "quality",
+      "viewport": "desktop",
+      "sha256": "e73c96138ca529333cab76acffd0cfc708b688c69880fcf66b41d8e789f3f5ac"
+    },
+    {
+      "name": "1440-720-overview.png",
+      "tab": "overview",
+      "viewport": "short",
+      "sha256": "2939aa5b2e0dfd2fad96f359f03b3f0fa8d9ec4938a3e49b34861619affa4856"
+    },
+    {
+      "name": "1440-720-trends.png",
+      "tab": "trends",
+      "viewport": "short",
+      "sha256": "ad667c73a451c754eb12b75cf260aed67933c56b6e0ad93ac04563a8830a717f"
+    },
+    {
+      "name": "1440-720-comparison.png",
+      "tab": "comparison",
+      "viewport": "short",
+      "sha256": "78a73d8adbe98b0d1190bedd5dbec1d04614088e04e333c61dd76cf16e0fef4e"
+    },
+    {
+      "name": "1440-720-history.png",
+      "tab": "history",
+      "viewport": "short",
+      "sha256": "1c93f430313860f0c65a9184789b38d5b6496c69e777e5b27dd1fdf7490b2175"
+    },
+    {
+      "name": "1440-720-quality.png",
+      "tab": "quality",
+      "viewport": "short",
+      "sha256": "88d8bc099b276e2082f679ffeaf32912f34f7d7cbc7f072b36193f7f285d0f6e"
+    },
+    {
+      "name": "800-700-overview.png",
+      "tab": "overview",
+      "viewport": "narrow",
+      "sha256": "e56cc81a81d5ee3ac415440cd4b2c2e19d962dba9a1e1a0056fa114776431bd2"
+    },
+    {
+      "name": "800-700-trends.png",
+      "tab": "trends",
+      "viewport": "narrow",
+      "sha256": "f77905e93d3296c9e4b227d7ad8088992d2188c7762a20fc1647e112229c5307"
+    },
+    {
+      "name": "800-700-comparison.png",
+      "tab": "comparison",
+      "viewport": "narrow",
+      "sha256": "bd10af10b3730ba3b35748dc7fb0ea129bc812fb72b822e5699b9ff7529c62f5"
+    },
+    {
+      "name": "800-700-history.png",
+      "tab": "history",
+      "viewport": "narrow",
+      "sha256": "36667d30ed539d31204bc2f89083cf1f8bc73ab2ac0c679a100eb31e78424b24"
+    },
+    {
+      "name": "800-700-quality.png",
+      "tab": "quality",
+      "viewport": "narrow",
+      "sha256": "0c4260477fedd412926c818309154966acf991f78632df2e521c8d012dd72094"
+    }
+  ],
+  "focusedScreenshots": [
+    {
+      "name": "focused-1440-900-overview.png",
+      "tab": "overview",
+      "viewport": "desktop-focus",
+      "sha256": "15ee555d015eb93b01e5aa12a806a947469861c03bb8d0c2ae0bbd297a7e19bd"
+    },
+    {
+      "name": "focused-1440-720-overview.png",
+      "tab": "overview",
+      "viewport": "short-focus",
+      "sha256": "45824c53bef2e4dc7ead97dd4fb52833fa99f6f35c9380a155f5fc5ab1274c0d"
+    },
+    {
+      "name": "focused-1018-700-overview.png",
+      "tab": "overview",
+      "viewport": "supplied-width-focus",
+      "sha256": "a467634ccc94d0f050e04a0d251e21528f0bdca6f9419aff081af7bb4d44a99d"
+    },
+    {
+      "name": "focused-800-700-overview.png",
+      "tab": "overview",
+      "viewport": "narrow-focus",
+      "sha256": "9255682933deea156b65a0d290c7d658650c3ef9fccfb227a818a6ee050fa6d8"
+    }
+  ],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "networkFailures": [],
+  "httpErrors": []
+}

@@ -1,0 +1,420 @@
+{
+  "open": {
+    "data": {
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": true,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": false,
+        "saveStatus": "not_attempted"
+      },
+      "targetId": "7EA58746EFBB25FCD30DA10E26215DF8",
+      "title": "Forecast performance · live analysis",
+      "url": "http://127.0.0.1:8766/#overview"
+    },
+    "details": {
+      "pageChangeSummary": {
+        "changeType": "navigation",
+        "command": "open",
+        "nextActionIds": [
+          "inspect-opened-page"
+        ],
+        "observed": true,
+        "summary": "open → navigation → Forecast performance · live analysis → http://127.0.0.1:8766/#overview",
+        "title": "Forecast performance · live analysis",
+        "url": "http://127.0.0.1:8766/#overview"
+      },
+      "resultCategory": "success",
+      "successCategory": "completed"
+    },
+    "nextActions": [
+      {
+        "id": "inspect-opened-page",
+        "params": {
+          "args": [
+            "snapshot",
+            "-i"
+          ]
+        },
+        "reason": "Inspect the opened page before choosing interactive refs.",
+        "tool": "agent_browser"
+      }
+    ],
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "completed",
+    "summary": "Forecast performance · live analysis",
+    "text": "Forecast performance · live analysis\nhttp://127.0.0.1:8766/#overview"
+  },
+  "viewport": {
+    "data": {
+      "deviceScaleFactor": 1,
+      "height": 900,
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      },
+      "mobile": false,
+      "width": 1440
+    },
+    "details": {
+      "resultCategory": "success",
+      "successCategory": "completed"
+    },
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "completed",
+    "summary": "set completed",
+    "text": "{\n  \"deviceScaleFactor\": 1,\n  \"height\": 900,\n  \"mobile\": false,\n  \"width\": 1440\n}"
+  },
+  "wait": {
+    "data": {
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      },
+      "text": "Performance at a glance",
+      "waited": "text"
+    },
+    "details": {
+      "resultCategory": "success",
+      "successCategory": "completed"
+    },
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "completed",
+    "summary": "Wait completed: Performance at a glance",
+    "text": "Wait completed: Performance at a glance"
+  },
+  "expanded": {
+    "data": {
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      },
+      "origin": "http://127.0.0.1:8766/#overview",
+      "result": {
+        "allTwoLines": true,
+        "collapsed": false,
+        "labels": [
+          "Overview",
+          "Trends",
+          "Comparison",
+          "Product history",
+          "Data quality"
+        ]
+      }
+    },
+    "details": {
+      "resultCategory": "success",
+      "successCategory": "completed"
+    },
+    "nextActions": [
+      {
+        "id": "inspect-after-mutation",
+        "params": {
+          "args": [
+            "snapshot",
+            "-i"
+          ]
+        },
+        "reason": "Refresh interactive refs after a browser mutation, navigation, scroll, or rerender.",
+        "safety": "Do not reuse prior @refs until a fresh snapshot confirms they still exist.",
+        "tool": "agent_browser"
+      }
+    ],
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "completed",
+    "summary": "Eval result: {",
+    "text": "{\n  \"allTwoLines\": true,\n  \"collapsed\": false,\n  \"labels\": [\n    \"Overview\",\n    \"Trends\",\n    \"Comparison\",\n    \"Product history\",\n    \"Data quality\"\n  ]\n}\n\nOrigin: http://127.0.0.1:8766/#overview"
+  },
+  "expandedShot": {
+    "data": {
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      },
+      "path": "/root/GitHub/forecast_analysis/validation-artifacts/focused-nav-feedback/navigation-expanded.png"
+    },
+    "details": {
+      "artifactVerification": {
+        "artifacts": [
+          {
+            "absolutePath": "/root/GitHub/forecast_analysis/validation-artifacts/focused-nav-feedback/navigation-expanded.png",
+            "exists": true,
+            "kind": "image",
+            "mediaType": "image/png",
+            "path": "validation-artifacts/focused-nav-feedback/navigation-expanded.png",
+            "requestedPath": "validation-artifacts/focused-nav-feedback/navigation-expanded.png",
+            "retentionState": "live",
+            "sizeBytes": 152274,
+            "state": "verified",
+            "status": "saved",
+            "storageScope": "explicit-path",
+            "updatedAtMs": 1788088515096.972
+          }
+        ],
+        "missingCount": 0,
+        "pendingCount": 0,
+        "unverifiedCount": 0,
+        "verified": true,
+        "verifiedCount": 1
+      },
+      "artifacts": [
+        {
+          "absolutePath": "/root/GitHub/forecast_analysis/validation-artifacts/focused-nav-feedback/navigation-expanded.png",
+          "artifactType": "image",
+          "command": "screenshot",
+          "cwd": "/root/GitHub/forecast_analysis",
+          "exists": true,
+          "extension": ".png",
+          "kind": "image",
+          "mediaType": "image/png",
+          "namespace": "",
+          "path": "validation-artifacts/focused-nav-feedback/navigation-expanded.png",
+          "requestedPath": "validation-artifacts/focused-nav-feedback/navigation-expanded.png",
+          "session": "piab-script-eb4af550-4992-4865-bdf1-b7d193f0865c",
+          "sizeBytes": 152274,
+          "status": "saved",
+          "subcommand": "/root/GitHub/forecast_analysis/validation-artifacts/focused-nav-feedback/navigation-expanded.png",
+          "updatedAtMs": 1788088515096.972
+        }
+      ],
+      "pageChangeSummary": {
+        "artifactCount": 1,
+        "changeType": "artifact",
+        "command": "screenshot",
+        "nextActionIds": [
+          "use-saved-artifact"
+        ],
+        "observed": true,
+        "summary": "screenshot → artifact → 1 artifact"
+      },
+      "resultCategory": "success",
+      "successCategory": "artifact-saved"
+    },
+    "nextActions": [
+      {
+        "artifactPath": "validation-artifacts/focused-nav-feedback/navigation-expanded.png",
+        "id": "use-saved-artifact",
+        "reason": "Use the saved artifact path from the structured result instead of scraping it from text.",
+        "safety": "Verify artifact metadata such as exists/status before treating the file as durable.",
+        "tool": "agent_browser"
+      }
+    ],
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "artifact-saved",
+    "summary": "Saved image: validation-artifacts/focused-nav-feedback/navigation-expanded.png",
+    "text": "Saved image: validation-artifacts/focused-nav-feedback/navigation-expanded.png\nArtifact type: image\nRequested path: validation-artifacts/focused-nav-feedback/navigation-expanded.png\nAbsolute path: /root/GitHub/forecast_analysis/validation-artifacts/focused-nav-feedback/navigation-expanded.png\nExists: true\nSize: 148.7 KiB\nSize bytes: 152274\nStatus: saved\nMedia type: image/png\nSession: piab-script-eb4af550-4992-4865-bdf1-b7d193f0865c\nCWD: /root/GitHub/forecast_analysis\nMachine data: details.artifacts[0]"
+  },
+  "collapsed": {
+    "data": {
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      },
+      "origin": "http://127.0.0.1:8766/#overview",
+      "result": {
+        "allCopyHidden": true,
+        "allIconsVisible": true,
+        "allNamesHidden": true,
+        "allTooltipsNamed": true,
+        "collapsed": true,
+        "iconCount": 5,
+        "overflowX": 0
+      }
+    },
+    "details": {
+      "resultCategory": "success",
+      "successCategory": "completed"
+    },
+    "nextActions": [
+      {
+        "id": "inspect-after-mutation",
+        "params": {
+          "args": [
+            "snapshot",
+            "-i"
+          ]
+        },
+        "reason": "Refresh interactive refs after a browser mutation, navigation, scroll, or rerender.",
+        "safety": "Do not reuse prior @refs until a fresh snapshot confirms they still exist.",
+        "tool": "agent_browser"
+      }
+    ],
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "completed",
+    "summary": "Eval result: {",
+    "text": "{\n  \"allCopyHidden\": true,\n  \"allIconsVisible\": true,\n  \"allNamesHidden\": true,\n  \"allTooltipsNamed\": true,\n  \"collapsed\": true,\n  \"iconCount\": 5,\n  \"overflowX\": 0\n}\n\nOrigin: http://127.0.0.1:8766/#overview"
+  },
+  "collapsedShot": {
+    "data": {
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      },
+      "path": "/root/GitHub/forecast_analysis/validation-artifacts/focused-nav-feedback/navigation-collapsed.png"
+    },
+    "details": {
+      "artifactVerification": {
+        "artifacts": [
+          {
+            "absolutePath": "/root/GitHub/forecast_analysis/validation-artifacts/focused-nav-feedback/navigation-collapsed.png",
+            "exists": true,
+            "kind": "image",
+            "mediaType": "image/png",
+            "path": "validation-artifacts/focused-nav-feedback/navigation-collapsed.png",
+            "requestedPath": "validation-artifacts/focused-nav-feedback/navigation-collapsed.png",
+            "retentionState": "live",
+            "sizeBytes": 147183,
+            "state": "verified",
+            "status": "saved",
+            "storageScope": "explicit-path",
+            "updatedAtMs": 1788088515593.9626
+          }
+        ],
+        "missingCount": 0,
+        "pendingCount": 0,
+        "unverifiedCount": 0,
+        "verified": true,
+        "verifiedCount": 1
+      },
+      "artifacts": [
+        {
+          "absolutePath": "/root/GitHub/forecast_analysis/validation-artifacts/focused-nav-feedback/navigation-collapsed.png",
+          "artifactType": "image",
+          "command": "screenshot",
+          "cwd": "/root/GitHub/forecast_analysis",
+          "exists": true,
+          "extension": ".png",
+          "kind": "image",
+          "mediaType": "image/png",
+          "namespace": "",
+          "path": "validation-artifacts/focused-nav-feedback/navigation-collapsed.png",
+          "requestedPath": "validation-artifacts/focused-nav-feedback/navigation-collapsed.png",
+          "session": "piab-script-eb4af550-4992-4865-bdf1-b7d193f0865c",
+          "sizeBytes": 147183,
+          "status": "saved",
+          "subcommand": "/root/GitHub/forecast_analysis/validation-artifacts/focused-nav-feedback/navigation-collapsed.png",
+          "updatedAtMs": 1788088515593.9626
+        }
+      ],
+      "pageChangeSummary": {
+        "artifactCount": 1,
+        "changeType": "artifact",
+        "command": "screenshot",
+        "nextActionIds": [
+          "use-saved-artifact"
+        ],
+        "observed": true,
+        "summary": "screenshot → artifact → 1 artifact"
+      },
+      "resultCategory": "success",
+      "successCategory": "artifact-saved"
+    },
+    "nextActions": [
+      {
+        "artifactPath": "validation-artifacts/focused-nav-feedback/navigation-collapsed.png",
+        "id": "use-saved-artifact",
+        "reason": "Use the saved artifact path from the structured result instead of scraping it from text.",
+        "safety": "Verify artifact metadata such as exists/status before treating the file as durable.",
+        "tool": "agent_browser"
+      }
+    ],
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "artifact-saved",
+    "summary": "Saved image: validation-artifacts/focused-nav-feedback/navigation-collapsed.png",
+    "text": "Saved image: validation-artifacts/focused-nav-feedback/navigation-collapsed.png\nArtifact type: image\nRequested path: validation-artifacts/focused-nav-feedback/navigation-collapsed.png\nAbsolute path: /root/GitHub/forecast_analysis/validation-artifacts/focused-nav-feedback/navigation-collapsed.png\nExists: true\nSize: 143.7 KiB\nSize bytes: 147183\nStatus: saved\nMedia type: image/png\nSession: piab-script-eb4af550-4992-4865-bdf1-b7d193f0865c\nCWD: /root/GitHub/forecast_analysis\nMachine data: details.artifacts[0]"
+  },
+  "errors": {
+    "data": {
+      "errors": [],
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      }
+    },
+    "details": {
+      "resultCategory": "success",
+      "successCategory": "completed"
+    },
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "completed",
+    "summary": "Page errors: 0",
+    "text": "No page errors."
+  }
+}

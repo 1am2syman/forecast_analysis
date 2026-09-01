@@ -1,0 +1,13 @@
+# Throwaway / generated content — excluded from the graphify knowledge graph
+validation-artifacts/
+.scratch/
+.unlazy/
+artifacts/
+site/
+__marimo__/
+__pycache__/
+graphify-out/
+*.png
+*.jpg
+*.jpeg
+*.webp

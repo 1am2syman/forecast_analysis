@@ -1,0 +1,308 @@
+{
+  "normal": {
+    "data": {
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      },
+      "origin": "http://127.0.0.1:8766/#overview",
+      "result": {
+        "leftHeaderLegend": 0,
+        "normalData": "14.25px",
+        "normalLine": "4.8px",
+        "normalMonth": "12px"
+      }
+    },
+    "details": {
+      "resultCategory": "success",
+      "successCategory": "completed"
+    },
+    "nextActions": [
+      {
+        "id": "inspect-after-mutation",
+        "params": {
+          "args": [
+            "snapshot",
+            "-i"
+          ]
+        },
+        "reason": "Refresh interactive refs after a browser mutation, navigation, scroll, or rerender.",
+        "safety": "Do not reuse prior @refs until a fresh snapshot confirms they still exist.",
+        "tool": "agent_browser"
+      }
+    ],
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "completed",
+    "summary": "Eval result: {",
+    "text": "{\n  \"leftHeaderLegend\": 0,\n  \"normalData\": \"14.25px\",\n  \"normalLine\": \"4.8px\",\n  \"normalMonth\": \"12px\"\n}\n\nOrigin: http://127.0.0.1:8766/#overview"
+  },
+  "normalShot": {
+    "data": {
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      },
+      "path": "/root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/normal-no-overlap-legend.png"
+    },
+    "details": {
+      "artifactVerification": {
+        "artifacts": [
+          {
+            "absolutePath": "/root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/normal-no-overlap-legend.png",
+            "exists": true,
+            "kind": "image",
+            "mediaType": "image/png",
+            "path": "validation-artifacts/focused-overview-chart/normal-no-overlap-legend.png",
+            "requestedPath": "validation-artifacts/focused-overview-chart/normal-no-overlap-legend.png",
+            "retentionState": "live",
+            "sizeBytes": 162871,
+            "state": "verified",
+            "status": "saved",
+            "storageScope": "explicit-path",
+            "updatedAtMs": 1788098778662.659
+          }
+        ],
+        "missingCount": 0,
+        "pendingCount": 0,
+        "unverifiedCount": 0,
+        "verified": true,
+        "verifiedCount": 1
+      },
+      "artifacts": [
+        {
+          "absolutePath": "/root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/normal-no-overlap-legend.png",
+          "artifactType": "image",
+          "command": "screenshot",
+          "cwd": "/root/GitHub/forecast_analysis",
+          "exists": true,
+          "extension": ".png",
+          "kind": "image",
+          "mediaType": "image/png",
+          "namespace": "",
+          "path": "validation-artifacts/focused-overview-chart/normal-no-overlap-legend.png",
+          "requestedPath": "validation-artifacts/focused-overview-chart/normal-no-overlap-legend.png",
+          "session": "piab-script-ed157eac-f74b-41ca-bf05-863762d5689c",
+          "sizeBytes": 162871,
+          "status": "saved",
+          "subcommand": "/root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/normal-no-overlap-legend.png",
+          "updatedAtMs": 1788098778662.659
+        }
+      ],
+      "pageChangeSummary": {
+        "artifactCount": 1,
+        "changeType": "artifact",
+        "command": "screenshot",
+        "nextActionIds": [
+          "use-saved-artifact"
+        ],
+        "observed": true,
+        "summary": "screenshot → artifact → 1 artifact"
+      },
+      "resultCategory": "success",
+      "successCategory": "artifact-saved"
+    },
+    "nextActions": [
+      {
+        "artifactPath": "validation-artifacts/focused-overview-chart/normal-no-overlap-legend.png",
+        "id": "use-saved-artifact",
+        "reason": "Use the saved artifact path from the structured result instead of scraping it from text.",
+        "safety": "Verify artifact metadata such as exists/status before treating the file as durable.",
+        "tool": "agent_browser"
+      }
+    ],
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "artifact-saved",
+    "summary": "Saved image: validation-artifacts/focused-overview-chart/normal-no-overlap-legend.png",
+    "text": "Saved image: validation-artifacts/focused-overview-chart/normal-no-overlap-legend.png\nArtifact type: image\nRequested path: validation-artifacts/focused-overview-chart/normal-no-overlap-legend.png\nAbsolute path: /root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/normal-no-overlap-legend.png\nExists: true\nSize: 159.1 KiB\nSize bytes: 162871\nStatus: saved\nMedia type: image/png\nSession: piab-script-ed157eac-f74b-41ca-bf05-863762d5689c\nCWD: /root/GitHub/forecast_analysis\nMachine data: details.artifacts[0]"
+  },
+  "full": {
+    "data": {
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      },
+      "origin": "http://127.0.0.1:8766/#overview",
+      "result": {
+        "bias": "9.5px",
+        "data": "10.5px",
+        "dialogLegend": [
+          "Vintage B",
+          "Vintage A",
+          "Over bias",
+          "Under bias"
+        ],
+        "line": "3.8px",
+        "month": "10px",
+        "section": "9px"
+      }
+    },
+    "details": {
+      "resultCategory": "success",
+      "successCategory": "completed"
+    },
+    "nextActions": [
+      {
+        "id": "inspect-after-mutation",
+        "params": {
+          "args": [
+            "snapshot",
+            "-i"
+          ]
+        },
+        "reason": "Refresh interactive refs after a browser mutation, navigation, scroll, or rerender.",
+        "safety": "Do not reuse prior @refs until a fresh snapshot confirms they still exist.",
+        "tool": "agent_browser"
+      }
+    ],
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "completed",
+    "summary": "Eval result: {",
+    "text": "{\n  \"bias\": \"9.5px\",\n  \"data\": \"10.5px\",\n  \"dialogLegend\": [\n    \"Vintage B\",\n    \"Vintage A\",\n    \"Over bias\",\n    \"Under bias\"\n  ],\n  \"line\": \"3.8px\",\n  \"month\": \"10px\",\n  \"section\": \"9px\"\n}\n\nOrigin: http://127.0.0.1:8766/#overview"
+  },
+  "fullShot": {
+    "data": {
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      },
+      "path": "/root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/fullscreen-notched-down.png"
+    },
+    "details": {
+      "artifactVerification": {
+        "artifacts": [
+          {
+            "absolutePath": "/root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/fullscreen-notched-down.png",
+            "exists": true,
+            "kind": "image",
+            "mediaType": "image/png",
+            "path": "validation-artifacts/focused-overview-chart/fullscreen-notched-down.png",
+            "requestedPath": "validation-artifacts/focused-overview-chart/fullscreen-notched-down.png",
+            "retentionState": "live",
+            "sizeBytes": 137646,
+            "state": "verified",
+            "status": "saved",
+            "storageScope": "explicit-path",
+            "updatedAtMs": 1788098779485.649
+          }
+        ],
+        "missingCount": 0,
+        "pendingCount": 0,
+        "unverifiedCount": 0,
+        "verified": true,
+        "verifiedCount": 1
+      },
+      "artifacts": [
+        {
+          "absolutePath": "/root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/fullscreen-notched-down.png",
+          "artifactType": "image",
+          "command": "screenshot",
+          "cwd": "/root/GitHub/forecast_analysis",
+          "exists": true,
+          "extension": ".png",
+          "kind": "image",
+          "mediaType": "image/png",
+          "namespace": "",
+          "path": "validation-artifacts/focused-overview-chart/fullscreen-notched-down.png",
+          "requestedPath": "validation-artifacts/focused-overview-chart/fullscreen-notched-down.png",
+          "session": "piab-script-ed157eac-f74b-41ca-bf05-863762d5689c",
+          "sizeBytes": 137646,
+          "status": "saved",
+          "subcommand": "/root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/fullscreen-notched-down.png",
+          "updatedAtMs": 1788098779485.649
+        }
+      ],
+      "pageChangeSummary": {
+        "artifactCount": 1,
+        "changeType": "artifact",
+        "command": "screenshot",
+        "nextActionIds": [
+          "use-saved-artifact"
+        ],
+        "observed": true,
+        "summary": "screenshot → artifact → 1 artifact"
+      },
+      "resultCategory": "success",
+      "successCategory": "artifact-saved"
+    },
+    "nextActions": [
+      {
+        "artifactPath": "validation-artifacts/focused-overview-chart/fullscreen-notched-down.png",
+        "id": "use-saved-artifact",
+        "reason": "Use the saved artifact path from the structured result instead of scraping it from text.",
+        "safety": "Verify artifact metadata such as exists/status before treating the file as durable.",
+        "tool": "agent_browser"
+      }
+    ],
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "artifact-saved",
+    "summary": "Saved image: validation-artifacts/focused-overview-chart/fullscreen-notched-down.png",
+    "text": "Saved image: validation-artifacts/focused-overview-chart/fullscreen-notched-down.png\nArtifact type: image\nRequested path: validation-artifacts/focused-overview-chart/fullscreen-notched-down.png\nAbsolute path: /root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/fullscreen-notched-down.png\nExists: true\nSize: 134.4 KiB\nSize bytes: 137646\nStatus: saved\nMedia type: image/png\nSession: piab-script-ed157eac-f74b-41ca-bf05-863762d5689c\nCWD: /root/GitHub/forecast_analysis\nMachine data: details.artifacts[0]"
+  },
+  "errors": {
+    "data": {
+      "errors": [],
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      }
+    },
+    "details": {
+      "resultCategory": "success",
+      "successCategory": "completed"
+    },
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "completed",
+    "summary": "Page errors: 0",
+    "text": "No page errors."
+  }
+}

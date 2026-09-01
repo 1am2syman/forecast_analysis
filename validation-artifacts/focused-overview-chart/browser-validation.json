@@ -1,0 +1,308 @@
+{
+  "open": {
+    "data": {
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": true,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": false,
+        "saveStatus": "not_attempted"
+      },
+      "targetId": "3CBFB9F961C646A5C505631D4FA33691",
+      "title": "Forecast performance · live analysis",
+      "url": "http://127.0.0.1:8766/#overview"
+    },
+    "details": {
+      "pageChangeSummary": {
+        "changeType": "navigation",
+        "command": "open",
+        "nextActionIds": [
+          "inspect-opened-page"
+        ],
+        "observed": true,
+        "summary": "open → navigation → Forecast performance · live analysis → http://127.0.0.1:8766/#overview",
+        "title": "Forecast performance · live analysis",
+        "url": "http://127.0.0.1:8766/#overview"
+      },
+      "resultCategory": "success",
+      "successCategory": "completed"
+    },
+    "nextActions": [
+      {
+        "id": "inspect-opened-page",
+        "params": {
+          "args": [
+            "snapshot",
+            "-i"
+          ]
+        },
+        "reason": "Inspect the opened page before choosing interactive refs.",
+        "tool": "agent_browser"
+      }
+    ],
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "completed",
+    "summary": "Forecast performance · live analysis",
+    "text": "Forecast performance · live analysis\nhttp://127.0.0.1:8766/#overview"
+  },
+  "viewport": {
+    "data": {
+      "deviceScaleFactor": 1,
+      "height": 900,
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      },
+      "mobile": false,
+      "width": 1440
+    },
+    "details": {
+      "resultCategory": "success",
+      "successCategory": "completed"
+    },
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "completed",
+    "summary": "set completed",
+    "text": "{\n  \"deviceScaleFactor\": 1,\n  \"height\": 900,\n  \"mobile\": false,\n  \"width\": 1440\n}"
+  },
+  "wait": {
+    "data": {
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      },
+      "text": "Monthly vintage accuracy, bias and actual volume",
+      "waited": "text"
+    },
+    "details": {
+      "resultCategory": "success",
+      "successCategory": "completed"
+    },
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "completed",
+    "summary": "Wait completed: Monthly vintage accuracy, bias and actual volume",
+    "text": "Wait completed: Monthly vintage accuracy, bias and actual volume"
+  },
+  "audit": {
+    "data": {
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      },
+      "origin": "http://127.0.0.1:8766/#overview",
+      "result": {
+        "aria": "Monthly Vintage A and Vintage B accuracy, Vintage B bias, and actual volume",
+        "biasBars": 16,
+        "legend": [
+          "Vintage B",
+          "Vintage A",
+          "Over bias",
+          "Under bias",
+          "Actual ('000 KL)"
+        ],
+        "monthLabels": 20,
+        "overBias": 16,
+        "pointMarkers": 0,
+        "title": "Monthly vintage accuracy, bias and actual volume",
+        "underBias": 0,
+        "vintageALine": true,
+        "vintageBLine": true,
+        "volumeBars": 16,
+        "volumeLabels": [
+          "2.9",
+          "2.4",
+          "2.3",
+          "2.6",
+          "2.7",
+          "2.5",
+          "2.8",
+          "2.9",
+          "2.3",
+          "2.7",
+          "3.4",
+          "2.5",
+          "3.3",
+          "3.0",
+          "2.4",
+          "2.7"
+        ],
+        "yAxisValueLabels": 0
+      }
+    },
+    "details": {
+      "resultCategory": "success",
+      "successCategory": "completed"
+    },
+    "nextActions": [
+      {
+        "id": "inspect-after-mutation",
+        "params": {
+          "args": [
+            "snapshot",
+            "-i"
+          ]
+        },
+        "reason": "Refresh interactive refs after a browser mutation, navigation, scroll, or rerender.",
+        "safety": "Do not reuse prior @refs until a fresh snapshot confirms they still exist.",
+        "tool": "agent_browser"
+      }
+    ],
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "completed",
+    "summary": "Eval result: {",
+    "text": "{\n  \"aria\": \"Monthly Vintage A and Vintage B accuracy, Vintage B bias, and actual volume\",\n  \"biasBars\": 16,\n  \"legend\": [\n    \"Vintage B\",\n    \"Vintage A\",\n    \"Over bias\",\n    \"Under bias\",\n    \"Actual ('000 KL)\"\n  ],\n  \"monthLabels\": 20,\n  \"overBias\": 16,\n  \"pointMarkers\": 0,\n  \"title\": \"Monthly vintage accuracy, bias and actual volume\",\n  \"underBias\": 0,\n  \"vintageALine\": true,\n  \"vintageBLine\": true,\n  \"volumeBars\": 16,\n  \"volumeLabels\": [\n    \"2.9\",\n    \"2.4\",\n    \"2.3\",\n    \"2.6\",\n    \"2.7\",\n    \"2.5\",\n    \"2.8\",\n    \"2.9\",\n    \"2.3\",\n    \"2.7\",\n    \"3.4\",\n    \"2.5\",\n    \"3.3\",\n    \"3.0\",\n    \"2.4\",\n    \"2.7\"\n  ],\n  \"yAxisValueLabels\": 0\n}\n\nOrigin: http://127.0.0.1:8766/#overview"
+  },
+  "shot": {
+    "data": {
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      },
+      "path": "/root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/overview-vintages-bias-volume.png"
+    },
+    "details": {
+      "artifactVerification": {
+        "artifacts": [
+          {
+            "absolutePath": "/root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/overview-vintages-bias-volume.png",
+            "exists": true,
+            "kind": "image",
+            "mediaType": "image/png",
+            "path": "validation-artifacts/focused-overview-chart/overview-vintages-bias-volume.png",
+            "requestedPath": "validation-artifacts/focused-overview-chart/overview-vintages-bias-volume.png",
+            "retentionState": "live",
+            "sizeBytes": 175570,
+            "state": "verified",
+            "status": "saved",
+            "storageScope": "explicit-path",
+            "updatedAtMs": 1788091120765.1672
+          }
+        ],
+        "missingCount": 0,
+        "pendingCount": 0,
+        "unverifiedCount": 0,
+        "verified": true,
+        "verifiedCount": 1
+      },
+      "artifacts": [
+        {
+          "absolutePath": "/root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/overview-vintages-bias-volume.png",
+          "artifactType": "image",
+          "command": "screenshot",
+          "cwd": "/root/GitHub/forecast_analysis",
+          "exists": true,
+          "extension": ".png",
+          "kind": "image",
+          "mediaType": "image/png",
+          "namespace": "",
+          "path": "validation-artifacts/focused-overview-chart/overview-vintages-bias-volume.png",
+          "requestedPath": "validation-artifacts/focused-overview-chart/overview-vintages-bias-volume.png",
+          "session": "piab-script-0b5479f5-6472-4715-929b-7efa70641d60",
+          "sizeBytes": 175570,
+          "status": "saved",
+          "subcommand": "/root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/overview-vintages-bias-volume.png",
+          "updatedAtMs": 1788091120765.1672
+        }
+      ],
+      "pageChangeSummary": {
+        "artifactCount": 1,
+        "changeType": "artifact",
+        "command": "screenshot",
+        "nextActionIds": [
+          "use-saved-artifact"
+        ],
+        "observed": true,
+        "summary": "screenshot → artifact → 1 artifact"
+      },
+      "resultCategory": "success",
+      "successCategory": "artifact-saved"
+    },
+    "nextActions": [
+      {
+        "artifactPath": "validation-artifacts/focused-overview-chart/overview-vintages-bias-volume.png",
+        "id": "use-saved-artifact",
+        "reason": "Use the saved artifact path from the structured result instead of scraping it from text.",
+        "safety": "Verify artifact metadata such as exists/status before treating the file as durable.",
+        "tool": "agent_browser"
+      }
+    ],
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "artifact-saved",
+    "summary": "Saved image: validation-artifacts/focused-overview-chart/overview-vintages-bias-volume.png",
+    "text": "Saved image: validation-artifacts/focused-overview-chart/overview-vintages-bias-volume.png\nArtifact type: image\nRequested path: validation-artifacts/focused-overview-chart/overview-vintages-bias-volume.png\nAbsolute path: /root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/overview-vintages-bias-volume.png\nExists: true\nSize: 171.5 KiB\nSize bytes: 175570\nStatus: saved\nMedia type: image/png\nSession: piab-script-0b5479f5-6472-4715-929b-7efa70641d60\nCWD: /root/GitHub/forecast_analysis\nMachine data: details.artifacts[0]"
+  },
+  "errors": {
+    "data": {
+      "errors": [],
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      }
+    },
+    "details": {
+      "resultCategory": "success",
+      "successCategory": "completed"
+    },
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "completed",
+    "summary": "Page errors: 0",
+    "text": "No page errors."
+  }
+}

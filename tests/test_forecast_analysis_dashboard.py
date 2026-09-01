@@ -29,6 +29,7 @@ from forecast_analysis.filters import (  # pyright: ignore[reportMissingImports]
 from forecast_analysis.metrics import (  # pyright: ignore[reportMissingImports]
     brand_target_month_order,
     build_brand_target_month_performance,
+    build_revision_scatter,
     calculate_metrics,
     calculate_revision_metrics,
     format_revision_tolerance,
@@ -96,6 +97,14 @@ class DashboardFixtureTests(unittest.TestCase):
                 ],
             }
         ).with_columns(
+            pl.when(pl.col("parent_code") == 100)
+            .then(pl.lit("A"))
+            .when(pl.col("parent_code") == 200)
+            .then(pl.lit("B"))
+            .when(pl.col("parent_code") == 300)
+            .then(pl.lit("C"))
+            .otherwise(pl.lit("Unclassified"))
+            .alias("sku_class"),
             pl.col("calculation_month").str.to_date("%Y-%m"),
             pl.col("snop_month").str.to_date("%Y-%m"),
             pl.col("parent_code").cast(pl.Int64),
@@ -508,6 +517,24 @@ class DashboardPopulationTests(unittest.TestCase):
         self.assertEqual(empty.vintage_pairs.height, 0)
         self.assertEqual(empty.monthly_performance.height, 0)
         self.assertIsNone(empty.metrics.forecast_accuracy_pct)
+        self.assertIsNone(empty.metrics.wape_pct)
+
+    def test_sku_class_filter_recomputes_forecast_and_actual_populations_together(self):
+        frame = DashboardFixtureTests.frame()
+        options = available_filter_values(frame, "tm")
+        self.assertEqual(options["sku_classes"], ["A", "B", "C", "Unclassified"])
+
+        view = build_dashboard_view(
+            frame,
+            DashboardFixtureTests.actual_population(),
+            DashboardFilters(source="tm", sku_classes=("B",)),
+        )
+
+        self.assertEqual(view.filtered_population["parent_code"].unique().to_list(), [200])
+        self.assertEqual(view.vintage_pairs["parent_code"].unique().to_list(), [200])
+        self.assertEqual(view.selected_actual_population["parent_code"].unique().to_list(), [200])
+        self.assertEqual(view.metrics.actual_kl, 10.0)
+        self.assertEqual(view.population_summary["products"].item(), 1)
 
     def test_cleaned_hierarchy_duplicates_do_not_multiply_brand_target_month_volume(self):
         forecast = normalize_forecast_history(
@@ -1162,6 +1189,59 @@ class DashboardMetricTests(unittest.TestCase):
             ["All brands", "Brand 100"],
         )
 
+    def test_brand_target_metrics_use_weighted_components_and_isolate_sources(self):
+        pair = pl.DataFrame(
+            {
+                "source": ["tm", "tm", "ml", "ml"],
+                "parent_code": [1, 2, 1, 2],
+                "brand": ["Brand A"] * 4,
+                "mapping_status": ["mapped"] * 4,
+                "snop_month": [date(2026, 1, 1)] * 4,
+                "actual_kl": [100.0, 10.0, 100.0, 10.0],
+                "vintage_a_forecast_kl": [100.0, 10.0, 100.0, 10.0],
+                "vintage_b_forecast_kl": [50.0, 10.0, 100.0, 0.0],
+                "pair_status": ["complete"] * 4,
+            }
+        )
+        actual_population = pl.DataFrame(
+            {
+                "parent_code": [1, 2, 3],
+                "snop_month": [date(2026, 1, 1)] * 3,
+                "actual_kl": [100.0, 10.0, 90.0],
+                "brand": ["Brand A"] * 3,
+                "mapping_status": ["mapped"] * 3,
+            }
+        )
+
+        heatmap = build_brand_target_month_performance(pair, actual_population)
+        tm = heatmap.filter(
+            (pl.col("source") == "tm")
+            & (pl.col("brand_display") == "Brand A")
+        ).row(0, named=True)
+        ml = heatmap.filter(
+            (pl.col("source") == "ml")
+            & (pl.col("brand_display") == "Brand A")
+        ).row(0, named=True)
+
+        self.assertAlmostEqual(tm["forecast_accuracy_pct"], (1 - 50 / 110) * 100)
+        self.assertAlmostEqual(tm["bias_pct"], -50 / 110 * 100)
+        self.assertAlmostEqual(ml["forecast_accuracy_pct"], (1 - 10 / 110) * 100)
+        self.assertAlmostEqual(ml["bias_pct"], -10 / 110 * 100)
+        self.assertAlmostEqual(tm["coverage_pct"], 110 / 200 * 100)
+        self.assertAlmostEqual(ml["coverage_pct"], 110 / 200 * 100)
+        self.assertEqual(tm["population_observations"], 2)
+        self.assertEqual(ml["population_observations"], 2)
+        self.assertEqual(
+            heatmap.group_by("source")
+            .agg(pl.col("brand_display").sort())
+            .sort("source")
+            .to_dicts(),
+            [
+                {"source": "ml", "brand_display": ["All brands", "Brand A"]},
+                {"source": "tm", "brand_display": ["All brands", "Brand A"]},
+            ],
+        )
+
     def test_brand_sorting_uses_weighted_aggregate_keys(self):
         pair = pl.DataFrame(
             {
@@ -1302,8 +1382,10 @@ class DashboardMetricTests(unittest.TestCase):
             pair, DashboardFixtureTests.metric_actual_population([100.0, 10.0])
         )
         assert summary.forecast_accuracy_pct is not None
+        assert summary.wape_pct is not None
         assert summary.bias_pct is not None
         self.assertAlmostEqual(summary.forecast_accuracy_pct, (1 - 50 / 110) * 100)
+        self.assertAlmostEqual(summary.wape_pct, 50 / 110 * 100)
         self.assertAlmostEqual(summary.bias_pct, (-50 / 110) * 100)
         self.assertNotAlmostEqual(summary.forecast_accuracy_pct, 75.0)
 
@@ -1358,6 +1440,7 @@ class DashboardMetricTests(unittest.TestCase):
             negative, DashboardFixtureTests.metric_actual_population([100.0])
         )
         self.assertEqual(summary.forecast_accuracy_pct, -100.0)
+        self.assertEqual(summary.wape_pct, 200.0)
         self.assertEqual(summary.bias_pct, 200.0)
 
         zero = negative.with_columns(
@@ -1367,6 +1450,7 @@ class DashboardMetricTests(unittest.TestCase):
             zero, DashboardFixtureTests.metric_actual_population([0.0])
         )
         self.assertIsNone(zero_summary.forecast_accuracy_pct)
+        self.assertIsNone(zero_summary.wape_pct)
         self.assertIsNone(zero_summary.bias_pct)
         self.assertEqual(zero_summary.zero_actual_observations, 1)
 
@@ -1424,10 +1508,14 @@ class DashboardMetricTests(unittest.TestCase):
                 "source",
                 "snop_month",
                 "forecast_accuracy_pct",
+                "vintage_a_accuracy_pct",
+                "vintage_b_accuracy_pct",
                 "bias_pct",
                 "absolute_error_kl",
                 "actual_kl",
                 "forecast_kl",
+                "vintage_a_forecast_kl",
+                "vintage_b_forecast_kl",
                 "coverage_pct",
                 "eligible_observations",
                 "population_observations",
@@ -1435,10 +1523,61 @@ class DashboardMetricTests(unittest.TestCase):
         )
         self.assertIn(date(2026, 1, 1), view.monthly_performance["snop_month"].to_list())
         self.assertIn("forecast_accuracy_pct", view.monthly_performance.columns)
+        self.assertIn("vintage_a_accuracy_pct", view.monthly_performance.columns)
+        self.assertIn("vintage_b_accuracy_pct", view.monthly_performance.columns)
+        self.assertEqual(
+            view.monthly_performance["forecast_accuracy_pct"].to_list(),
+            view.monthly_performance["vintage_b_accuracy_pct"].to_list(),
+        )
+        self.assertNotEqual(
+            view.monthly_performance["vintage_a_accuracy_pct"].to_list(),
+            view.monthly_performance["vintage_b_accuracy_pct"].to_list(),
+        )
         self.assertIn("bias_pct", view.monthly_performance.columns)
         self.assertIn("absolute_error_kl", view.monthly_performance.columns)
         self.assertIn("forecast_kl", view.monthly_performance.columns)
+        self.assertIn("vintage_a_forecast_kl", view.monthly_performance.columns)
+        self.assertIn("vintage_b_forecast_kl", view.monthly_performance.columns)
+        self.assertEqual(
+            view.monthly_performance["forecast_kl"].to_list(),
+            view.monthly_performance["vintage_b_forecast_kl"].to_list(),
+        )
+        self.assertNotEqual(
+            view.monthly_performance["vintage_a_forecast_kl"].to_list(),
+            view.monthly_performance["vintage_b_forecast_kl"].to_list(),
+        )
         self.assertIn("actual_kl", view.monthly_performance.columns)
+
+    def test_performance_tables_are_exact_public_projections_of_audit_tables(self):
+        view = build_dashboard_view(
+            DashboardFixtureTests.frame(), DashboardFixtureTests.actual_population()
+        )
+
+        chart_value_columns = [
+            "forecast_accuracy_pct",
+            "vintage_a_accuracy_pct",
+            "vintage_b_accuracy_pct",
+            "bias_pct",
+            "absolute_error_kl",
+            "actual_kl",
+            "forecast_kl",
+            "vintage_a_forecast_kl",
+            "vintage_b_forecast_kl",
+            "coverage_pct",
+        ]
+        expected_monthly = view.monthly_audit.filter(
+            pl.any_horizontal(
+                [pl.col(column).is_not_null() for column in chart_value_columns]
+            )
+        ).select(view.monthly_performance.columns)
+        self.assertEqual(
+            expected_monthly.to_dicts(),
+            view.monthly_performance.to_dicts(),
+        )
+        self.assertEqual(
+            view.horizon_audit.select(view.horizon_performance.columns).to_dicts(),
+            view.horizon_performance.to_dicts(),
+        )
 
 
 class DashboardRevisionTests(unittest.TestCase):
@@ -1700,21 +1839,161 @@ class DashboardRevisionTests(unittest.TestCase):
         ])
         self.assertEqual(diagnostics["observations"].to_list(), [1, 1, 1, 1])
         self.assertEqual(diagnostics["observations"].sum(), view.metrics.complete_pairs)
-        self.assertEqual(view.revision_scatter.height, 4)
+        self.assertEqual(view.revision_scatter.height, 0)
+
+    def test_revision_scatter_scores_one_parent_across_six_complete_five_vintage_months(self):
+        target_months = [date(2026, month, 1) for month in range(1, 7)]
+        rows: list[dict[str, object]] = []
+        scatter_excluded_brands = {
+            1: "PA-BDYLOT",
+            2: "JFB_POWDR",
+            3: "RK_CLO_R",
+            4: "RK_CLO_S",
+            5: "SAF_HONEY",
+            6: "BPA_PET_J",
+            7: "BPCNO-LP",
+        }
+        for parent_code in range(1, 22):
+            parent_description = (
+                "PCNO 500ml EJ - (PB) NEW"
+                if parent_code == 7
+                else f"Product {parent_code}"
+            )
+            forecasts = (
+                [500.0, 400.0, 300.0, 200.0, 100.0]
+                if parent_code == 21
+                else [150.0, 140.0, 130.0, 120.0, 110.0]
+            )
+            for target_month in target_months:
+                for vintage_index, forecast in enumerate(forecasts, start=1):
+                    rows.append(
+                        {
+                            "source": "tm",
+                            "parent_code": parent_code,
+                            "parent_description": parent_description,
+                            "hierarchy_description": parent_description,
+                            "brand": scatter_excluded_brands.get(
+                                parent_code,
+                                "Brand A",
+                            ),
+                            "sku_class": "A" if parent_code <= 10 else "B",
+                            "mapping_status": "mapped",
+                            "mapping_diagnostic": None,
+                            "snop_month": target_month,
+                            "calculation_month": date(2025, vintage_index, 1),
+                            "forecast_horizon_months": 5 - vintage_index,
+                            "forecast_kl": forecast,
+                            "actual_kl": 100.0,
+                            "actual_status": "matched_positive",
+                        }
+                    )
+        for target_month in target_months:
+            for vintage_index, forecast in enumerate(
+                [150.0, 140.0, 130.0, 120.0],
+                start=1,
+            ):
+                rows.append(
+                    {
+                        "source": "tm",
+                        "parent_code": 999,
+                        "parent_description": "Incomplete product",
+                        "hierarchy_description": "Incomplete product",
+                        "brand": "Brand A",
+                        "sku_class": "C",
+                        "mapping_status": "mapped",
+                        "mapping_diagnostic": None,
+                        "snop_month": target_month,
+                        "calculation_month": date(2025, vintage_index, 1),
+                        "forecast_horizon_months": 5 - vintage_index,
+                        "forecast_kl": forecast,
+                        "actual_kl": 100.0,
+                        "actual_status": "matched_positive",
+                    }
+                )
+        history = pl.DataFrame(rows).with_columns(
+            pl.col("parent_code").cast(pl.Int64),
+            pl.col("forecast_horizon_months").cast(pl.Int64),
+            pl.col("forecast_kl").cast(pl.Float64),
+            pl.col("actual_kl").cast(pl.Float64),
+        )
+
+        scatter = build_revision_scatter(
+            history,
+            target_end_month=date(2026, 6, 1),
+        )
+
+        self.assertEqual(scatter.height, 21)
+        self.assertEqual(scatter["parent_code"].n_unique(), 21)
+        self.assertNotIn(999, scatter["parent_code"].to_list())
+        self.assertEqual(scatter["target_months_used"].unique().to_list(), [6])
+        self.assertEqual(scatter["vintages_per_month"].unique().to_list(), [5])
+        self.assertEqual(scatter["transitions_used"].unique().to_list(), [24])
+        ordinary = scatter.filter(pl.col("parent_code") == 1).row(0, named=True)
+        outlier = scatter.filter(pl.col("parent_code") == 21).row(0, named=True)
+        self.assertAlmostEqual(ordinary["revision_score_pct"], -10.0)
+        self.assertAlmostEqual(ordinary["vintage_improvement_score_pp"], 10.0)
+        self.assertAlmostEqual(outlier["revision_score_pct"], -100.0)
+        self.assertAlmostEqual(outlier["vintage_improvement_score_pp"], 100.0)
         self.assertEqual(
-            set(view.revision_scatter.columns),
-            {
-                "source",
+            outlier["vintage_improvement_score_pp"],
+            outlier["raw_vintage_improvement_score_pp"],
+        )
+        self.assertEqual(outlier["winsorized_months"], 0)
+        self.assertEqual(outlier["sku_class"], "B")
+        self.assertEqual(outlier["revision_outcome"], "improved")
+
+        actual_population = history.select(
+            [
                 "parent_code",
-                "parent_description",
-                "brand",
                 "snop_month",
                 "actual_kl",
-                "revision_kl",
-                "error_improvement_kl",
-                "revision_direction",
-                "revision_outcome",
-            },
+                "hierarchy_description",
+                "brand",
+                "mapping_status",
+                "mapping_diagnostic",
+            ]
+        ).unique(subset=["parent_code", "snop_month"])
+        view = build_dashboard_view(
+            history,
+            actual_population,
+            DashboardFilters(target_months=(date(2026, 6, 1),)),
+        )
+        self.assertEqual(view.revision_scatter.height, 14)
+        self.assertTrue(
+            set(view.revision_scatter["brand"].unique().to_list()).isdisjoint(
+                scatter_excluded_brands.values()
+            )
+        )
+        pcno_ej_rows = view.revision_scatter.filter(
+            pl.col("parent_description")
+            .str.to_uppercase()
+            .str.contains("PCNO")
+            & pl.col("parent_description")
+            .str.to_uppercase()
+            .str.contains("EJ")
+        )
+        self.assertEqual(pcno_ej_rows.height, 0)
+        self.assertEqual(
+            view.revision_scatter["window_start_month"].unique().to_list(),
+            [date(2026, 1, 1)],
+        )
+        self.assertEqual(
+            view.revision_scatter["window_end_month"].unique().to_list(),
+            [date(2026, 6, 1)],
+        )
+
+        class_a_view = build_dashboard_view(
+            history,
+            actual_population,
+            DashboardFilters(
+                target_months=(date(2026, 6, 1),),
+                sku_classes=("A",),
+            ),
+        )
+        self.assertEqual(class_a_view.revision_scatter.height, 3)
+        self.assertEqual(
+            class_a_view.revision_scatter["sku_class"].unique().to_list(),
+            ["A"],
         )
 
 
@@ -1798,8 +2077,8 @@ class RealDashboardCoverageTests(unittest.TestCase):
         }
         self.assertAlmostEqual(metrics["tm"]["coverage_pct"], expected_tm_coverage)
         self.assertAlmostEqual(metrics["ml"]["coverage_pct"], expected_ml_coverage)
-        self.assertAlmostEqual(metrics["tm"]["coverage_pct"], 89.9026408913838)
-        self.assertAlmostEqual(metrics["ml"]["coverage_pct"], 97.62780544682361)
+        self.assertAlmostEqual(metrics["tm"]["coverage_pct"], 92.52985339685515)
+        self.assertAlmostEqual(metrics["ml"]["coverage_pct"], 97.50580756834091)
         self.assertGreater(metrics["ml"]["coverage_pct"], metrics["tm"]["coverage_pct"])
         coverage_delta = next(
             row["delta_ml_minus_tm"]

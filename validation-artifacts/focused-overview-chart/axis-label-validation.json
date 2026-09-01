@@ -1,0 +1,177 @@
+{
+  "metrics": {
+    "data": {
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      },
+      "origin": "http://127.0.0.1:8766/#overview",
+      "result": {
+        "allWholePercent": false,
+        "axisUnit": "9.6px",
+        "dataLabels": [
+          "79%",
+          "87%",
+          "81%",
+          "75%",
+          "75%",
+          "79%",
+          "80%",
+          "70%"
+        ],
+        "month": "12px",
+        "overflowX": 0,
+        "volumeAxis": "10.8px",
+        "year": "10.8px"
+      }
+    },
+    "details": {
+      "resultCategory": "success",
+      "successCategory": "completed"
+    },
+    "nextActions": [
+      {
+        "id": "inspect-after-mutation",
+        "params": {
+          "args": [
+            "snapshot",
+            "-i"
+          ]
+        },
+        "reason": "Refresh interactive refs after a browser mutation, navigation, scroll, or rerender.",
+        "safety": "Do not reuse prior @refs until a fresh snapshot confirms they still exist.",
+        "tool": "agent_browser"
+      }
+    ],
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "completed",
+    "summary": "Eval result: {",
+    "text": "{\n  \"allWholePercent\": false,\n  \"axisUnit\": \"9.6px\",\n  \"dataLabels\": [\n    \"79%\",\n    \"87%\",\n    \"81%\",\n    \"75%\",\n    \"75%\",\n    \"79%\",\n    \"80%\",\n    \"70%\"\n  ],\n  \"month\": \"12px\",\n  \"overflowX\": 0,\n  \"volumeAxis\": \"10.8px\",\n  \"year\": \"10.8px\"\n}\n\nOrigin: http://127.0.0.1:8766/#overview"
+  },
+  "shot": {
+    "data": {
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      },
+      "path": "/root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/two-chart-axis-minus20-whole-labels.png"
+    },
+    "details": {
+      "artifactVerification": {
+        "artifacts": [
+          {
+            "absolutePath": "/root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/two-chart-axis-minus20-whole-labels.png",
+            "exists": true,
+            "kind": "image",
+            "mediaType": "image/png",
+            "path": "validation-artifacts/focused-overview-chart/two-chart-axis-minus20-whole-labels.png",
+            "requestedPath": "validation-artifacts/focused-overview-chart/two-chart-axis-minus20-whole-labels.png",
+            "retentionState": "live",
+            "sizeBytes": 163458,
+            "state": "verified",
+            "status": "saved",
+            "storageScope": "explicit-path",
+            "updatedAtMs": 1788098465224.2676
+          }
+        ],
+        "missingCount": 0,
+        "pendingCount": 0,
+        "unverifiedCount": 0,
+        "verified": true,
+        "verifiedCount": 1
+      },
+      "artifacts": [
+        {
+          "absolutePath": "/root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/two-chart-axis-minus20-whole-labels.png",
+          "artifactType": "image",
+          "command": "screenshot",
+          "cwd": "/root/GitHub/forecast_analysis",
+          "exists": true,
+          "extension": ".png",
+          "kind": "image",
+          "mediaType": "image/png",
+          "namespace": "",
+          "path": "validation-artifacts/focused-overview-chart/two-chart-axis-minus20-whole-labels.png",
+          "requestedPath": "validation-artifacts/focused-overview-chart/two-chart-axis-minus20-whole-labels.png",
+          "session": "piab-script-b5e13517-6f7b-4048-8458-6a89f33f90e4",
+          "sizeBytes": 163458,
+          "status": "saved",
+          "subcommand": "/root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/two-chart-axis-minus20-whole-labels.png",
+          "updatedAtMs": 1788098465224.2676
+        }
+      ],
+      "pageChangeSummary": {
+        "artifactCount": 1,
+        "changeType": "artifact",
+        "command": "screenshot",
+        "nextActionIds": [
+          "use-saved-artifact"
+        ],
+        "observed": true,
+        "summary": "screenshot → artifact → 1 artifact"
+      },
+      "resultCategory": "success",
+      "successCategory": "artifact-saved"
+    },
+    "nextActions": [
+      {
+        "artifactPath": "validation-artifacts/focused-overview-chart/two-chart-axis-minus20-whole-labels.png",
+        "id": "use-saved-artifact",
+        "reason": "Use the saved artifact path from the structured result instead of scraping it from text.",
+        "safety": "Verify artifact metadata such as exists/status before treating the file as durable.",
+        "tool": "agent_browser"
+      }
+    ],
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "artifact-saved",
+    "summary": "Saved image: validation-artifacts/focused-overview-chart/two-chart-axis-minus20-whole-labels.png",
+    "text": "Saved image: validation-artifacts/focused-overview-chart/two-chart-axis-minus20-whole-labels.png\nArtifact type: image\nRequested path: validation-artifacts/focused-overview-chart/two-chart-axis-minus20-whole-labels.png\nAbsolute path: /root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/two-chart-axis-minus20-whole-labels.png\nExists: true\nSize: 159.6 KiB\nSize bytes: 163458\nStatus: saved\nMedia type: image/png\nSession: piab-script-b5e13517-6f7b-4048-8458-6a89f33f90e4\nCWD: /root/GitHub/forecast_analysis\nMachine data: details.artifacts[0]"
+  },
+  "errors": {
+    "data": {
+      "errors": [],
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      }
+    },
+    "details": {
+      "resultCategory": "success",
+      "successCategory": "completed"
+    },
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "completed",
+    "summary": "Page errors: 0",
+    "text": "No page errors."
+  }
+}

@@ -24,6 +24,7 @@ from .contracts import (
     SOURCE_AVAILABILITY_STATUSES,
     normalize_revision_tolerance,
 )
+from .sku_classification import SKU_CLASSES  # pyright: ignore[reportMissingImports]
 
 SOURCE_OPTIONS = {"TM": "tm", "ML": "ml"}
 QUALITY_BRAND_LABELS = {
@@ -35,6 +36,7 @@ PERFORMANCE_TOP_N_METRICS = (
     "absolute_error",
     "deterioration",
 )
+SKU_CLASS_BY_KEY = {value.lower(): value for value in SKU_CLASSES}
 
 
 def _normalize_revision_choices(
@@ -52,6 +54,23 @@ def _normalize_revision_choices(
             f"choose from {list(allowed)}"
         )
     return normalized
+
+
+def _normalize_sku_classes(
+    values: tuple[str, ...] | None,
+) -> tuple[str, ...] | None:
+    if values is None:
+        return None
+    normalized: list[str] = []
+    for value in values:
+        key = str(value).strip().lower()
+        if key not in SKU_CLASS_BY_KEY:
+            raise ValueError(
+                f"sku_classes contains unsupported value {value!r}; "
+                f"choose from {list(SKU_CLASSES)}"
+            )
+        normalized.append(SKU_CLASS_BY_KEY[key])
+    return tuple(normalized)
 
 
 def _normalize_band(
@@ -135,6 +154,7 @@ class DashboardFilters:
     comparison_horizon: int | None = None
     target_months: tuple[date, ...] | None = None
     brands: tuple[str, ...] | None = None
+    sku_classes: tuple[str, ...] | None = None
     parent_codes: tuple[int, ...] | None = None
     minimum_actual_volume: float = 0.0
     horizons: tuple[int, ...] | None = None
@@ -188,6 +208,11 @@ class DashboardFilters:
                 "brands",
                 tuple(str(value) for value in self.brands),
             )
+        object.__setattr__(
+            self,
+            "sku_classes",
+            _normalize_sku_classes(self.sku_classes),
+        )
         if self.parent_codes is not None:
             try:
                 parent_codes = tuple(int(value) for value in self.parent_codes)
@@ -486,6 +511,9 @@ def _complete_history_keys(
         scoped = scoped.filter(pl.col("snop_month").is_in(filters.target_months))
     if filters.brands is not None:
         scoped = scoped.filter(pl.col("brand_display").is_in(filters.brands))
+    if filters.sku_classes is not None:
+        require_columns(scoped, ["sku_class"], "SKU class analysis population")
+        scoped = scoped.filter(pl.col("sku_class").is_in(filters.sku_classes))
     if filters.parent_codes is not None:
         scoped = scoped.filter(pl.col("parent_code").is_in(filters.parent_codes))
     required_horizons = tuple(
@@ -561,6 +589,9 @@ def apply_dashboard_filters(
         filtered = filtered.filter(pl.col("snop_month").is_in(filters.target_months))
     if filters.brands is not None:
         filtered = filtered.filter(pl.col("brand_display").is_in(filters.brands))
+    if filters.sku_classes is not None:
+        require_columns(filtered, ["sku_class"], "SKU class analysis population")
+        filtered = filtered.filter(pl.col("sku_class").is_in(filters.sku_classes))
     if include_horizons and filters.complete_vintage_history_only:
         history_keys = _complete_history_keys(frame, filters)
         if history_keys.height == 0:
@@ -817,6 +848,13 @@ def apply_actual_filters(
                 "brand",
                 "mapping_status",
                 "mapping_diagnostic",
+                "sku_class",
+                "sku_class_as_of_month",
+                "sku_class_window_start",
+                "sku_class_actual_6m_kl",
+                "sku_class_contribution_pct",
+                "sku_class_cumulative_pct",
+                "sku_class_is_carried_forward",
             )
             if column in availability_frame.columns
         ]
@@ -873,6 +911,9 @@ def apply_actual_filters(
         filtered = filtered.filter(pl.col("snop_month").is_in(filters.target_months))
     if filters.brands is not None:
         filtered = filtered.filter(pl.col("brand_display").is_in(filters.brands))
+    if filters.sku_classes is not None:
+        require_columns(filtered, ["sku_class"], "SKU class actual population")
+        filtered = filtered.filter(pl.col("sku_class").is_in(filters.sku_classes))
     if filters.parent_codes is not None:
         filtered = filtered.filter(pl.col("parent_code").is_in(filters.parent_codes))
     if filters.hierarchy_statuses is not None:
@@ -959,6 +1000,7 @@ def available_filter_values(
     return {
         "target_months": sorted(source_frame["snop_month"].unique().to_list()),
         "brands": sorted(source_frame["brand_display"].drop_nulls().unique().to_list()),
+        "sku_classes": list(SKU_CLASSES),
         "parent_products": parent_options,
         "horizons": horizons,
         "hierarchy_statuses": ["mapped", "unmapped", "conflict"],

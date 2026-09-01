@@ -1,0 +1,3 @@
+leaf-1 verified: analytics tests, LSP, benchmark default/comparison ~0.8s
+leaf-2 verified: 12 service tests, LSP, compact bootstrap 24.3 KiB, cache hit ~0.14 ms
+leaf-3 verified: 4 focused source contracts, exhaustive Chromium interaction validation, JS/LSP/diff clean

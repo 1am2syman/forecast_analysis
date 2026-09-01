@@ -14,7 +14,7 @@ from forecast_analysis import (
 )
 from forecast_analysis.contracts import (
     ACTUAL_COLUMNS,
-    ANALYSIS_COLUMNS,
+    ANALYSIS_DATASET_COLUMNS,
     HIERARCHY_COLUMNS,
     NORMALIZED_FORECAST_COLUMNS,
 )
@@ -309,7 +309,7 @@ class CanonicalPopulationTests(unittest.TestCase):
             )
         )
 
-        self.assertEqual(dataset.frame.columns, ANALYSIS_COLUMNS)
+        self.assertEqual(dataset.frame.columns, ANALYSIS_DATASET_COLUMNS)
         self.assertEqual(dataset.frame.height, 4)
         self.assertEqual(set(dataset.frame["source"].to_list()), {"tm", "ml"})
         self.assertEqual(
@@ -389,7 +389,11 @@ class CurrentConsolidatedArtifactTests(unittest.TestCase):
 
         self.assertEqual(dataset.frame.height, inputs.forecast_history.height)
         self.assertEqual(dataset.frame.height, 16_035)
-        self.assertEqual(inputs.actuals.height, 1_679)
+        self.assertEqual(inputs.actuals.height, 2_222)
+        self.assertIsNotNone(inputs.actual_history)
+        assert inputs.actual_history is not None
+        self.assertGreater(inputs.actual_history.height, inputs.actuals.height)
+        self.assertEqual(dataset.frame["sku_class"].null_count(), 0)
         self.assertEqual(dataset.diagnostics.height, 18)
         self.assertEqual(set(dataset.frame["source"].unique().to_list()), {"ml", "tm"})
 

@@ -1,0 +1,1321 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>PROTOTYPE — SKU post-mortem cockpit</title>
+    <style>
+      :root {
+        --bg: #f4f7f6;
+        --panel: #fff;
+        --ink: #172421;
+        --muted: #60716c;
+        --line: #c8d5d1;
+        --soft: #e9efed;
+        --teal: #087f75;
+        --teal2: #dff1ee;
+        --blue: #2679a6;
+        --amber: #ad6c00;
+        --amber2: #fff2d8;
+        --red: #b63b35;
+        --red2: #fbe7e4;
+        --green: #397c57;
+        --green2: #e5f3ea;
+        --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        --sans: Inter, Arial, sans-serif;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: var(--sans);
+      }
+      button,
+      select {
+        font: inherit;
+      }
+      .prototype-flag {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 7px 18px;
+        background: #132622;
+        color: #fff;
+        font: 700 11px/1.3 var(--mono);
+        letter-spacing: 0.04em;
+      }
+      .app {
+        max-width: 1560px;
+        margin: auto;
+        padding: 18px 22px 88px;
+      }
+      .scope {
+        display: grid;
+        grid-template-columns: 2.1fr 0.75fr 0.75fr 0.75fr 0.9fr;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+      .field,
+      .box {
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        background: var(--panel);
+      }
+      .field {
+        padding: 8px 10px;
+      }
+      .k {
+        display: block;
+        margin-bottom: 4px;
+        color: var(--muted);
+        font: 700 9px/1.1 var(--mono);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .field strong {
+        font-size: 13px;
+      }
+      .page-head {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        margin: 6px 0 12px;
+      }
+      .eyebrow {
+        margin: 0 0 3px;
+        color: var(--teal);
+        font: 800 10px var(--mono);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+      .page-head h1 {
+        margin: 0;
+        font-size: 27px;
+        line-height: 1;
+      }
+      .page-head p {
+        margin: 5px 0 0;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .actions {
+        display: flex;
+        gap: 7px;
+      }
+      .btn {
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #fff;
+        padding: 8px 10px;
+        color: var(--ink);
+        font: 700 10px var(--mono);
+      }
+      .btn.primary {
+        border-color: var(--teal);
+        background: var(--teal);
+        color: #fff;
+      }
+      .decision {
+        display: grid;
+        grid-template-columns: 1.6fr 0.8fr 0.85fr 0.8fr;
+        border: 1px solid #8ebeb7;
+        border-left: 5px solid var(--teal);
+        border-radius: 8px;
+        background: linear-gradient(90deg, #f7fffd, #fff);
+        margin-bottom: 10px;
+      }
+      .decision > div {
+        min-width: 0;
+        padding: 12px 14px;
+        border-right: 1px solid var(--line);
+      }
+      .decision > div:last-child {
+        border: 0;
+      }
+      .decision h2 {
+        margin: 3px 0 5px;
+        font-size: 20px;
+      }
+      .decision p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.45;
+      }
+      .decision strong.big {
+        display: block;
+        font-size: 20px;
+      }
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        border-radius: 99px;
+        padding: 3px 7px;
+        background: var(--soft);
+        font: 700 9px var(--mono);
+      }
+      .chip.red {
+        background: var(--red2);
+        color: var(--red);
+      }
+      .chip.amber {
+        background: var(--amber2);
+        color: var(--amber);
+      }
+      .chip.green {
+        background: var(--green2);
+        color: var(--green);
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: minmax(0, 2.05fr) minmax(300px, 0.8fr);
+        gap: 10px;
+      }
+      .stack {
+        display: grid;
+        gap: 10px;
+      }
+      .section {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        overflow: hidden;
+      }
+      .section-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--line);
+        background: #fbfdfc;
+      }
+      .section-head h3 {
+        margin: 0;
+        font-size: 14px;
+      }
+      .section-head p {
+        margin: 3px 0 0;
+        color: var(--muted);
+        font: 500 10px var(--mono);
+      }
+      .section-body {
+        padding: 12px;
+      }
+      .metric-ledger {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+      }
+      .metric {
+        padding: 10px 12px;
+        border-right: 1px solid var(--line);
+      }
+      .metric:last-child {
+        border: 0;
+      }
+      .metric b {
+        display: block;
+        font-size: 18px;
+      }
+      .metric small {
+        color: var(--muted);
+        font: 600 9px var(--mono);
+      }
+      .metric .delta {
+        display: block;
+        margin-top: 3px;
+        font: 700 9px var(--mono);
+      }
+      .bad {
+        color: var(--red);
+      }
+      .good {
+        color: var(--green);
+      }
+      .warn {
+        color: var(--amber);
+      }
+      .chart-wrap {
+        padding: 8px 10px 5px;
+      }
+      .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        padding: 0 12px 10px;
+        color: var(--muted);
+        font: 600 9px var(--mono);
+      }
+      .legend i {
+        display: inline-block;
+        width: 12px;
+        height: 3px;
+        margin-right: 4px;
+        vertical-align: middle;
+      }
+      .two {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      .issue {
+        display: grid;
+        grid-template-columns: 20px 1fr auto;
+        gap: 9px;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--soft);
+      }
+      .issue:last-child {
+        border: 0;
+      }
+      .rank {
+        display: grid;
+        place-items: center;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: var(--red2);
+        color: var(--red);
+        font: 800 10px var(--mono);
+      }
+      .issue h4 {
+        margin: 0 0 3px;
+        font-size: 12px;
+      }
+      .issue p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 10px;
+        line-height: 1.4;
+      }
+      .issue aside {
+        text-align: right;
+        font: 700 9px var(--mono);
+      }
+      .evidence-rail {
+        position: sticky;
+        top: 42px;
+        align-self: start;
+      }
+      .spine {
+        padding: 10px 12px;
+      }
+      .spine-row {
+        position: relative;
+        display: grid;
+        grid-template-columns: 26px 1fr;
+        gap: 8px;
+        padding: 8px 0;
+      }
+      .spine-row:not(:last-child):before {
+        content: "";
+        position: absolute;
+        left: 12px;
+        top: 29px;
+        bottom: -5px;
+        width: 1px;
+        background: var(--line);
+      }
+      .node {
+        z-index: 1;
+        display: grid;
+        place-items: center;
+        width: 25px;
+        height: 25px;
+        border: 1px solid var(--line);
+        border-radius: 50%;
+        background: #fff;
+        color: var(--teal);
+        font: 800 10px var(--mono);
+      }
+      .spine-row h4 {
+        margin: 1px 0 2px;
+        font-size: 11px;
+      }
+      .spine-row p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 10px;
+        line-height: 1.35;
+      }
+      .treatment {
+        margin: 10px 12px 12px;
+        padding: 10px;
+        border: 1px solid #e2bb71;
+        border-radius: 6px;
+        background: var(--amber2);
+      }
+      .treatment h4 {
+        margin: 0 0 5px;
+        font-size: 12px;
+      }
+      .treatment p {
+        margin: 0;
+        color: #70501b;
+        font-size: 10px;
+        line-height: 1.4;
+      }
+      .table {
+        display: grid;
+        font: 600 9px var(--mono);
+      }
+      .tr {
+        display: grid;
+        grid-template-columns: 1.2fr 0.65fr 0.65fr 0.65fr 0.75fr 1.1fr;
+        gap: 8px;
+        padding: 8px 10px;
+        border-bottom: 1px solid var(--soft);
+        align-items: center;
+      }
+      .tr.head {
+        color: var(--muted);
+        background: #f7faf9;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      .tr:last-child {
+        border: 0;
+      }
+      .barrow {
+        display: grid;
+        grid-template-columns: 110px 1fr 48px;
+        gap: 8px;
+        align-items: center;
+        margin: 7px 0;
+        font: 700 9px var(--mono);
+      }
+      .bar {
+        height: 8px;
+        border-radius: 6px;
+        background: var(--soft);
+        overflow: hidden;
+      }
+      .bar i {
+        display: block;
+        height: 100%;
+        background: var(--teal);
+      }
+      .barrow.selected {
+        padding: 6px;
+        border: 1px solid var(--teal);
+        border-radius: 5px;
+        background: var(--teal2);
+      }
+      .timeline {
+        display: grid;
+        grid-template-columns: 90px repeat(6, 1fr);
+        font: 600 9px var(--mono);
+      }
+      .timeline > div {
+        min-height: 32px;
+        padding: 7px;
+        border-right: 1px solid var(--soft);
+        border-bottom: 1px solid var(--soft);
+      }
+      .event {
+        border-radius: 4px;
+        background: var(--amber2);
+        color: var(--amber);
+      }
+      .event.red {
+        background: var(--red2);
+        color: var(--red);
+      }
+      .event.green {
+        background: var(--green2);
+        color: var(--green);
+      }
+      .meeting {
+        display: grid;
+        gap: 8px;
+        padding: 10px 12px;
+      }
+      .ask {
+        padding: 9px;
+        border-left: 3px solid var(--teal);
+        background: #f7fbfa;
+      }
+      .ask b {
+        display: block;
+        font-size: 11px;
+      }
+      .ask span {
+        color: var(--muted);
+        font-size: 10px;
+      }
+      .variant {
+        display: none;
+      }
+      .variant.active {
+        display: block;
+      }
+      .switcher {
+        position: fixed;
+        z-index: 20;
+        left: 50%;
+        bottom: 18px;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 4px;
+        padding: 5px;
+        border: 1px solid #8fa7a1;
+        border-radius: 10px;
+        background: #132622;
+        box-shadow: 0 12px 30px #0003;
+      }
+      .switcher button {
+        border: 0;
+        border-radius: 6px;
+        background: transparent;
+        color: #cfe1dc;
+        padding: 8px 11px;
+        font: 700 10px var(--mono);
+        cursor: pointer;
+      }
+      .switcher button.active {
+        background: var(--teal);
+        color: white;
+      }
+      .agenda {
+        display: grid;
+        grid-template-columns: 180px 1fr;
+        gap: 10px;
+      }
+      .agenda-nav {
+        position: sticky;
+        top: 44px;
+        align-self: start;
+      }
+      .agenda-nav div {
+        padding: 10px;
+        border-left: 2px solid var(--line);
+        font: 700 10px var(--mono);
+      }
+      .agenda-nav div:first-child {
+        border-color: var(--teal);
+        background: var(--teal2);
+      }
+      .agenda-main {
+        display: grid;
+        gap: 10px;
+      }
+      .question {
+        font-size: 18px;
+        margin: 0;
+      }
+      .canvas {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 10px;
+      }
+      .column-title {
+        padding: 12px;
+        border-bottom: 1px solid var(--line);
+        font-size: 16px;
+      }
+      .card {
+        margin: 9px;
+        padding: 10px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+      }
+      .card h4 {
+        margin: 0 0 5px;
+      }
+      .card p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 10px;
+        line-height: 1.45;
+      }
+      @media (max-width: 980px) {
+        .scope {
+          grid-template-columns: 1fr 1fr;
+        }
+        .decision {
+          grid-template-columns: 1fr 1fr;
+        }
+        .grid,
+        .two,
+        .canvas {
+          grid-template-columns: 1fr;
+        }
+        .evidence-rail,
+        .agenda-nav {
+          position: static;
+        }
+        .metric-ledger {
+          grid-template-columns: repeat(3, 1fr);
+        }
+        .agenda {
+          grid-template-columns: 1fr;
+        }
+        .agenda-nav {
+          display: flex;
+          overflow: auto;
+        }
+        .page-head {
+          align-items: start;
+          gap: 12px;
+        }
+        .actions {
+          flex-wrap: wrap;
+        }
+        .tr {
+          grid-template-columns: 1fr 1fr 1fr;
+        }
+        .tr > *:nth-child(n + 4) {
+          display: none;
+        }
+      }
+      @media (max-width: 620px) {
+        .app {
+          padding: 12px 10px 90px;
+        }
+        .prototype-flag {
+          font-size: 9px;
+        }
+        .scope,
+        .decision {
+          grid-template-columns: 1fr;
+        }
+        .metric-ledger {
+          grid-template-columns: 1fr 1fr;
+        }
+        .timeline {
+          grid-template-columns: 75px repeat(6, 80px);
+          overflow: auto;
+        }
+        .switcher {
+          width: calc(100% - 18px);
+          overflow: auto;
+          justify-content: flex-start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="prototype-flag">
+      <span>PROTOTYPE · THROWAWAY UI · NO APP CHANGES</span
+      ><span
+        >Illustrative SKU 702082 · evidence available today is forecast + actual
+        + hierarchy + SKU class</span
+      >
+    </div>
+    <main class="app">
+      <section class="scope">
+        <div class="field">
+          <span class="k">SKU</span
+          ><strong>702082 · PCNO 20ml FT BOT NEW</strong>
+        </div>
+        <div class="field">
+          <span class="k">Source</span><strong>ML</strong>
+        </div>
+        <div class="field">
+          <span class="k">Evaluation</span><strong>May 25–Aug 26</strong>
+        </div>
+        <div class="field">
+          <span class="k">Forecast lag</span><strong>M−1 / latest</strong>
+        </div>
+        <div class="field">
+          <span class="k">Peer cohort</span><strong>Brand + Class C</strong>
+        </div>
+      </section>
+      <section class="variant" data-variant="evidence">
+        <header class="page-head">
+          <div>
+            <p class="eyebrow">SKU post-mortem</p>
+            <h1>What happened, why, and what changes next</h1>
+            <p>
+              One defensible narrative from historical evidence to forward
+              treatment.
+            </p>
+          </div>
+          <div class="actions">
+            <button class="btn">Meeting brief</button
+            ><button class="btn">Export evidence</button
+            ><button class="btn primary">Record decision</button>
+          </div>
+        </header>
+        <section class="decision">
+          <div>
+            <span class="chip amber">PROPOSED · REBASE WITH GUARDRAIL</span>
+            <h2>Restore 0.5 KL, then hold until demand confirms</h2>
+            <p>
+              The M−1 downward revision created the largest miss. Earlier M−2
+              evidence was materially closer to actual.
+            </p>
+          </div>
+          <div>
+            <span class="k">Forward impact</span
+            ><strong class="big">+0.5 KL</strong>
+            <p>vs current next-cycle baseline</p>
+          </div>
+          <div>
+            <span class="k">Confidence</span><strong class="big">Medium</strong>
+            <p>History supports direction; external drivers not yet linked.</p>
+          </div>
+          <div>
+            <span class="k">Review trigger</span
+            ><strong class="big">2 weeks</strong>
+            <p>Invalidate if run-rate remains below 3.6 KL.</p>
+          </div>
+        </section>
+        <div class="grid">
+          <div class="stack">
+            <section class="section">
+              <div class="section-head">
+                <div>
+                  <h3>Forecast–actual bridge</h3>
+                  <p>Past performance and forward proposal on one time axis</p>
+                </div>
+                <span class="chip">Actual · ML · proposed</span>
+              </div>
+              <div class="chart-wrap">
+                <svg
+                  viewBox="0 0 900 270"
+                  width="100%"
+                  role="img"
+                  aria-label="Illustrative forecast actual bridge"
+                >
+                  <rect
+                    x="610"
+                    y="24"
+                    width="255"
+                    height="210"
+                    fill="#eef5f3"
+                  />
+                  <text
+                    x="622"
+                    y="42"
+                    fill="#60716c"
+                    font-size="11"
+                    font-family="monospace"
+                  >
+                    FORWARD
+                  </text>
+                  <g stroke="#dce6e3" stroke-width="1">
+                    <line x1="50" y1="70" x2="865" y2="70" />
+                    <line x1="50" y1="130" x2="865" y2="130" />
+                    <line x1="50" y1="190" x2="865" y2="190" />
+                  </g>
+                  <polyline
+                    points="60,142 150,125 240,155 330,114 420,128 510,98 600,115"
+                    fill="none"
+                    stroke="#2679a6"
+                    stroke-width="3"
+                  />
+                  <polyline
+                    points="60,132 150,140 240,145 330,120 420,153 510,130 600,162"
+                    fill="none"
+                    stroke="#087f75"
+                    stroke-width="3"
+                  />
+                  <polyline
+                    points="600,162 690,146 780,132 860,128"
+                    fill="none"
+                    stroke="#ad6c00"
+                    stroke-width="3"
+                    stroke-dasharray="7 5"
+                  />
+                  <path
+                    d="M600 162 L690 130 L780 108 L860 105 L860 152 L780 158 L690 166 Z"
+                    fill="#fff2d8"
+                    opacity=".75"
+                  />
+                  <line
+                    x1="600"
+                    y1="22"
+                    x2="600"
+                    y2="234"
+                    stroke="#8fa7a1"
+                    stroke-dasharray="4 4"
+                  />
+                  <g fill="#60716c" font-size="10" font-family="monospace">
+                    <text x="55" y="255">Mar</text>
+                    <text x="230" y="255">May</text>
+                    <text x="410" y="255">Jul</text>
+                    <text x="585" y="255">Sep</text>
+                    <text x="675" y="255">Oct</text>
+                    <text x="765" y="255">Nov</text>
+                    <text x="842" y="255">Dec</text>
+                  </g>
+                  <circle
+                    cx="600"
+                    cy="115"
+                    r="5"
+                    fill="#fff"
+                    stroke="#2679a6"
+                    stroke-width="3"
+                  />
+                  <circle
+                    cx="600"
+                    cy="162"
+                    r="5"
+                    fill="#fff"
+                    stroke="#087f75"
+                    stroke-width="3"
+                  />
+                  <text
+                    x="515"
+                    y="91"
+                    fill="#172421"
+                    font-size="11"
+                    font-family="monospace"
+                  >
+                    Actual 4.1
+                  </text>
+                  <text
+                    x="505"
+                    y="181"
+                    fill="#b63b35"
+                    font-size="11"
+                    font-family="monospace"
+                  >
+                    Latest 3.3 · −18.9%
+                  </text>
+                </svg>
+              </div>
+              <div class="legend">
+                <span><i style="background: #2679a6"></i>Actual</span
+                ><span
+                  ><i style="background: #087f75"></i>Historical forecast</span
+                ><span
+                  ><i style="background: #ad6c00"></i>Recommended forward</span
+                ><span>Shaded band = upside/downside evidence range</span>
+              </div>
+            </section>
+            <section class="section">
+              <div class="metric-ledger">
+                <div class="metric">
+                  <span class="k">Latest FA</span><b>81.1%</b
+                  ><span class="delta bad">−16.7 pp vs first vintage</span>
+                </div>
+                <div class="metric">
+                  <span class="k">Bias</span><b class="bad">−18.9%</b
+                  ><span class="delta">Underforecast</span>
+                </div>
+                <div class="metric">
+                  <span class="k">Abs error</span><b>0.8 KL</b
+                  ><span class="delta bad">Largest vintage miss</span>
+                </div>
+                <div class="metric">
+                  <span class="k">Revision FVA</span><b class="bad">−0.7 KL</b
+                  ><span class="delta">First → latest</span>
+                </div>
+                <div class="metric">
+                  <span class="k">Revision efficiency</span
+                  ><b class="bad">−50%</b
+                  ><span class="delta">Error avoided / revised</span>
+                </div>
+                <div class="metric">
+                  <span class="k">Hit rate</span><b>1 / 3</b
+                  ><span class="delta warn">Material revisions</span>
+                </div>
+              </div>
+            </section>
+            <div class="two">
+              <section class="section">
+                <div class="section-head">
+                  <div>
+                    <h3>Revision audit</h3>
+                    <p>Did each intervention improve the outcome?</p>
+                  </div>
+                  <span class="chip red">2 worsened</span>
+                </div>
+                <div class="table">
+                  <div class="tr head">
+                    <span>Move</span><span>Revision</span
+                    ><span>Error before</span><span>Error after</span
+                    ><span>FVA</span><span>Judgment</span>
+                  </div>
+                  <div class="tr">
+                    <span>M−5 → M−4</span><span>−0.4</span><span>0.1</span
+                    ><span>0.5</span><span class="bad">−0.4</span
+                    ><span class="bad">Worsened</span>
+                  </div>
+                  <div class="tr">
+                    <span>M−3 → M−2</span><span>+0.3</span><span>0.5</span
+                    ><span>0.2</span><span class="good">+0.3</span
+                    ><span class="good">Improved</span>
+                  </div>
+                  <div class="tr">
+                    <span>M−2 → M−1</span><span>−0.6</span><span>0.2</span
+                    ><span>0.8</span><span class="bad">−0.6</span
+                    ><span class="bad">Worsened</span>
+                  </div>
+                </div>
+              </section>
+              <section class="section">
+                <div class="section-head">
+                  <div>
+                    <h3>Sibling benchmark</h3>
+                    <p>Comparable brand and SKU-class peers</p>
+                  </div>
+                  <span class="chip">Class C</span>
+                </div>
+                <div class="section-body">
+                  <div class="barrow">
+                    <span>Brand median FA</span>
+                    <div class="bar"><i style="width: 88%"></i></div>
+                    <b>88%</b>
+                  </div>
+                  <div class="barrow">
+                    <span>Class C median</span>
+                    <div class="bar"><i style="width: 85%"></i></div>
+                    <b>85%</b>
+                  </div>
+                  <div class="barrow selected">
+                    <span>This SKU</span>
+                    <div class="bar">
+                      <i style="width: 81%; background: #b63b35"></i>
+                    </div>
+                    <b>81%</b>
+                  </div>
+                  <div class="barrow">
+                    <span>Peer P75</span>
+                    <div class="bar"><i style="width: 92%"></i></div>
+                    <b>92%</b>
+                  </div>
+                  <p
+                    style="
+                      margin: 10px 0 0;
+                      color: var(--muted);
+                      font: 600 9px var(--mono);
+                    "
+                  >
+                    Show volume, lifecycle, and evidence coverage beside every
+                    peer comparison; do not benchmark unlike SKUs.
+                  </p>
+                </div>
+              </section>
+            </div>
+            <section class="section">
+              <div class="section-head">
+                <div>
+                  <h3>Exception and evidence timeline</h3>
+                  <p>
+                    Only time-stamped facts that could explain or invalidate the
+                    forecast
+                  </p>
+                </div>
+                <span class="chip amber">External feeds needed</span>
+              </div>
+              <div class="timeline">
+                <div></div>
+                <div>Mar</div>
+                <div>Apr</div>
+                <div>May</div>
+                <div>Jun</div>
+                <div>Jul</div>
+                <div>Aug</div>
+                <div>Forecast</div>
+                <div>M−5 4.0</div>
+                <div>M−4 3.6</div>
+                <div>M−3 3.6</div>
+                <div>M−2 4.0</div>
+                <div class="event red">M−1 ↓ to 3.3</div>
+                <div>Actual</div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div class="event green">4.1 KL</div>
+                <div>Evidence</div>
+                <div class="event">No event link</div>
+                <div class="event">No event link</div>
+                <div class="event">No event link</div>
+                <div class="event">No event link</div>
+                <div class="event red">Reason missing</div>
+                <div class="event">Actual complete</div>
+              </div>
+            </section>
+          </div>
+          <aside class="stack evidence-rail">
+            <section class="section">
+              <div class="section-head">
+                <div>
+                  <h3>Evidence → decision rail</h3>
+                  <p>The page's signature meeting narrative</p>
+                </div>
+              </div>
+              <div class="spine">
+                <div class="spine-row">
+                  <span class="node">1</span>
+                  <div>
+                    <h4>Observation</h4>
+                    <p>Latest forecast undershot actual by 0.8 KL (18.9%).</p>
+                  </div>
+                </div>
+                <div class="spine-row">
+                  <span class="node">2</span>
+                  <div>
+                    <h4>Diagnosis</h4>
+                    <p>
+                      Late downward revision, not persistent low demand, drove
+                      the miss.
+                    </p>
+                  </div>
+                </div>
+                <div class="spine-row">
+                  <span class="node">3</span>
+                  <div>
+                    <h4>Evidence</h4>
+                    <p>
+                      M−2 was 0.2 KL from actual; M−1 removed 0.6 KL and
+                      worsened error.
+                    </p>
+                  </div>
+                </div>
+                <div class="spine-row">
+                  <span class="node">4</span>
+                  <div>
+                    <h4>Competing explanation</h4>
+                    <p>
+                      Promotion, availability, distribution, and price evidence
+                      are not connected.
+                    </p>
+                  </div>
+                </div>
+                <div class="spine-row">
+                  <span class="node">5</span>
+                  <div>
+                    <h4>Treatment</h4>
+                    <p>
+                      Restore 0.5 KL as a guarded level correction; do not
+                      extrapolate a trend.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="treatment">
+                <h4>Decision test</h4>
+                <p>
+                  If next two weeks remain below 3.6 KL run-rate, cancel the
+                  rebase and use the downside scenario.
+                </p>
+              </div>
+            </section>
+            <section class="section">
+              <div class="section-head">
+                <div>
+                  <h3>Issue callouts</h3>
+                  <p>Ranked by materiality × confidence</p>
+                </div>
+              </div>
+              <div class="section-body">
+                <div class="issue">
+                  <span class="rank">1</span>
+                  <div>
+                    <h4>Late revision destroyed value</h4>
+                    <p>−0.6 KL at M−1; error worsened by the same amount.</p>
+                  </div>
+                  <aside class="bad">Confirmed<br />Recurring?</aside>
+                </div>
+                <div class="issue">
+                  <span class="rank">2</span>
+                  <div>
+                    <h4>External cause is unproven</h4>
+                    <p>
+                      No linked promotion, stockout, distribution, or price
+                      evidence.
+                    </p>
+                  </div>
+                  <aside class="warn">Unknown<br />Block claim</aside>
+                </div>
+                <div class="issue">
+                  <span class="rank">3</span>
+                  <div>
+                    <h4>Peer gap needs context</h4>
+                    <p>
+                      FA trails class median, but lifecycle and velocity
+                      matching must be verified.
+                    </p>
+                  </div>
+                  <aside>Probable<br />Monitor</aside>
+                </div>
+              </div>
+            </section>
+            <section class="section">
+              <div class="section-head">
+                <div>
+                  <h3>Meeting brief</h3>
+                  <p>What must be agreed today</p>
+                </div>
+              </div>
+              <div class="meeting">
+                <div class="ask">
+                  <b>Ask business</b
+                  ><span
+                    >What new information justified the July reduction?</span
+                  >
+                </div>
+                <div class="ask">
+                  <b>Ask forecasting</b
+                  ><span>Was the M−2 improvement model-driven or manual?</span>
+                </div>
+                <div class="ask">
+                  <b>Decision owner</b
+                  ><span>Demand planner · review 14 Sep</span>
+                </div>
+                <div class="ask">
+                  <b>No-change counterfactual</b
+                  ><span
+                    >Current baseline risks repeating a 0.5–0.8 KL
+                    underforecast.</span
+                  >
+                </div>
+              </div>
+            </section>
+          </aside>
+        </div>
+      </section>
+      <section class="variant" data-variant="agenda">
+        <header class="page-head">
+          <div>
+            <p class="eyebrow">Variant B · meeting agenda</p>
+            <h1>Five questions, one decision</h1>
+            <p>
+              A linear facilitation layout for screen-sharing in consensus
+              meetings.
+            </p>
+          </div>
+          <div class="actions">
+            <button class="btn primary">Start meeting mode</button>
+          </div>
+        </header>
+        <div class="agenda">
+          <nav class="section agenda-nav">
+            <div>1 · What happened?</div>
+            <div>2 · Was it forecastable?</div>
+            <div>3 · Did revisions help?</div>
+            <div>4 · Is it SKU-specific?</div>
+            <div>5 · What changes?</div>
+          </nav>
+          <div class="agenda-main">
+            <section class="section">
+              <div class="section-head">
+                <h2 class="question">1. What happened?</h2>
+                <span class="chip red">0.8 KL under</span>
+              </div>
+              <div class="section-body">
+                <div class="metric-ledger">
+                  <div class="metric">
+                    <span class="k">FA</span><b>81.1%</b>
+                  </div>
+                  <div class="metric">
+                    <span class="k">Bias</span><b class="bad">−18.9%</b>
+                  </div>
+                  <div class="metric">
+                    <span class="k">Actual</span><b>4.1 KL</b>
+                  </div>
+                  <div class="metric">
+                    <span class="k">Latest</span><b>3.3 KL</b>
+                  </div>
+                  <div class="metric">
+                    <span class="k">Persistence</span><b>3 / 5</b>
+                  </div>
+                  <div class="metric">
+                    <span class="k">Materiality</span><b>Medium</b>
+                  </div>
+                </div>
+              </div>
+            </section>
+            <section class="section">
+              <div class="section-head">
+                <h2 class="question">
+                  2. Was demand observable and the miss forecastable?
+                </h2>
+                <span class="chip amber">Evidence gap</span>
+              </div>
+              <div class="section-body">
+                <div class="two">
+                  <div class="card">
+                    <h4>Known</h4>
+                    <p>
+                      Actual is matched and positive. Forecast vintages and
+                      hierarchy are complete.
+                    </p>
+                  </div>
+                  <div class="card">
+                    <h4>Not connected</h4>
+                    <p>
+                      Stockout, service, promotion, price, distribution,
+                      lifecycle event, and commercial notes.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </section>
+            <section class="section">
+              <div class="section-head">
+                <h2 class="question">3. Did revisions add value?</h2>
+                <span class="chip red">No · −50% efficiency</span>
+              </div>
+              <div class="section-body">
+                <p style="margin: 0; color: var(--muted)">
+                  One material revision helped; two hurt. The final reduction
+                  created the largest error.
+                </p>
+              </div>
+            </section>
+            <section class="section">
+              <div class="section-head">
+                <h2 class="question">4. Is the issue SKU-specific?</h2>
+                <span class="chip">Brand + class cohort</span>
+              </div>
+              <div class="section-body">
+                <p style="margin: 0; color: var(--muted)">
+                  Place the SKU inside a comparable strip plot. Require matched
+                  lifecycle/velocity before accepting the peer conclusion.
+                </p>
+              </div>
+            </section>
+            <section class="decision">
+              <div>
+                <span class="chip amber">5 · PROPOSED TREATMENT</span>
+                <h2>Restore 0.5 KL with a two-week invalidation trigger</h2>
+                <p>
+                  Rebase level, not trend; leave event uplift unchanged until
+                  external evidence is supplied.
+                </p>
+              </div>
+              <div>
+                <span class="k">Impact</span
+                ><strong class="big">+0.5 KL</strong>
+              </div>
+              <div>
+                <span class="k">Risk</span><strong class="big">Medium</strong>
+              </div>
+              <div>
+                <span class="k">Owner</span><strong class="big">Planner</strong>
+              </div>
+            </section>
+          </div>
+        </div>
+      </section>
+      <section class="variant" data-variant="canvas">
+        <header class="page-head">
+          <div>
+            <p class="eyebrow">Variant C · investigation canvas</p>
+            <h1>Past → causes → forward</h1>
+            <p>A three-column working canvas for analyst-led post-mortems.</p>
+          </div>
+          <div class="actions">
+            <button class="btn">Save hypothesis</button
+            ><button class="btn primary">Publish treatment</button>
+          </div>
+        </header>
+        <div class="canvas">
+          <section class="section">
+            <h2 class="column-title">PAST · what happened</h2>
+            <div class="card">
+              <h4>Performance ledger</h4>
+              <p>
+                FA 81.1% · Bias −18.9% · Abs error 0.8 KL · persistence and
+                materiality.
+              </p>
+            </div>
+            <div class="card">
+              <h4>Forecast evolution</h4>
+              <p>
+                Vintage path against actual, with each revision classified
+                improved / worsened.
+              </p>
+            </div>
+            <div class="card">
+              <h4>Sibling context</h4>
+              <p>Brand and SKU-class percentile, volume/lifecycle matched.</p>
+            </div>
+          </section>
+          <section class="section">
+            <h2 class="column-title">CAUSES · what explains it</h2>
+            <div class="card">
+              <h4>Hypothesis 1 · late over-correction</h4>
+              <p>
+                <span class="chip green">Supported</span> M−2 was close; M−1
+                reduced 0.6 KL and worsened error.
+              </p>
+            </div>
+            <div class="card">
+              <h4>Hypothesis 2 · structural decline</h4>
+              <p>
+                <span class="chip red">Weak</span> One target-month vintage path
+                is insufficient to infer a persistent decline.
+              </p>
+            </div>
+            <div class="card">
+              <h4>Hypothesis 3 · external event</h4>
+              <p>
+                <span class="chip amber">Unverified</span> Requires promotion,
+                price, distribution, service, or commercial evidence.
+              </p>
+            </div>
+            <div class="card">
+              <h4>Evidence inbox</h4>
+              <p>
+                Time-stamped sources, confidence, repeatability, and
+                invalidation criteria.
+              </p>
+            </div>
+          </section>
+          <section class="section">
+            <h2 class="column-title">FORWARD · what changes</h2>
+            <div class="card">
+              <h4>Recommended baseline</h4>
+              <p>+0.5 KL guarded rebase; no trend extrapolation.</p>
+            </div>
+            <div class="card">
+              <h4>Scenario range</h4>
+              <p>Downside 3.6 · Base 3.9 · Upside 4.2 KL.</p>
+            </div>
+            <div class="card">
+              <h4>Assumptions</h4>
+              <p>
+                Demand remains observable; no unplanned distribution or
+                availability shock.
+              </p>
+            </div>
+            <div class="card">
+              <h4>Review contract</h4>
+              <p>
+                Owner, due date, trigger, and explicit action if evidence fails.
+              </p>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+    <nav class="switcher" aria-label="Prototype variants">
+      <button data-go="evidence">A · Evidence rail</button
+      ><button data-go="agenda">B · Meeting agenda</button
+      ><button data-go="canvas">C · Investigation canvas</button>
+    </nav>
+    <script>
+      const params = new URLSearchParams(location.search);
+      const chosen = params.get("v") || "evidence";
+      function show(v) {
+        document
+          .querySelectorAll(".variant")
+          .forEach((x) =>
+            x.classList.toggle("active", x.dataset.variant === v),
+          );
+        document
+          .querySelectorAll("[data-go]")
+          .forEach((x) => x.classList.toggle("active", x.dataset.go === v));
+        history.replaceState(null, "", `?v=${v}`);
+      }
+      document
+        .querySelectorAll("[data-go]")
+        .forEach((b) => (b.onclick = () => show(b.dataset.go)));
+      show(chosen);
+    </script>
+  </body>
+</html>

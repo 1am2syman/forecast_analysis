@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 import polars as pl
 
 from ._utils import require_columns
@@ -18,13 +18,15 @@ from .filters import (
     apply_quality_pair_filters,
 )
 from .metrics import (
+    HORIZON_METRIC_COLUMNS,
     MetricSummary,
     build_brand_target_month_performance,
-    build_horizon_performance,
-    build_monthly_performance,
+    build_horizon_audit,
+    build_monthly_audit,
     build_revision_diagnostics,
     build_revision_scatter,
     calculate_metrics,
+    project_monthly_performance,
 )
 from .vintages import VintageRule, select_vintage_pair
 
@@ -141,6 +143,8 @@ class ComparisonView:
     brand_target_month_performance: pl.DataFrame
     revision_diagnostics: pl.DataFrame
     revision_scatter: pl.DataFrame
+    monthly_audit: pl.DataFrame = field(default_factory=pl.DataFrame)
+    horizon_audit: pl.DataFrame = field(default_factory=pl.DataFrame)
 
     @property
     def ready(self) -> bool:
@@ -855,6 +859,18 @@ def build_source_comparison(
         tm_only_keys,
         ml_only_keys,
     )
+    metric_pairs = pl.concat(
+        [tm_metric_pairs, ml_metric_pairs],
+        how="vertical",
+    )
+    monthly_audit = build_monthly_audit(
+        metric_pairs,
+        selected_actual_population,
+    )
+    horizon_audit = build_horizon_audit(
+        common_population,
+        selected_actual_population,
+    )
 
     return ComparisonView(
         selected_horizon=selected_horizon,
@@ -886,16 +902,12 @@ def build_source_comparison(
         deltas=deltas,
         tm_metrics=metrics_by_source["tm"],
         ml_metrics=metrics_by_source["ml"],
-        monthly_performance=build_monthly_performance(
-            pl.concat([tm_metric_pairs, ml_metric_pairs], how="vertical"),
-            selected_actual_population,
-        ),
-        horizon_performance=build_horizon_performance(
-            common_population,
-            selected_actual_population,
-        ),
+        monthly_performance=project_monthly_performance(monthly_audit),
+        monthly_audit=monthly_audit,
+        horizon_performance=horizon_audit.select(HORIZON_METRIC_COLUMNS),
+        horizon_audit=horizon_audit,
         brand_target_month_performance=build_brand_target_month_performance(
-            pl.concat([tm_metric_pairs, ml_metric_pairs], how="vertical"),
+            metric_pairs,
             selected_actual_population,
             revision_tolerance_kl=comparison_filters.revision_tolerance_kl,
         ),
@@ -903,7 +915,5 @@ def build_source_comparison(
             tm_metric_pairs,
             ml_metric_pairs,
         ),
-        revision_scatter=build_revision_scatter(
-            pl.concat([tm_metric_pairs, ml_metric_pairs], how="vertical")
-        ),
+        revision_scatter=build_revision_scatter(metric_pairs),
     )

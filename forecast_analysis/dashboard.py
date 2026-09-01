@@ -23,15 +23,15 @@ from .filters import (
     with_display_brand,
 )  # pyright: ignore[reportMissingImports]
 from .metrics import (
+    HORIZON_METRIC_COLUMNS,
     MetricSummary,
     build_brand_target_month_performance,
     build_horizon_audit,
-    build_horizon_performance,
     build_monthly_audit,
-    build_monthly_performance,
     build_revision_diagnostics,
     build_revision_scatter,
     calculate_metrics,
+    project_monthly_performance,
 )  # pyright: ignore[reportMissingImports]
 from .product_history import (  # pyright: ignore[reportMissingImports]
     ProductHistoryView,
@@ -700,15 +700,9 @@ def _build_comparison_dashboard_view(
         selected_actual_population=comparison.selected_actual_population,
         metrics=comparison.tm_metrics,
         monthly_performance=comparison.monthly_performance,
-        monthly_audit=build_monthly_audit(
-            pl.concat([comparison.tm_pairs, comparison.ml_pairs], how="vertical"),
-            comparison.selected_actual_population,
-        ),
+        monthly_audit=comparison.monthly_audit,
         horizon_performance=comparison.horizon_performance,
-        horizon_audit=build_horizon_audit(
-            comparison.common_population,
-            comparison.selected_actual_population,
-        ),
+        horizon_audit=comparison.horizon_audit,
         brand_target_month_performance=comparison.brand_target_month_performance,
         revision_diagnostics=comparison.revision_diagnostics,
         revision_scatter=comparison.revision_scatter,
@@ -717,6 +711,16 @@ def _build_comparison_dashboard_view(
         download_frame=build_exception_download_frame(comparison.vintage_pairs),
         comparison=comparison,
     )
+
+
+REVISION_SCATTER_EXCLUDED_BRANDS = {
+    "PA-BDYLOT",
+    "JFB_POWDR",
+    "RK_CLO_R",
+    "RK_CLO_S",
+    "SAF_HONEY",
+    "BPA_PET_J",
+}
 
 
 def build_dashboard_view(
@@ -789,14 +793,7 @@ def build_dashboard_view(
         population_frame=coverage_population,
         revision_tolerance_kl=active_filters.revision_tolerance_kl,
     )
-    baseline_coverage_pairs = select_vintage_pair(
-        quality_pair_population,
-        active_filters.source,
-        vintage_a=vintage_a,
-        vintage_b=vintage_b,
-        population_frame=coverage_population,
-        revision_tolerance_kl=active_filters.revision_tolerance_kl,
-    )
+    baseline_coverage_pairs = coverage_pairs
     metric_coverage_pairs = select_vintage_pair(
         selection_population,
         active_filters.source,
@@ -863,6 +860,63 @@ def build_dashboard_view(
         selected_actual_population,
         metrics,
     )
+    monthly_audit = build_monthly_audit(pairs, selected_actual_population)
+    horizon_audit = build_horizon_audit(
+        output_population,
+        selected_actual_population,
+    )
+    scatter_filters = replace(
+        active_filters.without_revision_filters().without_performance_filters(),
+        target_months=None,
+        horizons=None,
+        pair_statuses=None,
+        sku_classes=None,
+        zero_forecast_only=False,
+        complete_vintage_history_only=False,
+    )
+    scatter_population = apply_dashboard_filters(
+        frame,
+        scatter_filters,
+        availability_frame=availability_population,
+    )
+    scatter_parent_scope_active = any(
+        (
+            active_filters.horizons is not None,
+            active_filters.pair_statuses is not None,
+            active_filters.zero_forecast_only,
+            active_filters.complete_vintage_history_only,
+            active_filters.revision_directions is not None,
+            active_filters.revision_outcomes is not None,
+            active_filters.has_performance_filters,
+        )
+    )
+    if scatter_parent_scope_active:
+        scatter_population = scatter_population.join(
+            pairs.select(["source", "parent_code"]).unique(),
+            on=["source", "parent_code"],
+            how="semi",
+        )
+    scatter_target_end = (
+        max(active_filters.target_months)
+        if active_filters.target_months
+        else None
+    )
+    revision_scatter = build_revision_scatter(
+        scatter_population,
+        target_end_month=scatter_target_end,
+    )
+    scatter_description = pl.col("parent_description").fill_null("").str.to_uppercase()
+    is_pcno_ej = scatter_description.str.contains(
+        "PCNO",
+    ) & scatter_description.str.contains("EJ")
+    revision_scatter = revision_scatter.filter(
+        ~pl.col("brand").fill_null("").is_in(REVISION_SCATTER_EXCLUDED_BRANDS)
+        & ~is_pcno_ej
+    )
+    if active_filters.sku_classes is not None:
+        revision_scatter = revision_scatter.filter(
+            pl.col("sku_class").is_in(active_filters.sku_classes)
+        )
     return DashboardView(
         filters=active_filters,
         filtered_population=output_population,
@@ -870,25 +924,17 @@ def build_dashboard_view(
         coverage_pairs=coverage_pairs,
         selected_actual_population=selected_actual_population,
         metrics=metrics,
-        monthly_performance=build_monthly_performance(
-            pairs, selected_actual_population
-        ),
-        monthly_audit=build_monthly_audit(
-            pairs, selected_actual_population
-        ),
-        horizon_performance=build_horizon_performance(
-            output_population, selected_actual_population
-        ),
-        horizon_audit=build_horizon_audit(
-            output_population, selected_actual_population
-        ),
+        monthly_performance=project_monthly_performance(monthly_audit),
+        monthly_audit=monthly_audit,
+        horizon_performance=horizon_audit.select(HORIZON_METRIC_COLUMNS),
+        horizon_audit=horizon_audit,
         brand_target_month_performance=build_brand_target_month_performance(
             pairs,
             selected_actual_population,
             revision_tolerance_kl=active_filters.revision_tolerance_kl,
         ),
         revision_diagnostics=build_revision_diagnostics(pairs),
-        revision_scatter=build_revision_scatter(pairs),
+        revision_scatter=revision_scatter,
         quality=quality,
         population_summary=population_summary,
         download_frame=build_exception_download_frame(pairs),

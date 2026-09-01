@@ -123,6 +123,7 @@ class ForecastAnalysisReleaseFixtureTests(unittest.TestCase):
         expected = self.fixture["metric_expected"]
         for field in (
             "forecast_accuracy_pct",
+            "wape_pct",
             "bias_pct",
             "absolute_error_kl",
             "mae_kl",

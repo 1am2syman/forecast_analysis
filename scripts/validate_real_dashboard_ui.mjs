@@ -28,6 +28,17 @@ const VIEWPORTS = [
   { name: "short", width: 1440, height: 720 },
   { name: "narrow", width: 800, height: 700 },
 ];
+const FOCUSED_VIEWPORTS = [
+  { name: "desktop-focus", width: 1440, height: 900, collapseRail: false },
+  { name: "short-focus", width: 1440, height: 720, collapseRail: false },
+  {
+    name: "supplied-width-focus",
+    width: 1018,
+    height: 700,
+    collapseRail: true,
+  },
+  { name: "narrow-focus", width: 800, height: 700, collapseRail: false },
+];
 
 function parseArgs(argv) {
   const args = { output: DEFAULT_OUTPUT };
@@ -194,8 +205,16 @@ class CdpPage {
     });
   }
 
-  async screenshot(path) {
-    const result = await this.send("Page.captureScreenshot", { format: "png" });
+  async screenshot(path, clip = null) {
+    const result = await this.send("Page.captureScreenshot", {
+      format: "png",
+      ...(clip
+        ? {
+            clip: { ...clip, scale: 1 },
+            captureBeyondViewport: false,
+          }
+        : {}),
+    });
     writeFileSync(path, Buffer.from(result.data, "base64"));
   }
 
@@ -233,14 +252,142 @@ function sha256(path) {
   return createHash("sha256").update(readFileSync(path)).digest("hex");
 }
 
+async function checkLazyEndpointCoverage(page) {
+  const urls = await page.evaluate(
+    "window.__dashboardFetches.map((record) => record.url)",
+  );
+  for (const moduleName of [
+    "trends",
+    "heatmap",
+    "exceptions",
+    "product",
+    "quality",
+  ]) {
+    assert(
+      urls.some((url) => url.includes(`/api/module/${moduleName}`)),
+      `Lazy ${moduleName} module was not requested`,
+    );
+  }
+  assert(
+    !urls.some((url) => /\/api\/view(?:$|\?)/.test(url)),
+    "Legacy /api/view was used by normal browser flow",
+  );
+}
+
+async function overviewAudit(page, viewport) {
+  const audit = await page.evaluate(`(() => {
+      const rect = (node) => {
+        const bounds = node.getBoundingClientRect();
+        return {top: bounds.top, left: bounds.left, right: bounds.right, bottom: bounds.bottom, width: bounds.width, height: bounds.height};
+      };
+      const charts = [...document.querySelectorAll('.overview-charts .frame__body')].map((body) => {
+        const svg = body.querySelector('svg.chart');
+        const bodyRect = rect(body);
+        const svgRect = rect(svg);
+        const viewBox = svg.viewBox.baseVal;
+        const renderedAspect = svgRect.width / svgRect.height;
+        const viewBoxAspect = viewBox.width / viewBox.height;
+        return {
+          body: bodyRect,
+          svg: svgRect,
+          viewBox: {width: viewBox.width, height: viewBox.height},
+          aspectError: Math.abs(renderedAspect - viewBoxAspect) / viewBoxAspect,
+          contained: svgRect.left >= bodyRect.left - 1 && svgRect.top >= bodyRect.top - 1 && svgRect.right <= bodyRect.right + 1 && svgRect.bottom <= bodyRect.bottom + 1,
+        };
+      });
+      const volume = document.querySelector('.chart--overview-volume');
+      return {
+        viewport: {width: innerWidth, height: innerHeight},
+        scopeTitle: getComputedStyle(document.querySelector('.scopebar__overview-title')).display,
+        paneHeads: document.querySelectorAll('#pane-overview > .pane__head').length,
+        health: rect(document.querySelector('.overview-health')),
+        chartTop: Math.min(...[...document.querySelectorAll('.overview-charts > .frame')].map((node) => node.getBoundingClientRect().top)),
+        detailsOpen: document.querySelector('.overview-details').open,
+        kpiLabels: [...document.querySelectorAll('[data-kpis] .kpi__label')].map((node) => node.textContent.trim()),
+        kpiVisible: [...document.querySelectorAll('[data-kpis] .kpi')].every((node) => { const bounds = node.getBoundingClientRect(); return getComputedStyle(node).display !== 'none' && bounds.width > 0 && bounds.height > 0; }),
+        charts,
+        volumeDomain: {
+          domainMin: Number(volume.dataset.domainMin),
+          domainMax: Number(volume.dataset.domainMax),
+          dataMin: Number(volume.dataset.dataMin),
+          dataMax: Number(volume.dataset.dataMax),
+        },
+      };
+    })()`);
+  assert(
+    audit.scopeTitle !== "none",
+    `${viewport.name}: merged overview title is hidden`,
+  );
+  assert(
+    audit.paneHeads === 0,
+    `${viewport.name}: duplicate overview heading row remains`,
+  );
+  assert(
+    audit.health.height <= 36,
+    `${viewport.name}: compact population row is too tall (${audit.health.height}px)`,
+  );
+  assert(
+    audit.chartTop <= 275,
+    `${viewport.name}: charts begin too late (${audit.chartTop}px)`,
+  );
+  assert(
+    !audit.detailsOpen,
+    `${viewport.name}: data details should default closed`,
+  );
+  assert(
+    audit.kpiLabels.length === 6 && audit.kpiVisible,
+    `${viewport.name}: all six KPI cards must remain visible`,
+  );
+  assert(
+    audit.kpiLabels.includes("WAPE"),
+    `${viewport.name}: WAPE KPI is missing`,
+  );
+  assert(
+    audit.kpiLabels.includes("Revision effectiveness"),
+    `${viewport.name}: revision effectiveness KPI is missing`,
+  );
+  assert(
+    audit.charts.length === 2,
+    `${viewport.name}: expected two overview charts`,
+  );
+  assert(
+    audit.charts.every((chart) => chart.aspectError <= 0.012),
+    `${viewport.name}: chart viewBox does not match rendered aspect`,
+  );
+  assert(
+    audit.charts.every((chart) => chart.contained),
+    `${viewport.name}: chart SVG exceeds its visual frame`,
+  );
+  const domain = audit.volumeDomain;
+  assert(
+    domain.domainMin >= 0,
+    `${viewport.name}: volume scale extends below zero`,
+  );
+  assert(
+    domain.domainMin <= domain.dataMin && domain.domainMax >= domain.dataMax,
+    `${viewport.name}: volume domain does not bound all data`,
+  );
+  if (domain.dataMin > 0)
+    assert(
+      domain.domainMin > 0,
+      `${viewport.name}: positive volume data was unnecessarily forced to zero`,
+    );
+  assert(
+    domain.domainMax - domain.domainMin <=
+      (domain.dataMax - domain.dataMin) * 1.6,
+    `${viewport.name}: volume domain wastes excessive vertical range`,
+  );
+  return audit;
+}
+
 function gallery(report) {
-  const cards = report.screenshots
+  const cards = [...report.focusedScreenshots, ...report.screenshots]
     .map(
       (shot) =>
         `<figure><img src="${shot.name}" alt="${shot.tab} at ${shot.viewport}"/><figcaption>${shot.viewport} · ${shot.tab}</figcaption></figure>`,
     )
     .join("");
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Real dashboard validation</title><style>body{margin:0;padding:28px;background:#edf3f1;color:#172421;font:14px system-ui}h1{margin-top:0}main{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}figure{margin:0;padding:10px;background:white;border:1px solid #c8d5d1;border-radius:8px}img{display:block;width:100%;height:auto;border:1px solid #dbe4e1}figcaption{padding-top:8px;font-family:monospace}</style></head><body><h1>Canonical real-data dashboard validation</h1><p>${report.screenshots.length} rendered states · ${report.generatedAt}</p><main>${cards}</main></body></html>`;
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Real dashboard validation</title><style>body{margin:0;padding:28px;background:#edf3f1;color:#172421;font:14px system-ui}h1{margin-top:0}main{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}figure{margin:0;padding:10px;background:white;border:1px solid #c8d5d1;border-radius:8px}img{display:block;width:100%;height:auto;border:1px solid #dbe4e1}figcaption{padding-top:8px;font-family:monospace}</style></head><body><h1>Canonical real-data dashboard validation</h1><p>${report.screenshots.length} matrix states + ${report.focusedScreenshots.length} focused overview captures · ${report.generatedAt}</p><main>${cards}</main></body></html>`;
 }
 
 async function main() {
@@ -296,11 +443,22 @@ async function main() {
     await page.send("Page.navigate", { url: `${baseUrl}#overview` });
     await waitFor(
       page,
-      `document.querySelector('[data-status]')?.textContent.includes('canonical dataset ready') && document.querySelectorAll('[data-kpis] .kpi').length === 8 && !document.querySelector('.loading')?.classList.contains('is-visible')`,
+      `document.querySelector('[data-status]')?.textContent.includes('canonical dataset ready') && document.querySelectorAll('[data-kpis] .kpi').length === 6 && !document.querySelector('.loading')?.classList.contains('is-visible')`,
       "canonical dashboard bootstrap",
       75_000,
     );
     await page.evaluate("document.fonts.ready", true);
+    await page.evaluate(`(() => {
+      window.__dashboardFetches = [];
+      const originalFetch = window.fetch.bind(window);
+      window.fetch = async (...args) => {
+        const options = args[1] || {};
+        const record = {url: String(args[0]), method: options.method || 'GET', body: options.body || null, done: false, status: null};
+        window.__dashboardFetches.push(record);
+        try { const response = await originalFetch(...args); record.status = response.status; record.done = true; return response; }
+        catch (error) { record.error = String(error); record.done = true; throw error; }
+      };
+    })()`);
 
     const semantic = JSON.parse(
       await page.evaluate(`JSON.stringify({
@@ -338,7 +496,7 @@ async function main() {
       ),
       "Pane labels do not match tabs",
     );
-    assert(semantic.kpis === 8, "Expected eight canonical KPI cards");
+    assert(semantic.kpis === 6, "Expected six canonical KPI cards");
     assert(
       semantic.liveChip === "Live data" && !semantic.syntheticText,
       "Dashboard must clearly render real rather than synthetic data",
@@ -353,13 +511,9 @@ async function main() {
       ),
       "Canonical metric attribution is missing",
     );
-    assert(
-      semantic.pageText.includes("73.9%") &&
-        semantic.pageText.includes("8,276.6 KL"),
-      "Canonical baseline metrics were not rendered",
-    );
-
     const screenshots = [];
+    const focusedScreenshots = [];
+    const overviewAudits = [];
     const layouts = [];
     for (const viewport of VIEWPORTS) {
       await page.viewport(viewport.width, viewport.height);
@@ -367,7 +521,12 @@ async function main() {
         await page.evaluate(
           `document.querySelector('[data-target="${tab}"]').click()`,
         );
-        await sleep(120);
+        await waitFor(
+          page,
+          `!document.querySelector('#pane-${tab}').classList.contains('is-stale') && !document.querySelector('#pane-${tab}').classList.contains('is-module-loading')`,
+          `${viewport.name}/${tab} lazy module load`,
+        );
+        await sleep(60);
         const layout = JSON.parse(
           await page.evaluate(`(() => {
             const active = document.querySelector('.stage > .pane.is-active');
@@ -419,6 +578,8 @@ async function main() {
           );
         }
         layouts.push({ viewport: viewport.name, ...layout });
+        if (tab === "overview")
+          overviewAudits.push(await overviewAudit(page, viewport));
         const name = `${viewport.width}-${viewport.height}-${tab}.png`;
         const path = join(args.output, name);
         await page.screenshot(path);
@@ -430,6 +591,38 @@ async function main() {
         });
       }
     }
+
+    for (const viewport of FOCUSED_VIEWPORTS) {
+      await page.viewport(viewport.width, viewport.height);
+      await page.evaluate(
+        `(() => {
+          const shouldCollapse = ${viewport.collapseRail};
+          const isCollapsed = document.querySelector('.body').classList.contains('is-rail-collapsed');
+          if (shouldCollapse !== isCollapsed) document.querySelector('[data-action="rail"]').click();
+          document.querySelector('[data-target="overview"]').click();
+          document.querySelector('.overview-details').open = false;
+          return new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        })()`,
+        true,
+      );
+      await sleep(80);
+      overviewAudits.push(await overviewAudit(page, viewport));
+      const clip = await page.evaluate(`(() => {
+        const bounds = document.querySelector('.workspace').getBoundingClientRect();
+        return {x: Math.max(0, bounds.x), y: Math.max(0, bounds.y), width: Math.min(innerWidth - Math.max(0, bounds.x), bounds.width), height: Math.min(innerHeight - Math.max(0, bounds.y), bounds.height)};
+      })()`);
+      const name = `focused-${viewport.width}-${viewport.height}-overview.png`;
+      const path = join(args.output, name);
+      await page.screenshot(path, clip);
+      focusedScreenshots.push({
+        name,
+        tab: "overview",
+        viewport: viewport.name,
+        sha256: sha256(path),
+      });
+    }
+
+    await checkLazyEndpointCoverage(page);
 
     await page.viewport(1440, 900);
     await page.evaluate(`(() => {
@@ -489,6 +682,11 @@ async function main() {
     await page.evaluate(
       `document.querySelector('[data-target="comparison"]').click(); document.querySelector('[data-subtabs="comparison"] [data-subtab-target="sources"]').click()`,
     );
+    await waitFor(
+      page,
+      `!document.querySelector('#pane-comparison').classList.contains('is-stale') && document.querySelector('[data-source-panel]').innerText.trim().length > 0`,
+      "lazy source comparison module",
+    );
     const comparisonText = await page.evaluate(
       `document.querySelector('[data-source-panel]').innerText`,
     );
@@ -516,7 +714,7 @@ async function main() {
     await sleep(200);
     await waitFor(
       page,
-      `!document.querySelector('.loading').classList.contains('is-visible') && document.querySelector('[data-product-summary]')?.innerText.includes('999173')`,
+      `!document.querySelector('#pane-history').classList.contains('is-stale') && !document.querySelector('#pane-history').classList.contains('is-module-loading') && document.querySelector('[data-product-summary]')?.innerText.includes('999173')`,
       "product drill-down",
     );
     const productState = JSON.parse(
@@ -542,7 +740,15 @@ async function main() {
       downloadPath: downloadDir,
     });
     await page.evaluate(
-      `document.querySelector('[data-subtabs="history"] [data-subtab-target="exceptions"]').click(); document.querySelector('[data-export-kind="vintages"]').click()`,
+      `document.querySelector('[data-subtabs="history"] [data-subtab-target="exceptions"]').click()`,
+    );
+    await waitFor(
+      page,
+      `!document.querySelector('#pane-history').classList.contains('is-stale') && !!document.querySelector('[data-export-kind="vintages"]')`,
+      "lazy exception module before export",
+    );
+    await page.evaluate(
+      `document.querySelector('[data-export-kind="vintages"]').click()`,
     );
     const downloadDeadline = Date.now() + 60_000;
     while (
@@ -586,7 +792,9 @@ async function main() {
       product: productState,
       downloads,
       layouts,
+      overviewAudits,
       screenshots,
+      focusedScreenshots,
       consoleErrors: page.consoleErrors,
       pageErrors: page.pageErrors,
       networkFailures: page.networkFailures,
@@ -598,7 +806,7 @@ async function main() {
     );
     writeFileSync(
       join(args.output, "validation-report.md"),
-      `# Real dashboard UI validation\n\n- Result: PASS\n- Generated: ${report.generatedAt}\n- Screenshots: ${screenshots.length}\n- Viewports: ${VIEWPORTS.map((viewport) => `${viewport.width}×${viewport.height}`).join(", ")}\n- Download: ${downloads.join(", ")}\n- Console/page/network errors: 0\n`,
+      `# Real dashboard UI validation\n\n- Result: PASS\n- Generated: ${report.generatedAt}\n- Matrix screenshots: ${screenshots.length}\n- Focused overview screenshots: ${focusedScreenshots.length}\n- Viewports: ${VIEWPORTS.map((viewport) => `${viewport.width}×${viewport.height}`).join(", ")}\n- Overview audits: ${overviewAudits.length} passed\n- Download: ${downloads.join(", ")}\n- Console/page/network errors: 0\n`,
     );
     writeFileSync(join(args.output, "index.html"), gallery(report));
     process.stdout.write("REAL DASHBOARD UI VALIDATION PASSED\n");

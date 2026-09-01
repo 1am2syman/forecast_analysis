@@ -1,0 +1,70 @@
+{
+  "generatedAt": "2026-09-01T07:25:58.179Z",
+  "screenshots": [
+    {
+      "name": "desktop-filter-timeline.png",
+      "width": 1440,
+      "height": 900,
+      "geometry": {
+        "visible": true,
+        "timelineOverflow": 0,
+        "drawerOverflow": 0,
+        "buttonsVisible": true,
+        "clippedRight": false,
+        "clippedLeft": false
+      }
+    },
+    {
+      "name": "wide-filter-timeline.png",
+      "width": 1680,
+      "height": 1000,
+      "geometry": {
+        "visible": true,
+        "timelineOverflow": 0,
+        "drawerOverflow": 0,
+        "buttonsVisible": true,
+        "clippedRight": false,
+        "clippedLeft": false
+      }
+    },
+    {
+      "name": "compact-filter-timeline.png",
+      "width": 800,
+      "height": 700,
+      "geometry": {
+        "visible": true,
+        "timelineOverflow": 0,
+        "drawerOverflow": 0,
+        "buttonsVisible": true,
+        "clippedRight": false,
+        "clippedLeft": false
+      }
+    },
+    {
+      "name": "desktop-6m-selected.png",
+      "width": 1440,
+      "height": 900,
+      "state": "6M selected"
+    },
+    {
+      "name": "desktop-keyboard-focus.png",
+      "width": 1440,
+      "height": 900,
+      "state": "Keyboard focus visible"
+    },
+    {
+      "name": "desktop-quarter-selected.png",
+      "width": 1440,
+      "height": 900,
+      "state": "Quarter and 4Q selected"
+    },
+    {
+      "name": "desktop-custom-period.png",
+      "width": 1440,
+      "height": 900,
+      "state": "Exact fields synchronized with handles"
+    }
+  ],
+  "screenshotsOnly": false,
+  "browserErrors": []
+}

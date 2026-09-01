@@ -308,6 +308,241 @@ class DashboardUiOverflowTests(unittest.TestCase):
         self.assertEqual(result["state"], "expanded-audit")
 
 
+class DashboardUiSourceContractTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.source = (ROOT / "dashboard/app.js").read_text(encoding="utf-8")
+        cls.styles = (ROOT / "dashboard/styles.css").read_text(encoding="utf-8")
+        cls.index = (ROOT / "dashboard/index.html").read_text(encoding="utf-8")
+
+    def test_overview_renders_volume_box_plots_and_dedicated_wape_card(self) -> None:
+        self.assertIn("function volumeBoxPlotCard", self.source)
+        self.assertIn('"Actual volume",\n          volumeDistributions.actual', self.source)
+        self.assertIn('"Forecast volume",\n          volumeDistributions.forecast', self.source)
+        self.assertIn("const wape = finite(metrics.wape_pct)", self.source)
+        self.assertIn('kpi(\n          "WAPE"', self.source)
+        self.assertIn("pct(wape)", self.source)
+        self.assertNotIn(">WAPE ${escapeHtml(pct(wape))}</text>", self.source)
+        self.assertNotIn('"MAE"', self.source)
+
+    def test_overview_uses_one_kpi_row_and_scales_charts_into_freed_height(self) -> None:
+        self.assertNotIn('kpi(\n          "Absolute error"', self.source)
+        self.assertNotIn('kpi(\n          "Coverage"', self.source)
+        self.assertIn("function overviewChartHeight", self.source)
+        self.assertIn("overviewChartHeight(performanceChart)", self.source)
+        self.assertIn("overviewChartHeight(volumeChart)", self.source)
+        self.assertIn('viewBox="0 0 ${width} ${height}"', self.source)
+
+    def test_forecast_vs_actual_month_tooltip_exposes_shared_values(self) -> None:
+        self.assertIn('data-tooltip-kind="volume"', self.source)
+        self.assertIn('class="chart__month-hit chart__point chart__volume-hit"', self.source)
+        self.assertIn("Vintage A forecast</dt>", self.source)
+        self.assertIn("Vintage B forecast</dt>", self.source)
+        self.assertIn("Actual</dt>", self.source)
+        self.assertIn("B − actual</dt>", self.source)
+        self.assertIn("data-tooltip-variance", self.source)
+
+    def test_forecast_vs_actual_palette_is_stable_across_filter_renders(self) -> None:
+        self.assertIn("--series-actual: #1e3a8a", self.styles)
+        self.assertIn("--series-vintage-a: #d6b98c", self.styles)
+        self.assertIn("--series-vintage-b: #15803d", self.styles)
+        self.assertIn(
+            ".chart--overview-volume .chart__series--vintage-a",
+            self.styles,
+        )
+        self.assertIn("stroke-dasharray: 13 8", self.styles)
+        self.assertIn(".chart-tooltip {\n  position: fixed;\n  z-index: 60;", self.styles)
+        self.assertIn(
+            'key key--volume-vintage-b"></i>Vintage B',
+            self.source,
+        )
+        self.assertIn('class="key key--volume-vintage-b"', self.index)
+        self.assertIn('class="key key--volume-vintage-a"', self.index)
+        self.assertIn('class="key key--volume-actual"', self.index)
+        self.assertIn(
+            'series("vintage_a_forecast_kl", "chart__series--vintage-a")',
+            self.source,
+        )
+        self.assertIn(
+            'series("vintage_b_forecast_kl", "chart__series--vintage-b")',
+            self.source,
+        )
+        self.assertIn(
+            'series("actual_kl", "chart__series--actual")',
+            self.source,
+        )
+
+    def test_fullscreen_chart_tooltip_uses_the_shared_tooltip_layer(self) -> None:
+        self.assertIn('document.addEventListener("pointerover"', self.source)
+        self.assertIn('event.target.closest?.(".chart__point")', self.source)
+        self.assertIn("showChartTooltip(point, event)", self.source)
+        self.assertIn("chartTooltip.id = \"active-chart-tooltip\"", self.source)
+        self.assertIn("z-index: 60", self.styles)
+
+    def test_trend_accuracy_reuses_the_exact_overview_chart_spec(self) -> None:
+        self.assertIn("function renderTrendMonthlyChart(payload)", self.source)
+        self.assertIn('monthlyMetric === "forecast_accuracy_pct"', self.source)
+        self.assertIn("title.textContent = chartDialogContent.accuracy.title", self.source)
+        self.assertIn("setHtml(legend, chartDialogContent.accuracy.legend)", self.source)
+        self.assertIn("overviewPerformanceChart(monthly.rows", self.source)
+        self.assertIn("height: overviewChartHeight(chartContainer)", self.source)
+        self.assertIn("[data-trend-chart]", self.source)
+        self.assertIn(".trend-main .chart--overview", self.styles)
+
+    def test_overview_axis_labels_have_clear_line_spacing_without_bias_caption(self) -> None:
+        self.assertNotIn('class="chart__section-label"', self.source)
+        self.assertEqual(self.source.count('class="chart__axis-year" x="${x(month)}" dy="16"'), 2)
+
+    def test_overview_volume_axis_uses_absolute_whole_kl_values(self) -> None:
+        self.assertIn("const OVERVIEW_VOLUME_Y_MIN_KL = 1600", self.source)
+        self.assertIn("const OVERVIEW_VOLUME_Y_MAX_KL = 4500", self.source)
+        self.assertIn(
+            "return [OVERVIEW_VOLUME_Y_MIN_KL, OVERVIEW_VOLUME_Y_MAX_KL]",
+            self.source,
+        )
+        self.assertIn("number(value, 0)", self.source)
+        self.assertNotIn("number(value / 1000, 1)", self.source)
+        self.assertIn(">KL</text><g class=\"chart__grid chart__grid--volume\"", self.source)
+        self.assertNotIn(">'000 KL</text>", self.source)
+
+    def test_filter_workbench_exposes_sku_class_request_and_options(self) -> None:
+        self.assertIn('<span>SKU Class</span', self.index)
+        self.assertIn('data-control="sku_class"', self.index)
+        self.assertIn('"sku_class",\n      options.sku_classes.map', self.source)
+        self.assertIn('sku_class: value("sku_class") || null', self.source)
+        self.assertIn('"All SKU classes"', self.source)
+
+    def test_revision_scatter_has_local_sku_class_filter_and_full_default_viewbox(self) -> None:
+        self.assertIn('data-scatter-sku-class', self.source)
+        self.assertIn('revisionScatterSkuClass', self.source)
+        self.assertIn('data-tooltip-sku-class', self.source)
+        self.assertNotIn('preserveAspectRatio="none"', self.source)
+        self.assertIn('const centerX = baseWidth / 2 + revisionScatterPan.x', self.source)
+        self.assertIn('Seasonal extremes retained · six-month median', self.source)
+        self.assertNotIn('Winsorized months', self.source)
+        self.assertIn('.scatter-toolbar__filter', self.styles)
+        self.assertIn('Out of scope · super seasonal:', self.source)
+        self.assertIn(
+            'PA Bodylot · JFB Powder · RK Cooling · Saff Honey · SP Petroleum Jelly (all SKUs) · PCNO EJ (all matching SKUs)',
+            self.source,
+        )
+
+    def test_revision_selection_focuses_the_full_scatter_population(self) -> None:
+        self.assertIn(
+            'revisionScatterSelection.size && revisionDrilldownBasePayload',
+            self.source,
+        )
+        self.assertIn('scatter__point--context', self.source)
+        self.assertIn('scatter__point--context', self.styles)
+        self.assertIn('Selected parents highlighted · others stay pale for context', self.source)
+        self.assertIn('Scatter keeps all parents visible for context', self.source)
+        self.assertIn('const uniformRadius = 7.2', self.source)
+        self.assertIn('return uniformRadius + Math.sqrt(normalized) * 18.45', self.source)
+        self.assertNotIn('click to filter · Shift-click to add', self.source)
+
+    def test_default_source_is_ml(self) -> None:
+        index = (ROOT / "dashboard/index.html").read_text(encoding="utf-8")
+        adapter = (ROOT / "dashboard/adapter.py").read_text(encoding="utf-8")
+        self.assertIn('<option value="ml" selected>ML</option>', index)
+        self.assertIn('options = self._filter_options("ml", False)', adapter)
+        self.assertIn('"source": "ml"', adapter)
+        self.assertIn('raw, "source", default="ml"', adapter)
+
+    def test_comparison_mode_switcher_sits_in_the_page_header(self) -> None:
+        comparison_start = self.index.index('id="pane-comparison"')
+        comparison_end = self.index.index('id="pane-history"')
+        comparison = self.index[comparison_start:comparison_end]
+
+        header_start = comparison.index('class="pane__head pane__head--with-control"')
+        header_end = comparison.index('class="subpanel is-active"')
+        header = comparison[header_start:header_end]
+        self.assertIn('data-subtabs="comparison"', header)
+        self.assertIn('class="pane__head-actions"', header)
+        self.assertNotIn("explicit analytical modes", comparison.lower())
+        self.assertIn(".pane__head-actions .subtabs", self.styles)
+
+    def test_revision_instruction_tags_are_embedded_in_outcome_strip(self) -> None:
+        self.assertIn("function revisionOutcomeInstructions", self.source)
+        self.assertIn('class="outcome__instructions"', self.source)
+        self.assertIn(">Review now</span>", self.source)
+        self.assertIn(">Pattern</span>", self.source)
+        self.assertIn(">Keep</span>", self.source)
+        self.assertNotIn("revisionActionCallouts", self.source)
+        self.assertNotIn('class="revision-callouts"', self.source)
+        self.assertIn(".outcome__instructions", self.styles)
+        self.assertIn("grid-template-columns: minmax(0, 1fr) auto", self.styles)
+        self.assertIn(".outcome__content > strong {\n  grid-column: 2;\n  justify-self: end;", self.styles)
+        self.assertIn("align-items: flex-start", self.styles)
+        self.assertIn("font: 600 8.5px / 1.2 var(--mono)", self.styles)
+        self.assertIn("text-align: right", self.styles)
+        self.assertNotIn(".revision-callout {", self.styles)
+
+    def test_revision_action_queue_deduplicates_skus_and_renders_error_sparklines(self) -> None:
+        self.assertIn("function revisionActionSkuRows()", self.source)
+        self.assertIn('actions.sku_rows', self.source)
+        self.assertIn('class="revision-queue__sparkline"', self.source)
+        self.assertIn('data-tooltip-kind="revision-action-sparkline"', self.source)
+        self.assertIn("Error improvement · zero baseline", self.source)
+        self.assertIn("Monthly error improvement", self.source)
+        self.assertIn("data-tooltip-month", self.source)
+        self.assertIn("revision-queue__sparkline", self.styles)
+        self.assertIn("grid-template-columns: 0.62fr 1.75fr 1.22fr 0.72fr 0.82fr 1.18fr", self.styles)
+
+    def test_revision_outcomes_table_is_replaced_by_month_band_sparklines(self) -> None:
+        self.assertIn("function revisionHistoryChart(history)", self.source)
+        self.assertIn('payload.revision_history', self.source)
+        self.assertIn('class="revision-history__band"', self.source)
+        self.assertIn('data-target-month=', self.source)
+        self.assertIn('data-interpolation="linear"', self.source)
+        self.assertIn('class="chart__point revision-history__endpoint', self.source)
+        self.assertIn('data-tooltip-kind="revision-history"', self.source)
+        self.assertIn('data-tooltip-kind="revision-history-segment"', self.source)
+        self.assertIn("revision-history__segment--${escapeHtml(outcome)}", self.source)
+        self.assertIn('revision-history__segment--improved', self.styles)
+        self.assertIn('revision-history__segment--worsened', self.styles)
+        self.assertIn('revision-history__segment--neutral', self.styles)
+        self.assertIn("Net FA vs oldest", self.source)
+        self.assertIn("Within each month band: oldest → latest forecast version", self.source)
+        self.assertIn("Green improved FA", self.source)
+        self.assertIn("Red worsened FA", self.source)
+        self.assertIn("Shared y-axis · fixed product cohort per month", self.source)
+        self.assertIn('data-chart-fullscreen="revision-history"', self.source)
+        self.assertIn('"revision-history": {', self.source)
+        self.assertIn("renderPayload: (payload) =>", self.source)
+        self.assertIn("revisionHistoryChart(payload.revision_history)", self.source)
+        self.assertIn("data-chart-kind=\"revision-history\"", self.styles)
+        self.assertNotIn("function revisionTable(rows)", self.source)
+        self.assertNotIn("<b>Outcome</b><strong>Rows</strong>", self.source)
+        self.assertIn("stroke-linejoin: miter", self.styles)
+        self.assertIn(".revision-history__endpoint", self.styles)
+        self.assertIn(".revision-history__separator", self.styles)
+        self.assertIn(".revision-history__segment--improved", self.styles)
+        self.assertIn(".revision-history__segment--worsened", self.styles)
+        self.assertIn(".revision-history__segment--neutral", self.styles)
+
+    def test_normal_filter_flow_uses_compact_and_lazy_module_endpoints(self) -> None:
+        self.assertIn('jsonRequest("api/view/compact"', self.source)
+        self.assertIn("jsonRequest(`api/module/${moduleName}`", self.source)
+        self.assertNotIn('jsonRequest("api/view"', self.source)
+        self.assertIn('trends: ["trends"]', self.source)
+        self.assertIn('heatmap: ["trends"]', self.source)
+        self.assertIn('product: ["history"]', self.source)
+
+    def test_request_owner_aborts_and_rejects_stale_module_merges(self) -> None:
+        self.assertIn("new AbortController()", self.source)
+        self.assertIn("compactController?.abort()", self.source)
+        self.assertIn("pending?.controller.abort()", self.source)
+        self.assertIn("generation !== requestGeneration", self.source)
+        self.assertIn("payload.meta?.dataset_version", self.source)
+        self.assertIn("requestKey(payload.request) === expected", self.source)
+
+    def test_discrete_controls_dispatch_immediately_and_inputs_are_debounced(self) -> None:
+        self.assertIn("const INPUT_DEBOUNCE_MS = 160", self.source)
+        self.assertIn("scheduleRefresh({\n        immediate: !control.matches", self.source)
+        self.assertIn('control.addEventListener("input"', self.source)
+        self.assertNotIn("setTimeout(() => refreshView({ announce: true }), 220)", self.source)
+
+
 class DashboardUiArtifactTests(unittest.TestCase):
     def _assert_substituted_expanded_capture_is_rejected(
         self,

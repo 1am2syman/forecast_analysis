@@ -69,9 +69,19 @@
                 data-target="overview"
                 type="button"
               >
-                <span class="lamp lamp--live" aria-hidden="true"></span
-                ><span class="tab__name">Overview</span
-                ><span class="tab__meta">KPIs · population</span>
+                <span class="lamp lamp--live" aria-hidden="true"></span>
+                <span class="tab__icon" aria-hidden="true">
+                  <svg viewBox="0 0 20 20">
+                    <rect x="3" y="3" width="5" height="5" rx="1" />
+                    <rect x="12" y="3" width="5" height="5" rx="1" />
+                    <rect x="3" y="12" width="5" height="5" rx="1" />
+                    <rect x="12" y="12" width="5" height="5" rx="1" />
+                  </svg>
+                </span>
+                <span class="tab__copy">
+                  <span class="tab__name">Overview</span>
+                  <span class="tab__meta">KPIs · population</span>
+                </span>
               </button>
             </li>
             <li role="presentation">
@@ -86,9 +96,17 @@
                 data-target="trends"
                 type="button"
               >
-                <span class="lamp" aria-hidden="true"></span
-                ><span class="tab__name">Trends</span
-                ><span class="tab__meta">month · horizon · brand</span>
+                <span class="lamp" aria-hidden="true"></span>
+                <span class="tab__icon" aria-hidden="true">
+                  <svg viewBox="0 0 20 20">
+                    <path d="M3 15.5 7.2 11l3 2.5L17 5.5" />
+                    <path d="M13.5 5.5H17V9" />
+                  </svg>
+                </span>
+                <span class="tab__copy">
+                  <span class="tab__name">Trends</span>
+                  <span class="tab__meta">month · horizon · brand</span>
+                </span>
               </button>
             </li>
             <li role="presentation">
@@ -103,9 +121,19 @@
                 data-target="comparison"
                 type="button"
               >
-                <span class="lamp" aria-hidden="true"></span
-                ><span class="tab__name">Comparison</span
-                ><span class="tab__meta">vintages · TM vs ML</span>
+                <span class="lamp" aria-hidden="true"></span>
+                <span class="tab__icon" aria-hidden="true">
+                  <svg viewBox="0 0 20 20">
+                    <path d="M3 6h12" />
+                    <path d="m12 3 3 3-3 3" />
+                    <path d="M17 14H5" />
+                    <path d="m8 11-3 3 3 3" />
+                  </svg>
+                </span>
+                <span class="tab__copy">
+                  <span class="tab__name">Comparison</span>
+                  <span class="tab__meta">vintages · TM vs ML</span>
+                </span>
               </button>
             </li>
             <li role="presentation">
@@ -120,9 +148,18 @@
                 data-target="history"
                 type="button"
               >
-                <span class="lamp" aria-hidden="true"></span
-                ><span class="tab__name">Product history</span
-                ><span class="tab__meta">stability · exceptions</span>
+                <span class="lamp" aria-hidden="true"></span>
+                <span class="tab__icon" aria-hidden="true">
+                  <svg viewBox="0 0 20 20">
+                    <path d="M5.2 5.2A7 7 0 1 1 3 10" />
+                    <path d="M3 4v4h4" />
+                    <path d="M10 6.5V10l2.6 1.7" />
+                  </svg>
+                </span>
+                <span class="tab__copy">
+                  <span class="tab__name">Product history</span>
+                  <span class="tab__meta">stability · exceptions</span>
+                </span>
               </button>
             </li>
             <li role="presentation">
@@ -137,10 +174,20 @@
                 data-target="quality"
                 type="button"
               >
-                <span class="lamp lamp--warn" aria-hidden="true"></span
-                ><span class="tab__name">Data quality</span
-                ><span class="tab__meta">statuses · downloads</span
-                ><span class="tab__badge" data-quality-badge aria-hidden="true"
+                <span class="lamp lamp--warn" aria-hidden="true"></span>
+                <span class="tab__icon tab__icon--warn" aria-hidden="true">
+                  <svg viewBox="0 0 20 20">
+                    <path
+                      d="M10 2.8 16 5v4.3c0 4-2.5 6.5-6 7.9-3.5-1.4-6-3.9-6-7.9V5l6-2.2Z"
+                    />
+                    <path d="m7.2 10 1.8 1.8 3.8-4" />
+                  </svg>
+                </span>
+                <span class="tab__copy">
+                  <span class="tab__name">Data quality</span>
+                  <span class="tab__meta">statuses · downloads</span>
+                </span>
+                <span class="tab__badge" data-quality-badge aria-hidden="true"
                   >–</span
                 >
               </button>
@@ -151,9 +198,15 @@
           </div>
         </nav>
 
-        <div class="workspace">
+        <div class="workspace is-overview">
           <div class="scopebar" aria-label="Active population ledger">
+            <div class="scopebar__overview-title">
+              <h2>Performance at a glance</h2>
+            </div>
             <div class="scopebar__primary" data-scope-primary></div>
+            <span class="scopebar__overview-stamp" data-overview-stamp
+              >canonical data</span
+            >
             <div class="scopebar__audit" data-scope-audit></div>
           </div>
 
@@ -186,21 +239,90 @@
                   ><span>Source</span
                   ><select data-control="source">
                     <option value="tm">TM</option>
-                    <option value="ml">ML</option>
+                    <option value="ml" selected>ML</option>
                   </select></label
                 >
-                <label class="compact-field"
-                  ><span>Target start</span
-                  ><select data-control="target_start"></select
-                ></label>
-                <label class="compact-field"
-                  ><span>Target end</span
-                  ><select data-control="target_end"></select
-                ></label>
+                <section
+                  class="timeline-control"
+                  data-timeline-control
+                  aria-labelledby="timeline-title"
+                >
+                  <div class="timeline-control__head">
+                    <span id="timeline-title">Planning timeline</span>
+                    <output data-timeline-summary aria-live="polite"
+                      >Loading periods…</output
+                    >
+                  </div>
+                  <div
+                    class="timeline-segment"
+                    role="group"
+                    aria-label="Group target periods by"
+                  >
+                    <button
+                      type="button"
+                      data-timeline-grain="month"
+                      aria-pressed="true"
+                    >
+                      Month
+                    </button>
+                    <button
+                      type="button"
+                      data-timeline-grain="quarter"
+                      aria-pressed="false"
+                    >
+                      Quarter
+                    </button>
+                  </div>
+                  <div
+                    class="timeline-presets"
+                    role="group"
+                    aria-label="Planning horizon"
+                  >
+                    <button type="button" data-timeline-months="3">3M</button>
+                    <button type="button" data-timeline-months="6">6M</button>
+                    <button type="button" data-timeline-months="12">12M</button>
+                    <button type="button" data-timeline-months="24">24M</button>
+                    <button type="button" data-timeline-months="all">
+                      All
+                    </button>
+                  </div>
+                  <div class="timeline-slider" data-timeline-range-control aria-describedby="timeline-range-copy">
+                    <span class="timeline-slider__label">Selected range</span>
+                    <div class="timeline-slider__rail" data-timeline-rail>
+                      <div class="timeline-slider__selection" data-timeline-selection tabindex="0" role="slider" aria-label="Move selected timeline window"></div>
+                      <input data-timeline-start-slider type="range" min="0" max="0" value="0" step="1" aria-label="Start month" />
+                      <input data-timeline-end-slider type="range" min="0" max="0" value="0" step="1" aria-label="End month" />
+                    </div>
+                    <div class="timeline-axis" data-timeline-axis aria-hidden="true"></div>
+                  </div>
+                  <div class="timeline-range" id="timeline-range-copy">
+                    <span data-timeline-start>—</span><i aria-hidden="true"></i
+                    ><strong data-timeline-end>—</strong>
+                  </div>
+                  <div class="timeline-custom" data-timeline-custom-fields>
+                    <label class="compact-field"
+                      ><span>From</span
+                      ><select data-control="target_start"></select
+                    ></label>
+                    <label class="compact-field"
+                      ><span>To</span
+                      ><select data-control="target_end"></select
+                    ></label>
+                  </div>
+                  <p class="timeline-hint" data-timeline-hint>
+                    Drag either end, or move the highlighted window. Presets reposition both ends.
+                  </p>
+                </section>
                 <label class="compact-field"
                   ><span>Brand</span
                   ><select data-control="brand"></select
                 ></label>
+                <label class="compact-field"
+                  ><span>SKU Class</span
+                  ><select data-control="sku_class">
+                    <option value="">All SKU classes</option>
+                  </select></label
+                >
                 <label class="compact-field"
                   ><span>Parent product</span
                   ><select data-control="parent_code"></select
@@ -391,7 +513,7 @@
                   />
                   Complete vintage history only</label
                 >
-                <p class="filter-note" data-filter-note>
+                <p class="filter-note" data-filter-note aria-live="polite">
                   Changes apply automatically.
                 </p>
               </fieldset>
@@ -409,36 +531,98 @@
               role="tabpanel"
               aria-labelledby="tab-overview"
             >
-              <div class="pane__head">
-                <div>
-                  <p class="eyebrow">Active population</p>
-                  <h2 class="pane__title">Performance at a glance</h2>
-                </div>
-                <span class="stamp" data-overview-stamp>canonical data</span>
+              <div
+                class="overview-health"
+                aria-label="Active population summary"
+              >
+                <div class="overview-health__facts" data-population></div>
+                <details class="overview-details">
+                  <summary>Data details</summary>
+                  <div
+                    class="overview-details__popover"
+                    data-population-details
+                  ></div>
+                </details>
               </div>
-              <div class="population" data-population></div>
-              <div class="kpis" data-kpis></div>
-              <section class="frame" aria-labelledby="overview-chart-title">
-                <header class="frame__head">
-                  <div>
-                    <h3 class="frame__title" id="overview-chart-title">
-                      Monthly accuracy and volume
-                    </h3>
-                    <p class="frame__sub">
-                      Aggregate metrics retain numerator, denominator, actual
-                      and forecast evidence
-                    </p>
-                  </div>
-                  <div class="legend">
-                    <span><i class="key key--teal"></i>Accuracy</span
-                    ><span><i class="key key--blue"></i>Actual KL</span>
-                  </div>
-                </header>
-                <div
-                  class="frame__body frame__body--wide"
-                  data-overview-chart
-                ></div>
-              </section>
+              <div
+                class="kpis kpis--overview"
+                data-kpis
+                aria-label="Primary performance indicators"
+              ></div>
+              <div class="overview-charts">
+                <section class="frame" aria-labelledby="overview-chart-title">
+                  <header class="frame__head">
+                    <div>
+                      <h3 class="frame__title" id="overview-chart-title">
+                        Monthly vintage accuracy and bias
+                      </h3>
+                      <p class="frame__sub">
+                        Compare accuracy; bias is for Vintage B
+                      </p>
+                    </div>
+                    <div class="frame__actions">
+                      <button
+                        class="chart-expand"
+                        data-action="chart-fullscreen"
+                        data-chart-fullscreen="accuracy"
+                        type="button"
+                        aria-label="Open accuracy and bias chart full screen"
+                        aria-haspopup="dialog"
+                        aria-controls="overview-chart-dialog"
+                      >
+                        <svg viewBox="0 0 20 20" aria-hidden="true">
+                          <path d="M7 3H3v4M13 3h4v4M17 13v4h-4M7 17H3v-4" />
+                        </svg>
+                        Full screen
+                      </button>
+                    </div>
+                  </header>
+                  <div class="frame__body" data-overview-chart></div>
+                </section>
+
+                <section class="frame" aria-labelledby="volume-chart-title">
+                  <header class="frame__head">
+                    <div>
+                      <h3 class="frame__title" id="volume-chart-title">
+                        Forecast versus actual volume
+                      </h3>
+                      <p class="frame__sub">
+                        Vintage A, Vintage B and actual share one KL scale
+                      </p>
+                    </div>
+                    <div class="frame__actions">
+                      <div class="legend">
+                        <span
+                          ><i class="key key--volume-vintage-b"></i>Vintage
+                          B</span
+                        >
+                        <span
+                          ><i class="key key--volume-vintage-a"></i>Vintage
+                          A</span
+                        >
+                        <span
+                          ><i class="key key--volume-actual"></i>Actual</span
+                        >
+                      </div>
+                      <button
+                        class="chart-expand"
+                        data-action="chart-fullscreen"
+                        data-chart-fullscreen="volume"
+                        type="button"
+                        aria-label="Open forecast versus actual chart full screen"
+                        aria-haspopup="dialog"
+                        aria-controls="overview-chart-dialog"
+                      >
+                        <svg viewBox="0 0 20 20" aria-hidden="true">
+                          <path d="M7 3H3v4M13 3h4v4M17 13v4h-4M7 17H3v-4" />
+                        </svg>
+                        Full screen
+                      </button>
+                    </div>
+                  </header>
+                  <div class="frame__body" data-overview-volume-chart></div>
+                </section>
+              </div>
             </section>
 
             <section
@@ -550,34 +734,35 @@
               role="tabpanel"
               aria-labelledby="tab-comparison"
             >
-              <div class="pane__head">
+              <div class="pane__head pane__head--with-control">
                 <div>
                   <p class="eyebrow">Comparable populations</p>
                   <h2 class="pane__title">TM vs ML, and how revisions land</h2>
                 </div>
-                <span class="stamp">explicit analytical modes</span>
-              </div>
-              <div
-                class="subtabs"
-                data-subtabs="comparison"
-                role="group"
-                aria-label="Comparison analysis mode"
-              >
-                <button
-                  class="subtab is-active"
-                  aria-pressed="true"
-                  data-subtab-target="revision"
-                  type="button"
-                >
-                  Vintage revisions</button
-                ><button
-                  class="subtab"
-                  aria-pressed="false"
-                  data-subtab-target="sources"
-                  type="button"
-                >
-                  TM vs ML
-                </button>
+                <div class="pane__head-actions">
+                  <div
+                    class="subtabs"
+                    data-subtabs="comparison"
+                    role="group"
+                    aria-label="Comparison analysis mode"
+                  >
+                    <button
+                      class="subtab is-active"
+                      aria-pressed="true"
+                      data-subtab-target="revision"
+                      type="button"
+                    >
+                      Vintage revisions</button
+                    ><button
+                      class="subtab"
+                      aria-pressed="false"
+                      data-subtab-target="sources"
+                      type="button"
+                    >
+                      TM vs ML
+                    </button>
+                  </div>
+                </div>
               </div>
               <div
                 class="subpanel is-active"
@@ -800,6 +985,46 @@
         </div>
       </div>
 
+      <div
+        class="chart-dialog"
+        id="overview-chart-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="overview-chart-dialog-title"
+        hidden
+      >
+        <header class="chart-dialog__head">
+          <div>
+            <p class="eyebrow">Chart analysis</p>
+            <h2 id="overview-chart-dialog-title">Overview chart</h2>
+          </div>
+          <div class="chart-dialog__actions">
+            <button
+              class="btn btn--accent"
+              data-action="fullscreen-filters"
+              type="button"
+              aria-expanded="false"
+              aria-controls="scope-drawer"
+            >
+              Filters · 0
+            </button>
+            <button
+              class="chart-expand"
+              data-action="overview-fullscreen-close"
+              type="button"
+              aria-label="Close full-screen chart"
+            >
+              <svg viewBox="0 0 20 20" aria-hidden="true">
+                <path d="m5 5 10 10M15 5 5 15" />
+              </svg>
+              Close
+            </button>
+          </div>
+        </header>
+        <div class="chart-dialog__legend legend" data-chart-dialog-legend></div>
+        <div class="chart-dialog__body" data-overview-chart-fullscreen></div>
+      </div>
+
       <footer class="statusbar">
         <span class="statusbar__seg"
           ><i class="lamp lamp--live" aria-hidden="true"></i
@@ -825,6 +1050,7 @@
       aria-live="polite"
       aria-atomic="true"
     ></div>
+    <script src="timeline.js"></script>
     <script src="app.js"></script>
   </body>
 </html>

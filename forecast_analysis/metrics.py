@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, replace
-from datetime import date
+from datetime import date, datetime
 import math
 from typing import Literal
 
@@ -22,10 +22,14 @@ METRIC_COLUMNS = [
     "source",
     "snop_month",
     "forecast_accuracy_pct",
+    "vintage_a_accuracy_pct",
+    "vintage_b_accuracy_pct",
     "bias_pct",
     "absolute_error_kl",
     "actual_kl",
     "forecast_kl",
+    "vintage_a_forecast_kl",
+    "vintage_b_forecast_kl",
     "coverage_pct",
     "eligible_observations",
     "population_observations",
@@ -36,6 +40,18 @@ MONTHLY_METRIC_NAMES = {
     "absolute_error": "absolute_error_kl",
     "forecast_vs_actual": None,
 }
+MONTHLY_CHART_VALUE_COLUMNS = [
+    "forecast_accuracy_pct",
+    "vintage_a_accuracy_pct",
+    "vintage_b_accuracy_pct",
+    "bias_pct",
+    "absolute_error_kl",
+    "actual_kl",
+    "forecast_kl",
+    "vintage_a_forecast_kl",
+    "vintage_b_forecast_kl",
+    "coverage_pct",
+]
 HORIZON_METRIC_COLUMNS = [
     "source",
     "forecast_horizon_months",
@@ -208,6 +224,7 @@ class MetricSummary:
     """
 
     forecast_accuracy_pct: float | None
+    wape_pct: float | None
     bias_pct: float | None
     absolute_error_kl: float | None
     actual_kl: float | None
@@ -259,6 +276,7 @@ PAIR_METRIC_COLUMNS = [
 def _empty_summary(population_observations: int = 0) -> MetricSummary:
     return MetricSummary(
         forecast_accuracy_pct=None,
+        wape_pct=None,
         bias_pct=None,
         absolute_error_kl=None,
         actual_kl=None,
@@ -284,87 +302,6 @@ def _sum_or_none(frame: pl.DataFrame, column: str) -> float | None:
     if isinstance(value, int):
         return value + 0.0
     raise TypeError(f"metric total is not numeric: {value!r}")
-
-
-@dataclass(frozen=True)
-class _ForecastMetricSnapshot:
-    accuracy_pct: float | None
-    bias_pct: float | None
-    absolute_error_kl: float | None
-    actual_kl: float | None
-    forecast_kl: float | None
-    mae_kl: float | None
-    mae_observations: int
-    eligible_observations: int
-    absolute_error_observations: int
-    ratio_actual_kl: float | None
-    ratio_absolute_error_kl: float | None
-    ratio_net_error_kl: float | None
-
-
-def _calculate_forecast_snapshot(
-    frame: pl.DataFrame,
-    forecast_column: str,
-) -> _ForecastMetricSnapshot:
-    require_columns(
-        frame,
-        ["pair_status", forecast_column, "actual_kl"],
-        "brand target-month metric population",
-    )
-    selected_rows = frame.filter(
-        pl.col("pair_status").is_in(["complete", "zero_actual"])
-        & pl.col(forecast_column).is_not_null()
-        & pl.col("actual_kl").is_not_null()
-    )
-    ratio_rows = frame.filter(
-        (pl.col("pair_status") == "complete")
-        & (pl.col("actual_kl") > 0)
-        & pl.col(forecast_column).is_not_null()
-    )
-    if selected_rows.height:
-        with_error = selected_rows.with_columns(
-            (pl.col(forecast_column) - pl.col("actual_kl")).alias("_error_kl")
-        ).with_columns(pl.col("_error_kl").abs().alias("_absolute_error_kl"))
-        absolute_error = _sum_or_none(with_error, "_absolute_error_kl")
-        actual_volume = _sum_or_none(with_error, "actual_kl")
-        forecast_volume = _sum_or_none(with_error, forecast_column)
-        mae = (
-            absolute_error / selected_rows.height
-            if absolute_error is not None and selected_rows.height
-            else None
-        )
-    else:
-        absolute_error = actual_volume = forecast_volume = mae = None
-
-    accuracy = bias = None
-    ratio_actual = ratio_abs_error = ratio_net_error = None
-    if ratio_rows.height:
-        with_ratio_error = ratio_rows.with_columns(
-            (pl.col(forecast_column) - pl.col("actual_kl")).alias("_error_kl")
-        ).with_columns(pl.col("_error_kl").abs().alias("_absolute_error_kl"))
-        denominator = _sum_or_none(with_ratio_error, "actual_kl")
-        if denominator not in (None, 0):
-            ratio_abs_error = _sum_or_none(with_ratio_error, "_absolute_error_kl")
-            ratio_net_error = _sum_or_none(with_ratio_error, "_error_kl")
-            if ratio_abs_error is not None and ratio_net_error is not None:
-                ratio_actual = denominator
-                accuracy = (1 - ratio_abs_error / denominator) * 100
-                bias = ratio_net_error / denominator * 100
-
-    return _ForecastMetricSnapshot(
-        accuracy_pct=accuracy,
-        bias_pct=bias,
-        absolute_error_kl=absolute_error,
-        actual_kl=actual_volume,
-        forecast_kl=forecast_volume,
-        mae_kl=mae,
-        mae_observations=selected_rows.height,
-        eligible_observations=ratio_rows.height,
-        absolute_error_observations=selected_rows.height,
-        ratio_actual_kl=ratio_actual,
-        ratio_absolute_error_kl=ratio_abs_error,
-        ratio_net_error_kl=ratio_net_error,
-    )
 
 
 def brand_target_metric_definition(
@@ -592,7 +529,7 @@ def calculate_metrics(
     else:
         absolute_error = actual_volume = forecast_volume = mae = None
 
-    accuracy = bias = None
+    accuracy = wape = bias = None
     ratio_abs_error = ratio_net_error = denominator = None
     if ratio_rows.height:
         ratio_with_error = ratio_rows.with_columns(
@@ -604,6 +541,7 @@ def calculate_metrics(
             ratio_abs_error = _sum_or_none(ratio_with_error, "_absolute_error_kl")
             ratio_net_error = _sum_or_none(ratio_with_error, "_error_kl")
             if ratio_abs_error is not None and ratio_net_error is not None:
+                wape = ratio_abs_error / denominator * 100
                 accuracy = (1 - ratio_abs_error / denominator) * 100
                 bias = ratio_net_error / denominator * 100
 
@@ -629,6 +567,7 @@ def calculate_metrics(
 
     return MetricSummary(
         forecast_accuracy_pct=accuracy,
+        wape_pct=wape,
         bias_pct=bias,
         absolute_error_kl=absolute_error,
         actual_kl=actual_volume,
@@ -682,15 +621,30 @@ REVISION_DIAGNOSTIC_SCHEMA = {
     "revision_kl": pl.Float64,
     "error_improvement_kl": pl.Float64,
 }
+REVISION_SCATTER_TARGET_MONTHS = 6
+REVISION_SCATTER_VINTAGES_PER_MONTH = 5
+REVISION_SCATTER_SCORE_TOLERANCE = 0.01
 REVISION_SCATTER_COLUMNS = [
     "source",
     "parent_code",
     "parent_description",
     "brand",
+    "sku_class",
     "snop_month",
+    "window_start_month",
+    "window_end_month",
     "actual_kl",
-    "revision_kl",
-    "error_improvement_kl",
+    "target_months_used",
+    "vintages_per_month",
+    "transitions_used",
+    "revision_score_pct",
+    "vintage_improvement_score_pp",
+    "raw_revision_score_pct",
+    "raw_vintage_improvement_score_pp",
+    "winsorized_months",
+    "improving_months",
+    "degrading_months",
+    "neutral_months",
     "revision_direction",
     "revision_outcome",
 ]
@@ -699,13 +653,45 @@ REVISION_SCATTER_SCHEMA = {
     "parent_code": pl.Int64,
     "parent_description": pl.String,
     "brand": pl.String,
+    "sku_class": pl.String,
     "snop_month": pl.Date,
+    "window_start_month": pl.Date,
+    "window_end_month": pl.Date,
     "actual_kl": pl.Float64,
-    "revision_kl": pl.Float64,
-    "error_improvement_kl": pl.Float64,
+    "target_months_used": pl.Int64,
+    "vintages_per_month": pl.Int64,
+    "transitions_used": pl.Int64,
+    "revision_score_pct": pl.Float64,
+    "vintage_improvement_score_pp": pl.Float64,
+    "raw_revision_score_pct": pl.Float64,
+    "raw_vintage_improvement_score_pp": pl.Float64,
+    "winsorized_months": pl.Int64,
+    "improving_months": pl.Int64,
+    "degrading_months": pl.Int64,
+    "neutral_months": pl.Int64,
     "revision_direction": pl.String,
     "revision_outcome": pl.String,
 }
+LEGACY_REVISION_SCATTER_COLUMNS = [
+    "source",
+    "parent_code",
+    "parent_description",
+    "brand",
+    "snop_month",
+    "actual_kl",
+    "vintage_a_calculation_month",
+    "vintage_a_horizon_months",
+    "vintage_a_forecast_kl",
+    "vintage_b_calculation_month",
+    "vintage_b_horizon_months",
+    "vintage_b_forecast_kl",
+    "vintage_a_absolute_error_kl",
+    "vintage_b_absolute_error_kl",
+    "revision_kl",
+    "error_improvement_kl",
+    "revision_direction",
+    "revision_outcome",
+]
 
 
 def build_revision_diagnostics(pair_frame: pl.DataFrame) -> pl.DataFrame:
@@ -755,27 +741,512 @@ def build_revision_diagnostics(pair_frame: pl.DataFrame) -> pl.DataFrame:
     )
 
 
-def build_revision_scatter(pair_frame: pl.DataFrame) -> pl.DataFrame:
-    """Return valid pair points for the revision-versus-improvement chart."""
-    require_columns(
-        pair_frame,
-        REVISION_SCATTER_COLUMNS + ["pair_status"],
-        "revision scatter population",
-    )
-    if pair_frame.height == 0:
-        return pl.DataFrame(schema=REVISION_SCATTER_SCHEMA).select(
-            REVISION_SCATTER_COLUMNS
-        )
-    return pair_frame.filter(pl.col("pair_status") == "complete").select(
+def _empty_revision_scatter() -> pl.DataFrame:
+    return pl.DataFrame(schema=REVISION_SCATTER_SCHEMA).select(
         REVISION_SCATTER_COLUMNS
     )
 
 
-def build_monthly_performance(
+def _legacy_revision_scatter(pair_frame: pl.DataFrame) -> pl.DataFrame:
+    """Preserve the pair-point projection used by hidden comparison payloads."""
+    require_columns(
+        pair_frame,
+        LEGACY_REVISION_SCATTER_COLUMNS + ["pair_status"],
+        "revision scatter pair population",
+    )
+    return pair_frame.filter(pl.col("pair_status") == "complete").select(
+        LEGACY_REVISION_SCATTER_COLUMNS
+    )
+
+
+def build_revision_scatter(
+    frame: pl.DataFrame,
+    *,
+    target_end_month: object | None = None,
+) -> pl.DataFrame:
+    """Return one robust six-month, five-vintage score per parent product.
+
+    Each target month contributes a least-squares trend across its five latest
+    forecast vintages. Forecast movement is normalized by actual volume and the
+    accuracy trend is expressed in percentage points per vintage. Monthly trends
+    are retained as calculated, including seasonal extremes. The parent bubble
+    uses the median of the six monthly trends, so one volatile month cannot
+    dominate.
+    """
+    history_columns = {
+        "source",
+        "parent_code",
+        "parent_description",
+        "brand",
+        "snop_month",
+        "calculation_month",
+        "forecast_kl",
+        "actual_kl",
+    }
+    if not history_columns.issubset(frame.columns):
+        return _legacy_revision_scatter(frame)
+    require_columns(frame, sorted(history_columns), "revision scatter history")
+    if frame.height == 0:
+        return _empty_revision_scatter()
+    if "sku_class" not in frame.columns:
+        frame = frame.with_columns(pl.lit("Unclassified").alias("sku_class"))
+
+    end_month = target_end_month
+    if end_month is None:
+        end_month = frame.get_column("snop_month").drop_nulls().max()
+    if isinstance(end_month, datetime):
+        end_month = end_month.date()
+    if not isinstance(end_month, date):
+        return _empty_revision_scatter()
+    available_months = sorted(
+        frame.filter(pl.col("snop_month") <= end_month)
+        .get_column("snop_month")
+        .drop_nulls()
+        .unique()
+        .to_list()
+    )[-REVISION_SCATTER_TARGET_MONTHS:]
+    if len(available_months) < REVISION_SCATTER_TARGET_MONTHS:
+        return _empty_revision_scatter()
+
+    keys = ["source", "parent_code", "snop_month"]
+    candidates = (
+        frame.filter(
+            pl.col("snop_month").is_in(available_months)
+            & pl.col("calculation_month").is_not_null()
+            & pl.col("forecast_kl").is_not_null()
+            & pl.col("actual_kl").is_not_null()
+            & (pl.col("actual_kl") > 0)
+        )
+        .unique(subset=[*keys, "calculation_month"], keep="last")
+        .sort([*keys, "calculation_month"])
+        .group_by(keys, maintain_order=True)
+        .tail(REVISION_SCATTER_VINTAGES_PER_MONTH)
+    )
+    complete_months = (
+        candidates.group_by(keys)
+        .agg(pl.col("calculation_month").n_unique().alias("_vintage_count"))
+        .filter(
+            pl.col("_vintage_count")
+            == REVISION_SCATTER_VINTAGES_PER_MONTH
+        )
+        .select(keys)
+    )
+    if complete_months.height == 0:
+        return _empty_revision_scatter()
+
+    points = (
+        candidates.join(complete_months, on=keys, how="semi")
+        .sort([*keys, "calculation_month"])
+        .with_columns(
+            (
+                pl.col("calculation_month")
+                .rank("ordinal")
+                .over(keys)
+                .cast(pl.Float64)
+                - 1
+            ).alias("_vintage_index"),
+            (pl.col("forecast_kl") / pl.col("actual_kl") * 100).alias(
+                "_forecast_pct_actual"
+            ),
+            (
+                1
+                - (pl.col("forecast_kl") - pl.col("actual_kl")).abs()
+                / pl.col("actual_kl")
+            )
+            .mul(100)
+            .alias("_forecast_accuracy_pct"),
+        )
+    )
+    centered_index = pl.col("_vintage_index") - 2.0
+    monthly = points.group_by(keys).agg(
+        pl.col("parent_description").first(),
+        pl.col("brand").first(),
+        pl.col("sku_class").first().fill_null("Unclassified"),
+        pl.col("actual_kl").first().cast(pl.Float64),
+        (centered_index * pl.col("_forecast_pct_actual"))
+        .sum()
+        .truediv(10.0)
+        .alias("_revision_score_pct"),
+        (centered_index * pl.col("_forecast_accuracy_pct"))
+        .sum()
+        .truediv(10.0)
+        .alias("_vintage_improvement_score_pp"),
+    )
+    parent_keys = ["source", "parent_code"]
+    parent_scores = (
+        monthly.group_by(parent_keys)
+        .agg(
+            pl.col("parent_description").first(),
+            pl.col("brand").first(),
+            pl.col("sku_class")
+            .filter(pl.col("snop_month") == available_months[-1])
+            .first()
+            .fill_null("Unclassified"),
+            pl.col("actual_kl").sum().cast(pl.Float64),
+            pl.col("snop_month").n_unique().cast(pl.Int64).alias(
+                "target_months_used"
+            ),
+            pl.col("_revision_score_pct").median().alias(
+                "revision_score_pct"
+            ),
+            pl.col("_vintage_improvement_score_pp").median().alias(
+                "vintage_improvement_score_pp"
+            ),
+            pl.col("_revision_score_pct").median().alias(
+                "raw_revision_score_pct"
+            ),
+            pl.col("_vintage_improvement_score_pp").median().alias(
+                "raw_vintage_improvement_score_pp"
+            ),
+            pl.lit(0, dtype=pl.Int64).alias("winsorized_months"),
+            (pl.col("_vintage_improvement_score_pp") > REVISION_SCATTER_SCORE_TOLERANCE)
+            .cast(pl.Int64)
+            .sum()
+            .alias("improving_months"),
+            (pl.col("_vintage_improvement_score_pp") < -REVISION_SCATTER_SCORE_TOLERANCE)
+            .cast(pl.Int64)
+            .sum()
+            .alias("degrading_months"),
+            (pl.col("_vintage_improvement_score_pp").abs() <= REVISION_SCATTER_SCORE_TOLERANCE)
+            .cast(pl.Int64)
+            .sum()
+            .alias("neutral_months"),
+        )
+        .filter(
+            pl.col("target_months_used")
+            == REVISION_SCATTER_TARGET_MONTHS
+        )
+    )
+    if parent_scores.height == 0:
+        return _empty_revision_scatter()
+
+    return (
+        parent_scores.with_columns(
+            pl.lit(available_months[-1], dtype=pl.Date).alias("snop_month"),
+            pl.lit(available_months[0], dtype=pl.Date).alias(
+                "window_start_month"
+            ),
+            pl.lit(available_months[-1], dtype=pl.Date).alias(
+                "window_end_month"
+            ),
+            pl.lit(REVISION_SCATTER_VINTAGES_PER_MONTH, dtype=pl.Int64).alias(
+                "vintages_per_month"
+            ),
+            pl.lit(
+                REVISION_SCATTER_TARGET_MONTHS
+                * (REVISION_SCATTER_VINTAGES_PER_MONTH - 1),
+                dtype=pl.Int64,
+            ).alias("transitions_used"),
+            pl.when(
+                pl.col("revision_score_pct")
+                > REVISION_SCATTER_SCORE_TOLERANCE
+            )
+            .then(pl.lit("up"))
+            .when(
+                pl.col("revision_score_pct")
+                < -REVISION_SCATTER_SCORE_TOLERANCE
+            )
+            .then(pl.lit("down"))
+            .otherwise(pl.lit("unchanged"))
+            .alias("revision_direction"),
+            pl.when(
+                pl.col("vintage_improvement_score_pp")
+                > REVISION_SCATTER_SCORE_TOLERANCE
+            )
+            .then(pl.lit("improved"))
+            .when(
+                pl.col("vintage_improvement_score_pp")
+                < -REVISION_SCATTER_SCORE_TOLERANCE
+            )
+            .then(pl.lit("worsened"))
+            .otherwise(pl.lit("neutral"))
+            .alias("revision_outcome"),
+        )
+        .select(REVISION_SCATTER_COLUMNS)
+        .sort(["source", "parent_code"])
+    )
+
+
+MONTHLY_METRIC_SCHEMA = {
+    "source": pl.String,
+    "snop_month": pl.Date,
+    "forecast_accuracy_pct": pl.Float64,
+    "vintage_a_accuracy_pct": pl.Float64,
+    "vintage_b_accuracy_pct": pl.Float64,
+    "bias_pct": pl.Float64,
+    "absolute_error_kl": pl.Float64,
+    "actual_kl": pl.Float64,
+    "forecast_kl": pl.Float64,
+    "vintage_a_forecast_kl": pl.Float64,
+    "vintage_b_forecast_kl": pl.Float64,
+    "coverage_pct": pl.Float64,
+    "eligible_observations": pl.Int64,
+    "population_observations": pl.Int64,
+}
+
+
+def _sum_if(condition: pl.Expr, value: pl.Expr, alias: str) -> pl.Expr:
+    return (
+        pl.when(condition)
+        .then(value.cast(pl.Float64))
+        .otherwise(pl.lit(None, dtype=pl.Float64))
+        .sum()
+        .alias(alias)
+    )
+
+
+def _count_if(condition: pl.Expr, alias: str) -> pl.Expr:
+    return condition.fill_null(False).cast(pl.Int64).sum().alias(alias)
+
+
+def _aggregate_pair_metric_components(
+    pair_frame: pl.DataFrame,
+    group_columns: list[str],
+    revision_tolerance_kl: float = DEFAULT_REVISION_TOLERANCE_KL,
+) -> pl.DataFrame:
+    """Aggregate pair arithmetic once for all grouped metric projections."""
+    require_columns(
+        pair_frame,
+        [
+            *group_columns,
+            "actual_kl",
+            "vintage_a_forecast_kl",
+            "vintage_b_forecast_kl",
+            "pair_status",
+        ],
+        "grouped vintage pair population",
+    )
+    tolerance = round(
+        normalize_revision_tolerance(revision_tolerance_kl),
+        REVISION_CLASSIFICATION_DECIMAL_PLACES,
+    )
+    actual = pl.col("actual_kl")
+    vintage_a = pl.col("vintage_a_forecast_kl")
+    vintage_b = pl.col("vintage_b_forecast_kl")
+    complete = pl.col("pair_status") == "complete"
+    selected_status = pl.col("pair_status").is_in(["complete", "zero_actual"])
+    selected_a = selected_status & actual.is_not_null() & vintage_a.is_not_null()
+    selected_b = selected_status & actual.is_not_null() & vintage_b.is_not_null()
+    ratio_a = complete & (actual > 0) & vintage_a.is_not_null()
+    ratio_b = complete & (actual > 0) & vintage_b.is_not_null()
+    revision_valid = (
+        complete
+        & actual.is_not_null()
+        & vintage_a.is_not_null()
+        & vintage_b.is_not_null()
+    )
+    coverage_b = selected_b
+    if "vintage_b_calculation_month" in pair_frame.columns:
+        coverage_b = (
+            pl.col("vintage_b_calculation_month").is_not_null()
+            & vintage_b.is_not_null()
+            & actual.is_not_null()
+        )
+
+    a_error = vintage_a - actual
+    b_error = vintage_b - actual
+    revision = (vintage_b - vintage_a).round(
+        REVISION_CLASSIFICATION_DECIMAL_PLACES
+    )
+    error_improvement = (
+        a_error.abs() - b_error.abs()
+    ).round(REVISION_CLASSIFICATION_DECIMAL_PLACES)
+
+    grouped = pair_frame.group_by(group_columns).agg(
+        pl.len().cast(pl.Int64).alias("population_observations"),
+        _count_if(selected_a, "_a_selected_count"),
+        _sum_if(selected_a, actual, "_a_selected_actual_sum"),
+        _sum_if(selected_a, vintage_a, "_a_selected_forecast_sum"),
+        _sum_if(selected_a, a_error.abs(), "_a_selected_absolute_error_sum"),
+        _count_if(ratio_a, "_a_ratio_count"),
+        _sum_if(ratio_a, actual, "_a_ratio_actual_sum"),
+        _sum_if(ratio_a, a_error.abs(), "_a_ratio_absolute_error_sum"),
+        _sum_if(ratio_a, a_error, "_a_ratio_net_error_sum"),
+        _count_if(selected_b, "_b_selected_count"),
+        _sum_if(selected_b, actual, "_b_selected_actual_sum"),
+        _sum_if(selected_b, vintage_b, "_b_selected_forecast_sum"),
+        _sum_if(selected_b, b_error.abs(), "_b_selected_absolute_error_sum"),
+        _count_if(ratio_b, "_b_ratio_count"),
+        _sum_if(ratio_b, actual, "_b_ratio_actual_sum"),
+        _sum_if(ratio_b, b_error.abs(), "_b_ratio_absolute_error_sum"),
+        _sum_if(ratio_b, b_error, "_b_ratio_net_error_sum"),
+        _count_if(coverage_b, "_coverage_count"),
+        _sum_if(coverage_b, actual, "_coverage_actual_sum"),
+        _count_if(complete, "complete_pairs"),
+        _count_if(pl.col("pair_status") == "missing_actual", "missing_actual_observations"),
+        _count_if(pl.col("pair_status") == "zero_actual", "zero_actual_observations"),
+        _count_if(revision_valid, "_revision_count"),
+        _sum_if(revision_valid, actual, "_revision_actual_sum"),
+        _sum_if(revision_valid, a_error.abs(), "_revision_a_absolute_error_sum"),
+        _sum_if(revision_valid, b_error.abs(), "_revision_b_absolute_error_sum"),
+        _count_if(
+            revision_valid & ((revision > tolerance) | (revision < -tolerance)),
+            "materially_revised_observations",
+        ),
+        _count_if(
+            revision_valid & (error_improvement > tolerance),
+            "improved_revisions",
+        ),
+    )
+    valid_a_ratio = (
+        (pl.col("_a_ratio_count") > 0)
+        & (pl.col("_a_ratio_actual_sum") != 0)
+    )
+    valid_b_ratio = (
+        (pl.col("_b_ratio_count") > 0)
+        & (pl.col("_b_ratio_actual_sum") != 0)
+    )
+    return grouped.with_columns(
+        pl.when(valid_b_ratio)
+        .then(
+            (1 - pl.col("_b_ratio_absolute_error_sum") / pl.col("_b_ratio_actual_sum"))
+            * 100
+        )
+        .otherwise(pl.lit(None, dtype=pl.Float64))
+        .alias("forecast_accuracy_pct"),
+        pl.when(valid_a_ratio)
+        .then(
+            (1 - pl.col("_a_ratio_absolute_error_sum") / pl.col("_a_ratio_actual_sum"))
+            * 100
+        )
+        .otherwise(pl.lit(None, dtype=pl.Float64))
+        .alias("vintage_a_accuracy_pct"),
+        pl.when(valid_b_ratio)
+        .then(
+            (1 - pl.col("_b_ratio_absolute_error_sum") / pl.col("_b_ratio_actual_sum"))
+            * 100
+        )
+        .otherwise(pl.lit(None, dtype=pl.Float64))
+        .alias("vintage_b_accuracy_pct"),
+        pl.when(valid_b_ratio)
+        .then(pl.col("_b_ratio_net_error_sum") / pl.col("_b_ratio_actual_sum") * 100)
+        .otherwise(pl.lit(None, dtype=pl.Float64))
+        .alias("bias_pct"),
+        pl.when(pl.col("_b_selected_count") > 0)
+        .then(pl.col("_b_selected_absolute_error_sum"))
+        .otherwise(pl.lit(None, dtype=pl.Float64))
+        .alias("absolute_error_kl"),
+        pl.when(pl.col("_b_selected_count") > 0)
+        .then(pl.col("_b_selected_actual_sum"))
+        .otherwise(pl.lit(None, dtype=pl.Float64))
+        .alias("actual_kl"),
+        pl.when(pl.col("_b_selected_count") > 0)
+        .then(pl.col("_b_selected_forecast_sum"))
+        .otherwise(pl.lit(None, dtype=pl.Float64))
+        .alias("forecast_kl"),
+        pl.when(pl.col("_a_selected_count") > 0)
+        .then(pl.col("_a_selected_forecast_sum"))
+        .otherwise(pl.lit(None, dtype=pl.Float64))
+        .alias("vintage_a_forecast_kl"),
+        pl.when(pl.col("_b_selected_count") > 0)
+        .then(pl.col("_b_selected_forecast_sum"))
+        .otherwise(pl.lit(None, dtype=pl.Float64))
+        .alias("vintage_b_forecast_kl"),
+        pl.col("_b_ratio_count").alias("eligible_observations"),
+        pl.col("_a_ratio_count").alias("vintage_a_eligible_observations"),
+        pl.col("_b_ratio_count").alias("vintage_b_eligible_observations"),
+        pl.col("_b_selected_count").alias("absolute_error_observations"),
+        pl.when(valid_a_ratio)
+        .then(pl.col("_a_ratio_actual_sum"))
+        .otherwise(pl.lit(None, dtype=pl.Float64))
+        .alias("vintage_a_actual_kl"),
+        pl.when(valid_a_ratio)
+        .then(pl.col("_a_ratio_absolute_error_sum"))
+        .otherwise(pl.lit(None, dtype=pl.Float64))
+        .alias("vintage_a_absolute_error_kl"),
+        pl.when(valid_a_ratio)
+        .then(pl.col("_a_ratio_net_error_sum"))
+        .otherwise(pl.lit(None, dtype=pl.Float64))
+        .alias("vintage_a_net_error_kl"),
+        pl.when(valid_b_ratio)
+        .then(pl.col("_b_ratio_actual_sum"))
+        .otherwise(pl.lit(None, dtype=pl.Float64))
+        .alias("vintage_b_actual_kl"),
+        pl.when(valid_b_ratio)
+        .then(pl.col("_b_ratio_absolute_error_sum"))
+        .otherwise(pl.lit(None, dtype=pl.Float64))
+        .alias("vintage_b_absolute_error_kl"),
+        pl.when(valid_b_ratio)
+        .then(pl.col("_b_ratio_net_error_sum"))
+        .otherwise(pl.lit(None, dtype=pl.Float64))
+        .alias("vintage_b_net_error_kl"),
+        pl.when(
+            (pl.col("_revision_count") > 0)
+            & (pl.col("_revision_actual_sum") != 0)
+        )
+        .then(
+            (
+                pl.col("_revision_a_absolute_error_sum")
+                - pl.col("_revision_b_absolute_error_sum")
+            )
+            / pl.col("_revision_actual_sum")
+            * 100
+        )
+        .otherwise(pl.lit(None, dtype=pl.Float64))
+        .alias("accuracy_delta_pp"),
+        pl.when(pl.col("materially_revised_observations") > 0)
+        .then(
+            pl.col("improved_revisions")
+            / pl.col("materially_revised_observations")
+            * 100
+        )
+        .otherwise(pl.lit(None, dtype=pl.Float64))
+        .alias("revision_effectiveness_pct"),
+        pl.when(pl.col("_b_ratio_count") > 0)
+        .then(pl.col("_b_ratio_absolute_error_sum"))
+        .otherwise(pl.lit(None, dtype=pl.Float64))
+        .alias("accuracy_numerator_kl"),
+        pl.when(valid_b_ratio)
+        .then(pl.col("_b_ratio_actual_sum"))
+        .otherwise(pl.lit(None, dtype=pl.Float64))
+        .alias("accuracy_denominator_actual_kl"),
+        pl.when(pl.col("_b_ratio_count") > 0)
+        .then(pl.col("_b_ratio_net_error_sum"))
+        .otherwise(pl.lit(None, dtype=pl.Float64))
+        .alias("bias_numerator_kl"),
+        pl.when(valid_b_ratio)
+        .then(pl.col("_b_ratio_actual_sum"))
+        .otherwise(pl.lit(None, dtype=pl.Float64))
+        .alias("bias_denominator_actual_kl"),
+        pl.when(pl.col("_b_selected_count") > 0)
+        .then(
+            pl.col("_b_selected_absolute_error_sum")
+            / pl.col("_b_selected_count")
+        )
+        .otherwise(pl.lit(None, dtype=pl.Float64))
+        .alias("mae_kl"),
+        pl.col("_b_selected_count").alias("mae_observations"),
+        pl.when(pl.col("_coverage_count") > 0)
+        .then(pl.col("_coverage_actual_sum"))
+        .otherwise(pl.lit(None, dtype=pl.Float64))
+        .alias("_coverage_actual_kl"),
+    )
+
+
+def _with_coverage_metrics(
+    frame: pl.DataFrame,
+    numerator_column: str,
+) -> pl.DataFrame:
+    denominator = pl.col("coverage_denominator_actual_kl")
+    numerator = pl.col(numerator_column)
+    normalized_numerator = (
+        pl.when(denominator.is_not_null() & (denominator > 0))
+        .then(numerator.fill_null(0.0))
+        .otherwise(numerator)
+    )
+    return frame.with_columns(
+        normalized_numerator.alias("coverage_numerator_actual_kl"),
+        pl.when(denominator.is_not_null() & (denominator != 0))
+        .then(numerator.fill_null(0.0) / denominator * 100)
+        .otherwise(pl.lit(None, dtype=pl.Float64))
+        .alias("coverage_pct"),
+    )
+
+
+def _build_monthly_metric_table(
     pair_frame: pl.DataFrame,
     selected_actual_population: pl.DataFrame,
 ) -> pl.DataFrame:
-    """Return aggregate KPI columns by target month for chart reuse."""
     require_columns(
         pair_frame,
         ["source", "snop_month", *PAIR_METRIC_COLUMNS],
@@ -786,49 +1257,49 @@ def build_monthly_performance(
         ACTUAL_COLUMNS,
         "selected actual population",
     )
-    rows: list[dict[str, object]] = []
-    groups = (
-        pair_frame.select(["source", "snop_month"])
-        .unique()
-        .sort(["source", "snop_month"])
-        .iter_rows(named=True)
+    audit_schema = {**MONTHLY_METRIC_SCHEMA, **_AUDIT_CONTEXT_SCHEMA}
+    if pair_frame.height == 0:
+        return pl.DataFrame(schema=audit_schema).select(
+            [*METRIC_COLUMNS, *_AUDIT_CONTEXT_COLUMNS]
+        )
+
+    components = _aggregate_pair_metric_components(
+        pair_frame,
+        ["source", "snop_month"],
     )
-    for group in groups:
-        subset = pair_frame.filter(
-            (pl.col("source") == group["source"])
-            & (pl.col("snop_month") == group["snop_month"])
+    actual_totals = selected_actual_population.group_by("snop_month").agg(
+        pl.col("actual_kl")
+        .sum()
+        .cast(pl.Float64)
+        .alias("coverage_denominator_actual_kl")
+    )
+    return (
+        _with_coverage_metrics(
+            components.join(actual_totals, on="snop_month", how="left"),
+            "_coverage_actual_kl",
         )
-        actual_subset = selected_actual_population.filter(
-            pl.col("snop_month") == group["snop_month"]
-        )
-        summary = calculate_metrics(subset, actual_subset)
-        rows.append(
-            {
-                "source": group["source"],
-                "snop_month": group["snop_month"],
-                "forecast_accuracy_pct": summary.forecast_accuracy_pct,
-                "bias_pct": summary.bias_pct,
-                "absolute_error_kl": summary.absolute_error_kl,
-                "actual_kl": summary.actual_kl,
-                "forecast_kl": summary.forecast_kl,
-                "coverage_pct": summary.coverage_pct,
-                "eligible_observations": summary.eligible_observations,
-                "population_observations": summary.population_observations,
-            }
-        )
-    schema = {
-        "source": pl.String,
-        "snop_month": pl.Date,
-        "forecast_accuracy_pct": pl.Float64,
-        "bias_pct": pl.Float64,
-        "absolute_error_kl": pl.Float64,
-        "actual_kl": pl.Float64,
-        "forecast_kl": pl.Float64,
-        "coverage_pct": pl.Float64,
-        "eligible_observations": pl.Int64,
-        "population_observations": pl.Int64,
-    }
-    return pl.DataFrame(rows, schema=schema).select(METRIC_COLUMNS)
+        .select([*METRIC_COLUMNS, *_AUDIT_CONTEXT_COLUMNS])
+        .sort(["source", "snop_month"])
+    )
+
+
+def project_monthly_performance(monthly_audit: pl.DataFrame) -> pl.DataFrame:
+    """Project only periods that can contribute to a monthly line chart."""
+    require_columns(monthly_audit, METRIC_COLUMNS, "monthly metric audit")
+    has_chart_value = pl.any_horizontal(
+        [pl.col(column).is_not_null() for column in MONTHLY_CHART_VALUE_COLUMNS]
+    )
+    return monthly_audit.filter(has_chart_value).select(METRIC_COLUMNS)
+
+
+def build_monthly_performance(
+    pair_frame: pl.DataFrame,
+    selected_actual_population: pl.DataFrame,
+) -> pl.DataFrame:
+    """Return plottable aggregate KPI columns by target month for chart reuse."""
+    return project_monthly_performance(
+        _build_monthly_metric_table(pair_frame, selected_actual_population)
+    )
 
 
 _AUDIT_CONTEXT_COLUMNS = [
@@ -855,57 +1326,90 @@ _AUDIT_CONTEXT_SCHEMA = {
 }
 
 
-def _audit_context_row(summary: MetricSummary) -> dict[str, object]:
-    return {
-        "accuracy_numerator_kl": summary.accuracy_numerator_kl,
-        "accuracy_denominator_actual_kl": summary.accuracy_denominator_actual_kl,
-        "bias_numerator_kl": summary.bias_numerator_kl,
-        "bias_denominator_actual_kl": summary.bias_denominator_actual_kl,
-        "coverage_numerator_actual_kl": summary.coverage_numerator_actual_kl,
-        "coverage_denominator_actual_kl": summary.coverage_denominator_actual_kl,
-        "mae_kl": summary.mae_kl,
-        "mae_observations": summary.mae_observations,
-        "absolute_error_observations": summary.absolute_error_observations,
-    }
-
-
 def build_monthly_audit(
     pair_frame: pl.DataFrame,
     selected_actual_population: pl.DataFrame,
 ) -> pl.DataFrame:
     """Return monthly metrics with exact numerator and denominator context."""
-    base = build_monthly_performance(pair_frame, selected_actual_population)
-    rows: list[dict[str, object]] = []
-    for group in (
-        pair_frame.select(["source", "snop_month"])
-        .unique()
-        .sort(["source", "snop_month"])
-        .iter_rows(named=True)
-    ):
-        subset = pair_frame.filter(
-            (pl.col("source") == group["source"])
-            & (pl.col("snop_month") == group["snop_month"])
+    return _build_monthly_metric_table(pair_frame, selected_actual_population)
+
+
+def _horizon_label_expression() -> pl.Expr:
+    horizon = pl.col("forecast_horizon_months")
+    return (
+        pl.when(horizon == 0)
+        .then(pl.lit("Current month"))
+        .when(horizon == 1)
+        .then(pl.lit("1 month ahead"))
+        .otherwise(pl.concat_str([horizon.cast(pl.String), pl.lit(" months ahead")]))
+        .alias("horizon_label")
+    )
+
+
+def _build_horizon_metric_table(
+    frame: pl.DataFrame,
+    selected_actual_population: pl.DataFrame,
+) -> pl.DataFrame:
+    require_columns(
+        frame,
+        [
+            "source",
+            "calculation_month",
+            "forecast_horizon_months",
+            "forecast_kl",
+            "actual_kl",
+            "actual_status",
+        ],
+        "horizon performance population",
+    )
+    require_columns(
+        selected_actual_population,
+        ACTUAL_COLUMNS,
+        "selected actual population",
+    )
+    audit_schema = {**HORIZON_METRIC_SCHEMA, **_AUDIT_CONTEXT_SCHEMA}
+    if frame.height == 0:
+        return pl.DataFrame(schema=audit_schema).select(
+            [*HORIZON_METRIC_COLUMNS, *_AUDIT_CONTEXT_COLUMNS]
         )
-        actual_subset = selected_actual_population.filter(
-            pl.col("snop_month") == group["snop_month"]
+
+    pair_projection = frame.select(
+        [
+            "source",
+            "forecast_horizon_months",
+            pl.lit(None, dtype=pl.Float64).alias("vintage_a_forecast_kl"),
+            pl.col("calculation_month").alias("vintage_b_calculation_month"),
+            pl.col("forecast_kl").alias("vintage_b_forecast_kl"),
+            "actual_kl",
+            pl.when(pl.col("actual_status") == "missing")
+            .then(pl.lit("missing_actual"))
+            .when(pl.col("actual_status") == "matched_zero")
+            .then(pl.lit("zero_actual"))
+            .otherwise(pl.lit("complete"))
+            .alias("pair_status"),
+        ]
+    )
+    components = _aggregate_pair_metric_components(
+        pair_projection,
+        ["source", "forecast_horizon_months"],
+    )
+    total_actual = _sum_or_none(selected_actual_population, "actual_kl")
+    return (
+        _with_coverage_metrics(
+            components.with_columns(
+                pl.lit(total_actual, dtype=pl.Float64).alias(
+                    "coverage_denominator_actual_kl"
+                )
+            ),
+            "_coverage_actual_kl",
         )
-        summary = calculate_metrics(subset, actual_subset)
-        rows.append(
-            {
-                "source": group["source"],
-                "snop_month": group["snop_month"],
-                **_audit_context_row(summary),
-            }
+        .with_columns(_horizon_label_expression())
+        .select([*HORIZON_METRIC_COLUMNS, *_AUDIT_CONTEXT_COLUMNS])
+        .sort(
+            ["source", "forecast_horizon_months"],
+            descending=[False, True],
         )
-    audit = pl.DataFrame(
-        rows,
-        schema={
-            "source": pl.String,
-            "snop_month": pl.Date,
-            **_AUDIT_CONTEXT_SCHEMA,
-        },
-    ).select(["source", "snop_month", *_AUDIT_CONTEXT_COLUMNS])
-    return base.join(audit, on=["source", "snop_month"], how="left")
+    )
 
 
 def build_horizon_audit(
@@ -913,118 +1417,7 @@ def build_horizon_audit(
     selected_actual_population: pl.DataFrame,
 ) -> pl.DataFrame:
     """Return horizon metrics with exact numerator and denominator context."""
-    base = build_horizon_performance(frame, selected_actual_population)
-    rows: list[dict[str, object]] = []
-    for group in (
-        frame.select(["source", "forecast_horizon_months"])
-        .unique()
-        .sort(
-            ["source", "forecast_horizon_months"],
-            descending=[False, True],
-        )
-        .iter_rows(named=True)
-    ):
-        subset = frame.filter(
-            (pl.col("source") == group["source"])
-            & (
-                pl.col("forecast_horizon_months")
-                == group["forecast_horizon_months"]
-            )
-        )
-        pair_subset = subset.select(
-            [
-                "source",
-                pl.lit(None, dtype=pl.Date).alias("vintage_a_calculation_month"),
-                pl.col("calculation_month").alias("vintage_b_calculation_month"),
-                pl.col("forecast_kl").alias("vintage_b_forecast_kl"),
-                "actual_kl",
-                pl.when(pl.col("actual_status") == "missing")
-                .then(pl.lit("missing_actual"))
-                .when(pl.col("actual_status") == "matched_zero")
-                .then(pl.lit("zero_actual"))
-                .otherwise(pl.lit("complete"))
-                .alias("pair_status"),
-            ]
-        )
-        summary = calculate_metrics(pair_subset, selected_actual_population)
-        rows.append(
-            {
-                "source": group["source"],
-                "forecast_horizon_months": group["forecast_horizon_months"],
-                **_audit_context_row(summary),
-            }
-        )
-    audit = pl.DataFrame(
-        rows,
-        schema={
-            "source": pl.String,
-            "forecast_horizon_months": pl.Int64,
-            **_AUDIT_CONTEXT_SCHEMA,
-        },
-    ).select(["source", "forecast_horizon_months", *_AUDIT_CONTEXT_COLUMNS])
-    return base.join(
-        audit,
-        on=["source", "forecast_horizon_months"],
-        how="left",
-    )
-
-
-def _build_brand_target_summary(
-    pair_frame: pl.DataFrame,
-    actual_population: pl.DataFrame,
-    source: str,
-    brand_display: str,
-    target_month: date,
-    revision_tolerance_kl: float,
-) -> dict[str, object]:
-    vintage_a = _calculate_forecast_snapshot(
-        pair_frame,
-        "vintage_a_forecast_kl",
-    )
-    vintage_b = _calculate_forecast_snapshot(
-        pair_frame,
-        "vintage_b_forecast_kl",
-    )
-    revision = calculate_revision_metrics(
-        pair_frame,
-        revision_tolerance_kl=revision_tolerance_kl,
-    )
-    total_actual = _sum_or_none(actual_population, "actual_kl")
-    coverage = None
-    if total_actual not in (None, 0):
-        coverage = (vintage_b.actual_kl or 0.0) / total_actual * 100
-
-    return {
-        "source": source,
-        "brand_display": brand_display,
-        "snop_month": target_month,
-        "forecast_accuracy_pct": vintage_b.accuracy_pct,
-        "bias_pct": vintage_b.bias_pct,
-        "absolute_error_kl": vintage_b.absolute_error_kl,
-        "vintage_a_accuracy_pct": vintage_a.accuracy_pct,
-        "vintage_b_accuracy_pct": vintage_b.accuracy_pct,
-        "accuracy_delta_pp": revision.accuracy_delta_pp,
-        "revision_effectiveness_pct": revision.revision_effectiveness_pct,
-        "actual_kl": vintage_b.actual_kl,
-        "forecast_kl": vintage_b.forecast_kl,
-        "coverage_pct": coverage,
-        "eligible_observations": vintage_b.eligible_observations,
-        "vintage_a_eligible_observations": vintage_a.eligible_observations,
-        "vintage_b_eligible_observations": vintage_b.eligible_observations,
-        "absolute_error_observations": vintage_b.absolute_error_observations,
-        "population_observations": pair_frame.height,
-        "complete_pairs": pair_frame.filter(
-            pl.col("pair_status") == "complete"
-        ).height,
-        "improved_revisions": revision.improved_revisions,
-        "materially_revised_observations": revision.materially_revised_observations,
-        "vintage_a_actual_kl": vintage_a.ratio_actual_kl,
-        "vintage_a_absolute_error_kl": vintage_a.ratio_absolute_error_kl,
-        "vintage_a_net_error_kl": vintage_a.ratio_net_error_kl,
-        "vintage_b_actual_kl": vintage_b.ratio_actual_kl,
-        "vintage_b_absolute_error_kl": vintage_b.ratio_absolute_error_kl,
-        "vintage_b_net_error_kl": vintage_b.ratio_net_error_kl,
-    }
+    return _build_horizon_metric_table(frame, selected_actual_population)
 
 
 def build_brand_target_month_performance(
@@ -1072,73 +1465,80 @@ def build_brand_target_month_performance(
         )
 
     paired = with_display_brand(pair_frame)
-    actuals = with_display_brand(actual_population)
-    rows: list[dict[str, object]] = []
-
-    for group in (
-        paired.select(["source", "brand_display", "snop_month"])
-        .unique()
-        .sort(["source", "brand_display", "snop_month"])
-        .iter_rows(named=True)
-    ):
-        group_pairs = paired.filter(
-            (pl.col("source") == group["source"])
-            & (pl.col("brand_display") == group["brand_display"])
-            & (pl.col("snop_month") == group["snop_month"])
-        )
-        group_actuals = actuals.filter(
-            (pl.col("brand_display") == group["brand_display"])
-            & (pl.col("snop_month") == group["snop_month"])
-        )
-        rows.append(
-            _build_brand_target_summary(
-                group_pairs,
-                group_actuals,
-                group["source"],
-                group["brand_display"],
-                group["snop_month"],
-                tolerance,
-            )
-        )
-
-    for group in (
-        paired.select(["source", "snop_month"])
-        .unique()
-        .sort(["source", "snop_month"])
-        .iter_rows(named=True)
-    ):
-        group_pairs = paired.filter(
-            (pl.col("source") == group["source"])
-            & (pl.col("snop_month") == group["snop_month"])
-        )
-        group_actuals = actuals.filter(pl.col("snop_month") == group["snop_month"])
-        rows.append(
-            _build_brand_target_summary(
-                group_pairs,
-                group_actuals,
-                group["source"],
-                "All brands",
-                group["snop_month"],
-                tolerance,
-            )
-        )
-
-    if not rows:
+    if paired.height == 0:
         return pl.DataFrame(schema=BRAND_TARGET_PERFORMANCE_SCHEMA).select(
             BRAND_TARGET_PERFORMANCE_COLUMNS
         )
+    actuals = with_display_brand(actual_population)
+    grouped_pairs = pl.concat(
+        [
+            paired.with_columns(pl.lit(False).alias("_all_brands")),
+            paired.with_columns(
+                pl.lit(True).alias("_all_brands"),
+                pl.lit(None, dtype=pl.String).alias("brand_display"),
+            ),
+        ],
+        how="vertical",
+    )
+    components = _aggregate_pair_metric_components(
+        grouped_pairs,
+        ["source", "_all_brands", "brand_display", "snop_month"],
+        tolerance,
+    )
+    actual_totals = pl.concat(
+        [
+            actuals.with_columns(pl.lit(False).alias("_all_brands"))
+            .group_by(["_all_brands", "brand_display", "snop_month"])
+            .agg(
+                pl.col("actual_kl")
+                .sum()
+                .cast(pl.Float64)
+                .alias("coverage_denominator_actual_kl")
+            ),
+            actuals.group_by("snop_month")
+            .agg(
+                pl.col("actual_kl")
+                .sum()
+                .cast(pl.Float64)
+                .alias("coverage_denominator_actual_kl")
+            )
+            .with_columns(
+                pl.lit(True).alias("_all_brands"),
+                pl.lit(None, dtype=pl.String).alias("brand_display"),
+            )
+            .select(
+                [
+                    "_all_brands",
+                    "brand_display",
+                    "snop_month",
+                    "coverage_denominator_actual_kl",
+                ]
+            ),
+        ],
+        how="vertical",
+    )
     return (
-        pl.DataFrame(rows, schema=BRAND_TARGET_PERFORMANCE_SCHEMA)
-        .select(BRAND_TARGET_PERFORMANCE_COLUMNS)
+        _with_coverage_metrics(
+            components.join(
+                actual_totals,
+                on=["_all_brands", "brand_display", "snop_month"],
+                how="left",
+                nulls_equal=True,
+            ),
+            "actual_kl",
+        )
         .with_columns(
-            (pl.col("brand_display") == "All brands").alias("_all_brands")
+            pl.when(pl.col("_all_brands"))
+            .then(pl.lit("All brands"))
+            .otherwise(pl.col("brand_display"))
+            .alias("brand_display")
         )
         .sort(
             ["source", "snop_month", "_all_brands", "brand_display"],
             descending=[False, False, True, False],
             nulls_last=True,
         )
-        .drop("_all_brands")
+        .select(BRAND_TARGET_PERFORMANCE_COLUMNS)
     )
 
 
@@ -1301,83 +1701,10 @@ def build_horizon_performance(
     derived horizon. It does not select a nearest vintage when a horizon is
     absent; missing actuals remain visible through the observation counts.
     """
-    require_columns(
+    return _build_horizon_metric_table(
         frame,
-        [
-            "source",
-            "calculation_month",
-            "forecast_horizon_months",
-            "forecast_kl",
-            "actual_kl",
-            "actual_status",
-        ],
-        "horizon performance population",
-    )
-    require_columns(
         selected_actual_population,
-        ACTUAL_COLUMNS,
-        "selected actual population",
-    )
-    if frame.height == 0:
-        return pl.DataFrame(schema=HORIZON_METRIC_SCHEMA).select(
-            HORIZON_METRIC_COLUMNS
-        )
-
-    rows: list[dict[str, object]] = []
-    groups = (
-        frame.select(["source", "forecast_horizon_months"])
-        .unique()
-        .sort(
-            ["source", "forecast_horizon_months"],
-            descending=[False, True],
-        )
-        .iter_rows(named=True)
-    )
-    for group in groups:
-        subset = frame.filter(
-            (pl.col("source") == group["source"])
-            & (pl.col("forecast_horizon_months") == group["forecast_horizon_months"])
-        )
-        pair_subset = subset.select(
-            [
-                "source",
-                pl.lit(None, dtype=pl.Date).alias("vintage_a_calculation_month"),
-                pl.col("calculation_month").alias("vintage_b_calculation_month"),
-                pl.col("forecast_kl").alias("vintage_b_forecast_kl"),
-                "actual_kl",
-                pl.when(pl.col("actual_status") == "missing")
-                .then(pl.lit("missing_actual"))
-                .when(pl.col("actual_status") == "matched_zero")
-                .then(pl.lit("zero_actual"))
-                .otherwise(pl.lit("complete"))
-                .alias("pair_status"),
-            ]
-        )
-        summary = calculate_metrics(pair_subset, selected_actual_population)
-        horizon = group["forecast_horizon_months"]
-        if not isinstance(horizon, int):
-            raise TypeError(f"forecast horizon is not an integer: {horizon!r}")
-        rows.append(
-            {
-                "source": group["source"],
-                "forecast_horizon_months": horizon,
-                "horizon_label": format_horizon_label(horizon),
-                "forecast_accuracy_pct": summary.forecast_accuracy_pct,
-                "bias_pct": summary.bias_pct,
-                "absolute_error_kl": summary.absolute_error_kl,
-                "actual_kl": summary.actual_kl,
-                "forecast_kl": summary.forecast_kl,
-                "coverage_pct": summary.coverage_pct,
-                "eligible_observations": summary.eligible_observations,
-                "population_observations": summary.population_observations,
-                "missing_actual_observations": summary.missing_actual_observations,
-                "zero_actual_observations": summary.zero_actual_observations,
-            }
-        )
-
-    return pl.DataFrame(rows, schema=HORIZON_METRIC_SCHEMA).select(
-        HORIZON_METRIC_COLUMNS
-    )
+    ).select(HORIZON_METRIC_COLUMNS)
 
 
 def format_revision_tolerance(value: float | int | None) -> str:

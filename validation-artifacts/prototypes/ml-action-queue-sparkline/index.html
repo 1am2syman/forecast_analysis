@@ -1,0 +1,928 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ML action queue · sparkline proposal</title>
+    <style>
+      @font-face {
+        font-family: Chakra;
+        src: url("../../prototypes/forecast-overview-compact-proposal/fonts/chakra-petch-600.ttf");
+      }
+      @font-face {
+        font-family: PlexMono;
+        src: url("../../prototypes/forecast-overview-compact-proposal/fonts/ibm-plex-mono-400.ttf");
+      }
+      @font-face {
+        font-family: PlexMono;
+        src: url("../../prototypes/forecast-overview-compact-proposal/fonts/ibm-plex-mono-600.ttf");
+        font-weight: 600;
+      }
+      @font-face {
+        font-family: PlexSans;
+        src: url("../../prototypes/forecast-overview-compact-proposal/fonts/ibm-plex-sans-400.ttf");
+      }
+      @font-face {
+        font-family: PlexSans;
+        src: url("../../prototypes/forecast-overview-compact-proposal/fonts/ibm-plex-sans-600.ttf");
+        font-weight: 600;
+      }
+      :root {
+        --bg: #edf3f1;
+        --panel: #fff;
+        --panel2: #eef3f1;
+        --line: #c8d5d1;
+        --soft: #dbe4e1;
+        --text: #172421;
+        --muted: #536762;
+        --faint: #657873;
+        --teal: #087f75;
+        --green: #15803d;
+        --red: #b63b35;
+        --amber: #9a5e00;
+        --blue: #2e79a5;
+        --mono: PlexMono, monospace;
+        --sans: PlexSans, system-ui, sans-serif;
+        --display: Chakra, system-ui, sans-serif;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--sans);
+      }
+      .top {
+        height: 57px;
+        background: #fff;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 26px;
+      }
+      .brand {
+        font: 600 19px var(--display);
+        letter-spacing: 0.01em;
+      }
+      .brand:before {
+        content: "•";
+        color: var(--teal);
+        margin-right: 9px;
+      }
+      .meta {
+        font: 10px var(--mono);
+        color: var(--faint);
+        letter-spacing: 0.04em;
+      }
+      main {
+        max-width: 1320px;
+        margin: 0 auto;
+        padding: 34px 28px 110px;
+      }
+      .eyebrow {
+        font: 600 10px var(--mono);
+        color: var(--teal);
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+      }
+      .intro {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 30px;
+        margin-bottom: 22px;
+      }
+      .intro h1 {
+        font: 600 31px var(--display);
+        margin: 8px 0 5px;
+        letter-spacing: 0.01em;
+      }
+      .intro p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+        max-width: 700px;
+        line-height: 1.5;
+      }
+      .status {
+        font: 600 10px var(--mono);
+        color: var(--teal);
+        border: 1px solid #9fc7c1;
+        background: #e7f3f0;
+        padding: 7px 10px;
+        white-space: nowrap;
+      }
+      .compare {
+        display: grid;
+        grid-template-columns: 1fr 1.22fr;
+        gap: 18px;
+        align-items: start;
+      }
+      .frame {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        box-shadow: 0 1px 2px #1724210d;
+      }
+      .frame__head {
+        padding: 16px 18px 13px;
+        border-bottom: 1px solid var(--soft);
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        align-items: start;
+      }
+      .frame__head h2 {
+        font: 600 17px var(--display);
+        margin: 0 0 4px;
+      }
+      .frame__head p {
+        margin: 0;
+        color: var(--muted);
+        font: 11px/1.4 var(--mono);
+      }
+      .tag {
+        font: 600 9px var(--mono);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 5px 7px;
+        border: 1px solid var(--soft);
+        color: var(--faint);
+        white-space: nowrap;
+      }
+      .tag--new {
+        color: var(--teal);
+        border-color: #a5c9c3;
+        background: #eef8f5;
+      }
+      .body {
+        padding: 14px 16px 18px;
+      }
+      .old-table {
+        border: 1px solid var(--soft);
+        overflow: hidden;
+      }
+      .old-head,
+      .old-row {
+        display: grid;
+        grid-template-columns: 0.55fr 1.6fr 0.9fr 0.75fr 0.85fr 0.9fr;
+        gap: 9px;
+        align-items: center;
+        padding: 10px 11px;
+        font: 10px var(--mono);
+        border-bottom: 1px solid var(--soft);
+      }
+      .old-head {
+        background: var(--panel2);
+        font-size: 9px;
+        color: var(--faint);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      .old-row:last-child {
+        border-bottom: 0;
+      }
+      .old-row .sku {
+        font-weight: 600;
+        color: var(--text);
+      }
+      .old-row .desc {
+        color: var(--faint);
+        font-size: 9px;
+      }
+      .old-row .bad {
+        color: var(--red);
+        font-weight: 600;
+      }
+      .month-stack {
+        color: var(--muted);
+        line-height: 1.55;
+      }
+      .ellipsis {
+        color: var(--faint);
+        font-size: 16px;
+      }
+      .problem {
+        display: flex;
+        gap: 8px;
+        align-items: start;
+        margin: 15px 1px 0;
+        padding: 11px 12px;
+        background: #fff7ed;
+        border-left: 3px solid var(--amber);
+        color: #6c4a14;
+        font-size: 12px;
+        line-height: 1.45;
+      }
+      .problem b {
+        font-family: var(--mono);
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        display: block;
+        margin-bottom: 3px;
+      }
+      .proposal {
+        border-color: #9fc7c1;
+      }
+      .proposal .body {
+        padding: 0;
+      }
+      .toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 11px 16px;
+        background: var(--panel2);
+        border-bottom: 1px solid var(--soft);
+        font: 10px var(--mono);
+        color: var(--faint);
+      }
+      .search {
+        border: 1px solid var(--line);
+        background: #fff;
+        color: var(--muted);
+        padding: 7px 10px;
+        width: 250px;
+        font: 10px var(--mono);
+      }
+      .csv {
+        color: var(--teal);
+        font-weight: 600;
+      }
+      .new-head,
+      .new-row {
+        display: grid;
+        grid-template-columns: 0.55fr 1.45fr 1.22fr 0.78fr 0.88fr 1.04fr;
+        gap: 12px;
+        align-items: center;
+        padding: 10px 16px;
+        font: 10px var(--mono);
+        border-bottom: 1px solid var(--soft);
+      }
+      .new-head {
+        background: #f8fbfa;
+        color: var(--faint);
+        font-size: 9px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      .new-row:last-child {
+        border-bottom: 0;
+      }
+      .new-row:hover {
+        background: #f7fbfa;
+      }
+      .new-row .sku {
+        font-weight: 600;
+        color: var(--text);
+      }
+      .new-row .desc {
+        display: block;
+        color: var(--faint);
+        font-size: 9px;
+        margin-top: 3px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .metric {
+        color: var(--red);
+        font-weight: 600;
+      }
+      .action {
+        color: var(--amber);
+        font-weight: 600;
+      }
+      .priority {
+        display: inline-block;
+        padding: 4px 6px;
+        background: #fff0ef;
+        color: var(--red);
+        font-size: 9px;
+        font-weight: 600;
+      }
+      .priority--watch {
+        background: #fff7ed;
+        color: var(--amber);
+      }
+      .spark {
+        width: 130px;
+        height: 30px;
+        display: block;
+        overflow: visible;
+      }
+      .spark .axis {
+        stroke: #cbd9d5;
+        stroke-width: 1;
+        stroke-dasharray: 2 3;
+      }
+      .spark .line {
+        fill: none;
+        stroke: var(--teal);
+        stroke-width: 2.2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .spark .dot {
+        fill: #fff;
+        stroke: var(--teal);
+        stroke-width: 1.5;
+      }
+      .spark .dot.bad {
+        stroke: var(--red);
+        fill: #fff6f5;
+      }
+      .spark .dot.good {
+        stroke: var(--green);
+      }
+      .spark-label {
+        color: var(--faint);
+        font-size: 8px;
+        display: flex;
+        justify-content: space-between;
+        margin-top: 2px;
+        width: 130px;
+      }
+      .spark-cell {
+        min-width: 0;
+      }
+      .spark-cell small {
+        display: block;
+        color: var(--faint);
+        font-size: 8px;
+        margin-top: 4px;
+        white-space: nowrap;
+      }
+      .legend {
+        display: flex;
+        gap: 13px;
+        margin-top: 13px;
+        color: var(--faint);
+        font: 9px var(--mono);
+        align-items: center;
+      }
+      .legend i {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 4px;
+      }
+      .legend .teal {
+        background: var(--teal);
+      }
+      .legend .red {
+        background: var(--red);
+      }
+      .legend .green {
+        background: var(--green);
+      }
+      .callout {
+        margin: 18px 16px 16px;
+        padding: 13px 14px;
+        border: 1px solid #b9d7d1;
+        background: #f1faf8;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      .callout h3 {
+        font: 600 13px var(--display);
+        margin: 0 0 4px;
+      }
+      .callout p {
+        font-size: 11px;
+        color: var(--muted);
+        line-height: 1.45;
+        margin: 0;
+      }
+      .csv-box {
+        background: #172421;
+        color: #dceae6;
+        padding: 12px 13px;
+        font: 9px/1.6 var(--mono);
+        overflow: auto;
+      }
+      .csv-box .keep {
+        color: #8fd0c6;
+      }
+      .csv-box .row {
+        color: #c3d1cd;
+      }
+      .notes {
+        margin-top: 20px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+      }
+      .note {
+        border-top: 2px solid var(--teal);
+        padding: 11px 2px 0;
+      }
+      .note b {
+        display: block;
+        font: 600 10px var(--mono);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-bottom: 5px;
+      }
+      .note span {
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.4;
+      }
+      .switcher {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 3px;
+        background: #172421;
+        padding: 4px;
+        box-shadow: 0 7px 24px #17242144;
+        z-index: 4;
+      }
+      .switcher button {
+        border: 0;
+        background: transparent;
+        color: #b7ccc7;
+        padding: 9px 13px;
+        font: 600 10px var(--mono);
+        cursor: pointer;
+      }
+      .switcher button.active {
+        background: #e7f3f0;
+        color: var(--teal);
+      }
+      .variant-b {
+        display: none;
+      }
+      .variant-b .proposal {
+        max-width: 920px;
+        margin: 0 auto;
+      }
+      .lanes {
+        padding: 0;
+      }
+      .lane {
+        display: grid;
+        grid-template-columns: 1.35fr 1fr 0.8fr;
+        gap: 20px;
+        align-items: center;
+        padding: 15px 18px;
+        border-bottom: 1px solid var(--soft);
+      }
+      .lane:last-child {
+        border-bottom: 0;
+      }
+      .lane h3 {
+        font: 600 15px var(--display);
+        margin: 0 0 4px;
+      }
+      .lane p {
+        font: 10px var(--mono);
+        color: var(--faint);
+        margin: 0;
+      }
+      .lane .spark {
+        width: 220px;
+        height: 40px;
+      }
+      .lane .spark-label {
+        width: 220px;
+      }
+      .lane .action {
+        justify-self: end;
+      }
+      .variant-b .callout {
+        margin: 16px;
+      }
+      .variant-b .lane .metric {
+        display: block;
+        margin-top: 5px;
+      }
+      @media (max-width: 900px) {
+        main {
+          padding: 24px 14px 100px;
+        }
+        .intro {
+          display: block;
+        }
+        .status {
+          display: inline-block;
+          margin-top: 15px;
+        }
+        .compare {
+          grid-template-columns: 1fr;
+        }
+        .notes {
+          grid-template-columns: 1fr;
+        }
+        .new-head,
+        .new-row {
+          min-width: 770px;
+        }
+        .proposal {
+          overflow: hidden;
+        }
+        .toolbar {
+          min-width: 770px;
+        }
+        .callout {
+          grid-template-columns: 1fr;
+        }
+        .meta {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="top">
+      <div class="brand">Forecast performance</div>
+      <div class="meta">COMPARISON · ML ACTION QUEUE · PROPOSAL</div>
+    </header>
+    <main>
+      <div class="intro">
+        <div>
+          <div class="eyebrow">Comparison tab / design sketch</div>
+          <h1>Turn repeated month rows into SKU signals</h1>
+          <p>
+            The queue stays actionable, but stops spending a full column
+            repeating every target month. Each SKU appears once; the selected
+            months become a small performance trace.
+          </p>
+        </div>
+        <div class="status">PROTOTYPE · NO APP CODE CHANGED</div>
+      </div>
+
+      <section class="variant-a">
+        <div class="compare">
+          <article class="frame">
+            <div class="frame__head">
+              <div>
+                <h2>Current queue</h2>
+                <p>One harmful revision per SKU × target month</p>
+              </div>
+              <span class="tag">Today</span>
+            </div>
+            <div class="body">
+              <div class="old-table">
+                <div class="old-head">
+                  <span>Priority</span><span>Material</span><span>Target</span
+                  ><span>Actual</span><span>Added error</span
+                  ><span>Action</span>
+                </div>
+                <div class="old-row">
+                  <span class="bad">Review now</span
+                  ><span
+                    ><b class="sku">10482</b><br /><span class="desc"
+                      >Classic filter 2-pack</span
+                    ></span
+                  ><span class="month-stack"
+                    >Mar 2026<br />Apr 2026<br />May 2026<br /><span
+                      class="ellipsis"
+                      >…</span
+                    ></span
+                  ><span>2,420</span><span class="bad">+418</span
+                  ><span>Validate uplift</span>
+                </div>
+                <div class="old-row">
+                  <span class="bad">Review now</span
+                  ><span
+                    ><b class="sku">10482</b><br /><span class="desc"
+                      >Classic filter 2-pack</span
+                    ></span
+                  ><span class="month-stack"
+                    >Apr 2026<br />May 2026<br />Jun 2026</span
+                  ><span>2,420</span><span class="bad">+301</span
+                  ><span>Validate uplift</span>
+                </div>
+                <div class="old-row">
+                  <span class="bad">Review now</span
+                  ><span
+                    ><b class="sku">10482</b><br /><span class="desc"
+                      >Classic filter 2-pack</span
+                    ></span
+                  ><span class="month-stack">May 2026<br />Jun 2026</span
+                  ><span>2,420</span><span class="bad">+267</span
+                  ><span>Validate uplift</span>
+                </div>
+                <div class="old-row">
+                  <span class="priority--watch">#4</span
+                  ><span
+                    ><b class="sku">20731</b><br /><span class="desc"
+                      >Premium refill cartridge</span
+                    ></span
+                  ><span class="month-stack">Mar 2026<br />Apr 2026</span
+                  ><span>1,180</span><span class="bad">+194</span
+                  ><span>Check reduction</span>
+                </div>
+              </div>
+              <div class="problem">
+                <div>!</div>
+                <div>
+                  <b>Why it feels noisy</b>The same SKU occupies multiple rows,
+                  and the month column becomes a long list. The queue is
+                  technically complete but hard to scan for recurring patterns.
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="frame proposal">
+            <div class="frame__head">
+              <div>
+                <h2>Proposed ML queue</h2>
+                <p>
+                  One row per deduplicated SKU · month performance stays visible
+                </p>
+              </div>
+              <span class="tag tag--new">Change</span>
+            </div>
+            <div class="toolbar">
+              <input
+                class="search"
+                value="filter: harmful revisions"
+                aria-label="Example filter"
+              /><span
+                ><span class="csv">↓ Download action evidence · CSV</span></span
+              >
+            </div>
+            <div class="new-head">
+              <span>Priority</span><span>SKU / material</span
+              ><span>Revision performance</span><span>Latest target</span
+              ><span>Added error</span><span>Planner action</span>
+            </div>
+            <div class="new-row">
+              <span><span class="priority">Review now</span></span
+              ><span
+                ><b class="sku">10482</b
+                ><span class="desc">Classic filter 2-pack</span></span
+              ><span class="spark-cell"
+                ><svg
+                  class="spark"
+                  viewBox="0 0 130 30"
+                  role="img"
+                  aria-label="Error improvement across March to June: plus 24, minus 96, minus 418, minus 267 KL"
+                >
+                  <path class="axis" d="M2 15H128" />
+                  <path class="line" d="M3 8 L44 18 L85 26 L127 23" />
+                  <circle class="dot good" cx="3" cy="8" r="2.6" />
+                  <circle class="dot bad" cx="44" cy="18" r="2.6" />
+                  <circle class="dot bad" cx="85" cy="26" r="2.6" />
+                  <circle class="dot bad" cx="127" cy="23" r="2.6" /></svg
+                ><span class="spark-label"
+                  ><span>Mar</span><span>Jun</span></span
+                ><small>+24 → −267 KL · 4 target months</small></span
+              ><span>Jun 2026</span><span class="metric">+986</span
+              ><span class="action">Validate uplift</span>
+            </div>
+            <div class="new-row">
+              <span><span class="priority priority--watch">#4</span></span
+              ><span
+                ><b class="sku">20731</b
+                ><span class="desc">Premium refill cartridge</span></span
+              ><span class="spark-cell"
+                ><svg
+                  class="spark"
+                  viewBox="0 0 130 30"
+                  role="img"
+                  aria-label="Error improvement across March to May: plus 12, minus 194, minus 84 KL"
+                >
+                  <path class="axis" d="M2 15H128" />
+                  <path class="line" d="M3 9 L65 20 L127 16" />
+                  <circle class="dot good" cx="3" cy="9" r="2.6" />
+                  <circle class="dot bad" cx="65" cy="20" r="2.6" />
+                  <circle class="dot bad" cx="127" cy="16" r="2.6" /></svg
+                ><span class="spark-label"
+                  ><span>Mar</span><span>May</span></span
+                ><small>+12 → −84 KL · 3 target months</small></span
+              ><span>May 2026</span><span class="metric">+194</span
+              ><span class="action">Check reduction</span>
+            </div>
+            <div class="new-row">
+              <span><span class="priority priority--watch">#5</span></span
+              ><span
+                ><b class="sku">31108</b
+                ><span class="desc">Compact air purifier</span></span
+              ><span class="spark-cell"
+                ><svg
+                  class="spark"
+                  viewBox="0 0 130 30"
+                  role="img"
+                  aria-label="Error improvement across April to June: minus 162, plus 31, plus 74 KL"
+                >
+                  <path class="axis" d="M2 15H128" />
+                  <path class="line" d="M3 19 L65 15 L127 7" />
+                  <circle class="dot bad" cx="3" cy="19" r="2.6" />
+                  <circle class="dot good" cx="65" cy="15" r="2.6" />
+                  <circle class="dot good" cx="127" cy="7" r="2.6" /></svg
+                ><span class="spark-label"
+                  ><span>Apr</span><span>Jun</span></span
+                ><small>−162 → +74 KL · 3 target months</small></span
+              ><span>Jun 2026</span><span class="metric">+162</span
+              ><span class="action">Validate uplift</span>
+            </div>
+            <div class="legend">
+              <span
+                ><i class="teal"></i>error improvement path · zero
+                baseline</span
+              ><span><i class="red"></i>harmful month</span
+              ><span><i class="green"></i>improving month</span>
+            </div>
+            <div class="callout">
+              <div>
+                <h3>What changes in the UI</h3>
+                <p>
+                  Deduplicate by SKU, roll its harmful month rows into one queue
+                  item, and plot month-level error improvement in chronological
+                  order. Hovering a point can reveal the exact month and
+                  evidence.
+                </p>
+              </div>
+              <div>
+                <h3>What does not change</h3>
+                <p>
+                  The queue remains filterable and sortable. Priority and total
+                  added error are aggregated for the SKU. The CSV keeps the
+                  detailed SKU × month evidence rows.
+                </p>
+              </div>
+            </div>
+          </article>
+        </div>
+        <div class="notes">
+          <div class="note">
+            <b>Table scan</b
+            ><span
+              >One material = one decision row, so recurring risk is visible
+              immediately.</span
+            >
+          </div>
+          <div class="note">
+            <b>Month detail</b
+            ><span
+              >The sparkline is a compact overview, not a replacement for exact
+              values.</span
+            >
+          </div>
+          <div class="note">
+            <b>Download</b
+            ><span
+              >CSV remains the audit trail with the existing detailed columns
+              intact.</span
+            >
+          </div>
+        </div>
+      </section>
+
+      <section class="variant-b">
+        <article class="frame proposal">
+          <div class="frame__head">
+            <div>
+              <h2>Alternative: SKU lanes</h2>
+              <p>
+                Same deduplication and CSV contract, with more room for the
+                signal
+              </p>
+            </div>
+            <span class="tag tag--new">Option B</span>
+          </div>
+          <div class="toolbar">
+            <input
+              class="search"
+              value="filter: harmful revisions"
+              aria-label="Example filter"
+            /><span
+              ><span class="csv">↓ Download action evidence · CSV</span></span
+            >
+          </div>
+          <div class="lanes">
+            <div class="lane">
+              <div>
+                <h3>10482 · Classic filter 2-pack</h3>
+                <p>
+                  4 target months · latest Jun 2026 ·
+                  <span class="metric">+986 added error</span>
+                </p>
+              </div>
+              <div>
+                <svg
+                  class="spark"
+                  viewBox="0 0 220 40"
+                  aria-label="Error improvement path: plus 24, minus 96, minus 418, minus 267 KL"
+                >
+                  <path class="axis" d="M2 20H218" />
+                  <path class="line" d="M3 9 L72 23 L145 34 L217 29" />
+                  <circle class="dot good" cx="3" cy="9" r="3" />
+                  <circle class="dot bad" cx="72" cy="16" r="3" />
+                  <circle class="dot bad" cx="145" cy="31" r="3" />
+                  <circle class="dot bad" cx="217" cy="25" r="3" /></svg
+                ><span class="spark-label"
+                  ><span>Mar +24 KL</span><span>Jun −267 KL</span></span
+                >
+              </div>
+              <span class="action">Validate uplift</span>
+            </div>
+            <div class="lane">
+              <div>
+                <h3>20731 · Premium refill cartridge</h3>
+                <p>
+                  3 target months · latest May 2026 ·
+                  <span class="metric">+194 added error</span>
+                </p>
+              </div>
+              <div>
+                <svg
+                  class="spark"
+                  viewBox="0 0 220 40"
+                  aria-label="Error improvement path: plus 12, minus 194, minus 84 KL"
+                >
+                  <path class="axis" d="M2 20H218" />
+                  <path class="line" d="M3 11 L110 31 L217 25" />
+                  <circle class="dot good" cx="3" cy="11" r="3" />
+                  <circle class="dot bad" cx="110" cy="28" r="3" />
+                  <circle class="dot bad" cx="217" cy="22" r="3" /></svg
+                ><span class="spark-label"
+                  ><span>Mar +12 KL</span><span>May −84 KL</span></span
+                >
+              </div>
+              <span class="action">Check reduction</span>
+            </div>
+            <div class="lane">
+              <div>
+                <h3>31108 · Compact air purifier</h3>
+                <p>
+                  3 target months · latest Jun 2026 ·
+                  <span class="metric">+162 added error</span>
+                </p>
+              </div>
+              <div>
+                <svg
+                  class="spark"
+                  viewBox="0 0 220 40"
+                  aria-label="Error improvement path: minus 162, plus 31, plus 74 KL"
+                >
+                  <path class="axis" d="M2 20H218" />
+                  <path class="line" d="M3 31 L110 16 L217 8" />
+                  <circle class="dot bad" cx="3" cy="26" r="3" />
+                  <circle class="dot good" cx="110" cy="20" r="3" />
+                  <circle class="dot good" cx="217" cy="9" r="3" /></svg
+                ><span class="spark-label"
+                  ><span>Apr −162 KL</span><span>Jun +74 KL</span></span
+                >
+              </div>
+              <span class="action">Validate uplift</span>
+            </div>
+          </div>
+          <div class="callout">
+            <div>
+              <h3>Trade-off</h3>
+              <p>
+                More visual and easier to compare paths, but less compact when
+                the queue contains many SKUs.
+              </p>
+            </div>
+            <div class="csv-box">
+              <span class="keep">CSV stays detailed:</span><br /><span
+                class="row"
+                >SKU, description, target_month, actual_kl,</span
+              ><br /><span class="row"
+                >vintage_a_forecast_kl, vintage_b_forecast_kl,</span
+              ><br /><span class="row"
+                >revision_kl, error_improvement_kl, impact_kl, ...</span
+              >
+            </div>
+          </div>
+        </article>
+      </section>
+    </main>
+    <nav class="switcher" aria-label="Prototype variations">
+      <button class="active" data-variant="a">A · Compact table</button
+      ><button data-variant="b">B · SKU lanes</button>
+    </nav>
+    <script>
+      for (const button of document.querySelectorAll("[data-variant]"))
+        button.addEventListener("click", () => {
+          const v = button.dataset.variant;
+          document.querySelector(".variant-a").style.display =
+            v === "a" ? "block" : "none";
+          document.querySelector(".variant-b").style.display =
+            v === "b" ? "block" : "none";
+          document
+            .querySelectorAll("[data-variant]")
+            .forEach((b) => b.classList.toggle("active", b === button));
+          history.replaceState(null, "", "?variant=" + v);
+        });
+      const v = new URLSearchParams(location.search).get("variant");
+      if (v === "b") document.querySelector('[data-variant="b"]').click();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,180 @@
+{
+  "metrics": {
+    "data": {
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      },
+      "origin": "http://127.0.0.1:8766/#overview",
+      "result": {
+        "accuracyLabel": "9.5px",
+        "accuracyLine": "4px",
+        "actualLine": "4px",
+        "biasLabel": "8.5px",
+        "columns": "581.5px 581.5px",
+        "frames": [
+          {
+            "h": 470,
+            "w": 581.5
+          },
+          {
+            "h": 470,
+            "w": 581.5
+          }
+        ],
+        "monthLabel": "10px",
+        "overflowX": 0,
+        "volumeAxis": "9px",
+        "volumeLine": "4px"
+      }
+    },
+    "details": {
+      "resultCategory": "success",
+      "successCategory": "completed"
+    },
+    "nextActions": [
+      {
+        "id": "inspect-after-mutation",
+        "params": {
+          "args": [
+            "snapshot",
+            "-i"
+          ]
+        },
+        "reason": "Refresh interactive refs after a browser mutation, navigation, scroll, or rerender.",
+        "safety": "Do not reuse prior @refs until a fresh snapshot confirms they still exist.",
+        "tool": "agent_browser"
+      }
+    ],
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "completed",
+    "summary": "Eval result: {",
+    "text": "{\n  \"accuracyLabel\": \"9.5px\",\n  \"accuracyLine\": \"4px\",\n  \"actualLine\": \"4px\",\n  \"biasLabel\": \"8.5px\",\n  \"columns\": \"581.5px 581.5px\",\n  \"frames\": [\n    {\n      \"h\": 470,\n      \"w\": 581.5\n    },\n    {\n      \"h\": 470,\n      \"w\": 581.5\n    }\n  ],\n  \"monthLabel\": \"10px\",\n  \"overflowX\": 0,\n  \"volumeAxis\": \"9px\",\n  \"volumeLine\": \"4px\"\n}\n\nOrigin: http://127.0.0.1:8766/#overview"
+  },
+  "shot": {
+    "data": {
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      },
+      "path": "/root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/two-chart-magnified.png"
+    },
+    "details": {
+      "artifactVerification": {
+        "artifacts": [
+          {
+            "absolutePath": "/root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/two-chart-magnified.png",
+            "exists": true,
+            "kind": "image",
+            "mediaType": "image/png",
+            "path": "validation-artifacts/focused-overview-chart/two-chart-magnified.png",
+            "requestedPath": "validation-artifacts/focused-overview-chart/two-chart-magnified.png",
+            "retentionState": "live",
+            "sizeBytes": 159904,
+            "state": "verified",
+            "status": "saved",
+            "storageScope": "explicit-path",
+            "updatedAtMs": 1788098071397.946
+          }
+        ],
+        "missingCount": 0,
+        "pendingCount": 0,
+        "unverifiedCount": 0,
+        "verified": true,
+        "verifiedCount": 1
+      },
+      "artifacts": [
+        {
+          "absolutePath": "/root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/two-chart-magnified.png",
+          "artifactType": "image",
+          "command": "screenshot",
+          "cwd": "/root/GitHub/forecast_analysis",
+          "exists": true,
+          "extension": ".png",
+          "kind": "image",
+          "mediaType": "image/png",
+          "namespace": "",
+          "path": "validation-artifacts/focused-overview-chart/two-chart-magnified.png",
+          "requestedPath": "validation-artifacts/focused-overview-chart/two-chart-magnified.png",
+          "session": "piab-script-eb984330-cdd9-4262-aa3b-56b1fb4ad953",
+          "sizeBytes": 159904,
+          "status": "saved",
+          "subcommand": "/root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/two-chart-magnified.png",
+          "updatedAtMs": 1788098071397.946
+        }
+      ],
+      "pageChangeSummary": {
+        "artifactCount": 1,
+        "changeType": "artifact",
+        "command": "screenshot",
+        "nextActionIds": [
+          "use-saved-artifact"
+        ],
+        "observed": true,
+        "summary": "screenshot → artifact → 1 artifact"
+      },
+      "resultCategory": "success",
+      "successCategory": "artifact-saved"
+    },
+    "nextActions": [
+      {
+        "artifactPath": "validation-artifacts/focused-overview-chart/two-chart-magnified.png",
+        "id": "use-saved-artifact",
+        "reason": "Use the saved artifact path from the structured result instead of scraping it from text.",
+        "safety": "Verify artifact metadata such as exists/status before treating the file as durable.",
+        "tool": "agent_browser"
+      }
+    ],
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "artifact-saved",
+    "summary": "Saved image: validation-artifacts/focused-overview-chart/two-chart-magnified.png",
+    "text": "Saved image: validation-artifacts/focused-overview-chart/two-chart-magnified.png\nArtifact type: image\nRequested path: validation-artifacts/focused-overview-chart/two-chart-magnified.png\nAbsolute path: /root/GitHub/forecast_analysis/validation-artifacts/focused-overview-chart/two-chart-magnified.png\nExists: true\nSize: 156.2 KiB\nSize bytes: 159904\nStatus: saved\nMedia type: image/png\nSession: piab-script-eb984330-cdd9-4262-aa3b-56b1fb4ad953\nCWD: /root/GitHub/forecast_analysis\nMachine data: details.artifacts[0]"
+  },
+  "errors": {
+    "data": {
+      "errors": [],
+      "lifecycle": {
+        "effectiveLaunch": {
+          "browserLaunched": true,
+          "engine": "chrome",
+          "launchHash": 7707568497978554000
+        },
+        "launched": false,
+        "relaunchedBrowser": false,
+        "restartedBackground": false,
+        "restoreStatus": "not_configured",
+        "reused": true,
+        "saveStatus": "not_attempted"
+      }
+    },
+    "details": {
+      "resultCategory": "success",
+      "successCategory": "completed"
+    },
+    "ok": true,
+    "resultCategory": "success",
+    "successCategory": "completed",
+    "summary": "Page errors: 0",
+    "text": "No page errors."
+  }
+}
