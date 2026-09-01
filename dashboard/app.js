@@ -538,6 +538,29 @@
       renderPayload: (payload) =>
         revisionHistoryChart(payload.revision_history),
     },
+    "postmortem-performance": {
+      title: (payload) =>
+        `Latest forecast versus actual · ${payload.product_detail?.parent_code || "SKU"}`,
+      legend:
+        '<span><i class="key key--teal"></i>Forecast</span><span><i class="key key--blue"></i>Actual</span>',
+      renderPayload: (payload) =>
+        productPerformanceChart(payload.product_detail?.postmortem),
+    },
+    "postmortem-revision": {
+      title: (payload) =>
+        `Revision outcome · ${payload.product_detail?.parent_code || "SKU"}`,
+      legend:
+        '<span><i class="scatter-key scatter-key--improved"></i>Improved</span><span><i class="scatter-key scatter-key--worsened"></i>Worsened</span><span><i class="scatter-key scatter-key--neutral"></i>Neutral</span>',
+      renderPayload: (payload) =>
+        productRevisionOutcomeChart(payload.product_detail?.postmortem),
+    },
+    "product-history": {
+      title: (payload) =>
+        `Selected target forecast development · ${payload.product_detail?.parent_code || "SKU"}`,
+      legend:
+        '<span><i class="key key--amber"></i>TM</span><span><i class="key key--teal"></i>ML</span><span><i class="key key--blue"></i>Actual</span>',
+      renderPayload: (payload) => historyChart(payload.product_detail || {}),
+    },
   };
 
   function renderFullscreenChart() {
@@ -2878,6 +2901,212 @@
     return `<section class="frame message-frame"><div class="message-state"><span class="severity severity--warn">Mode</span><h3>${escapeHtml(title)}</h3><p>${escapeHtml(copy)}</p><button class="btn btn--accent" data-mode-action="${escapeHtml(kind)}" type="button">${escapeHtml(action)}</button></div></section>`;
   }
 
+  function productPerformanceChart(postmortem) {
+    const rows = (postmortem?.rolling_performance?.rows || []).filter(
+      (row) => finite(row.forecast_kl) || finite(row.actual_kl),
+    );
+    if (!rows.length) return emptyVisual("No actualized monthly performance");
+    const width = 760;
+    const height = 248;
+    const left = 58;
+    const right = 738;
+    const top = 24;
+    const bottom = 207;
+    const values = rows.flatMap((row) => [row.forecast_kl, row.actual_kl]);
+    const [min, max] = chartExtent(values);
+    const x = (index) =>
+      rows.length === 1
+        ? (left + right) / 2
+        : left + (index / (rows.length - 1)) * (right - left);
+    const y = (value) =>
+      bottom - ((value - min) / Math.max(max - min, 0.001)) * (bottom - top);
+    const line = (key, className) => {
+      const points = rows
+        .map((row, index) => ({ row, index, value: row[key] }))
+        .filter((point) => finite(point.value));
+      if (!points.length) return "";
+      const path = points
+        .map(
+          (point, index) =>
+            `${index ? "L" : "M"}${x(point.index).toFixed(1)} ${y(point.value).toFixed(1)}`,
+        )
+        .join(" ");
+      const dots = points
+        .map((point) => {
+          const label = `${key === "forecast_kl" ? "Forecast" : "Actual"}, ${monthLabel(point.row.snop_month)}, ${kl(point.value)}`;
+          return `<circle class="chart__point postmortem-chart__point postmortem-chart__point--${className}" cx="${x(point.index).toFixed(1)}" cy="${y(point.value).toFixed(1)}" r="3.5" tabindex="0" role="img" aria-label="${escapeHtml(label)}"><title>${escapeHtml(label)}</title></circle>`;
+        })
+        .join("");
+      return `<path class="postmortem-chart__${className}" d="${path}"></path>${dots}`;
+    };
+    const horizontalGrid = [0, 0.5, 1]
+      .map((ratio) => {
+        const value = max - ratio * (max - min);
+        const gridY = top + ratio * (bottom - top);
+        return `<line x1="${left}" y1="${gridY}" x2="${right}" y2="${gridY}"></line><text x="${left - 8}" y="${gridY + 3}">${escapeHtml(number(value, 1))}</text>`;
+      })
+      .join("");
+    const labels = rows
+      .map((row, index) =>
+        index % Math.max(1, Math.ceil(rows.length / 6)) === 0 || index === rows.length - 1
+          ? `<text x="${x(index)}" y="230">${escapeHtml(monthLabel(row.snop_month).split(" ")[0])}</text>`
+          : "",
+      )
+      .join("");
+    return `<svg class="chart postmortem-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="Latest forecast versus actual by target month"><title>Latest forecast versus actual by target month</title><g class="chart__grid">${horizontalGrid}</g>${line("forecast_kl", "forecast")}${line("actual_kl", "actual")}<g class="chart__labels">${labels}</g></svg>`;
+  }
+
+  function productRevisionOutcomeChart(postmortem) {
+    const points = (postmortem?.revision_outcomes?.rows || []).filter((row) =>
+      finite(row.error_improvement_kl),
+    );
+    if (!points.length) return emptyVisual("No complete Vintage A/B outcomes");
+    const width = 520;
+    const height = 148;
+    const left = 25;
+    const right = 505;
+    const top = 14;
+    const bottom = 105;
+    const maxAbsolute = Math.max(
+      ...points.map((point) => Math.abs(point.error_improvement_kl)),
+      0.01,
+    );
+    const zeroY = (top + bottom) / 2;
+    const x = (index) =>
+      points.length === 1
+        ? width / 2
+        : left + (index / (points.length - 1)) * (right - left);
+    const y = (value) =>
+      zeroY - (value / maxAbsolute) * ((bottom - top) / 2 - 4);
+    const line = points
+      .map(
+        (point, index) =>
+          `${index ? "L" : "M"}${x(index).toFixed(1)} ${y(point.error_improvement_kl).toFixed(1)}`,
+      )
+      .join(" ");
+    const dots = points
+      .map((point, index) => {
+        const outcome = point.revision_outcome || "neutral";
+        const label = `${monthLabel(point.snop_month)}, revision ${signedKl(point.revision_kl)}, error improvement ${signedKl(point.error_improvement_kl)}, ${labelize(outcome)}`;
+        return `<circle class="chart__point postmortem-revision-chart__point postmortem-revision-chart__point--${escapeHtml(outcome)}" cx="${x(index).toFixed(1)}" cy="${y(point.error_improvement_kl).toFixed(1)}" r="4" tabindex="0" role="img" aria-label="${escapeHtml(label)}"><title>${escapeHtml(label)}</title></circle>`;
+      })
+      .join("");
+    const labels = points
+      .map(
+        (point, index) =>
+          `<text x="${x(index)}" y="126">${escapeHtml(monthLabel(point.snop_month).split(" ")[0])}</text>`,
+      )
+      .join("");
+    return `<div class="postmortem-revision-chart"><svg class="chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="Monthly revision error improvement with zero baseline"><title>Monthly revision error improvement with zero baseline</title><line class="postmortem-revision-chart__zero" x1="${left}" y1="${zeroY}" x2="${right}" y2="${zeroY}"></line><path class="postmortem-revision-chart__line" d="${line}"></path>${dots}<g class="chart__labels">${labels}</g></svg><div class="postmortem-revision-chart__legend"><span><i class="scatter-key scatter-key--improved"></i>Improved</span><span><i class="scatter-key scatter-key--worsened"></i>Worsened</span><span><i class="scatter-key scatter-key--neutral"></i>Neutral</span><span>Error improvement · zero baseline · ${count(points.length)} months</span></div></div>`;
+  }
+
+  function productCommentary(postmortem) {
+    const rows = postmortem?.commentary?.rows || [];
+    const body = rows.length
+      ? rows
+          .map((row) => {
+            const kind =
+              row.severity === "positive"
+                ? "good"
+                : row.severity === "critical"
+                  ? "bad"
+                  : row.severity === "warning"
+                    ? "warn"
+                    : "neutral";
+            const refs = (row.evidence_refs || []).join(" · ");
+            return `<article class="postmortem-comment postmortem-comment--${kind}"><i class="postmortem-comment__lamp" aria-hidden="true"></i><div class="postmortem-comment__copy"><b>${escapeHtml(labelize(row.category))}</b><strong>${escapeHtml(row.headline)}</strong><p>${escapeHtml(row.body)}${refs ? `<br><span>Evidence: ${escapeHtml(refs)}</span>` : ""}</p></div><span class="postmortem-comment__confidence">${escapeHtml(row.confidence)} confidence</span></article>`;
+          })
+          .join("")
+      : '<div class="empty-row">No material issue callouts for this selection.</div>';
+    return `<header class="postmortem-commentary__head"><h3>Planner commentary</h3><p>Rules-based observations · evidence refs · no invented cause</p></header><div class="postmortem-commentary__body">${body}</div>`;
+  }
+
+  function productPeerBenchmark(postmortem) {
+    const peers = postmortem?.peer_benchmarks?.rows || [];
+    if (!peers.length) return emptyVisual("No eligible sibling cohort");
+    const values = peers.flatMap((row) => [
+      row.p25_accuracy_pct,
+      row.median_accuracy_pct,
+      row.p75_accuracy_pct,
+      row.selected_accuracy_pct,
+    ]).filter(finite);
+    const lower = Math.min(...values, 0);
+    const upper = Math.max(...values, 100);
+    const position = (value) =>
+      finite(value)
+        ? Math.max(0, Math.min(100, ((value - lower) / Math.max(upper - lower, 1)) * 100))
+        : 0;
+    return `<div class="postmortem-peer-list">${peers
+      .map((row) => {
+        const selected = position(row.selected_accuracy_pct);
+        const p25 = position(row.p25_accuracy_pct);
+        const p75 = position(row.p75_accuracy_pct);
+        const median = position(row.median_accuracy_pct);
+        return `<article class="postmortem-peer"><span><b>${escapeHtml(labelize(row.cohort_type))}</b><small>${escapeHtml(row.cohort_value)} · ${count(row.eligible_count)} eligible</small></span><div class="postmortem-peer__track" aria-label="Selected accuracy ${pct(row.selected_accuracy_pct)} versus ${labelize(row.cohort_type)} median ${pct(row.median_accuracy_pct)}"><i class="postmortem-peer__band" style="left:${p25}%;width:${Math.max(1, p75 - p25)}%"></i><i class="postmortem-peer__median" style="left:${median}%"></i><i class="postmortem-peer__selected" style="left:${selected}%"></i></div><strong>${pct(row.selected_accuracy_pct)}</strong><p class="postmortem-peer-note">Median ${pct(row.median_accuracy_pct)} · rank ${row.selected_rank || "—"}/${count(row.eligible_count)} · percentile ${pct(row.selected_percentile_pct)}</p></article>`;
+      })
+      .join("")}<p class="postmortem-peer-note">Accuracy scale ${number(lower, 0)}% to ${number(upper, 0)}% · same target month and active source.</p></div>`;
+  }
+
+  function renderProductPostmortem(detail) {
+    const postmortem = detail.postmortem || {};
+    const summary = postmortem.summary || {};
+    const treatment = postmortem.treatment || {};
+    const decisionKind =
+      treatment.action === "hold" ? "severity--good" : "severity--warn";
+    setHtml(
+      document.querySelector("[data-postmortem-decision]"),
+      `<div class="postmortem-decision__lead"><header><span class="severity ${decisionKind}">${escapeHtml(labelize(treatment.action || "Review"))}</span><h3>${escapeHtml(treatment.rationale || postmortem.status_message)}</h3></header><p>Evidence-bound recommendation for the forward baseline; business cause remains a review input.</p></div><div class="postmortem-decision__fact"><b>Proposed impact</b><strong>${finite(treatment.impact_kl) ? signedKl(treatment.impact_kl) : "No quantified change"}</strong><small>Directional adjustment, not an auto-write</small></div><div class="postmortem-decision__fact"><b>Confidence</b><strong>${escapeHtml(labelize(treatment.confidence))}</strong><small>Based on connected forecast evidence</small></div><div class="postmortem-decision__fact"><b>Review trigger</b><strong>${escapeHtml(treatment.review_trigger || "Next material update")}</strong><small>Planner retains final judgment</small></div>`,
+    );
+    const metrics = [
+      ["Latest forecast", kl(summary.latest_forecast_kl), `As of ${dateLabel(summary.latest_calculation_month)}`],
+      ["Actual", kl(summary.actual_kl), monthLabel(detail.target_month)],
+      ["Forecast accuracy", pct(summary.forecast_accuracy_pct), "Latest forecast vs actual"],
+      ["Bias", signedKl(summary.bias_kl), pct(summary.bias_pct)],
+      ["Absolute error", kl(summary.absolute_error_kl), "Magnitude of latest miss"],
+      ["Revision efficiency", pct(summary.revision_efficiency_pct), `${count(summary.material_revision_hits)} of ${count(summary.material_revisions)} material moves helped`],
+    ];
+    setHtml(
+      document.querySelector("[data-postmortem-metrics]"),
+      metrics
+        .map(
+          ([label, value, note]) => `<article class="postmortem-metric"><b>${escapeHtml(label)}</b><strong>${escapeHtml(value)}</strong><small>${escapeHtml(note)}</small></article>`,
+        )
+        .join(""),
+    );
+    setHtml(
+      document.querySelector("[data-postmortem-performance-chart]"),
+      productPerformanceChart(postmortem),
+    );
+    setHtml(
+      document.querySelector("[data-postmortem-commentary]"),
+      productCommentary(postmortem),
+    );
+    setHtml(
+      document.querySelector("[data-postmortem-revision-chart]"),
+      productRevisionOutcomeChart(postmortem),
+    );
+    document.querySelector("[data-postmortem-revision-summary]").textContent =
+      `${signedKl(summary.first_to_latest_fva_kl)} FVA · ${pct(summary.material_hit_rate_pct)} hit rate`;
+    setHtml(
+      document.querySelector("[data-postmortem-peers]"),
+      productPeerBenchmark(postmortem),
+    );
+    const peerCount = (postmortem.peer_benchmarks?.rows || []).reduce(
+      (total, row) => Math.max(total, Number(row.eligible_count || 0)),
+      0,
+    );
+    document.querySelector("[data-postmortem-peer-scope]").textContent =
+      `${count(peerCount)} eligible siblings`;
+    setHtml(
+      document.querySelector("[data-postmortem-evidence]"),
+      `<header class="postmortem-evidence__head"><h3>Selected-target evidence</h3><p>Facts to take into the forecast review</p></header><div class="postmortem-evidence__body"><div class="postmortem-evidence__row"><strong>Latest position</strong><span>${kl(summary.latest_forecast_kl)} forecast vs ${kl(summary.actual_kl)} actual</span><b>${signedKl(summary.bias_kl)}</b></div><div class="postmortem-evidence__row"><strong>Forecast value add</strong><span>Oldest-to-latest absolute-error change</span><b>${signedKl(summary.first_to_latest_fva_kl)}</b></div><div class="postmortem-evidence__row"><strong>Revision discipline</strong><span>${count(summary.material_revisions)} material moves · ${count(summary.material_revision_hits)} helped</span><b>${pct(summary.material_hit_rate_pct)}</b></div><div class="postmortem-evidence__row"><strong>Data scope</strong><span>${escapeHtml(postmortem.source?.toUpperCase())} · class ${escapeHtml(postmortem.sku_class)} · ${count(summary.vintage_count)} vintages</span><b>${escapeHtml(labelize(postmortem.status))}</b></div></div>`,
+    );
+    setHtml(
+      document.querySelector("[data-postmortem-treatment]"),
+      `<header class="postmortem-treatment__head"><h3>Forward forecast treatment</h3><p>Decision contract for planner, business and forecasting teams</p></header><div class="postmortem-treatment__item"><b>Action</b><strong>${escapeHtml(labelize(treatment.action))}</strong><small>Controlled recommendation</small></div><div class="postmortem-treatment__item"><b>Adjustment</b><strong>${finite(treatment.impact_kl) ? signedKl(treatment.impact_kl) : "Hold pending evidence"}</strong><small>Against current baseline</small></div><div class="postmortem-treatment__item"><b>Rationale</b><strong title="${escapeHtml(treatment.rationale)}">${escapeHtml(treatment.rationale)}</strong><small>Forecast evidence only</small></div><div class="postmortem-treatment__item"><b>Review contract</b><strong title="${escapeHtml(treatment.review_trigger)}">${escapeHtml(treatment.review_trigger)}</strong><small>Reassess, do not autopilot</small></div>`,
+    );
+  }
+
   function renderProduct(detail) {
     const productControl = document.querySelector(
       '[data-product-control="parent"]',
@@ -2885,6 +3114,17 @@
     const monthControl = document.querySelector(
       '[data-product-control="month"]',
     );
+    const postmortemTargets = [
+      "[data-postmortem-decision]",
+      "[data-postmortem-metrics]",
+      "[data-postmortem-performance-chart]",
+      "[data-postmortem-commentary]",
+      "[data-postmortem-revision-chart]",
+      "[data-postmortem-peers]",
+      "[data-postmortem-evidence]",
+      "[data-postmortem-treatment]",
+      "[data-product-revisions]",
+    ];
     if (!detail || detail.error) {
       setHtml(productControl, option("", "No product available", ""));
       setHtml(monthControl, option("", "No target month available", ""));
@@ -2899,8 +3139,9 @@
         document.querySelector("[data-history-chart]"),
         emptyVisual("No product history"),
       );
-      setHtml(document.querySelector("[data-stability]"), "");
-      setHtml(document.querySelector("[data-product-revisions]"), "");
+      postmortemTargets.forEach((selector) =>
+        setHtml(document.querySelector(selector), ""),
+      );
       return;
     }
     setHtml(
@@ -2930,18 +3171,15 @@
         populationItem("Product", detail.parent_code),
         populationItem("Description", detail.parent_description),
         populationItem("Brand", detail.brand || "Unmapped"),
+        populationItem("SKU class", detail.postmortem?.sku_class || "Unclassified"),
         populationItem("Mapping", labelize(detail.mapping_status)),
-        populationItem("Actual", kl(detail.actual_kl)),
-        populationItem("History", detail.status_message),
+        populationItem("Target", monthLabel(detail.target_month)),
       ].join(""),
     );
+    renderProductPostmortem(detail);
     setHtml(
       document.querySelector("[data-history-chart]"),
       historyChart(detail),
-    );
-    setHtml(
-      document.querySelector("[data-stability]"),
-      detail.stability.rows.map(stabilityCard).join(""),
     );
     setHtml(
       document.querySelector("[data-product-revisions]"),
@@ -2993,7 +3231,7 @@
 
   function productRevisionTable(rows) {
     const header =
-      '<div role="row"><b role="columnheader">Source</b><strong role="columnheader">From → to</strong><em role="columnheader">Horizon</em><i role="columnheader">Revision</i><span role="columnheader">Direction</span><small role="columnheader">Error after</small></div>';
+      '<div role="row"><b role="columnheader">Source</b><strong role="columnheader">From → to</strong><em role="columnheader">Horizon</em><i role="columnheader">Revision</i><span role="columnheader">Direction</span><small role="columnheader">Error after</small><small role="columnheader">Outcome</small></div>';
     if (!rows.length)
       return (
         header +
@@ -3006,7 +3244,7 @@
         .reverse()
         .map(
           (row) =>
-            `<div role="row"><b role="cell">${sourceBadge(row.source)}</b><strong role="cell">${dateLabel(row.previous_calculation_month)} → ${dateLabel(row.calculation_month)}</strong><em role="cell">M−${row.previous_horizon_months} → M−${row.forecast_horizon_months}</em><i role="cell">${signedKl(row.revision_kl)}</i><span role="cell">${labelize(row.revision_direction)}</span><small role="cell" class="${row.error_improvement_kl > 0 ? "good" : row.error_improvement_kl < 0 ? "bad" : ""}">${signedKl(row.error_kl)}</small></div>`,
+            `<div role="row"><b role="cell">${sourceBadge(row.source)}</b><strong role="cell">${dateLabel(row.previous_calculation_month)} → ${dateLabel(row.calculation_month)}</strong><em role="cell">M−${row.previous_horizon_months} → M−${row.forecast_horizon_months}</em><i role="cell">${signedKl(row.revision_kl)}</i><span role="cell">${labelize(row.revision_direction)}</span><small role="cell" class="${row.error_improvement_kl > 0 ? "good" : row.error_improvement_kl < 0 ? "bad" : ""}">${signedKl(row.error_kl)}</small><small role="cell" class="${row.error_improvement_kl > 0 ? "good" : row.error_improvement_kl < 0 ? "bad" : ""}">${labelize(row.revision_outcome)} · ${signedKl(row.error_improvement_kl)}</small></div>`,
         )
         .join("")
     );

@@ -654,6 +654,30 @@ class StaticDashboardAdapterTests(unittest.TestCase):
         self.assertGreater(detail["points"]["total"], 0)
         self.assertGreater(detail["stability"]["total"], 0)
 
+    def test_product_detail_exposes_auditable_postmortem_projection(self) -> None:
+        detail = self.service.product_detail(self.defaults)
+
+        self.assertIsNotNone(detail)
+        assert detail is not None
+        postmortem = detail["postmortem"]
+        self.assertEqual(postmortem["source"], self.defaults["source"])
+        self.assertIn(postmortem["status"], {"ready", "insufficient_history"})
+        self.assertIn("forecast_accuracy_pct", postmortem["summary"])
+        self.assertIn("revision_efficiency_pct", postmortem["summary"])
+        self.assertGreater(postmortem["rolling_performance"]["total"], 0)
+        self.assertGreater(postmortem["peer_benchmarks"]["total"], 0)
+        self.assertGreater(postmortem["commentary"]["total"], 0)
+        self.assertIn(
+            postmortem["treatment"]["action"],
+            {"hold", "rebase", "rephase", "scenario", "escalate"},
+        )
+        self.assertTrue(
+            all(
+                row["evidence_refs"]
+                for row in postmortem["commentary"]["rows"]
+            )
+        )
+
     def test_csv_export_matches_the_exact_active_request(self) -> None:
         request = dict(self.defaults)
         request.update(

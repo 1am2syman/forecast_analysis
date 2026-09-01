@@ -67,6 +67,12 @@ from .product_history import (  # pyright: ignore[reportMissingImports]
     build_product_history,
     search_parent_products,
 )
+from .product_postmortem import (  # pyright: ignore[reportMissingImports]
+    ForwardTreatment,
+    ProductPostmortemView,
+    TargetMonthSummary,
+    build_product_postmortem,
+)
 from .vintages import VintageRule, select_vintage_pair  # pyright: ignore[reportMissingImports]
 
 __all__ = [
@@ -78,6 +84,9 @@ __all__ = [
     "DashboardView",
     "MetricSummary",
     "ProductHistoryView",
+    "ProductPostmortemView",
+    "ForwardTreatment",
+    "TargetMonthSummary",
     "RevisionMetrics",
     "VintageRule",
     "aggregate_actuals",
@@ -113,6 +122,7 @@ __all__ = [
     "build_population_diagnostics",
     "build_quality_view",
     "build_product_history",
+    "build_product_postmortem",
     "build_revision_diagnostics",
     "build_revision_scatter",
     "brand_target_metric_definition",

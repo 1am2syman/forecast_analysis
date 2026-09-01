@@ -816,8 +816,8 @@
             >
               <div class="pane__head">
                 <div>
-                  <p class="eyebrow">Drill-down</p>
-                  <h2 class="pane__title">Product vintage history</h2>
+                  <p class="eyebrow">Decision evidence</p>
+                  <h2 class="pane__title">SKU post-mortem</h2>
                 </div>
                 <span class="stamp">active-scope detail</span>
               </div>
@@ -833,7 +833,7 @@
                   data-subtab-target="product"
                   type="button"
                 >
-                  Product history</button
+                  SKU post-mortem</button
                 ><button
                   class="subtab"
                   aria-pressed="false"
@@ -870,34 +870,147 @@
                   </div>
                 </div>
                 <div class="product-summary" data-product-summary></div>
-                <div class="history-layout">
+                <section
+                  class="postmortem-decision"
+                  aria-label="Evidence-based forward forecast treatment"
+                  data-postmortem-decision
+                ></section>
+                <div
+                  class="postmortem-metrics"
+                  aria-label="SKU post-mortem performance ledger"
+                  data-postmortem-metrics
+                ></div>
+                <div class="postmortem-primary">
+                  <section class="frame postmortem-performance-frame">
+                    <header class="frame__head">
+                      <div>
+                        <h3 class="frame__title">Latest forecast versus actual</h3>
+                        <p class="frame__sub">
+                          Actualized target months · latest available forecast
+                        </p>
+                      </div>
+                      <div class="frame__actions">
+                        <div class="legend">
+                          <span><i class="key key--teal"></i>Forecast</span
+                          ><span><i class="key key--blue"></i>Actual</span>
+                        </div>
+                        <button
+                          class="chart-expand"
+                          data-action="chart-fullscreen"
+                          data-chart-fullscreen="postmortem-performance"
+                          type="button"
+                          aria-label="Open latest forecast versus actual chart full screen"
+                          aria-haspopup="dialog"
+                          aria-controls="overview-chart-dialog"
+                        >
+                          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 3H3v4M13 3h4v4M17 13v4h-4M7 17H3v-4" /></svg>
+                          Full screen
+                        </button>
+                      </div>
+                    </header>
+                    <div
+                      class="frame__body postmortem-chart-body"
+                      data-postmortem-performance-chart
+                    ></div>
+                  </section>
+                  <aside
+                    class="postmortem-commentary"
+                    aria-label="Categorized planner commentary"
+                    data-postmortem-commentary
+                  ></aside>
+                </div>
+                <div class="postmortem-secondary">
+                  <section class="frame">
+                    <header class="frame__head">
+                      <div>
+                        <h3 class="frame__title">Revision outcome · oldest → latest</h3>
+                        <p class="frame__sub">
+                          Error improvement · zero baseline · by target month
+                        </p>
+                      </div>
+                      <div class="frame__actions">
+                        <span class="frame__metric" data-postmortem-revision-summary></span>
+                        <button
+                          class="chart-expand"
+                          data-action="chart-fullscreen"
+                          data-chart-fullscreen="postmortem-revision"
+                          type="button"
+                          aria-label="Open revision outcome chart full screen"
+                          aria-haspopup="dialog"
+                          aria-controls="overview-chart-dialog"
+                        >
+                          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 3H3v4M13 3h4v4M17 13v4h-4M7 17H3v-4" /></svg>
+                          Full screen
+                        </button>
+                      </div>
+                    </header>
+                    <div
+                      class="frame__body postmortem-revision-body"
+                      data-postmortem-revision-chart
+                    ></div>
+                  </section>
+                  <section class="frame">
+                    <header class="frame__head">
+                      <div>
+                        <h3 class="frame__title">Sibling benchmark</h3>
+                        <p class="frame__sub">
+                          Same brand and SKU class · matched active scope
+                        </p>
+                      </div>
+                      <span class="frame__metric" data-postmortem-peer-scope></span>
+                    </header>
+                    <div
+                      class="frame__body postmortem-peer-body"
+                      data-postmortem-peers
+                    ></div>
+                  </section>
+                </div>
+                <div class="postmortem-detail-grid">
                   <section class="frame">
                     <header class="frame__head">
                       <div>
                         <h3 class="frame__title">
-                          Chronological forecast development
+                          Selected target · forecast development
                         </h3>
                         <p class="frame__sub">
-                          Calculation month, horizon, forecast, actual, error
-                          and bias
+                          Calculation month, horizon, forecast, actual, error and bias
                         </p>
                       </div>
-                      <div class="legend">
-                        <span><i class="key key--amber"></i>TM</span
-                        ><span><i class="key key--teal"></i>ML</span
-                        ><span><i class="key key--blue"></i>Actual</span>
+                      <div class="frame__actions">
+                        <div class="legend">
+                          <span><i class="key key--amber"></i>TM</span
+                          ><span><i class="key key--teal"></i>ML</span
+                          ><span><i class="key key--blue"></i>Actual</span>
+                        </div>
+                        <button
+                          class="chart-expand"
+                          data-action="chart-fullscreen"
+                          data-chart-fullscreen="product-history"
+                          type="button"
+                          aria-label="Open selected target forecast development chart full screen"
+                          aria-haspopup="dialog"
+                          aria-controls="overview-chart-dialog"
+                        >
+                          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 3H3v4M13 3h4v4M17 13v4h-4M7 17H3v-4" /></svg>
+                          Full screen
+                        </button>
                       </div>
                     </header>
                     <div class="frame__body" data-history-chart></div>
                   </section>
-                  <section class="stability" data-stability></section>
+                  <section class="postmortem-evidence" data-postmortem-evidence></section>
                 </div>
                 <div
-                  class="revision-table"
+                  class="revision-table postmortem-revision-table"
                   role="table"
                   aria-label="Consecutive source-specific revisions"
                   data-product-revisions
                 ></div>
+                <section
+                  class="postmortem-treatment"
+                  aria-label="Forward forecast treatment and review contract"
+                  data-postmortem-treatment
+                ></section>
               </div>
               <div class="subpanel" data-subpanel="history:exceptions" hidden>
                 <div class="exception-toolbar">

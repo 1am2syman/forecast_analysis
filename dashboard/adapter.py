@@ -27,6 +27,7 @@ from forecast_analysis import (
     build_analysis_dataset,
     build_dashboard_view,
     build_product_detail,
+    build_product_postmortem,
     load_analysis_inputs,
     with_display_brand,
 )
@@ -1595,6 +1596,15 @@ class DashboardDataService:
             .sort()
             .to_list()
         )
+        postmortem = build_product_postmortem(
+            view.filtered_population,
+            view.vintage_pairs,
+            parent_code,
+            target_month,
+            source=request["source"],
+            rolling_months=12,
+            revision_tolerance_kl=request["revision_tolerance_kl"],
+        )
         return {
             "parent_code": detail.parent_code,
             "target_month": _iso(detail.target_month),
@@ -1610,6 +1620,24 @@ class DashboardDataService:
             "points": _frame_payload(detail.points, limit=120),
             "revisions": _frame_payload(detail.revisions, limit=40),
             "stability": _frame_payload(detail.stability),
+            "postmortem": {
+                "source": postmortem.source,
+                "sku_class": postmortem.sku_class,
+                "status": postmortem.status,
+                "status_message": postmortem.status_message,
+                "rolling_performance": _frame_payload(
+                    postmortem.rolling_performance
+                ),
+                "revision_outcomes": _frame_payload(
+                    postmortem.revision_outcomes
+                ),
+                "summary": _json_value(postmortem.summary.as_dict()),
+                "peer_benchmarks": _frame_payload(
+                    postmortem.peer_benchmarks
+                ),
+                "commentary": _frame_payload(postmortem.commentary),
+                "treatment": _json_value(postmortem.treatment.as_dict()),
+            },
             "product_options": _rows(product_options),
             "target_options": [_iso(month) for month in target_options],
         }
