@@ -34,10 +34,10 @@ function validateCore() {
     timeline.matchingPreset(available, "2025-01-01", "2025-12-01", "month"),
     12,
   );
-  assert.deepEqual(
-    timeline.indexRange(available, "2025-03-01", "2025-08-01"),
-    { start: 26, end: 31 },
-  );
+  assert.deepEqual(timeline.indexRange(available, "2025-03-01", "2025-08-01"), {
+    start: 26,
+    end: 31,
+  });
   assert.deepEqual(timeline.rangeFromIndices(available, 26, 31), {
     start: "2025-03-01",
     end: "2025-08-01",

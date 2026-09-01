@@ -115,8 +115,14 @@
   function rangeFromIndices(months, startIndex, endIndex) {
     const available = normalizeMonths(months);
     if (!available.length) return { start: null, end: null };
-    const left = Math.max(0, Math.min(available.length - 1, Number(startIndex)));
-    const right = Math.max(left, Math.min(available.length - 1, Number(endIndex)));
+    const left = Math.max(
+      0,
+      Math.min(available.length - 1, Number(startIndex)),
+    );
+    const right = Math.max(
+      left,
+      Math.min(available.length - 1, Number(endIndex)),
+    );
     return { start: available[left], end: available[right] };
   }
 
@@ -132,7 +138,13 @@
   function moveWindow(months, startIndex, endIndex, delta) {
     const available = normalizeMonths(months);
     const width = Math.max(0, Number(endIndex) - Number(startIndex));
-    const nextStart = Math.max(0, Math.min(available.length - width - 1, Number(startIndex) + Number(delta)));
+    const nextStart = Math.max(
+      0,
+      Math.min(
+        available.length - width - 1,
+        Number(startIndex) + Number(delta),
+      ),
+    );
     return { start: nextStart, end: nextStart + width };
   }
 

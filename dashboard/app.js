@@ -35,10 +35,16 @@
     ]),
   );
   const timeline = document.querySelector("[data-timeline-control]");
-  const timelineStartSlider = timeline?.querySelector("[data-timeline-start-slider]");
-  const timelineEndSlider = timeline?.querySelector("[data-timeline-end-slider]");
+  const timelineStartSlider = timeline?.querySelector(
+    "[data-timeline-start-slider]",
+  );
+  const timelineEndSlider = timeline?.querySelector(
+    "[data-timeline-end-slider]",
+  );
   const timelineRail = timeline?.querySelector("[data-timeline-rail]");
-  const timelineSelection = timeline?.querySelector("[data-timeline-selection]");
+  const timelineSelection = timeline?.querySelector(
+    "[data-timeline-selection]",
+  );
   const timelineState = { grain: "month" };
   let timelineWindowDrag = null;
   const toast = document.querySelector(".toast");
@@ -713,17 +719,26 @@
       .filter(({ value, index }) => {
         if (index === 0 || index === lastIndex) return true;
         const month = Number(value.slice(5, 7));
-        return timelineState.grain === "quarter" ? [1, 4, 7, 10].includes(month) : month === 1;
+        return timelineState.grain === "quarter"
+          ? [1, 4, 7, 10].includes(month)
+          : month === 1;
       });
-    const labels = candidates.length <= 6
-      ? candidates
-      : candidates.filter((_, index) => index === 0 || index === candidates.length - 1 || index % Math.ceil(candidates.length / 5) === 0);
+    const labels =
+      candidates.length <= 6
+        ? candidates
+        : candidates.filter(
+            (_, index) =>
+              index === 0 ||
+              index === candidates.length - 1 ||
+              index % Math.ceil(candidates.length / 5) === 0,
+          );
     return labels
       .map(({ value, index }) => {
         const quarter = ForecastTimeline.quarterLabel(value).split(" ");
-        const label = timelineState.grain === "quarter"
-          ? `${quarter[0]} ’${quarter[1]?.slice(-2)}`
-          : monthLabel(value);
+        const label =
+          timelineState.grain === "quarter"
+            ? `${quarter[0]} ’${quarter[1]?.slice(-2)}`
+            : monthLabel(value);
         return `<span style="left:${lastIndex ? (index / lastIndex) * 100 : 0}%">${escapeHtml(label)}</span>`;
       })
       .join("");
@@ -733,7 +748,11 @@
     if (!timeline || !timelineStartSlider || !timelineEndSlider) return;
     const available = ForecastTimeline.normalizeMonths(months);
     const range = ForecastTimeline.clampRange(available, start, end);
-    const indices = ForecastTimeline.indexRange(available, range.start, range.end);
+    const indices = ForecastTimeline.indexRange(
+      available,
+      range.start,
+      range.end,
+    );
     const lastIndex = Math.max(0, available.length - 1);
     for (const slider of [timelineStartSlider, timelineEndSlider]) {
       slider.min = "0";
@@ -741,42 +760,82 @@
       slider.disabled = available.length < 2;
     }
     timelineStartSlider.value = String(indices.start);
-    timelineStartSlider.setAttribute("aria-valuetext", monthLabel(range.start, false));
+    timelineStartSlider.setAttribute(
+      "aria-valuetext",
+      monthLabel(range.start, false),
+    );
     timelineEndSlider.value = String(indices.end);
-    timelineEndSlider.setAttribute("aria-valuetext", monthLabel(range.end, false));
+    timelineEndSlider.setAttribute(
+      "aria-valuetext",
+      monthLabel(range.end, false),
+    );
     const startPct = lastIndex ? (indices.start / lastIndex) * 100 : 0;
     const endPct = lastIndex ? (indices.end / lastIndex) * 100 : 100;
     timelineRail?.style.setProperty("--start-pct", `${startPct}%`);
     timelineRail?.style.setProperty("--end-pct", `${endPct}%`);
-    timelineRail?.classList.toggle("is-tight", indices.end - indices.start <= 1);
+    timelineRail?.classList.toggle(
+      "is-tight",
+      indices.end - indices.start <= 1,
+    );
     timelineSelection?.setAttribute("aria-valuemin", "0");
     timelineSelection?.setAttribute("aria-valuemax", String(lastIndex));
     timelineSelection?.setAttribute("aria-valuenow", String(indices.start));
-    timelineSelection?.setAttribute("aria-valuetext", `${monthLabel(range.start, false)} through ${monthLabel(range.end, false)}`);
-    timeline.querySelector("[data-timeline-start]").textContent = monthLabel(range.start, false);
-    timeline.querySelector("[data-timeline-end]").textContent = monthLabel(range.end, false);
+    timelineSelection?.setAttribute(
+      "aria-valuetext",
+      `${monthLabel(range.start, false)} through ${monthLabel(range.end, false)}`,
+    );
+    timeline.querySelector("[data-timeline-start]").textContent = monthLabel(
+      range.start,
+      false,
+    );
+    timeline.querySelector("[data-timeline-end]").textContent = monthLabel(
+      range.end,
+      false,
+    );
     const count = ForecastTimeline.inclusiveMonthCount(range.start, range.end);
-    timeline.querySelector("[data-timeline-summary]").textContent = `${count} month${count === 1 ? "" : "s"}`;
+    timeline.querySelector("[data-timeline-summary]").textContent =
+      `${count} month${count === 1 ? "" : "s"}`;
     timeline.querySelectorAll("[data-timeline-grain]").forEach((button) => {
       const selected = button.dataset.timelineGrain === timelineState.grain;
       button.classList.toggle("is-active", selected);
       button.setAttribute("aria-pressed", String(selected));
     });
-    const isAll = range.start === available[0] && range.end === available.at(-1);
-    const matched = ForecastTimeline.matchingPreset(available, range.start, range.end, timelineState.grain, [3, 6, 12, 24]);
+    const isAll =
+      range.start === available[0] && range.end === available.at(-1);
+    const matched = ForecastTimeline.matchingPreset(
+      available,
+      range.start,
+      range.end,
+      timelineState.grain,
+      [3, 6, 12, 24],
+    );
     timeline.querySelectorAll("[data-timeline-months]").forEach((button) => {
       const value = button.dataset.timelineMonths;
       const duration = Number(value);
       const selected = value === "all" ? isAll : matched === duration;
       button.classList.toggle("is-active", selected);
       button.setAttribute("aria-pressed", String(selected));
-      button.disabled = value !== "all" && ForecastTimeline.inclusiveMonthCount(available[0], available.at(-1)) < duration;
-      button.textContent = value === "all" ? "All" : timelineState.grain === "quarter" ? `${duration / 3}Q` : `${duration}M`;
+      button.disabled =
+        value !== "all" &&
+        ForecastTimeline.inclusiveMonthCount(available[0], available.at(-1)) <
+          duration;
+      button.textContent =
+        value === "all"
+          ? "All"
+          : timelineState.grain === "quarter"
+            ? `${duration / 3}Q`
+            : `${duration}M`;
     });
-    setHtml(timeline.querySelector("[data-timeline-axis]"), timelineAxisMarkup(available));
+    setHtml(
+      timeline.querySelector("[data-timeline-axis]"),
+      timelineAxisMarkup(available),
+    );
     const startMonth = Number(range.start?.slice(5, 7));
     const endMonth = Number(range.end?.slice(5, 7));
-    const partialQuarter = timelineState.grain === "quarter" && (! [1, 4, 7, 10].includes(startMonth) || ![3, 6, 9, 12].includes(endMonth));
+    const partialQuarter =
+      timelineState.grain === "quarter" &&
+      (![1, 4, 7, 10].includes(startMonth) ||
+        ![3, 6, 9, 12].includes(endMonth));
     timeline.querySelector("[data-timeline-hint]").textContent = partialQuarter
       ? `Monthly precision retained · partial ${ForecastTimeline.quarterLabel(range.start)} to partial ${ForecastTimeline.quarterLabel(range.end)}`
       : "Drag either end, or move the highlighted window. Presets reposition both ends.";
@@ -790,14 +849,24 @@
   }
 
   function syncTimelineFromRequest(options, request) {
-    updateTimelineUi(options.target_months || [], request.target_start, request.target_end);
+    updateTimelineUi(
+      options.target_months || [],
+      request.target_start,
+      request.target_end,
+    );
   }
 
   function applyTimelinePreset(months, value) {
     const available = ForecastTimeline.normalizeMonths(months);
-    const range = value === "all"
-      ? { start: available[0], end: available.at(-1) }
-      : ForecastTimeline.rangeForPreset(available, Number(value), timelineState.grain, controls.get("target_end").value);
+    const range =
+      value === "all"
+        ? { start: available[0], end: available.at(-1) }
+        : ForecastTimeline.rangeForPreset(
+            available,
+            Number(value),
+            timelineState.grain,
+            controls.get("target_end").value,
+          );
     setTimelineRange(available, range.start, range.end);
   }
 
@@ -3283,13 +3352,25 @@
     let endIndex = Number(timelineEndSlider.value);
     if (kind === "start" && startIndex > endIndex) endIndex = startIndex;
     if (kind === "end" && endIndex < startIndex) startIndex = endIndex;
-    const range = ForecastTimeline.rangeFromIndices(months, startIndex, endIndex);
+    const range = ForecastTimeline.rangeFromIndices(
+      months,
+      startIndex,
+      endIndex,
+    );
     setTimelineRange(months, range.start, range.end);
   }
-  timelineStartSlider?.addEventListener("input", () => applyTimelineHandle("start"));
-  timelineEndSlider?.addEventListener("input", () => applyTimelineHandle("end"));
-  timelineStartSlider?.addEventListener("change", () => scheduleRefresh({ immediate: true }));
-  timelineEndSlider?.addEventListener("change", () => scheduleRefresh({ immediate: true }));
+  timelineStartSlider?.addEventListener("input", () =>
+    applyTimelineHandle("start"),
+  );
+  timelineEndSlider?.addEventListener("input", () =>
+    applyTimelineHandle("end"),
+  );
+  timelineStartSlider?.addEventListener("change", () =>
+    scheduleRefresh({ immediate: true }),
+  );
+  timelineEndSlider?.addEventListener("change", () =>
+    scheduleRefresh({ immediate: true }),
+  );
 
   function moveTimelineWindow(delta) {
     const months = currentPayload?.options.target_months || [];
@@ -3299,7 +3380,11 @@
       Number(timelineEndSlider.value),
       delta,
     );
-    const range = ForecastTimeline.rangeFromIndices(months, moved.start, moved.end);
+    const range = ForecastTimeline.rangeFromIndices(
+      months,
+      moved.start,
+      moved.end,
+    );
     setTimelineRange(months, range.start, range.end);
   }
   timelineSelection?.addEventListener("keydown", (event) => {
@@ -3318,21 +3403,33 @@
     timelineSelection.setPointerCapture(event.pointerId);
   });
   timelineSelection?.addEventListener("pointermove", (event) => {
-    if (!timelineWindowDrag || event.pointerId !== timelineWindowDrag.pointerId) return;
+    if (!timelineWindowDrag || event.pointerId !== timelineWindowDrag.pointerId)
+      return;
     const width = timelineRail.getBoundingClientRect().width;
     const steps = Number(timelineEndSlider.max) || 1;
-    const delta = Math.round(((event.clientX - timelineWindowDrag.originX) / width) * steps);
+    const delta = Math.round(
+      ((event.clientX - timelineWindowDrag.originX) / width) * steps,
+    );
     const moved = ForecastTimeline.moveWindow(
       currentPayload?.options.target_months || [],
       timelineWindowDrag.start,
       timelineWindowDrag.end,
       delta,
     );
-    const range = ForecastTimeline.rangeFromIndices(currentPayload?.options.target_months || [], moved.start, moved.end);
-    setTimelineRange(currentPayload?.options.target_months || [], range.start, range.end);
+    const range = ForecastTimeline.rangeFromIndices(
+      currentPayload?.options.target_months || [],
+      moved.start,
+      moved.end,
+    );
+    setTimelineRange(
+      currentPayload?.options.target_months || [],
+      range.start,
+      range.end,
+    );
   });
   const endTimelineWindowDrag = (event) => {
-    if (!timelineWindowDrag || event.pointerId !== timelineWindowDrag.pointerId) return;
+    if (!timelineWindowDrag || event.pointerId !== timelineWindowDrag.pointerId)
+      return;
     timelineWindowDrag = null;
     scheduleRefresh({ immediate: true });
   };
@@ -3346,9 +3443,19 @@
       if (name === "target_start") {
         const end = controls.get("target_end");
         if (control.value > end.value) end.value = control.value;
+        updateTimelineUi(
+          currentPayload?.options.target_months || [],
+          control.value,
+          end.value,
+        );
       } else if (name === "target_end") {
         const start = controls.get("target_start");
         if (control.value < start.value) start.value = control.value;
+        updateTimelineUi(
+          currentPayload?.options.target_months || [],
+          start.value,
+          control.value,
+        );
       }
       if (name.endsWith("_kind") && currentPayload) {
         const prefix = name.replace("_kind", "");

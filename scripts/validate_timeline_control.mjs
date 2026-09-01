@@ -300,10 +300,22 @@ try {
       height: 900,
       state: "6M selected",
     });
-    await page.evaluate(`document.querySelector('[data-control="source"]').focus()`);
+    await page.evaluate(
+      `document.querySelector('[data-control="source"]').focus()`,
+    );
     for (let index = 0; index < 5; index += 1) {
-      await page.send("Input.dispatchKeyEvent", { type: "keyDown", key: "Tab", code: "Tab", windowsVirtualKeyCode: 9 });
-      await page.send("Input.dispatchKeyEvent", { type: "keyUp", key: "Tab", code: "Tab", windowsVirtualKeyCode: 9 });
+      await page.send("Input.dispatchKeyEvent", {
+        type: "keyDown",
+        key: "Tab",
+        code: "Tab",
+        windowsVirtualKeyCode: 9,
+      });
+      await page.send("Input.dispatchKeyEvent", {
+        type: "keyUp",
+        key: "Tab",
+        code: "Tab",
+        windowsVirtualKeyCode: 9,
+      });
     }
     await page.screenshot(join(args.output, "desktop-keyboard-focus.png"));
     screenshots.push({
@@ -320,9 +332,18 @@ try {
       end: Number(document.querySelector('[data-timeline-end-slider]').value),
       selectionWidth: document.querySelector('[data-timeline-selection]').getBoundingClientRect().width,
     }))()`);
-    assert(!sliderState.startDisabled && !sliderState.endDisabled, "Both range handles must always remain active");
-    assert(sliderState.end - sliderState.start === 5, "6M preset did not reposition both slider ends");
-    assert(sliderState.selectionWidth > 0, "Selected range track is not visible");
+    assert(
+      !sliderState.startDisabled && !sliderState.endDisabled,
+      "Both range handles must always remain active",
+    );
+    assert(
+      sliderState.end - sliderState.start === 5,
+      "6M preset did not reposition both slider ends",
+    );
+    assert(
+      sliderState.selectionWidth > 0,
+      "Selected range track is not visible",
+    );
 
     before = await page.evaluate(requestCount());
     await page.evaluate(`(() => {
@@ -331,10 +352,23 @@ try {
       slider.dispatchEvent(new Event('input', {bubbles:true}));
       slider.dispatchEvent(new Event('change', {bubbles:true}));
     })()`);
-    await waitFor(page, `${requestCount()} > ${before}`, "manual start-handle request");
+    await waitFor(
+      page,
+      `${requestCount()} > ${before}`,
+      "manual start-handle request",
+    );
     const shifted = await page.evaluate(`window.__timelineRequests.at(-1)`);
-    assert(shifted.target_start > request.target_start && shifted.target_end === request.target_end, "Start handle did not independently update the range");
-    assert(await page.evaluate(`![...document.querySelectorAll('[data-timeline-months]')].some((button) => button.classList.contains('is-active'))`), "Manual unmatched range should clear preset selection");
+    assert(
+      shifted.target_start > request.target_start &&
+        shifted.target_end === request.target_end,
+      "Start handle did not independently update the range",
+    );
+    assert(
+      await page.evaluate(
+        `![...document.querySelectorAll('[data-timeline-months]')].some((button) => button.classList.contains('is-active'))`,
+      ),
+      "Manual unmatched range should clear preset selection",
+    );
 
     before = await page.evaluate(requestCount());
     await page.evaluate(
@@ -361,10 +395,22 @@ try {
       start.dispatchEvent(new Event('input', {bubbles:true}));
       start.dispatchEvent(new Event('change', {bubbles:true}));
     })()`);
-    await waitFor(page, `${requestCount()} > ${before}`, "partial-quarter monthly request");
+    await waitFor(
+      page,
+      `${requestCount()} > ${before}`,
+      "partial-quarter monthly request",
+    );
     request = await page.evaluate(`window.__timelineRequests.at(-1)`);
-    assert(![1, 4, 7, 10].includes(Number(request.target_start.slice(5, 7))), "Quarter view incorrectly forced manual movement to a quarter boundary");
-    assert(await page.evaluate(`document.querySelector('[data-timeline-hint]').textContent.includes('Monthly precision retained')`), "Partial-quarter context is not explained");
+    assert(
+      ![1, 4, 7, 10].includes(Number(request.target_start.slice(5, 7))),
+      "Quarter view incorrectly forced manual movement to a quarter boundary",
+    );
+    assert(
+      await page.evaluate(
+        `document.querySelector('[data-timeline-hint]').textContent.includes('Monthly precision retained')`,
+      ),
+      "Partial-quarter context is not explained",
+    );
 
     const semantics = await page.evaluate(`(() => ({
       grainPressed: document.querySelector('[data-timeline-grain="quarter"]').getAttribute('aria-pressed'),
@@ -378,8 +424,16 @@ try {
       semantics.grainPressed === "true",
       "Quarter selected state is not exposed",
     );
-    assert(semantics.startLabel === "Start month" && semantics.endLabel === "End month" && semantics.windowLabel?.includes("Move selected"), "Dual-slider accessible labels are incomplete");
-    assert(semantics.nativeButtons && semantics.dateFieldsVisible, "Timeline semantics are incomplete");
+    assert(
+      semantics.startLabel === "Start month" &&
+        semantics.endLabel === "End month" &&
+        semantics.windowLabel?.includes("Move selected"),
+      "Dual-slider accessible labels are incomplete",
+    );
+    assert(
+      semantics.nativeButtons && semantics.dateFieldsVisible,
+      "Timeline semantics are incomplete",
+    );
     before = await page.evaluate(requestCount());
     const exactRange = await page.evaluate(`(() => {
       const start = document.querySelector('[data-control="target_start"]');
@@ -417,12 +471,39 @@ try {
       steps: Number(document.querySelector('[data-timeline-end-slider]').max),
     }))()`);
     before = await page.evaluate(requestCount());
-    await page.send("Input.dispatchMouseEvent", { type: "mousePressed", x: beforeWindow.selection.x, y: beforeWindow.selection.y, button: "left", clickCount: 1 });
-    await page.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: beforeWindow.selection.x + beforeWindow.railWidth / beforeWindow.steps, y: beforeWindow.selection.y, button: "left" });
-    await page.send("Input.dispatchMouseEvent", { type: "mouseReleased", x: beforeWindow.selection.x + beforeWindow.railWidth / beforeWindow.steps, y: beforeWindow.selection.y, button: "left", clickCount: 1 });
-    await waitFor(page, `${requestCount()} > ${before}`, "dragged window movement request");
-    const afterWindow = await page.evaluate(`(() => ({start: Number(document.querySelector('[data-timeline-start-slider]').value), end: Number(document.querySelector('[data-timeline-end-slider]').value)}))()`);
-    assert(afterWindow.start === beforeWindow.start + 1 && afterWindow.end === beforeWindow.end + 1, "Selected window did not drag intact");
+    await page.send("Input.dispatchMouseEvent", {
+      type: "mousePressed",
+      x: beforeWindow.selection.x,
+      y: beforeWindow.selection.y,
+      button: "left",
+      clickCount: 1,
+    });
+    await page.send("Input.dispatchMouseEvent", {
+      type: "mouseMoved",
+      x: beforeWindow.selection.x + beforeWindow.railWidth / beforeWindow.steps,
+      y: beforeWindow.selection.y,
+      button: "left",
+    });
+    await page.send("Input.dispatchMouseEvent", {
+      type: "mouseReleased",
+      x: beforeWindow.selection.x + beforeWindow.railWidth / beforeWindow.steps,
+      y: beforeWindow.selection.y,
+      button: "left",
+      clickCount: 1,
+    });
+    await waitFor(
+      page,
+      `${requestCount()} > ${before}`,
+      "dragged window movement request",
+    );
+    const afterWindow = await page.evaluate(
+      `(() => ({start: Number(document.querySelector('[data-timeline-start-slider]').value), end: Number(document.querySelector('[data-timeline-end-slider]').value)}))()`,
+    );
+    assert(
+      afterWindow.start === beforeWindow.start + 1 &&
+        afterWindow.end === beforeWindow.end + 1,
+      "Selected window did not drag intact",
+    );
 
     before = await page.evaluate(requestCount());
     await page.evaluate(

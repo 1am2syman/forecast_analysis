@@ -815,6 +815,14 @@ input[type="checkbox"] {
   box-shadow: 0 1px 3px rgba(23, 36, 33, 0.22);
   cursor: ew-resize;
 }
+.timeline-slider__rail.is-tight
+  input[data-timeline-start-slider]::-webkit-slider-thumb {
+  margin-top: -9px;
+}
+.timeline-slider__rail.is-tight
+  input[data-timeline-end-slider]::-webkit-slider-thumb {
+  margin-top: -1px;
+}
 .timeline-slider__rail input[type="range"]:disabled::-webkit-slider-thumb {
   opacity: 0.45;
   cursor: not-allowed;
