@@ -814,62 +814,59 @@
               role="tabpanel"
               aria-labelledby="tab-history"
             >
-              <div class="pane__head">
+              <div class="pane__head pane__head--with-control">
                 <div>
                   <p class="eyebrow">Decision evidence</p>
                   <h2 class="pane__title">SKU post-mortem</h2>
                 </div>
-                <span class="stamp">active-scope detail</span>
-              </div>
-              <div
-                class="subtabs"
-                data-subtabs="history"
-                role="group"
-                aria-label="Product investigation mode"
-              >
-                <button
-                  class="subtab is-active"
-                  aria-pressed="true"
-                  data-subtab-target="product"
-                  type="button"
-                >
-                  SKU post-mortem</button
-                ><button
-                  class="subtab"
-                  aria-pressed="false"
-                  data-subtab-target="exceptions"
-                  type="button"
-                >
-                  Forecast exceptions
-                </button>
-              </div>
-              <div class="subpanel is-active" data-subpanel="history:product">
-                <div
-                  class="toolbar history-toolbar"
-                  aria-label="Product drill-down filters"
-                >
-                  <label class="field field--grow"
-                    ><span class="field__k">Product</span
-                    ><select
-                      class="field__ctl"
-                      data-product-control="parent"
-                    ></select></label
-                  ><label class="field"
-                    ><span class="field__k">Target month</span
-                    ><select
-                      class="field__ctl"
-                      data-product-control="month"
-                    ></select
-                  ></label>
-                  <div class="field">
-                    <span class="field__k">Source scope</span
-                    ><strong
-                      class="field__readout"
-                      data-product-source
-                    ></strong>
+                <div class="pane__head-actions">
+                  <span class="stamp">active-scope detail</span>
+                  <div
+                    class="subtabs"
+                    data-subtabs="history"
+                    role="group"
+                    aria-label="Product investigation mode"
+                  >
+                    <button
+                      class="subtab is-active"
+                      aria-pressed="true"
+                      data-subtab-target="product"
+                      type="button"
+                    >
+                      SKU post-mortem</button
+                    ><button
+                      class="subtab"
+                      aria-pressed="false"
+                      data-subtab-target="exceptions"
+                      type="button"
+                    >
+                      Forecast exceptions
+                    </button>
                   </div>
                 </div>
-                <div class="product-summary" data-product-summary></div>
+              </div>
+              <div class="subpanel is-active" data-subpanel="history:product">
+                <div class="history-context">
+                  <div class="product-summary" data-product-summary></div>
+                  <div
+                    class="toolbar history-toolbar"
+                    aria-label="Product drill-down filters"
+                  >
+                    <label class="field field--grow"
+                      ><span class="field__k">Product</span
+                      ><select
+                        class="field__ctl"
+                        data-product-control="parent"
+                      ></select></label
+                    ><label class="field"
+                      ><span class="field__k">Target month</span
+                      ><select
+                        class="field__ctl"
+                        data-product-control="month"
+                      ></select
+                    ></label>
+                  </div>
+                </div>
                 <section
                   class="postmortem-decision"
                   aria-label="Evidence-based forward forecast treatment"

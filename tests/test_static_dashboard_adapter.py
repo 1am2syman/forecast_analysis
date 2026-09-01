@@ -651,6 +651,7 @@ class StaticDashboardAdapterTests(unittest.TestCase):
         assert detail is not None
         self.assertEqual(detail["parent_code"], requested_parent)
         self.assertEqual(detail["target_month"], detail["target_options"][-1])
+        self.assertIn(detail["sku_class"], {"A", "B", "C", "Unclassified"})
         self.assertGreater(detail["points"]["total"], 0)
         self.assertGreater(detail["stability"]["total"], 0)
 

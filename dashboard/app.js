@@ -138,7 +138,7 @@
     forecast_accuracy_pct: "Forecast accuracy",
     bias_pct: "Bias",
     absolute_error_kl: "Absolute error",
-    forecast_kl: "Forecast and actual volume",
+    forecast_kl: "Forecast compared with actual demand",
     vintage_a_accuracy_pct: "Vintage A accuracy",
     vintage_b_accuracy_pct: "Vintage B accuracy",
     accuracy_delta_pp: "Accuracy delta",
@@ -507,7 +507,7 @@
       render: overviewPerformanceChart,
     },
     volume: {
-      title: "Forecast versus actual volume",
+      title: "Forecast compared with actual demand",
       legend:
         '<span><i class="key key--volume-vintage-b"></i>Vintage B</span><span><i class="key key--volume-vintage-a"></i>Vintage A</span><span><i class="key key--volume-actual"></i>Actual</span>',
       render: overviewVolumeChart,
@@ -1757,7 +1757,7 @@
         return `<rect class="chart__month-hit chart__point chart__volume-hit" x="${Math.max(left, x(row.snop_month) - hitWidth / 2)}" y="${top}" width="${Math.min(hitWidth, right - Math.max(left, x(row.snop_month) - hitWidth / 2))}" height="${bottom - top}" tabindex="0" role="img" aria-label="${escapeHtml(accessibleLabel)}" data-tooltip-kind="volume" data-tooltip-source="${escapeHtml(source.toUpperCase())}" data-tooltip-month="${escapeHtml(monthLabel(row.snop_month))}" data-tooltip-vintage-a="${escapeHtml(kl(row.vintage_a_forecast_kl))}" data-tooltip-vintage-b="${escapeHtml(kl(row.vintage_b_forecast_kl))}" data-tooltip-actual="${escapeHtml(kl(row.actual_kl))}" data-tooltip-variance="${escapeHtml(variance)}"/>`;
       })
       .join("");
-    return `<svg class="chart chart--overview-volume" viewBox="0 0 ${width} ${height}" data-domain-min="${min}" data-domain-max="${max}" data-data-min="${Math.min(...volumeValues.filter(finite))}" data-data-max="${Math.max(...volumeValues.filter(finite))}" role="img" aria-label="Monthly Vintage A and Vintage B forecast volume versus actual volume"><text class="chart__axis-unit" x="${left}" y="${scaleY(13)}">KL</text><g class="chart__grid chart__grid--volume">${grid}</g>${series("vintage_a_forecast_kl", "chart__series--vintage-a")}${series("vintage_b_forecast_kl", "chart__series--vintage-b")}${series("actual_kl", "chart__series--actual")}<g class="chart__month-hits">${monthHits}</g><g class="chart__labels">${monthLabels}</g></svg>`;
+    return `<svg class="chart chart--overview-volume" viewBox="0 0 ${width} ${height}" data-domain-min="${min}" data-domain-max="${max}" data-data-min="${Math.min(...volumeValues.filter(finite))}" data-data-max="${Math.max(...volumeValues.filter(finite))}" role="img" aria-label="Monthly Vintage A and Vintage B forecasts compared with actual demand"><text class="chart__axis-unit" x="${left}" y="${scaleY(13)}">KL</text><g class="chart__grid chart__grid--volume">${grid}</g>${series("vintage_a_forecast_kl", "chart__series--vintage-a")}${series("vintage_b_forecast_kl", "chart__series--vintage-b")}${series("actual_kl", "chart__series--actual")}<g class="chart__month-hits">${monthHits}</g><g class="chart__labels">${monthLabels}</g></svg>`;
   }
 
   function lineChart(
@@ -3162,16 +3162,12 @@
         .map((value) => option(value, monthLabel(value), detail.target_month))
         .join(""),
     );
-    document.querySelector("[data-product-source]").textContent = detail.sources
-      .map((source) => source.toUpperCase())
-      .join(" + ");
     setHtml(
       document.querySelector("[data-product-summary]"),
       [
-        populationItem("Product", detail.parent_code),
         populationItem("Description", detail.parent_description),
         populationItem("Brand", detail.brand || "Unmapped"),
-        populationItem("SKU class", detail.postmortem?.sku_class || "Unclassified"),
+        populationItem("SKU class", detail.sku_class || "Unclassified"),
         populationItem("Mapping", labelize(detail.mapping_status)),
         populationItem("Target", monthLabel(detail.target_month)),
       ].join(""),
@@ -3223,10 +3219,6 @@
       )
       .join("");
     return `<svg class="chart" viewBox="0 0 760 250" role="img" aria-label="Chronological forecast development"><title>Chronological forecast development</title>${actual}${series}<g class="chart__labels">${labels}</g></svg>`;
-  }
-
-  function stabilityCard(row) {
-    return `<article><header>${sourceBadge(row.source)}<span>${count(row.vintage_count)} vintages</span></header><div><b>Forecast range</b><strong>${kl(row.forecast_range_kl)}</strong></div><div><b>Volatility</b><strong>${kl(row.forecast_volatility_kl)}</strong></div><div><b>Revision count</b><strong>${count(row.revision_count)}</strong></div><div><b>Maximum revision</b><strong>${kl(row.maximum_absolute_revision_kl)}</strong></div><footer>${escapeHtml(row.history_message)}</footer></article>`;
   }
 
   function productRevisionTable(rows) {

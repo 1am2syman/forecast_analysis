@@ -3293,6 +3293,24 @@ input.field__ctl {
   overflow: hidden;
   border-radius: 6px;
 }
+.history-context {
+  display: grid;
+  flex: 0 0 auto;
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 1.25fr);
+  gap: 8px;
+  min-width: 0;
+  align-items: stretch;
+}
+.history-context .product-summary {
+  grid-template-columns:
+    minmax(0, 1.8fr) minmax(0, 0.9fr) minmax(58px, 0.55fr)
+    minmax(58px, 0.75fr);
+  min-width: 0;
+}
+.history-context .history-toolbar {
+  min-width: 0;
+  grid-template-columns: minmax(0, 1.75fr) minmax(112px, 0.85fr);
+}
 .product-summary span {
   display: flex;
   flex-direction: column;
@@ -4374,6 +4392,9 @@ input.field__ctl {
   .pane {
     padding-right: 14px;
     padding-left: 14px;
+  }
+  .pane__head-actions .stamp {
+    display: none;
   }
   .population span {
     padding-right: 5px;

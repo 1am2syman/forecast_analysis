@@ -461,6 +461,30 @@ class DashboardUiSourceContractTests(unittest.TestCase):
         self.assertNotIn("explicit analytical modes", comparison.lower())
         self.assertIn(".pane__head-actions .subtabs", self.styles)
 
+    def test_history_controls_collapse_into_header_and_context_rows(self) -> None:
+        history_start = self.index.index('id="pane-history"')
+        history_end = self.index.index('id="pane-quality"')
+        history = self.index[history_start:history_end]
+
+        header_end = history.index('class="subpanel is-active"')
+        header = history[:header_end]
+        context_start = history.index('class="history-context"')
+        context_end = history.index('class="postmortem-decision"')
+        context = history[context_start:context_end]
+
+        self.assertIn('data-subtabs="history"', header)
+        self.assertIn('class="pane__head-actions"', header)
+        self.assertIn('data-product-summary', context)
+        self.assertIn('class="toolbar history-toolbar"', context)
+        self.assertLess(
+            context.index('data-product-summary'),
+            context.index('class="toolbar history-toolbar"'),
+        )
+        self.assertNotIn('data-product-source', history)
+        self.assertIn(".history-context {", self.styles)
+        self.assertIn(".history-context .history-toolbar {", self.styles)
+        self.assertNotIn('populationItem("Product", detail.parent_code)', self.source)
+
     def test_revision_instruction_tags_are_embedded_in_outcome_strip(self) -> None:
         self.assertIn("function revisionOutcomeInstructions", self.source)
         self.assertIn('class="outcome__instructions"', self.source)
@@ -541,7 +565,7 @@ class DashboardUiSourceContractTests(unittest.TestCase):
         self.assertIn("data-chart-kind=\"revision-history\"", self.styles)
         self.assertNotIn("function revisionTable(rows)", self.source)
         self.assertNotIn("<b>Outcome</b><strong>Rows</strong>", self.source)
-        self.assertIn("stroke-linejoin: miter", self.styles)
+        self.assertIn("stroke-linejoin: round", self.styles)
         self.assertIn(".revision-history__endpoint", self.styles)
         self.assertIn(".revision-history__separator", self.styles)
         self.assertIn(".revision-history__segment--improved", self.styles)

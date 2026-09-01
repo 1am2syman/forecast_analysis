@@ -27,7 +27,7 @@ from forecast_analysis import (
     build_analysis_dataset,
     build_dashboard_view,
     build_product_detail,
-    build_product_postmortem,
+    build_product_postmortem,  # pyright: ignore[reportAttributeAccessIssue]
     load_analysis_inputs,
     with_display_brand,
 )
@@ -1612,6 +1612,7 @@ class DashboardDataService:
             "parent_description": detail.parent_description,
             "hierarchy_description": detail.hierarchy_description,
             "brand": detail.brand,
+            "sku_class": postmortem.sku_class,
             "mapping_status": detail.mapping_status,
             "actual_kl": detail.actual_kl,
             "actual_status": detail.actual_status,
