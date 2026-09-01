@@ -538,6 +538,29 @@
       renderPayload: (payload) =>
         revisionHistoryChart(payload.revision_history),
     },
+    "postmortem-performance": {
+      title: (payload) =>
+        `Latest forecast versus actual · ${payload.product_detail?.parent_code || "SKU"}`,
+      legend:
+        '<span><i class="key key--teal"></i>Forecast</span><span><i class="key key--blue"></i>Actual</span>',
+      renderPayload: (payload) =>
+        productPerformanceChart(payload.product_detail?.postmortem),
+    },
+    "postmortem-revision": {
+      title: (payload) =>
+        `Revision outcome · ${payload.product_detail?.parent_code || "SKU"}`,
+      legend:
+        '<span><i class="scatter-key scatter-key--improved"></i>Improved</span><span><i class="scatter-key scatter-key--worsened"></i>Worsened</span><span><i class="scatter-key scatter-key--neutral"></i>Neutral</span>',
+      renderPayload: (payload) =>
+        productRevisionOutcomeChart(payload.product_detail?.postmortem),
+    },
+    "product-history": {
+      title: (payload) =>
+        `Selected target forecast development · ${payload.product_detail?.parent_code || "SKU"}`,
+      legend:
+        '<span><i class="key key--amber"></i>TM</span><span><i class="key key--teal"></i>ML</span><span><i class="key key--blue"></i>Actual</span>',
+      renderPayload: (payload) => historyChart(payload.product_detail || {}),
+    },
   };
 
   function renderFullscreenChart() {

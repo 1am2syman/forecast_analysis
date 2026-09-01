@@ -197,6 +197,14 @@ async function main() {
           bodyFont: getComputedStyle(document.body).fontFamily,
           background: getComputedStyle(document.body).backgroundColor,
           title: document.querySelector('.pane__title')?.innerText || '',
+          fullscreenButtons: document.querySelectorAll('#pane-history [data-chart-fullscreen]').length,
+          firstChartVisiblePx: (() => {
+            const rect = document.querySelector('[data-postmortem-performance-chart]')?.getBoundingClientRect();
+            return rect ? Math.max(0, Math.min(rect.bottom, innerHeight - 30) - Math.max(rect.top, 0)) : 0;
+          })(),
+          metricFont: parseFloat(getComputedStyle(document.querySelector('.postmortem-metric strong')).fontSize),
+          commentaryFont: parseFloat(getComputedStyle(document.querySelector('.postmortem-comment__copy p')).fontSize),
+          metadataFont: parseFloat(getComputedStyle(document.querySelector('.product-summary strong')).fontSize),
         };
       })()`);
       assert(audit.paneActive, `${viewport.name}: history pane is not active`);
@@ -211,6 +219,9 @@ async function main() {
       assert(!audit.overlap, `${viewport.name}: post-mortem sections overlap`);
       assert(/Chakra Petch/i.test(audit.displayFont) && /IBM Plex/i.test(audit.bodyFont), `${viewport.name}: dashboard typography tokens missing`);
       assert(audit.background === "rgb(237, 243, 241)", `${viewport.name}: dashboard background token missing`);
+      assert(audit.fullscreenButtons >= 3, `${viewport.name}: chart full-screen controls missing`);
+      assert(audit.firstChartVisiblePx >= 100, `${viewport.name}: first chart is not meaningfully visible on landing`);
+      assert(audit.metricFont >= 16 && audit.commentaryFont >= 9 && audit.metadataFont >= 9.5, `${viewport.name}: post-mortem typography remains too small`);
       const path = join(OUTPUT, `${viewport.name}-${viewport.width}x${viewport.height}.png`);
       await page.screenshot(path);
       audits.push(audit);
@@ -227,9 +238,27 @@ async function main() {
         await page.evaluate(`document.querySelector('[data-subpanel="history:product"]').scrollTop = 0`);
       }
     }
+    await page.viewport(1440, 900);
+    const fullscreenAudits = [];
+    for (const kind of ["postmortem-performance", "postmortem-revision", "product-history"]) {
+      await page.evaluate(`document.querySelector('[data-chart-fullscreen="${kind}"]').click()`);
+      await waitForExpression(page, `!document.querySelector('#overview-chart-dialog').hidden && document.querySelector('#overview-chart-dialog').dataset.chartKind === '${kind}' && document.querySelector('[data-overview-chart-fullscreen] svg')`, `${kind} fullscreen chart`);
+      const audit = await page.evaluate(`(() => ({
+        kind: document.querySelector('#overview-chart-dialog').dataset.chartKind,
+        title: document.querySelector('#overview-chart-dialog-title').innerText,
+        chartWidth: document.querySelector('[data-overview-chart-fullscreen] svg').getBoundingClientRect().width,
+        chartHeight: document.querySelector('[data-overview-chart-fullscreen] svg').getBoundingClientRect().height,
+      }))()`);
+      assert(audit.chartWidth > 900 && audit.chartHeight > 500, `${kind}: fullscreen chart did not use the dialog canvas`);
+      const fullscreenPath = join(OUTPUT, `fullscreen-${kind}.png`);
+      await page.screenshot(fullscreenPath);
+      screenshots.push(fullscreenPath);
+      fullscreenAudits.push(audit);
+      await page.evaluate(`document.querySelector('[data-action="overview-fullscreen-close"]').click()`);
+    }
     assert(page.errors.length === 0, `Browser errors: ${page.errors.join(" | ")}`);
-    writeFileSync(join(OUTPUT, "validation-report.json"), `${JSON.stringify({ baseUrl: BASE_URL, audits, screenshots }, null, 2)}\n`);
-    writeFileSync(join(OUTPUT, "validation-report.md"), `# SKU post-mortem browser validation\n\n- Result: PASS\n- Viewports: ${VIEWPORTS.map((viewport) => `${viewport.width}×${viewport.height}`).join(", ")}\n- Core sections: decision, ledger, forecast/actual, commentary, revision outcome, peers, evidence, treatment\n- Browser errors: 0\n`);
+    writeFileSync(join(OUTPUT, "validation-report.json"), `${JSON.stringify({ baseUrl: BASE_URL, audits, fullscreenAudits, screenshots }, null, 2)}\n`);
+    writeFileSync(join(OUTPUT, "validation-report.md"), `# SKU post-mortem browser validation\n\n- Result: PASS\n- Viewports: ${VIEWPORTS.map((viewport) => `${viewport.width}×${viewport.height}`).join(", ")}\n- Core sections: decision, ledger, forecast/actual, commentary, revision outcome, peers, evidence, treatment\n- Landing-page chart visibility: at least 100 px at every validated viewport\n- Full-screen charts: forecast/actual, revision outcome, selected-target development\n- Minimum checked fonts: KPI 16 px, commentary 9 px, product metadata 9.5 px\n- Browser errors: 0\n`);
     process.stdout.write("sku postmortem browser validation passed\n");
   } finally {
     page?.close();

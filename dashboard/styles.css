@@ -3404,7 +3404,7 @@ input.field__ctl {
   display: grid;
   flex: 0 0 auto;
   grid-template-columns: minmax(0, 1.8fr) repeat(3, minmax(115px, 0.55fr));
-  min-height: 70px;
+  min-height: 58px;
   overflow: hidden;
   border-left: 3px solid var(--teal);
 }
@@ -3435,13 +3435,13 @@ input.field__ctl {
 .postmortem-decision__fact small {
   margin: 0;
   color: var(--muted);
-  font: 400 8px / 1.35 var(--mono);
+  font: 400 9px / 1.35 var(--mono);
 }
 .postmortem-decision__fact b,
 .postmortem-metric b,
 .postmortem-treatment__item b {
   color: var(--faint);
-  font: 400 6.8px / 1.15 var(--mono);
+  font: 500 8px / 1.15 var(--mono);
   letter-spacing: 0.07em;
   text-transform: uppercase;
 }
@@ -3456,7 +3456,7 @@ input.field__ctl {
   display: grid;
   flex: 0 0 auto;
   grid-template-columns: repeat(6, minmax(0, 1fr));
-  min-height: 55px;
+  min-height: 50px;
   overflow: hidden;
   background: var(--panel);
   border: 1px solid var(--hairline);
@@ -3475,12 +3475,12 @@ input.field__ctl {
   border-right: 0;
 }
 .postmortem-metric strong {
-  font: 600 14px / 1.1 var(--display);
+  font: 600 16px / 1.1 var(--display);
 }
 .postmortem-metric small {
   overflow: hidden;
   color: var(--muted);
-  font: 400 7px / 1.2 var(--mono);
+  font: 400 8.5px / 1.25 var(--mono);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -3493,16 +3493,16 @@ input.field__ctl {
   min-width: 0;
 }
 .postmortem-primary {
-  grid-template-columns: minmax(0, 2.2fr) minmax(265px, 0.8fr);
-  min-height: 290px;
+  grid-template-columns: minmax(0, 2.2fr) minmax(285px, 0.8fr);
+  min-height: 225px;
 }
 .postmortem-secondary {
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  min-height: 205px;
+  min-height: 180px;
 }
 .postmortem-detail-grid {
-  grid-template-columns: minmax(0, 2fr) minmax(230px, 0.75fr);
-  min-height: 245px;
+  grid-template-columns: minmax(0, 2fr) minmax(250px, 0.75fr);
+  min-height: 215px;
 }
 .postmortem-chart-body,
 .postmortem-revision-body,
@@ -3518,9 +3518,15 @@ input.field__ctl {
   height: 100%;
   min-height: 0;
 }
+.postmortem-revision-chart {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+}
 .postmortem-chart .chart__grid text,
-.postmortem-revision-chart .chart__grid text {
-  font-size: 8px;
+.postmortem-revision-chart .chart__grid text,
+.postmortem-chart .chart__labels text,
+.postmortem-revision-chart .chart__labels text {
+  font-size: 10px;
 }
 .postmortem-chart__forecast,
 .postmortem-chart__actual,
@@ -3567,14 +3573,14 @@ input.field__ctl {
 .postmortem-evidence__head h3,
 .postmortem-treatment__head h3 {
   margin: 0;
-  font: 600 12px / 1.15 var(--display);
+  font: 600 13px / 1.15 var(--display);
 }
 .postmortem-commentary__head p,
 .postmortem-evidence__head p,
 .postmortem-treatment__head p {
   margin: 2px 0 0;
   color: var(--muted);
-  font: 400 7px / 1.3 var(--mono);
+  font: 400 8.5px / 1.35 var(--mono);
 }
 .postmortem-commentary__body {
   display: grid;
@@ -3613,23 +3619,23 @@ input.field__ctl {
 .postmortem-comment__copy b {
   display: block;
   color: var(--teal);
-  font: 500 6.5px / 1.2 var(--mono);
+  font: 500 8px / 1.2 var(--mono);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 .postmortem-comment__copy strong {
   display: block;
   margin-top: 1px;
-  font: 600 9px / 1.25 var(--body);
+  font: 600 10.5px / 1.3 var(--body);
 }
 .postmortem-comment__copy p {
   margin: 2px 0 0;
   color: var(--muted);
-  font: 400 7.5px / 1.35 var(--mono);
+  font: 400 9px / 1.4 var(--mono);
 }
 .postmortem-comment__confidence {
   color: var(--faint);
-  font: 400 6.5px / 1.2 var(--mono);
+  font: 400 7.5px / 1.2 var(--mono);
   text-transform: uppercase;
   white-space: nowrap;
 }
@@ -3662,7 +3668,7 @@ input.field__ctl {
   padding: 5px 9px;
   color: var(--faint);
   border-top: 1px solid var(--hairline-soft);
-  font: 400 7px / 1.2 var(--mono);
+  font: 400 8.5px / 1.25 var(--mono);
 }
 .postmortem-peer-list {
   display: grid;
@@ -3673,10 +3679,10 @@ input.field__ctl {
 }
 .postmortem-peer {
   display: grid;
-  grid-template-columns: 92px minmax(0, 1fr) 42px;
+  grid-template-columns: 110px minmax(0, 1fr) 48px;
   align-items: center;
   gap: 7px;
-  font: 500 7.5px / 1.2 var(--mono);
+  font: 500 9px / 1.25 var(--mono);
 }
 .postmortem-peer--selected {
   padding: 5px 6px;
@@ -3735,7 +3741,7 @@ input.field__ctl {
 .postmortem-peer-note {
   margin: 3px 0 0;
   color: var(--faint);
-  font: 400 7px / 1.35 var(--mono);
+  font: 400 8.5px / 1.35 var(--mono);
 }
 .postmortem-evidence {
   display: flex;
@@ -3750,12 +3756,12 @@ input.field__ctl {
 }
 .postmortem-evidence__row {
   display: grid;
-  grid-template-columns: 92px minmax(0, 1fr) auto;
+  grid-template-columns: 110px minmax(0, 1fr) auto;
   gap: 7px;
   align-items: center;
   padding: 7px 9px;
   border-bottom: 1px solid var(--hairline-soft);
-  font: 400 7.5px / 1.3 var(--mono);
+  font: 400 9px / 1.4 var(--mono);
 }
 .postmortem-evidence__row:last-child {
   border-bottom: 0;
@@ -3790,16 +3796,65 @@ input.field__ctl {
 }
 .postmortem-treatment__item strong {
   overflow: hidden;
-  font: 600 10px / 1.2 var(--mono);
+  font: 600 11px / 1.25 var(--mono);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .postmortem-treatment__item small {
   color: var(--muted);
-  font: 400 7px / 1.25 var(--mono);
+  font: 400 8.5px / 1.3 var(--mono);
 }
 .postmortem-revision-table > div {
   grid-template-columns: 0.42fr 1.2fr 0.65fr 0.62fr 0.62fr 0.62fr 0.72fr;
+}
+#pane-history .history-toolbar {
+  min-height: 38px;
+}
+#pane-history .history-toolbar .field {
+  min-height: 38px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+#pane-history .product-summary {
+  min-height: 32px;
+}
+#pane-history .product-summary span {
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+#pane-history .product-summary b {
+  font-size: 8px;
+}
+#pane-history .product-summary strong {
+  font-size: 9.5px;
+}
+#pane-history .frame__title {
+  font-size: 13px;
+}
+#pane-history .frame__sub,
+#pane-history .frame__metric,
+#pane-history .legend {
+  font-size: 8.5px;
+}
+.chart-dialog[data-chart-kind="postmortem-performance"] .chart-dialog__body,
+.chart-dialog[data-chart-kind="postmortem-revision"] .chart-dialog__body,
+.chart-dialog[data-chart-kind="product-history"] .chart-dialog__body {
+  display: grid;
+}
+.chart-dialog[data-chart-kind="postmortem-performance"] .postmortem-chart,
+.chart-dialog[data-chart-kind="postmortem-revision"] .postmortem-revision-chart,
+.chart-dialog[data-chart-kind="product-history"] .chart {
+  width: 100%;
+  height: 100%;
+}
+.chart-dialog[data-chart-kind="postmortem-performance"] .chart text,
+.chart-dialog[data-chart-kind="postmortem-revision"] .chart text,
+.chart-dialog[data-chart-kind="product-history"] .chart text {
+  font-size: 11px;
+}
+.chart-dialog[data-chart-kind="postmortem-revision"] .postmortem-revision-chart__legend {
+  padding: 9px 14px;
+  font-size: 10px;
 }
 
 .exception-toolbar {
@@ -4508,42 +4563,34 @@ input.field__ctl {
     padding-right: 8px;
     padding-left: 8px;
   }
-  .postmortem-decision,
-  .postmortem-treatment {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .postmortem-decision {
+    grid-template-columns: minmax(0, 1.45fr) repeat(3, minmax(105px, 0.55fr));
   }
-  .postmortem-decision__lead,
-  .postmortem-treatment__head {
-    grid-column: 1 / -1;
-    border-bottom: 1px solid var(--hairline-soft);
+  .postmortem-decision__lead h3 {
+    font-size: 14px;
   }
   .postmortem-metrics {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-  .postmortem-metric:nth-child(3) {
-    border-right: 0;
-  }
-  .postmortem-metric:nth-child(-n + 3) {
-    border-bottom: 1px solid var(--hairline-soft);
-  }
-  .postmortem-primary,
-  .postmortem-secondary,
-  .postmortem-detail-grid {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: repeat(6, minmax(112px, 1fr));
+    overflow-x: auto;
   }
   .postmortem-primary {
-    min-height: 520px;
+    grid-template-columns: minmax(0, 1.7fr) minmax(230px, 0.8fr);
+    min-height: 225px;
   }
-  .postmortem-primary .frame,
-  .postmortem-commentary {
-    min-height: 250px;
+  .postmortem-secondary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .postmortem-secondary > *,
-  .postmortem-detail-grid > * {
-    min-height: 220px;
+  .postmortem-detail-grid {
+    grid-template-columns: minmax(0, 1.7fr) minmax(230px, 0.8fr);
   }
-  .postmortem-treatment__item:nth-child(odd) {
-    border-right: 0;
+  .postmortem-peer {
+    grid-template-columns: 90px minmax(0, 1fr) 42px;
+  }
+  .postmortem-treatment {
+    grid-template-columns: minmax(190px, 1.2fr) repeat(4, minmax(110px, 0.7fr));
+  }
+  .postmortem-revision-table {
+    overflow-x: auto;
   }
   .postmortem-revision-table {
     overflow-x: auto;

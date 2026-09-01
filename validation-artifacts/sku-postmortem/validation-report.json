@@ -22,7 +22,12 @@
       "displayFont": "\"Chakra Petch\", system-ui, sans-serif",
       "bodyFont": "\"IBM Plex Sans\", system-ui, sans-serif",
       "background": "rgb(237, 243, 241)",
-      "title": "How performance moves"
+      "title": "How performance moves",
+      "fullscreenButtons": 3,
+      "firstChartVisiblePx": 320.359375,
+      "metricFont": 16,
+      "commentaryFont": 9,
+      "metadataFont": 9.5
     },
     {
       "viewport": {
@@ -45,7 +50,12 @@
       "displayFont": "\"Chakra Petch\", system-ui, sans-serif",
       "bodyFont": "\"IBM Plex Sans\", system-ui, sans-serif",
       "background": "rgb(237, 243, 241)",
-      "title": "How performance moves"
+      "title": "How performance moves",
+      "fullscreenButtons": 3,
+      "firstChartVisiblePx": 329.78125,
+      "metricFont": 16,
+      "commentaryFont": 9,
+      "metadataFont": 9.5
     },
     {
       "viewport": {
@@ -68,7 +78,32 @@
       "displayFont": "\"Chakra Petch\", system-ui, sans-serif",
       "bodyFont": "\"IBM Plex Sans\", system-ui, sans-serif",
       "background": "rgb(237, 243, 241)",
-      "title": "How performance moves"
+      "title": "How performance moves",
+      "fullscreenButtons": 3,
+      "firstChartVisiblePx": 153.953125,
+      "metricFont": 16,
+      "commentaryFont": 9,
+      "metadataFont": 9.5
+    }
+  ],
+  "fullscreenAudits": [
+    {
+      "kind": "postmortem-performance",
+      "title": "Latest forecast versus actual · 702082",
+      "chartWidth": 1394,
+      "chartHeight": 777.859375
+    },
+    {
+      "kind": "postmortem-revision",
+      "title": "Revision outcome · 702082",
+      "chartWidth": 1394,
+      "chartHeight": 746.359375
+    },
+    {
+      "kind": "product-history",
+      "title": "Selected target forecast development · 702082",
+      "chartWidth": 1394,
+      "chartHeight": 777.859375
     }
   ],
   "screenshots": [
@@ -76,6 +111,9 @@
     "/root/GitHub/forecast_analysis-worktrees/sku-postmortem/validation-artifacts/sku-postmortem/desktop-1440x900-lower.png",
     "/root/GitHub/forecast_analysis-worktrees/sku-postmortem/validation-artifacts/sku-postmortem/wide-1680x1050.png",
     "/root/GitHub/forecast_analysis-worktrees/sku-postmortem/validation-artifacts/sku-postmortem/compact-800x700.png",
-    "/root/GitHub/forecast_analysis-worktrees/sku-postmortem/validation-artifacts/sku-postmortem/compact-800x700-lower.png"
+    "/root/GitHub/forecast_analysis-worktrees/sku-postmortem/validation-artifacts/sku-postmortem/compact-800x700-lower.png",
+    "/root/GitHub/forecast_analysis-worktrees/sku-postmortem/validation-artifacts/sku-postmortem/fullscreen-postmortem-performance.png",
+    "/root/GitHub/forecast_analysis-worktrees/sku-postmortem/validation-artifacts/sku-postmortem/fullscreen-postmortem-revision.png",
+    "/root/GitHub/forecast_analysis-worktrees/sku-postmortem/validation-artifacts/sku-postmortem/fullscreen-product-history.png"
   ]
 }
