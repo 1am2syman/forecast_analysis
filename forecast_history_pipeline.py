@@ -53,10 +53,10 @@ ML_REQUIRED_COLUMNS = [
     "MONTH_DATE",
     "TRAIN_TILL",
     "PREDICTING_MONTH",
-    "Cal_forecast",
     "PRED_VOLUME",
     "Oth_Ch_Contr._%",
 ]
+ML_OPTIONAL_REFERENCE_COLUMN = "Cal_forecast"
 ML_FORMULA_TOLERANCE = 1e-6
 FORECAST_SOURCES = {"tm", "ml"}
 DEFAULT_OUTPUT_MODE = 0o644
@@ -113,7 +113,8 @@ class MlValidationEvidence:
     """
 
     checked_rows: int
-    max_formula_difference: float
+    cal_forecast_checked_rows: int
+    max_formula_difference: float | None
     formula_tolerance: float
     horizon_counts: tuple[tuple[str, int], ...]
     calculation_months: tuple[date, ...]
@@ -128,6 +129,7 @@ class MlValidationEvidence:
         return pl.DataFrame(
             {
                 "checked_rows": [self.checked_rows],
+                "cal_forecast_checked_rows": [self.cal_forecast_checked_rows],
                 "max_formula_difference": [self.max_formula_difference],
                 "formula_tolerance": [self.formula_tolerance],
                 "horizon_coverage": [horizon_coverage],
@@ -280,6 +282,11 @@ def parse_grid(path: Path) -> tuple[dict, pl.DataFrame]:
         sequence = _month_sequence(start_abbr, start_year, end_abbr, end_year)
     except ValueError as exc:
         raise ValueError(f"{path.name}: {exc}") from None
+    if len(sequence) != 5:
+        raise ValueError(
+            f"{path.name}: TM file must contain exactly five target months "
+            f"(M1 through M5), found {len(sequence)}"
+        )
 
     sheet_months = [raw.row(anchor_idx)[i].strip() for i in month_positions]
     expected_months = [abbr for abbr, _ in sequence]
@@ -289,7 +296,16 @@ def parse_grid(path: Path) -> tuple[dict, pl.DataFrame]:
             f"the file-name range {expected_months}"
         )
 
-    calculation_month = date(start_year, MONTH_NO[start_abbr], 1)
+    # The workbook name describes the first through fifth target months.  The
+    # forecast was made in the preceding month, so that preceding month is the
+    # canonical calculation month for every row in this file.
+    calculation_year = start_year - (1 if start_abbr == "Jan" else 0)
+    calculation_month_number = 12 if start_abbr == "Jan" else MONTH_NO[start_abbr] - 1
+    calculation_month = date(
+        calculation_year,
+        calculation_month_number,
+        1,
+    )
     month_dates = {
         abbr: date(year, MONTH_NO[abbr], 1)
         for abbr, (_, year) in zip(sheet_months, sequence)
@@ -393,7 +409,7 @@ def parse_grid(path: Path) -> tuple[dict, pl.DataFrame]:
     meta.update(
         {
             "file": path.name,
-            "calc_month": f"{start_year}-{MONTH_NO[start_abbr]:02d}",
+            "calc_month": calculation_month.strftime("%Y-%m"),
             "snop_months": [f"{year}-{MONTH_NO[abbr]:02d}" for abbr, year in sequence],
             "sheet_months": sheet_months,
             "layout": (
@@ -540,14 +556,24 @@ def _normalize_key_column(raw: pl.DataFrame) -> list[int]:
 
 def _coerce_ml_rows(raw: pl.DataFrame, parent_codes: list[int]) -> pl.DataFrame:
     """Create typed working columns while keeping KEY conversion exact."""
-    return raw.with_row_index("_source_row").with_columns(
+    work = raw
+    if ML_OPTIONAL_REFERENCE_COLUMN not in work.columns:
+        work = work.with_columns(
+            pl.lit(None, dtype=pl.Float64).alias(ML_OPTIONAL_REFERENCE_COLUMN)
+        )
+    cal_forecast_text = (
+        pl.col(ML_OPTIONAL_REFERENCE_COLUMN)
+        .cast(pl.String, strict=False)
+        .str.strip_chars()
+    )
+    return work.with_row_index("_source_row").with_columns(
         [
             pl.Series("_parent_code", parent_codes, dtype=pl.Int64),
             pl.col("DESCRIPTION")
             .cast(pl.String, strict=False)
             .alias("_parent_description"),
-            _month_date_expr(raw, "MONTH_DATE").alias("_snop_month"),
-            _month_date_expr(raw, "TRAIN_TILL").alias("_train_till"),
+            _month_date_expr(work, "MONTH_DATE").alias("_snop_month"),
+            _month_date_expr(work, "TRAIN_TILL").alias("_train_till"),
             pl.col("PREDICTING_MONTH")
             .cast(pl.String, strict=False)
             .alias("_predicting_month"),
@@ -555,9 +581,13 @@ def _coerce_ml_rows(raw: pl.DataFrame, parent_codes: list[int]) -> pl.DataFrame:
             pl.col("Oth_Ch_Contr._%")
             .cast(pl.Float64, strict=False)
             .alias("_other_channel_contribution"),
-            pl.col("Cal_forecast")
+            pl.col(ML_OPTIONAL_REFERENCE_COLUMN)
             .cast(pl.Float64, strict=False)
             .alias("_cal_forecast"),
+            (
+                cal_forecast_text.is_not_null()
+                & (cal_forecast_text != "")
+            ).alias("_cal_forecast_supplied"),
         ]
     )
 
@@ -573,7 +603,6 @@ def _validate_ml_mapping_fields(work: pl.DataFrame) -> None:
             pl.col("_predicting_month").is_null(),
             pl.col("_pred_volume").is_null(),
             pl.col("_other_channel_contribution").is_null(),
-            pl.col("_cal_forecast").is_null(),
         )
     )
     if bad_mapping.height:
@@ -598,19 +627,35 @@ def _validate_ml_dates(work: pl.DataFrame) -> None:
 
 
 def _validate_ml_numeric_bounds(work: pl.DataFrame) -> None:
-    """Validate finite forecast values and the contribution denominator bounds."""
-    bad_numbers = work.filter(
-        (~pl.col("_cal_forecast").is_finite())
-        | (pl.col("_cal_forecast") < 0)
+    """Validate the forecast value and optional reference numeric bounds."""
+    bad_forecast = work.filter(
+        pl.col("_pred_volume").is_null()
         | (~pl.col("_pred_volume").is_finite())
+        | (pl.col("_pred_volume") < 0)
     )
-    if bad_numbers.height:
+    if bad_forecast.height:
         raise ValueError(
-            "ML history validation failed: Cal_forecast and PRED_VOLUME must be "
-            "finite, and Cal_forecast must be non-negative; sample rows: "
+            "ML history validation failed: PRED_VOLUME must be finite and "
+            "non-negative; sample rows: "
+            + repr(_sample_rows(bad_forecast, ["_source_row", "PRED_VOLUME"]))
+        )
+
+    bad_reference = work.filter(
+        pl.col("_cal_forecast_supplied")
+        & (
+            pl.col("_cal_forecast").is_null()
+            | (~pl.col("_cal_forecast").is_finite())
+            | (pl.col("_cal_forecast") < 0)
+        )
+    )
+    if bad_reference.height:
+        raise ValueError(
+            "ML history validation failed: supplied Cal_forecast reference "
+            "values must be finite and non-negative; sample rows: "
             + repr(
                 _sample_rows(
-                    bad_numbers, ["_source_row", "PRED_VOLUME", "Cal_forecast"]
+                    bad_reference,
+                    ["_source_row", ML_OPTIONAL_REFERENCE_COLUMN],
                 )
             )
         )
@@ -674,20 +719,25 @@ def _validate_ml_horizons(work: pl.DataFrame) -> None:
 
 
 def _validate_ml_formula(work: pl.DataFrame) -> pl.DataFrame:
-    """Check cached Cal_forecast values against the workbook formula."""
+    """Validate each supplied Cal_forecast reference against its formula."""
     checked = work.with_columns(
         (pl.col("_pred_volume") / (1 - pl.col("_other_channel_contribution"))).alias(
             "_expected_cal_forecast"
         )
     ).with_columns(
-        (pl.col("_cal_forecast") - pl.col("_expected_cal_forecast"))
-        .abs()
+        pl.when(pl.col("_cal_forecast_supplied"))
+        .then((pl.col("_cal_forecast") - pl.col("_expected_cal_forecast")).abs())
+        .otherwise(pl.lit(None, dtype=pl.Float64))
         .alias("_formula_diff")
     )
     bad_formula = checked.filter(
-        (~pl.col("_expected_cal_forecast").is_finite())
-        | (~pl.col("_formula_diff").is_finite())
-        | (pl.col("_formula_diff") > ML_FORMULA_TOLERANCE)
+        pl.col("_cal_forecast_supplied")
+        & (
+            (~pl.col("_expected_cal_forecast").is_finite())
+            | pl.col("_formula_diff").is_null()
+            | (~pl.col("_formula_diff").is_finite())
+            | (pl.col("_formula_diff") > ML_FORMULA_TOLERANCE)
+        )
     )
     if bad_formula.height:
         raise ValueError(
@@ -719,7 +769,7 @@ def _build_ml_frame(work: pl.DataFrame) -> pl.DataFrame:
                 pl.col("snop_month"),
                 pl.col("_parent_code").alias("parent_code"),
                 pl.col("_parent_description").alias("parent_description"),
-                pl.col("_cal_forecast").alias("qty"),
+                pl.col("_pred_volume").alias("qty"),
             ]
         )
         .with_columns(source=pl.lit("ml"))
@@ -764,10 +814,18 @@ def validate_and_normalize_ml_history(raw: pl.DataFrame) -> MlHistoryResult:
         )
         for row in work.group_by("_horizon").len().sort("_horizon").to_dicts()
     )
+    cal_forecast_checked_rows = work.filter(
+        pl.col("_cal_forecast_supplied")
+    ).height
     formula_difference = work.get_column("_formula_diff").max()
-    max_formula_difference = _measured_float(formula_difference, "formula difference")
+    max_formula_difference = (
+        None
+        if formula_difference is None
+        else _measured_float(formula_difference, "formula difference")
+    )
     evidence = MlValidationEvidence(
         checked_rows=raw.height,
+        cal_forecast_checked_rows=cal_forecast_checked_rows,
         max_formula_difference=max_formula_difference,
         formula_tolerance=ML_FORMULA_TOLERANCE,
         horizon_counts=horizon_counts,
@@ -894,6 +952,27 @@ def build_tm_history(longs: list[pl.DataFrame]) -> pl.DataFrame:
     )
 
 
+def _validate_canonical_horizons(frame: pl.DataFrame, label: str) -> None:
+    """Require every source row to represent exactly one of M1 through M5."""
+    horizon = (
+        pl.col("snop_month").dt.year() * 12
+        + pl.col("snop_month").dt.month()
+        - pl.col("calculation_month").dt.year() * 12
+        - pl.col("calculation_month").dt.month()
+    )
+    invalid = frame.filter(~horizon.is_between(1, 5))
+    if invalid.height:
+        raise ValueError(
+            f"{label} validation failed: canonical forecast horizon must be M1 "
+            "through M5; sample rows: "
+            + repr(
+                invalid.select(
+                    ["calculation_month", "snop_month", "parent_code", "source"]
+                ).head(3).to_dicts()
+            )
+        )
+
+
 def _validate_internal_history(frame: pl.DataFrame, label: str) -> None:
     """Validate the in-memory Date-based history before CSV formatting."""
     if frame.columns != OUTPUT_COLUMNS:
@@ -936,6 +1015,7 @@ def _validate_internal_history(frame: pl.DataFrame, label: str) -> None:
         raise ValueError(
             f"{label} validation failed: month values must be first-of-month"
         )
+    _validate_canonical_horizons(frame, label)
     if not frame.get_column("qty").is_finite().all():
         raise ValueError(f"{label} validation failed: qty contains non-finite values")
     invalid_sources = frame.filter(~pl.col("source").is_in(FORECAST_SOURCES))
@@ -1052,6 +1132,24 @@ def validate_formatted_history(
         raise ValueError(
             "formatted forecast history validation failed: qty contains non-finite values"
         )
+    formatted_horizon = (
+        pl.col("snop_month").str.strptime(pl.Date, "%Y-%m")
+        .dt.year() * 12
+        + pl.col("snop_month").str.strptime(pl.Date, "%Y-%m").dt.month()
+        - pl.col("calculation_month").str.strptime(pl.Date, "%Y-%m").dt.year() * 12
+        - pl.col("calculation_month").str.strptime(pl.Date, "%Y-%m").dt.month()
+    )
+    invalid_horizons = frame.filter(~formatted_horizon.is_between(1, 5))
+    if invalid_horizons.height:
+        raise ValueError(
+            "formatted forecast history validation failed: canonical forecast "
+            "horizon must be M1 through M5; sample rows: "
+            + repr(
+                invalid_horizons.select(
+                    ["calculation_month", "snop_month", "parent_code", "source"]
+                ).head(3).to_dicts()
+            )
+        )
     invalid_sources = frame.filter(~pl.col("source").is_in(FORECAST_SOURCES))
     if invalid_sources.height:
         raise ValueError(
@@ -1138,7 +1236,20 @@ def build_validation_status(
         raise ValueError("TM validation status cannot pass failed Grand Total evidence")
     if ml_validation.checked_rows <= 0:
         raise ValueError("ML validation status requires checked rows")
-    if ml_validation.max_formula_difference > ml_validation.formula_tolerance:
+    reference_rows = ml_validation.cal_forecast_checked_rows
+    formula_difference = ml_validation.max_formula_difference
+    formula_tolerance = ml_validation.formula_tolerance
+    if not 0 <= reference_rows <= ml_validation.checked_rows:
+        raise ValueError("ML validation status has invalid Cal_forecast evidence")
+    if (reference_rows == 0) != (formula_difference is None):
+        raise ValueError("ML validation status has inconsistent Cal_forecast evidence")
+    if not math.isfinite(formula_tolerance) or formula_tolerance < 0:
+        raise ValueError("ML validation status has invalid formula tolerance evidence")
+    if formula_difference is not None and (
+        not math.isfinite(formula_difference)
+        or formula_difference < 0
+        or formula_difference > formula_tolerance
+    ):
         raise ValueError("ML validation status cannot pass failed formula evidence")
     if ml_validation.duplicate_final_key_count != 0:
         raise ValueError("ML validation status cannot pass duplicate-key evidence")

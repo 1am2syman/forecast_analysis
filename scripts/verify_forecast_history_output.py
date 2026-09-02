@@ -144,6 +144,16 @@ def _month_keys(frame: pl.DataFrame, column: str) -> list[str]:
     return [value.strftime("%Y-%m") for value in sorted(frame[column].unique())]
 
 
+def _canonicalize_legacy_tm_oracle(frame: pl.DataFrame) -> pl.DataFrame:
+    """Project the immutable pre-fix TM oracle onto canonical provenance."""
+    return frame.with_columns(
+        pl.col("calculation_month")
+        .str.to_date("%Y-%m")
+        .dt.offset_by("-1mo")
+        .dt.strftime("%Y-%m")
+    )
+
+
 def verify_output_contract(output_path: Path) -> pl.DataFrame:
     """Validate an existing CSV without rebuilding or mutating it."""
     check(output_path.is_file(), f"forecast history output not found: {output_path}")
@@ -181,7 +191,7 @@ def verify_current_input_regression(output: pl.DataFrame) -> None:
     )
 
     build = pipeline.build_forecast_history_from_paths()
-    expected_tm = oracle.sort(TM_SORT_COLUMNS)
+    expected_tm = _canonicalize_legacy_tm_oracle(oracle).sort(TM_SORT_COLUMNS)
     actual_tm = pipeline.format_forecast_history_output(
         build.tm, required_sources={"tm"}
     ).select(expected_tm.columns)

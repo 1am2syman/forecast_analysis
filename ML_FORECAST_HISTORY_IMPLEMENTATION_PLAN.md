@@ -46,21 +46,21 @@ The target output contract is:
 | `MONTH_DATE` | `snop_month` |
 | `TRAIN_TILL` | Base month used to derive `calculation_month` by adding one month |
 | `PREDICTING_MONTH` | Validation of the interval between `calculation_month` and `snop_month` |
-| `Cal_forecast` | `qty` |
-| `PRED_VOLUME` | Validation input only; not written |
-| `Oth_Ch_Contr._%` | Validation input only; not written |
+| `PRED_VOLUME` | `qty` |
+| `Cal_forecast` | Optional validation/reference only; not written |
+| `Oth_Ch_Contr._%` | Validation input for a supplied `Cal_forecast`; not written |
 
 ### Confirmed quantity choice
 
-Use `Cal_forecast` as the ML `qty` value.
+Use `PRED_VOLUME` as the ML `qty` value.
 
-The workbook defines it as:
+`PRED_VOLUME` is the authoritative model forecast. When `Cal_forecast` is supplied, retain it only as optional reference data and validate the workbook formula:
 
 ```text
 Cal_forecast = PRED_VOLUME / (1 - Oth_Ch_Contr._%)
 ```
 
-This formula was verified across all 7,520 rows with zero numerical difference from the cached Excel result. `Cal_forecast` totals approximately 213,264.72, compared with approximately 192,541.91 for the unadjusted `PRED_VOLUME`.
+The current workbook contains `Cal_forecast` for all 7,520 rows, and the formula matches with zero numerical difference. The optional reference total is approximately 213,264.72, while the authoritative `PRED_VOLUME` total written as ML `qty` is approximately 192,541.91.
 
 ### Month derivation
 
@@ -115,10 +115,11 @@ Add a helper such as `parse_ml_history(path)` that:
 4. Sets `snop_month` directly from `MONTH_DATE`.
 5. Derives `calculation_month` by adding one month to `TRAIN_TILL`.
 6. Parses `PREDICTING_MONTH` strictly as `M+1` through `M+5` and validates that it matches the interval between the derived dates.
-7. Validates the cached `Cal_forecast` against its Excel formula within a small floating-point tolerance.
-8. Renames and selects the target fields.
-9. Adds `source = "ml"`.
-10. Returns a DataFrame matching the final output contract exactly.
+7. Uses `PRED_VOLUME` as the authoritative `qty` value and requires it to be finite and non-negative.
+8. When `Cal_forecast` is present and non-blank, validates it against its Excel formula within a small floating-point tolerance; the column itself is optional.
+9. Renames and selects the target fields.
+10. Adds `source = "ml"`.
+11. Returns a DataFrame matching the final output contract exactly.
 
 The helper should fail with a precise error instead of silently dropping malformed rows.
 
@@ -195,9 +196,11 @@ The output must not be written unless all applicable checks pass.
 - `calculation_month` equals `TRAIN_TILL + 1 month`.
 - Horizons are restricted to `M+1` through `M+5`.
 - `PREDICTING_MONTH` matches the interval between `calculation_month` and `snop_month`.
-- `Cal_forecast` is finite and non-negative.
-- `Oth_Ch_Contr._%` is in `[0, 1)` so the adjustment denominator is valid.
-- `Cal_forecast` matches `PRED_VOLUME / (1 - Oth_Ch_Contr._%)` within tolerance.
+- `PRED_VOLUME` is present, finite, and non-negative.
+- `Cal_forecast` may be absent or blank because it is not the forecast-output source.
+- When `Cal_forecast` is supplied, it is finite and non-negative.
+- `Oth_Ch_Contr._%` is in `[0, 1)` so any supplied reference can be validated.
+- A supplied `Cal_forecast` matches `PRED_VOLUME / (1 - Oth_Ch_Contr._%)` within tolerance.
 - No duplicate ML final keys exist.
 
 ### Combined-output checks
@@ -228,14 +231,16 @@ Create focused automated tests around pure transformation helpers rather than Ma
    - Accept `M+1` through `M+5` when they match the interval between the derived dates.
    - Reject missing, malformed, zero, unsupported, or date-inconsistent horizons.
 
-3. **ML schema validation**
+3. **ML schema and quantity validation**
    - Missing required column fails clearly.
-   - Null required value fails clearly.
+   - Missing, negative, or non-finite `PRED_VOLUME` fails clearly.
+   - Missing or blank `Cal_forecast` passes because it is optional reference data.
    - Invalid contribution percentage fails clearly.
 
-4. **Formula validation**
-   - Correct `Cal_forecast` passes.
-   - A changed cached value fails within the selected tolerance.
+4. **Optional formula validation**
+   - A correct supplied `Cal_forecast` passes.
+   - A changed supplied value fails within the selected tolerance.
+   - Output `qty` always equals `PRED_VOLUME`, never `Cal_forecast`.
 
 5. **Source labeling and concatenation**
    - TM rows receive `tm`.
@@ -262,7 +267,8 @@ The work is complete when:
 
 - Running the ETL reads both source families and produces one combined CSV.
 - Existing records are labeled `tm`; ML records are labeled `ml`.
-- ML `qty` comes from the confirmed `Cal_forecast` field.
+- ML `qty` comes from the authoritative `PRED_VOLUME` field.
+- `Cal_forecast` is optional validation/reference data and is never written as forecast output.
 - Both sources share the same six-column schema and month format.
 - Same-key TM and ML forecasts coexist rather than being merged.
 - The ETL refuses to write output when either source fails its validation gates.

@@ -37,6 +37,43 @@ def load_tm_oracle() -> tuple[pl.DataFrame, dict]:
     return pl.read_csv(io.BytesIO(fixture_bytes)), manifest
 
 
+def canonicalize_legacy_tm_oracle(frame: pl.DataFrame) -> pl.DataFrame:
+    """Shift the immutable pre-fix oracle onto canonical calculation months."""
+    return frame.with_columns(
+        pl.col("calculation_month")
+        .str.to_date("%Y-%m")
+        .dt.offset_by("-1mo")
+        .dt.strftime("%Y-%m")
+    )
+
+
+class TmGridProvenanceTests(unittest.TestCase):
+    def test_april_through_august_file_is_march_calculation_vintage(self):
+        path = (
+            etl.FORECAST_HISTORY_DIR
+            / "S&OP_grid file_Apr-26 to Aug-26_circulation.xlsx"
+        )
+
+        meta, rows = etl.parse_grid(path)
+
+        self.assertEqual(meta["calc_month"], "2026-03")
+        self.assertEqual(rows["calculation_month"].unique().to_list(), [date(2026, 3, 1)])
+        horizons = (
+            rows.select(
+                (
+                    pl.col("snop_month").dt.year() * 12
+                    + pl.col("snop_month").dt.month()
+                    - pl.col("calculation_month").dt.year() * 12
+                    - pl.col("calculation_month").dt.month()
+                ).alias("horizon")
+            )["horizon"]
+            .unique()
+            .sort()
+            .to_list()
+        )
+        self.assertEqual(horizons, [1, 2, 3, 4, 5])
+
+
 class MlHistoryNormalizationTests(unittest.TestCase):
     def make_row(self, **overrides):
         row = {
@@ -98,11 +135,35 @@ class MlHistoryNormalizationTests(unittest.TestCase):
                 self.make_row(MONTH_DATE=date(2025, 7, 1), PREDICTING_MONTH="M+1")
             )
 
+    def test_pred_volume_is_the_authoritative_forecast_quantity(self):
+        result = self.normalize(
+            self.make_row(PRED_VOLUME=90.0, Cal_forecast=100.0)
+        )
+
+        self.assertEqual(result["qty"].item(), 90.0)
+
+    def test_cal_forecast_column_and_blank_values_are_optional(self):
+        without_column = self.make_row()
+        del without_column["Cal_forecast"]
+        without_reference = etl.validate_and_normalize_ml_history(
+            pl.DataFrame([without_column])
+        )
+        blank_reference = etl.validate_and_normalize_ml_history(
+            pl.DataFrame([self.make_row(Cal_forecast="")])
+        )
+
+        self.assertEqual(without_reference.frame["qty"].item(), 90.0)
+        self.assertEqual(without_reference.validation.cal_forecast_checked_rows, 0)
+        self.assertIsNone(without_reference.validation.max_formula_difference)
+        self.assertEqual(blank_reference.frame["qty"].item(), 90.0)
+        self.assertEqual(blank_reference.validation.cal_forecast_checked_rows, 0)
+        self.assertIsNone(blank_reference.validation.max_formula_difference)
+
     def test_missing_required_column_is_rejected(self):
         row = self.make_row()
-        del row["Cal_forecast"]
+        del row["PRED_VOLUME"]
 
-        with self.assertRaisesRegex(ValueError, "Cal_forecast"):
+        with self.assertRaisesRegex(ValueError, "PRED_VOLUME"):
             self.normalize(row)
 
         row = self.make_row()
@@ -157,8 +218,16 @@ class MlHistoryNormalizationTests(unittest.TestCase):
             with self.subTest(key=key), self.assertRaisesRegex(ValueError, "KEY"):
                 self.normalize(self.make_row(KEY=key))
 
-    def test_nonfinite_and_negative_cal_forecast_values_are_rejected(self):
+    def test_nonfinite_and_negative_pred_volume_values_are_rejected(self):
         for value in (float("nan"), float("inf"), -1.0):
+            with (
+                self.subTest(value=value),
+                self.assertRaisesRegex(ValueError, "PRED_VOLUME"),
+            ):
+                self.normalize(self.make_row(PRED_VOLUME=value))
+
+    def test_supplied_invalid_cal_forecast_reference_values_are_rejected(self):
+        for value in (float("nan"), float("inf"), -1.0, "not-a-number"):
             with (
                 self.subTest(value=value),
                 self.assertRaisesRegex(ValueError, "Cal_forecast"),
@@ -190,6 +259,7 @@ class MlHistoryNormalizationTests(unittest.TestCase):
         result = etl.validate_and_normalize_ml_history(pl.DataFrame([self.make_row()]))
 
         self.assertEqual(result.validation.checked_rows, 1)
+        self.assertEqual(result.validation.cal_forecast_checked_rows, 1)
         self.assertEqual(result.validation.max_formula_difference, 0.0)
         self.assertEqual(result.validation.horizon_counts, (("M+1", 1),))
         self.assertEqual(result.validation.duplicate_final_key_count, 0)
@@ -197,6 +267,7 @@ class MlHistoryNormalizationTests(unittest.TestCase):
             result.validation.to_frame().columns,
             [
                 "checked_rows",
+                "cal_forecast_checked_rows",
                 "max_formula_difference",
                 "formula_tolerance",
                 "horizon_coverage",
@@ -261,6 +332,18 @@ class ForecastHistoryCombinationTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "duplicate final keys"):
             etl.combine_forecast_history(duplicate, self.history_row("ml"))
 
+    def test_noncanonical_horizons_are_rejected_before_combining(self):
+        for source, target_month in (("tm", date(2025, 5, 1)), ("ml", date(2025, 12, 1))):
+            with self.subTest(source=source), self.assertRaisesRegex(
+                ValueError, "canonical forecast horizon must be M1 through M5"
+            ):
+                etl.combine_forecast_history(
+                    self.history_row(source).with_columns(
+                        pl.lit(target_month).alias("snop_month")
+                    ),
+                    self.history_row("ml"),
+                )
+
     def test_tm_aggregation_labels_rows_without_changing_business_keys(self):
         longs = [
             pl.DataFrame(
@@ -289,6 +372,7 @@ class ValidationStatusTests(unittest.TestCase):
         )
         ml_validation = etl.MlValidationEvidence(
             checked_rows=1,
+            cal_forecast_checked_rows=1,
             max_formula_difference=0.0,
             formula_tolerance=etl.ML_FORMULA_TOLERANCE,
             horizon_counts=(("M+1", 1),),
@@ -303,6 +387,43 @@ class ValidationStatusTests(unittest.TestCase):
             status.to_dicts(),
             [{"source": "tm", "status": "passed"}, {"source": "ml", "status": "passed"}],
         )
+
+    def test_status_accepts_an_optional_cal_forecast_reference_that_is_absent(self):
+        tm_validation = pl.DataFrame({"max_abs_diff_vs_grand_total": [0.0]})
+        ml_validation = etl.MlValidationEvidence(
+            checked_rows=1,
+            cal_forecast_checked_rows=0,
+            max_formula_difference=None,
+            formula_tolerance=etl.ML_FORMULA_TOLERANCE,
+            horizon_counts=(("M+1", 1),),
+            calculation_months=(date(2025, 5, 1),),
+            snop_months=(date(2025, 6, 1),),
+            duplicate_final_key_count=0,
+        )
+
+        status = etl.build_validation_status(tm_validation, ml_validation)
+
+        self.assertEqual(status.get_column("status").to_list(), ["passed", "passed"])
+
+    def test_status_rejects_invalid_formula_measurements(self):
+        tm_validation = pl.DataFrame({"max_abs_diff_vs_grand_total": [0.0]})
+        for difference in (float("nan"), float("inf"), float("-inf"), -1.0):
+            with self.subTest(difference=difference), self.assertRaisesRegex(
+                ValueError, "formula evidence"
+            ):
+                etl.build_validation_status(
+                    tm_validation,
+                    etl.MlValidationEvidence(
+                        checked_rows=1,
+                        cal_forecast_checked_rows=1,
+                        max_formula_difference=difference,
+                        formula_tolerance=etl.ML_FORMULA_TOLERANCE,
+                        horizon_counts=(("M+1", 1),),
+                        calculation_months=(date(2025, 5, 1),),
+                        snop_months=(date(2025, 6, 1),),
+                        duplicate_final_key_count=0,
+                    ),
+                )
 
 
 class OracleProvenanceTests(unittest.TestCase):
@@ -392,9 +513,10 @@ class CurrentWorkbookRegressionTests(unittest.TestCase):
         actual_tm = etl.format_forecast_history_output(
             build.tm, required_sources={"tm"}
         ).select(oracle.columns)
+        canonical_oracle = canonicalize_legacy_tm_oracle(oracle)
         assert_frame_equal(
             actual_tm.sort(TM_SORT_COLUMNS),
-            oracle.sort(TM_SORT_COLUMNS),
+            canonical_oracle.sort(TM_SORT_COLUMNS),
             check_dtypes=False,
         )
         self.assertEqual(oracle.height, oracle_manifest["row_count"])
@@ -417,6 +539,12 @@ class CurrentWorkbookRegressionTests(unittest.TestCase):
             list(build.ml_validation.horizon_counts),
             [tuple(item) for item in expected["ml_horizon_counts"]],
         )
+        self.assertEqual(
+            build.ml_validation.cal_forecast_checked_rows,
+            expected["ml_rows"],
+        )
+        self.assertIsNotNone(build.ml_validation.max_formula_difference)
+        assert build.ml_validation.max_formula_difference is not None
         self.assertLessEqual(
             build.ml_validation.max_formula_difference,
             build.ml_validation.formula_tolerance,
@@ -426,6 +554,26 @@ class CurrentWorkbookRegressionTests(unittest.TestCase):
             build.validation_status.to_dicts(),
             [{"source": "tm", "status": "passed"}, {"source": "ml", "status": "passed"}],
         )
+        raw_ml = pl.read_excel(
+            etl.ML_HISTORY_PATH,
+            sheet_name="data",
+            engine="calamine",
+        )
+        expected_ml_values = (
+            raw_ml.select(
+                pl.col("KEY").alias("parent_code"),
+                pl.col("TRAIN_TILL")
+                .dt.offset_by("1mo")
+                .alias("calculation_month"),
+                pl.col("MONTH_DATE").alias("snop_month"),
+                pl.col("PRED_VOLUME").alias("qty"),
+            )
+            .sort(["parent_code", "snop_month", "calculation_month"])
+        )
+        actual_ml_values = build.ml.select(expected_ml_values.columns).sort(
+            ["parent_code", "snop_month", "calculation_month"]
+        )
+        assert_frame_equal(actual_ml_values, expected_ml_values)
         self.assertEqual(build.consolidated.columns, etl.OUTPUT_COLUMNS)
         self.assertTrue(
             build.consolidated.equals(build.consolidated.sort(etl.HISTORY_SORT_COLUMNS))

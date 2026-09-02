@@ -73,12 +73,19 @@ from .product_postmortem import (  # pyright: ignore[reportMissingImports]
     TargetMonthSummary,
     build_product_postmortem,
 )
+from .vintage_accuracy import (
+    CommonVintageAccuracy,
+    VintageAccuracyRow,
+    VintageAccuracySeries,
+    build_common_vintage_accuracy,
+)
 from .vintages import VintageRule, select_vintage_pair  # pyright: ignore[reportMissingImports]
 
 __all__ = [
     "ACTUAL_REFERENCE_COLOR",
     "AnalysisDataset",
     "ComparisonView",
+    "CommonVintageAccuracy",
     "QualityView",
     "DashboardFilters",
     "DashboardView",
@@ -88,6 +95,8 @@ __all__ = [
     "ForwardTreatment",
     "TargetMonthSummary",
     "RevisionMetrics",
+    "VintageAccuracyRow",
+    "VintageAccuracySeries",
     "VintageRule",
     "aggregate_actuals",
     "apply_actual_filters",
@@ -108,6 +117,7 @@ __all__ = [
     "ZERO_REFERENCE_COLOR",
     "build_analysis_dataset",
     "build_brand_target_month_performance",
+    "build_common_vintage_accuracy",
     "build_dashboard_view",
     "build_exception_download_frame",
     "build_population_summary",

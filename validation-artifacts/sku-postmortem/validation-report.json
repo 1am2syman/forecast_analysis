@@ -1,5 +1,5 @@
 {
-  "baseUrl": "http://127.0.0.1:8876/",
+  "baseUrl": "http://127.0.0.1:8766/",
   "audits": [
     {
       "viewport": {
@@ -8,6 +8,18 @@
       },
       "selected": "702082",
       "paneActive": true,
+      "contextLabels": [
+        "PRODUCT",
+        "TARGET MONTH",
+        "BRAND",
+        "SKU CLASS"
+      ],
+      "contextSingleRow": true,
+      "contextOrder": true,
+      "summaryLabelLines": [
+        9,
+        9
+      ],
       "metrics": 6,
       "performancePaths": 2,
       "revisionPoints": 5,
@@ -36,6 +48,18 @@
       },
       "selected": "702082",
       "paneActive": true,
+      "contextLabels": [
+        "PRODUCT",
+        "TARGET MONTH",
+        "BRAND",
+        "SKU CLASS"
+      ],
+      "contextSingleRow": true,
+      "contextOrder": true,
+      "summaryLabelLines": [
+        9,
+        9
+      ],
       "metrics": 6,
       "performancePaths": 2,
       "revisionPoints": 5,
@@ -64,6 +88,18 @@
       },
       "selected": "702082",
       "paneActive": true,
+      "contextLabels": [
+        "PRODUCT",
+        "TARGET MONTH",
+        "BRAND",
+        "SKU CLASS"
+      ],
+      "contextSingleRow": true,
+      "contextOrder": true,
+      "summaryLabelLines": [
+        9,
+        9
+      ],
       "metrics": 6,
       "performancePaths": 2,
       "revisionPoints": 5,
@@ -80,7 +116,7 @@
       "background": "rgb(237, 243, 241)",
       "title": "How performance moves",
       "fullscreenButtons": 3,
-      "firstChartVisiblePx": 153.953125,
+      "firstChartVisiblePx": 227.953125,
       "metricFont": 16,
       "commentaryFont": 9,
       "metadataFont": 9.5
@@ -107,13 +143,13 @@
     }
   ],
   "screenshots": [
-    "/root/GitHub/forecast_analysis-worktrees/sku-postmortem/validation-artifacts/sku-postmortem/desktop-1440x900.png",
-    "/root/GitHub/forecast_analysis-worktrees/sku-postmortem/validation-artifacts/sku-postmortem/desktop-1440x900-lower.png",
-    "/root/GitHub/forecast_analysis-worktrees/sku-postmortem/validation-artifacts/sku-postmortem/wide-1680x1050.png",
-    "/root/GitHub/forecast_analysis-worktrees/sku-postmortem/validation-artifacts/sku-postmortem/compact-800x700.png",
-    "/root/GitHub/forecast_analysis-worktrees/sku-postmortem/validation-artifacts/sku-postmortem/compact-800x700-lower.png",
-    "/root/GitHub/forecast_analysis-worktrees/sku-postmortem/validation-artifacts/sku-postmortem/fullscreen-postmortem-performance.png",
-    "/root/GitHub/forecast_analysis-worktrees/sku-postmortem/validation-artifacts/sku-postmortem/fullscreen-postmortem-revision.png",
-    "/root/GitHub/forecast_analysis-worktrees/sku-postmortem/validation-artifacts/sku-postmortem/fullscreen-product-history.png"
+    "/root/GitHub/forecast_analysis/validation-artifacts/sku-postmortem/desktop-1440x900.png",
+    "/root/GitHub/forecast_analysis/validation-artifacts/sku-postmortem/desktop-1440x900-lower.png",
+    "/root/GitHub/forecast_analysis/validation-artifacts/sku-postmortem/wide-1680x1050.png",
+    "/root/GitHub/forecast_analysis/validation-artifacts/sku-postmortem/compact-800x700.png",
+    "/root/GitHub/forecast_analysis/validation-artifacts/sku-postmortem/compact-800x700-lower.png",
+    "/root/GitHub/forecast_analysis/validation-artifacts/sku-postmortem/fullscreen-postmortem-performance.png",
+    "/root/GitHub/forecast_analysis/validation-artifacts/sku-postmortem/fullscreen-postmortem-revision.png",
+    "/root/GitHub/forecast_analysis/validation-artifacts/sku-postmortem/fullscreen-product-history.png"
   ]
 }

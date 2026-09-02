@@ -25,6 +25,18 @@
   const chartDialogClose = chartDialog.querySelector(
     '[data-action="overview-fullscreen-close"]',
   );
+  const vintageSelectorTriggers = Array.from(
+    document.querySelectorAll("[data-vintage-selector-trigger]"),
+  );
+  const vintageSelectorPopover = document.createElement("div");
+  vintageSelectorPopover.className = "vintage-selector";
+  vintageSelectorPopover.setAttribute("role", "dialog");
+  vintageSelectorPopover.setAttribute(
+    "aria-label",
+    "Forecast vintage comparison",
+  );
+  vintageSelectorPopover.hidden = true;
+  document.body.append(vintageSelectorPopover);
   const fullscreenFilters = chartDialog.querySelector(
     '[data-action="fullscreen-filters"]',
   );
@@ -77,6 +89,7 @@
   let currentRequest = null;
   let fullscreenChart = null;
   let fullscreenTrigger = null;
+  let vintageSelectorTrigger = null;
   let revisionQueueSource = null;
   let revisionQueueRows = [];
   let revisionQueueSearch = "";
@@ -125,6 +138,13 @@
     finite(value) ? `${value > 0 ? "+" : ""}${number(value, digits)} KL` : "—";
   const signedPct = (value, digits = 1) =>
     finite(value) ? `${value > 0 ? "+" : ""}${number(value, digits)}%` : "—";
+  const ACCURACY_VINTAGE_COLORS = [
+    "#9a5e00",
+    "#2e79a5",
+    "#7c4d9e",
+    "#b63b35",
+    "#667b24",
+  ];
   const monthLabel = (value, short = true) => {
     if (!value) return "—";
     const date = new Date(`${value}T00:00:00Z`);
@@ -242,9 +262,27 @@
       point.dataset.tooltipKind === "revision-history-segment";
     const isRevisionActionSparkline =
       point.dataset.tooltipKind === "revision-action-sparkline";
+    const vintageAccuracyRows = (() => {
+      try {
+        return JSON.parse(point.dataset.tooltipVintageSeries || "[]");
+      } catch {
+        return [];
+      }
+    })();
+    const vintageAccuracyContent = vintageAccuracyRows.length
+      ? vintageAccuracyRows
+          .map(
+            (series) =>
+              `<div><dt>${escapeHtml(series.label)}${series.fixed ? " · fixed" : ""}</dt><dd>${escapeHtml(series.value)}</dd></div>`,
+          )
+          .join("")
+      : `<div><dt>Vintage A accuracy</dt><dd>${escapeHtml(point.dataset.tooltipVintageA)}</dd></div><div><dt>Vintage B accuracy</dt><dd>${escapeHtml(point.dataset.tooltipVintageB)}</dd></div>`;
+    const vintageAccuracyEvidence = vintageAccuracyRows.length
+      ? `<div><dt>Common cohort</dt><dd>${escapeHtml(point.dataset.tooltipCommonCohort)} parents</dd></div><div><dt>Actual denominator</dt><dd>${escapeHtml(point.dataset.tooltipActualDenominator)}</dd></div>`
+      : "";
     const monthlyContent = isVolumeSummary
       ? `<div class="chart-tooltip__head"><strong>${escapeHtml(point.dataset.tooltipMonth)}</strong><span>${escapeHtml(point.dataset.tooltipSource)}</span></div><dl><div><dt>Vintage A forecast</dt><dd>${escapeHtml(point.dataset.tooltipVintageA)}</dd></div><div><dt>Vintage B forecast</dt><dd>${escapeHtml(point.dataset.tooltipVintageB)}</dd></div><div><dt>Actual</dt><dd>${escapeHtml(point.dataset.tooltipActual)}</dd></div><div><dt>B − actual</dt><dd>${escapeHtml(point.dataset.tooltipVariance)}</dd></div></dl>`
-      : `<div class="chart-tooltip__head"><strong>${escapeHtml(point.dataset.tooltipMonth)}</strong><span>${escapeHtml(point.dataset.tooltipSource)}</span></div><dl><div><dt>Vintage A accuracy</dt><dd>${escapeHtml(point.dataset.tooltipVintageA)}</dd></div><div><dt>Vintage B accuracy</dt><dd>${escapeHtml(point.dataset.tooltipVintageB)}</dd></div><div><dt>Vintage B bias</dt><dd class="${Number(point.dataset.tooltipBiasRaw) >= 0 ? "chart-tooltip__over" : "chart-tooltip__under"}">${escapeHtml(point.dataset.tooltipBias)}</dd></div></dl>`;
+      : `<div class="chart-tooltip__head"><strong>${escapeHtml(point.dataset.tooltipMonth)}</strong><span>${escapeHtml(point.dataset.tooltipSource)}</span></div><dl>${vintageAccuracyContent}${vintageAccuracyEvidence}<div><dt>Latest forecast bias</dt><dd class="${Number(point.dataset.tooltipBiasRaw) >= 0 ? "chart-tooltip__over" : "chart-tooltip__under"}">${escapeHtml(point.dataset.tooltipBias)}</dd></div></dl>`;
     const revisionPairContent = `<div class="chart-tooltip__head"><strong>${escapeHtml(point.dataset.tooltipCode)}</strong><span>${escapeHtml(point.dataset.tooltipSource)}</span></div><p class="chart-tooltip__description">${escapeHtml(point.dataset.tooltipDescription)}</p><div class="chart-tooltip__meta"><span>${escapeHtml(point.dataset.tooltipMonth)}</span><span>${escapeHtml(point.dataset.tooltipBrand)}</span><span>${escapeHtml(point.dataset.tooltipDirection)} · ${escapeHtml(point.dataset.tooltipOutcome)}</span></div><dl><div><dt>Actual volume</dt><dd>${escapeHtml(point.dataset.tooltipActual)}</dd></div><div><dt>Vintage A forecast</dt><dd>${escapeHtml(point.dataset.tooltipVintageA)}<small>${escapeHtml(point.dataset.tooltipVintageAScope)}</small></dd></div><div><dt>Vintage B forecast</dt><dd>${escapeHtml(point.dataset.tooltipVintageB)}<small>${escapeHtml(point.dataset.tooltipVintageBScope)}</small></dd></div><div><dt>Error before revision</dt><dd>${escapeHtml(point.dataset.tooltipErrorA)}</dd></div><div><dt>Error after revision</dt><dd>${escapeHtml(point.dataset.tooltipErrorB)}</dd></div><div><dt>Forecast revision</dt><dd>${escapeHtml(point.dataset.tooltipRevision)}</dd></div><div class="chart-tooltip__result"><dt>Error improvement</dt><dd class="${Number(point.dataset.tooltipImprovementRaw) >= 0 ? "good" : "bad"}">${escapeHtml(point.dataset.tooltipImprovement)}</dd></div></dl>`;
     const revisionScoreContent = `<div class="chart-tooltip__head"><strong>${escapeHtml(point.dataset.tooltipCode)}</strong><span>${escapeHtml(point.dataset.tooltipSource)}</span></div><p class="chart-tooltip__description">${escapeHtml(point.dataset.tooltipDescription)}</p><div class="chart-tooltip__meta"><span>${escapeHtml(point.dataset.tooltipWindow)}</span><span>${escapeHtml(point.dataset.tooltipBrand)}</span><span>SKU class ${escapeHtml(point.dataset.tooltipSkuClass)}</span><span>${escapeHtml(point.dataset.tooltipDirection)} · ${escapeHtml(point.dataset.tooltipOutcome)}</span></div><dl><div><dt>Six-month actual volume</dt><dd>${escapeHtml(point.dataset.tooltipActual)}</dd></div><div><dt>Evidence window</dt><dd>${escapeHtml(point.dataset.tooltipMonths)} target months<small>${escapeHtml(point.dataset.tooltipVintages)} vintages per month · ${escapeHtml(point.dataset.tooltipTransitions)} vintage changes</small></dd></div><div><dt>Improving months</dt><dd>${escapeHtml(point.dataset.tooltipImproving)}<small>${escapeHtml(point.dataset.tooltipDegrading)} degrading · ${escapeHtml(point.dataset.tooltipNeutral)} neutral</small></dd></div><div><dt>Forecast trend</dt><dd>${escapeHtml(point.dataset.tooltipRevision)}<small>median monthly trend · % of actual per vintage</small></dd></div><div class="chart-tooltip__result"><dt>Vintage improvement score</dt><dd class="${Number(point.dataset.tooltipImprovementRaw) >= 0 ? "good" : "bad"}">${escapeHtml(point.dataset.tooltipImprovement)}<small>median monthly FA change · pp per vintage</small></dd></div></dl>`;
     const revisionContent =
@@ -499,11 +537,130 @@
     setScopeDrawerOpen(false, restoreFocus ? trigger : null);
   }
 
+  function accuracyVintageOptions(payload = currentPayload) {
+    return payload?.accuracy_vintages?.options || [];
+  }
+
+  function requestedAccuracyVintageIds(payload = currentPayload) {
+    const options = accuracyVintageOptions(payload);
+    const supportedIds = new Set(options.map((option) => option.id));
+    const visibleInputs = vintageSelectorPopover.hidden
+      ? []
+      : Array.from(
+          vintageSelectorPopover.querySelectorAll("[data-vintage-option]"),
+        );
+    if (visibleInputs.length) {
+      return visibleInputs
+        .filter((input) => input.checked && supportedIds.has(input.value))
+        .map((input) => input.value);
+    }
+    return options
+      .filter((option) => option.selected)
+      .map((option) => option.id);
+  }
+
+  function syncAccuracyVintageSelection(payload) {
+    const selectedCount = accuracyVintageOptions(payload).filter(
+      (option) => option.selected,
+    ).length;
+    document
+      .querySelectorAll("[data-vintage-selector-count]")
+      .forEach((node) => (node.textContent = String(selectedCount)));
+    const subtitle = document.querySelector("[data-accuracy-chart-subtitle]");
+    if (subtitle)
+      subtitle.textContent = `Latest forecast fixed · ${selectedCount} vintage${selectedCount === 1 ? "" : "s"} selected`;
+    if (!vintageSelectorPopover.hidden) {
+      renderVintageSelector();
+      if (vintageSelectorTrigger)
+        positionVintageSelector(vintageSelectorTrigger);
+    }
+  }
+
+  function accuracyVintageSeries(payload = currentPayload) {
+    const vintages = payload?.accuracy_vintages;
+    if (!vintages?.latest) return [];
+    return [
+      ...vintages.options.filter((option) => option.selected),
+      vintages.latest,
+    ];
+  }
+
+  function accuracyVintageColor(index, isLatest = false) {
+    return isLatest
+      ? "#087f75"
+      : ACCURACY_VINTAGE_COLORS[index % ACCURACY_VINTAGE_COLORS.length];
+  }
+
+  function accuracyVintageLegend(payload = currentPayload) {
+    const latestId = payload?.accuracy_vintages?.latest?.id;
+    return accuracyVintageSeries(payload)
+      .map((series, index) => {
+        const isLatest = series.id === latestId;
+        const color = accuracyVintageColor(index, isLatest);
+        return `<span><i class="key" style="background:${color}"></i>${escapeHtml(series.label)}${isLatest ? " · fixed" : ""}</span>`;
+      })
+      .concat(
+        '<span><i class="key key--bias-over"></i>Over bias</span>',
+        '<span><i class="key key--bias-under"></i>Under bias</span>',
+      )
+      .join("");
+  }
+
+  function renderVintageSelector() {
+    const vintages = currentPayload?.accuracy_vintages;
+    if (!vintages) return;
+    const latest = vintages.latest;
+    const options = vintages.options
+      .map((option, index) => {
+        const isDefault = option.rule?.kind === "oldest_available";
+        return `<label class="vintage-selector__option"><input type="checkbox" value="${escapeHtml(option.id)}" data-vintage-option${option.selected ? " checked" : ""}/><i style="--series-color:${accuracyVintageColor(index)}"></i><span>${escapeHtml(option.label)}${isDefault ? " <small>Default</small>" : ""}</span></label>`;
+      })
+      .join("");
+    setHtml(
+      vintageSelectorPopover,
+      `<header class="vintage-selector__head"><strong>Compare forecast vintages</strong><span>Select one or more historical vintages. Latest remains fixed.</span></header><div class="vintage-selector__fixed"><i style="--series-color:${accuracyVintageColor(0, true)}"></i><span>${escapeHtml(latest.label)}</span><small>Fixed</small></div>${options}`,
+    );
+  }
+
+  function positionVintageSelector(trigger) {
+    const triggerRect = trigger.getBoundingClientRect();
+    const popoverRect = vintageSelectorPopover.getBoundingClientRect();
+    const margin = 10;
+    const gap = 7;
+    let left = triggerRect.right - popoverRect.width;
+    let top = triggerRect.bottom + gap;
+    if (left < margin) left = margin;
+    if (left + popoverRect.width > innerWidth - margin)
+      left = innerWidth - popoverRect.width - margin;
+    if (top + popoverRect.height > innerHeight - margin)
+      top = triggerRect.top - popoverRect.height - gap;
+    vintageSelectorPopover.style.left = `${Math.max(margin, left)}px`;
+    vintageSelectorPopover.style.top = `${Math.max(margin, top)}px`;
+  }
+
+  function setVintageSelectorOpen(open, trigger = vintageSelectorTrigger) {
+    vintageSelectorTriggers.forEach((button) =>
+      button.setAttribute("aria-expanded", String(open && button === trigger)),
+    );
+    vintageSelectorPopover.hidden = !open;
+    if (open && trigger) {
+      vintageSelectorTrigger = trigger;
+      renderVintageSelector();
+      positionVintageSelector(trigger);
+    }
+  }
+
+  function closeVintageSelector({ restoreFocus = false } = {}) {
+    const trigger = vintageSelectorTrigger;
+    setVintageSelectorOpen(false);
+    vintageSelectorTrigger = null;
+    if (restoreFocus) trigger?.focus();
+  }
+
   const chartDialogContent = {
     accuracy: {
       title: "Monthly vintage accuracy and bias",
-      legend:
-        '<span><i class="key key--vintage-b"></i>Vintage B</span><span><i class="key key--vintage-a"></i>Vintage A</span><span><i class="key key--bias-over"></i>Over bias</span><span><i class="key key--bias-under"></i>Under bias</span>',
+      legend: (payload) => accuracyVintageLegend(payload),
       render: overviewPerformanceChart,
     },
     volume: {
@@ -585,6 +742,10 @@
       ? config.renderPayload(fullscreenPayload)
       : config.render(fullscreenPayload.monthly_performance?.rows || [], {
           height: overviewChartHeight(chartDialogBody),
+          vintagePayload:
+            fullscreenChart === "accuracy"
+              ? fullscreenPayload.accuracy_vintages
+              : null,
         });
     setHtml(chartDialogBody, content);
     if (fullscreenChart === "revision") refreshScatterCharts();
@@ -596,6 +757,9 @@
     fullscreenTrigger = trigger;
     chartDialog.hidden = false;
     document.body.classList.add("has-chart-dialog");
+    chartDialog
+      .querySelector("[data-vintage-selector-trigger]")
+      .toggleAttribute("hidden", kind !== "accuracy");
     renderFullscreenChart();
     chartDialogClose.focus();
   }
@@ -603,6 +767,7 @@
   function closeChartDialog() {
     if (chartDialog.hidden) return;
     closeScopeDrawer();
+    closeVintageSelector();
     chartDialog.hidden = true;
     chartDialog.removeAttribute("data-chart-kind");
     setHtml(chartDialogBody, "");
@@ -1047,6 +1212,7 @@
       minimum_actual_volume: numeric("minimum_actual_volume") ?? 0,
       vintage_a: vintage("vintage_a"),
       vintage_b: vintage("vintage_b"),
+      accuracy_vintage_ids: requestedAccuracyVintageIds(),
       revision_direction: value("revision_direction") || null,
       revision_outcome: value("revision_outcome") || null,
       revision_tolerance_kl: numeric("revision_tolerance_kl") ?? 0.01,
@@ -1072,7 +1238,11 @@
   function updateFilterCount() {
     if (!defaults) return;
     const request = buildRequest();
-    const ignored = new Set(["product_parent_code", "product_target_month"]);
+    const ignored = new Set([
+      "accuracy_vintage_ids",
+      "product_parent_code",
+      "product_target_month",
+    ]);
     const active = Object.keys(defaults).filter((key) => {
       if (ignored.has(key) || !(key in request)) return false;
       return JSON.stringify(request[key]) !== JSON.stringify(defaults[key]);
@@ -1237,11 +1407,12 @@
     await Promise.all(required.map((moduleName) => fetchModule(moduleName)));
   }
 
-  async function refreshView({ announce = false } = {}) {
+  async function refreshView({ announce = false, closeSelector = true } = {}) {
     clearTimeout(refreshTimer);
     const request = buildRequest();
     const key = requestKey(request);
     if (compactController && compactRequestKey === key) return;
+    if (closeSelector) closeVintageSelector();
     compactController?.abort();
     abortModuleRequests();
     revisionDrilldownBaseKey = null;
@@ -1287,13 +1458,17 @@
     }
   }
 
-  function scheduleRefresh({ immediate = false, announce = true } = {}) {
+  function scheduleRefresh({
+    immediate = false,
+    announce = true,
+    closeSelector = true,
+  } = {}) {
     updateFilterCount();
     clearTimeout(refreshTimer);
-    if (immediate) void refreshView({ announce });
+    if (immediate) void refreshView({ announce, closeSelector });
     else
       refreshTimer = setTimeout(
-        () => void refreshView({ announce }),
+        () => void refreshView({ announce, closeSelector }),
         INPUT_DEBOUNCE_MS,
       );
   }
@@ -1435,6 +1610,7 @@
   }
 
   function renderOverviewCharts(payload) {
+    syncAccuracyVintageSelection(payload);
     const monthlyRows = payload.monthly_performance?.rows || [];
     const performanceChart = document.querySelector("[data-overview-chart]");
     const volumeChart = document.querySelector("[data-overview-volume-chart]");
@@ -1442,6 +1618,7 @@
       performanceChart,
       overviewPerformanceChart(monthlyRows, {
         height: overviewChartHeight(performanceChart),
+        vintagePayload: payload.accuracy_vintages,
       }),
     );
     setHtml(
@@ -1509,15 +1686,7 @@
     const accuracyDelta = metrics.accuracy_delta_pp;
     const volumeDistributions = payload.volume_distributions || {};
     const volumeScale = boxPlotScale(volumeDistributions);
-    const wape = finite(metrics.wape_pct)
-      ? metrics.wape_pct
-      : finite(metrics.accuracy_numerator_kl) &&
-          finite(metrics.accuracy_denominator_actual_kl) &&
-          metrics.accuracy_denominator_actual_kl !== 0
-        ? (metrics.accuracy_numerator_kl /
-            metrics.accuracy_denominator_actual_kl) *
-          100
-        : null;
+    const wape = finite(metrics.wape_pct) ? metrics.wape_pct : null;
     setHtml(
       document.querySelector("[data-kpis]"),
       [
@@ -1625,13 +1794,23 @@
     }, `M ${points[0].x},${points[0].y}`);
   }
 
-  function overviewPerformanceChart(rows, { height = 252 } = {}) {
+  function overviewPerformanceChart(
+    rows,
+    { height = 252, vintagePayload = null } = {},
+  ) {
     if (!rows.length) return emptyVisual("No monthly metric rows");
     const source = rows[0].source;
     const sourceRows = rows
       .filter((row) => row.source === source)
       .sort((a, b) => a.snop_month.localeCompare(b.snop_month));
     const months = sourceRows.map((row) => row.snop_month);
+    if (!vintagePayload?.latest)
+      return emptyVisual("No common-cohort vintage accuracy rows");
+    const activePayload = vintagePayload;
+    const activeSeries = accuracyVintageSeries({
+      accuracy_vintages: activePayload,
+    });
+    const latestId = activePayload.latest.id;
     const width = 1000;
     const scaleY = (value) => Math.round((value / 252) * height);
     const left = 22;
@@ -1643,10 +1822,9 @@
     const x = (month) =>
       left +
       (months.indexOf(month) / Math.max(1, months.length - 1)) * (right - left);
-    const accuracyValues = sourceRows.flatMap((row) => [
-      row.vintage_a_accuracy_pct,
-      row.vintage_b_accuracy_pct,
-    ]);
+    const accuracyValues = activeSeries.flatMap((series) =>
+      series.rows.map((row) => row.forecast_accuracy_pct),
+    );
     const [accuracyMin, accuracyMax] = chartExtent(accuracyValues);
     const accuracyY = (value) =>
       accuracyBottom -
@@ -1665,20 +1843,30 @@
         return `<line x1="${left}" y1="${y}" x2="${right}" y2="${y}"/>`;
       })
       .join("");
-    const line = (metric, className, labelOffset) => {
-      const metricRows = sourceRows.filter((row) => finite(row[metric]));
-      const points = metricRows.map((row) => ({
-        x: x(row.snop_month),
-        y: accuracyY(row[metric]),
-      }));
-      const labels = metricRows
-        .map(
-          (row) =>
-            `<text x="${x(row.snop_month)}" y="${accuracyY(row[metric]) + labelOffset}">${escapeHtml(metricValue(row[metric], metric, 0))}</text>`,
-        )
-        .join("");
-      return `<path class="chart__smooth-line ${className}" data-interpolation="smooth" d="${smoothLinePath(points)}"/><g class="chart__data-labels ${className}">${labels}</g>`;
-    };
+    const accuracyLines = activeSeries
+      .map((series, index) => {
+        const isLatest = series.id === latestId;
+        const seriesRows = series.rows.filter((row) =>
+          finite(row.forecast_accuracy_pct),
+        );
+        const points = seriesRows.map((row) => ({
+          x: x(row.snop_month),
+          y: accuracyY(row.forecast_accuracy_pct),
+        }));
+        const color = accuracyVintageColor(index, isLatest);
+        const labelOffset = isLatest ? -7 : 14;
+        const labels =
+          activeSeries.length <= 2 || isLatest
+            ? seriesRows
+                .map(
+                  (row) =>
+                    `<text x="${x(row.snop_month)}" y="${accuracyY(row.forecast_accuracy_pct) + labelOffset}">${escapeHtml(metricValue(row.forecast_accuracy_pct, "forecast_accuracy_pct", 0))}</text>`,
+                )
+                .join("")
+            : "";
+        return `<path class="chart__smooth-line chart__series--comparison${isLatest ? " chart__series--vintage-b" : ""}" style="--series-color:${color}" data-vintage-id="${escapeHtml(series.id)}" data-vintage-fixed="${isLatest}" data-vintage-default="${Boolean(series.selected)}" data-interpolation="smooth" d="${smoothLinePath(points)}"/><g class="chart__data-labels chart__series--comparison" style="--series-color:${color}" data-vintage-id="${escapeHtml(series.id)}">${labels}</g>`;
+      })
+      .join("");
     const biasBars = sourceRows
       .filter((row) => finite(row.bias_pct))
       .map((row) => {
@@ -1699,11 +1887,34 @@
     const hitWidth = (right - left) / Math.max(1, months.length - 1);
     const monthHits = sourceRows
       .map((row) => {
-        const accessibleLabel = `${monthLabel(row.snop_month)}: Vintage A accuracy ${metricValue(row.vintage_a_accuracy_pct, "vintage_a_accuracy_pct")}, Vintage B accuracy ${metricValue(row.vintage_b_accuracy_pct, "vintage_b_accuracy_pct")}, Vintage B bias ${metricValue(row.bias_pct, "bias_pct")}`;
-        return `<rect class="chart__month-hit chart__point" x="${Math.max(left, x(row.snop_month) - hitWidth / 2)}" y="${accuracyTop}" width="${Math.min(hitWidth, right - Math.max(left, x(row.snop_month) - hitWidth / 2))}" height="${biasBottom - accuracyTop}" tabindex="0" role="img" aria-label="${escapeHtml(accessibleLabel)}" data-tooltip-source="${escapeHtml(source.toUpperCase())}" data-tooltip-month="${escapeHtml(monthLabel(row.snop_month))}" data-tooltip-vintage-a="${escapeHtml(metricValue(row.vintage_a_accuracy_pct, "vintage_a_accuracy_pct"))}" data-tooltip-vintage-b="${escapeHtml(metricValue(row.vintage_b_accuracy_pct, "vintage_b_accuracy_pct"))}" data-tooltip-bias="${escapeHtml(metricValue(row.bias_pct, "bias_pct"))}" data-tooltip-bias-raw="${escapeHtml(row.bias_pct)}"/>`;
+        const seriesValues = activeSeries.map((series) => {
+          const point = series.rows.find(
+            (item) => item.snop_month === row.snop_month,
+          );
+          return {
+            label: series.label,
+            fixed: series.id === latestId,
+            value: metricValue(
+              point?.forecast_accuracy_pct,
+              "forecast_accuracy_pct",
+            ),
+          };
+        });
+        const evidencePoint = activeSeries
+          .map((series) =>
+            series.rows.find((item) => item.snop_month === row.snop_month),
+          )
+          .find(Boolean);
+        const commonCohort = count(evidencePoint?.eligible_parents);
+        const actualDenominator = kl(evidencePoint?.actual_denominator_kl);
+        const seriesSummary = seriesValues
+          .map((series) => `${series.label} ${series.value}`)
+          .join(", ");
+        const accessibleLabel = `${monthLabel(row.snop_month)}: ${seriesSummary}, common cohort ${commonCohort} parents, actual denominator ${actualDenominator}, latest forecast bias ${metricValue(row.bias_pct, "bias_pct")}`;
+        return `<rect class="chart__month-hit chart__point" x="${Math.max(left, x(row.snop_month) - hitWidth / 2)}" y="${accuracyTop}" width="${Math.min(hitWidth, right - Math.max(left, x(row.snop_month) - hitWidth / 2))}" height="${biasBottom - accuracyTop}" tabindex="0" role="img" aria-label="${escapeHtml(accessibleLabel)}" data-tooltip-source="${escapeHtml(source.toUpperCase())}" data-tooltip-month="${escapeHtml(monthLabel(row.snop_month))}" data-tooltip-vintage-series="${escapeHtml(JSON.stringify(seriesValues))}" data-tooltip-common-cohort="${escapeHtml(commonCohort)}" data-tooltip-actual-denominator="${escapeHtml(actualDenominator)}" data-tooltip-bias="${escapeHtml(metricValue(row.bias_pct, "bias_pct"))}" data-tooltip-bias-raw="${escapeHtml(row.bias_pct)}"/>`;
       })
       .join("");
-    return `<svg class="chart chart--overview" viewBox="0 0 ${width} ${height}" role="img" aria-label="Monthly Vintage A and Vintage B accuracy with Vintage B bias"><g class="chart__grid">${accuracyGrid}</g>${line("vintage_a_accuracy_pct", "chart__series--vintage-a", 14)}${line("vintage_b_accuracy_pct", "chart__series--vintage-b", -7)}<g class="bias-strip"><line class="bias-strip__zero" x1="${left}" y1="${biasZero}" x2="${right}" y2="${biasZero}"/>${biasBars}</g><line class="chart__x-divider" x1="${left}" y1="${scaleY(228)}" x2="${right}" y2="${scaleY(228)}"/><g class="chart__month-hits">${monthHits}</g><g class="chart__labels">${monthLabels}</g></svg>`;
+    return `<svg class="chart chart--overview" viewBox="0 0 ${width} ${height}" role="img" aria-label="Monthly selected historical forecast accuracy compared with fixed latest forecast accuracy and latest forecast bias"><g class="chart__grid">${accuracyGrid}</g>${accuracyLines}<g class="bias-strip"><line class="bias-strip__zero" x1="${left}" y1="${biasZero}" x2="${right}" y2="${biasZero}"/>${biasBars}</g><line class="chart__x-divider" x1="${left}" y1="${scaleY(228)}" x2="${right}" y2="${scaleY(228)}"/><g class="chart__month-hits">${monthHits}</g><g class="chart__labels">${monthLabels}</g></svg>`;
   }
 
   function overviewVolumeChart(rows, { height = 252 } = {}) {
@@ -1851,12 +2062,16 @@
 
     if (monthlyMetric === "forecast_accuracy_pct") {
       title.textContent = chartDialogContent.accuracy.title;
-      subtitle.textContent = `Compare accuracy; bias is for Vintage B · ${payload.request.comparison_mode ? "Aligned TM and ML" : payload.request.source.toUpperCase()} · ${monthly.total} monthly rows`;
-      setHtml(legend, chartDialogContent.accuracy.legend);
+      const selectedCount = accuracyVintageOptions(payload).filter(
+        (option) => option.selected,
+      ).length;
+      subtitle.textContent = `Latest forecast fixed · ${selectedCount} comparison vintage${selectedCount === 1 ? "" : "s"} · ${payload.request.comparison_mode ? "Aligned TM and ML" : payload.request.source.toUpperCase()} · ${monthly.total} monthly rows`;
+      setHtml(legend, accuracyVintageLegend(payload));
       setHtml(
         chartContainer,
         overviewPerformanceChart(monthly.rows, {
           height: overviewChartHeight(chartContainer),
+          vintagePayload: payload.accuracy_vintages,
         }),
       );
       return;
@@ -2948,7 +3163,8 @@
       .join("");
     const labels = rows
       .map((row, index) =>
-        index % Math.max(1, Math.ceil(rows.length / 6)) === 0 || index === rows.length - 1
+        index % Math.max(1, Math.ceil(rows.length / 6)) === 0 ||
+        index === rows.length - 1
           ? `<text x="${x(index)}" y="230">${escapeHtml(monthLabel(row.snop_month).split(" ")[0])}</text>`
           : "",
       )
@@ -3024,17 +3240,22 @@
   function productPeerBenchmark(postmortem) {
     const peers = postmortem?.peer_benchmarks?.rows || [];
     if (!peers.length) return emptyVisual("No eligible sibling cohort");
-    const values = peers.flatMap((row) => [
-      row.p25_accuracy_pct,
-      row.median_accuracy_pct,
-      row.p75_accuracy_pct,
-      row.selected_accuracy_pct,
-    ]).filter(finite);
+    const values = peers
+      .flatMap((row) => [
+        row.p25_accuracy_pct,
+        row.median_accuracy_pct,
+        row.p75_accuracy_pct,
+        row.selected_accuracy_pct,
+      ])
+      .filter(finite);
     const lower = Math.min(...values, 0);
     const upper = Math.max(...values, 100);
     const position = (value) =>
       finite(value)
-        ? Math.max(0, Math.min(100, ((value - lower) / Math.max(upper - lower, 1)) * 100))
+        ? Math.max(
+            0,
+            Math.min(100, ((value - lower) / Math.max(upper - lower, 1)) * 100),
+          )
         : 0;
     return `<div class="postmortem-peer-list">${peers
       .map((row) => {
@@ -3044,7 +3265,9 @@
         const median = position(row.median_accuracy_pct);
         return `<article class="postmortem-peer"><span><b>${escapeHtml(labelize(row.cohort_type))}</b><small>${escapeHtml(row.cohort_value)} · ${count(row.eligible_count)} eligible</small></span><div class="postmortem-peer__track" aria-label="Selected accuracy ${pct(row.selected_accuracy_pct)} versus ${labelize(row.cohort_type)} median ${pct(row.median_accuracy_pct)}"><i class="postmortem-peer__band" style="left:${p25}%;width:${Math.max(1, p75 - p25)}%"></i><i class="postmortem-peer__median" style="left:${median}%"></i><i class="postmortem-peer__selected" style="left:${selected}%"></i></div><strong>${pct(row.selected_accuracy_pct)}</strong><p class="postmortem-peer-note">Median ${pct(row.median_accuracy_pct)} · rank ${row.selected_rank || "—"}/${count(row.eligible_count)} · percentile ${pct(row.selected_percentile_pct)}</p></article>`;
       })
-      .join("")}<p class="postmortem-peer-note">Accuracy scale ${number(lower, 0)}% to ${number(upper, 0)}% · same target month and active source.</p></div>`;
+      .join(
+        "",
+      )}<p class="postmortem-peer-note">Accuracy scale ${number(lower, 0)}% to ${number(upper, 0)}% · same target month and active source.</p></div>`;
   }
 
   function renderProductPostmortem(detail) {
@@ -3058,18 +3281,35 @@
       `<div class="postmortem-decision__lead"><header><span class="severity ${decisionKind}">${escapeHtml(labelize(treatment.action || "Review"))}</span><h3>${escapeHtml(treatment.rationale || postmortem.status_message)}</h3></header><p>Evidence-bound recommendation for the forward baseline; business cause remains a review input.</p></div><div class="postmortem-decision__fact"><b>Proposed impact</b><strong>${finite(treatment.impact_kl) ? signedKl(treatment.impact_kl) : "No quantified change"}</strong><small>Directional adjustment, not an auto-write</small></div><div class="postmortem-decision__fact"><b>Confidence</b><strong>${escapeHtml(labelize(treatment.confidence))}</strong><small>Based on connected forecast evidence</small></div><div class="postmortem-decision__fact"><b>Review trigger</b><strong>${escapeHtml(treatment.review_trigger || "Next material update")}</strong><small>Planner retains final judgment</small></div>`,
     );
     const metrics = [
-      ["Latest forecast", kl(summary.latest_forecast_kl), `As of ${dateLabel(summary.latest_calculation_month)}`],
+      [
+        "Latest forecast",
+        kl(summary.latest_forecast_kl),
+        `As of ${dateLabel(summary.latest_calculation_month)}`,
+      ],
       ["Actual", kl(summary.actual_kl), monthLabel(detail.target_month)],
-      ["Forecast accuracy", pct(summary.forecast_accuracy_pct), "Latest forecast vs actual"],
+      [
+        "Forecast accuracy",
+        pct(summary.forecast_accuracy_pct),
+        "Latest forecast vs actual",
+      ],
       ["Bias", signedKl(summary.bias_kl), pct(summary.bias_pct)],
-      ["Absolute error", kl(summary.absolute_error_kl), "Magnitude of latest miss"],
-      ["Revision efficiency", pct(summary.revision_efficiency_pct), `${count(summary.material_revision_hits)} of ${count(summary.material_revisions)} material moves helped`],
+      [
+        "Absolute error",
+        kl(summary.absolute_error_kl),
+        "Magnitude of latest miss",
+      ],
+      [
+        "Revision efficiency",
+        pct(summary.revision_efficiency_pct),
+        `${count(summary.material_revision_hits)} of ${count(summary.material_revisions)} material moves helped`,
+      ],
     ];
     setHtml(
       document.querySelector("[data-postmortem-metrics]"),
       metrics
         .map(
-          ([label, value, note]) => `<article class="postmortem-metric"><b>${escapeHtml(label)}</b><strong>${escapeHtml(value)}</strong><small>${escapeHtml(note)}</small></article>`,
+          ([label, value, note]) =>
+            `<article class="postmortem-metric"><b>${escapeHtml(label)}</b><strong>${escapeHtml(value)}</strong><small>${escapeHtml(note)}</small></article>`,
         )
         .join(""),
     );
@@ -3165,11 +3405,8 @@
     setHtml(
       document.querySelector("[data-product-summary]"),
       [
-        populationItem("Description", detail.parent_description),
         populationItem("Brand", detail.brand || "Unmapped"),
         populationItem("SKU class", detail.sku_class || "Unclassified"),
-        populationItem("Mapping", labelize(detail.mapping_status)),
-        populationItem("Target", monthLabel(detail.target_month)),
       ].join(""),
     );
     renderProductPostmortem(detail);
@@ -3491,6 +3728,7 @@
     revisionScatterZoom = 1;
     revisionScatterSelection = new Set();
     revisionScatterPan = { x: 0, y: 0 };
+    closeVintageSelector();
     applyRequestToControls(defaults);
     document.querySelectorAll("[data-metric-selector]").forEach((select) => {
       select.selectedIndex = 0;
@@ -3730,6 +3968,10 @@
     renderRevisionActionQueue();
   });
   document.addEventListener("change", (event) => {
+    if (event.target.matches?.("[data-vintage-option]")) {
+      scheduleRefresh({ immediate: true, closeSelector: false });
+      return;
+    }
     if (!event.target.matches?.("[data-scatter-sku-class]")) return;
     revisionScatterSkuClass = event.target.value || "all";
     revisionScatterZoom = 1;
@@ -3810,6 +4052,27 @@
     }
   });
   document.addEventListener("click", (event) => {
+    const vintageTrigger = event.target.closest?.(
+      "[data-vintage-selector-trigger]",
+    );
+    if (vintageTrigger) {
+      const open =
+        vintageSelectorPopover.hidden ||
+        vintageSelectorTrigger !== vintageTrigger;
+      if (open) {
+        closeScopeDrawer();
+        setVintageSelectorOpen(true, vintageTrigger);
+      } else {
+        closeVintageSelector({ restoreFocus: true });
+      }
+      return;
+    }
+    if (
+      !vintageSelectorPopover.hidden &&
+      !event.target.closest?.(".vintage-selector")
+    ) {
+      closeVintageSelector();
+    }
     const drilldownCategory = event.target.closest?.(
       "[data-drilldown-category]",
     );
@@ -3921,6 +4184,10 @@
   document.addEventListener("keydown", (event) => {
     if (event.key !== "Escape") return;
     if (!chartTooltip.hidden) hideChartTooltip(document.activeElement);
+    if (!vintageSelectorPopover.hidden) {
+      closeVintageSelector({ restoreFocus: true });
+      return;
+    }
     if (!revisionDrilldownPopover.hidden) {
       closeRevisionDrilldown({ restoreFocus: true });
       return;
@@ -3932,6 +4199,8 @@
     if (!chartDialog.hidden) closeChartDialog();
   });
   window.addEventListener("resize", () => {
+    if (!vintageSelectorPopover.hidden && vintageSelectorTrigger)
+      positionVintageSelector(vintageSelectorTrigger);
     if (!revisionDrilldownPopover.hidden && revisionDrilldownTrigger)
       positionRevisionDrilldown(revisionDrilldownTrigger);
   });

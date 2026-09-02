@@ -587,11 +587,25 @@
                       <h3 class="frame__title" id="overview-chart-title">
                         Monthly vintage accuracy and bias
                       </h3>
-                      <p class="frame__sub">
-                        Compare accuracy; bias is for Vintage B
+                      <p class="frame__sub" data-accuracy-chart-subtitle>
+                        Latest forecast fixed · oldest vintage selected
                       </p>
                     </div>
                     <div class="frame__actions">
+                      <button
+                        class="vintage-selector__trigger"
+                        data-vintage-selector-trigger
+                        type="button"
+                        aria-label="Choose forecast vintages to compare"
+                        aria-haspopup="dialog"
+                        aria-expanded="false"
+                      >
+                        <svg viewBox="0 0 20 20" aria-hidden="true">
+                          <path d="M4 6h12M4 10h12M4 14h12" />
+                        </svg>
+                        Vintages
+                        <strong data-vintage-selector-count>1</strong>
+                      </button>
                       <button
                         class="chart-expand"
                         data-action="chart-fullscreen"
@@ -847,7 +861,6 @@
               </div>
               <div class="subpanel is-active" data-subpanel="history:product">
                 <div class="history-context">
-                  <div class="product-summary" data-product-summary></div>
                   <div
                     class="toolbar history-toolbar"
                     aria-label="Product drill-down filters"
@@ -866,6 +879,7 @@
                       ></select
                     ></label>
                   </div>
+                  <div class="product-summary" data-product-summary></div>
                 </div>
                 <section
                   class="postmortem-decision"
@@ -881,7 +895,9 @@
                   <section class="frame postmortem-performance-frame">
                     <header class="frame__head">
                       <div>
-                        <h3 class="frame__title">Latest forecast versus actual</h3>
+                        <h3 class="frame__title">
+                          Latest forecast versus actual
+                        </h3>
                         <p class="frame__sub">
                           Actualized target months · latest available forecast
                         </p>
@@ -900,7 +916,9 @@
                           aria-haspopup="dialog"
                           aria-controls="overview-chart-dialog"
                         >
-                          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 3H3v4M13 3h4v4M17 13v4h-4M7 17H3v-4" /></svg>
+                          <svg viewBox="0 0 20 20" aria-hidden="true">
+                            <path d="M7 3H3v4M13 3h4v4M17 13v4h-4M7 17H3v-4" />
+                          </svg>
                           Full screen
                         </button>
                       </div>
@@ -920,13 +938,18 @@
                   <section class="frame">
                     <header class="frame__head">
                       <div>
-                        <h3 class="frame__title">Revision outcome · oldest → latest</h3>
+                        <h3 class="frame__title">
+                          Revision outcome · oldest → latest
+                        </h3>
                         <p class="frame__sub">
                           Error improvement · zero baseline · by target month
                         </p>
                       </div>
                       <div class="frame__actions">
-                        <span class="frame__metric" data-postmortem-revision-summary></span>
+                        <span
+                          class="frame__metric"
+                          data-postmortem-revision-summary
+                        ></span>
                         <button
                           class="chart-expand"
                           data-action="chart-fullscreen"
@@ -936,7 +959,9 @@
                           aria-haspopup="dialog"
                           aria-controls="overview-chart-dialog"
                         >
-                          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 3H3v4M13 3h4v4M17 13v4h-4M7 17H3v-4" /></svg>
+                          <svg viewBox="0 0 20 20" aria-hidden="true">
+                            <path d="M7 3H3v4M13 3h4v4M17 13v4h-4M7 17H3v-4" />
+                          </svg>
                           Full screen
                         </button>
                       </div>
@@ -954,7 +979,10 @@
                           Same brand and SKU class · matched active scope
                         </p>
                       </div>
-                      <span class="frame__metric" data-postmortem-peer-scope></span>
+                      <span
+                        class="frame__metric"
+                        data-postmortem-peer-scope
+                      ></span>
                     </header>
                     <div
                       class="frame__body postmortem-peer-body"
@@ -970,7 +998,8 @@
                           Selected target · forecast development
                         </h3>
                         <p class="frame__sub">
-                          Calculation month, horizon, forecast, actual, error and bias
+                          Calculation month, horizon, forecast, actual, error
+                          and bias
                         </p>
                       </div>
                       <div class="frame__actions">
@@ -988,14 +1017,19 @@
                           aria-haspopup="dialog"
                           aria-controls="overview-chart-dialog"
                         >
-                          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 3H3v4M13 3h4v4M17 13v4h-4M7 17H3v-4" /></svg>
+                          <svg viewBox="0 0 20 20" aria-hidden="true">
+                            <path d="M7 3H3v4M13 3h4v4M17 13v4h-4M7 17H3v-4" />
+                          </svg>
                           Full screen
                         </button>
                       </div>
                     </header>
                     <div class="frame__body" data-history-chart></div>
                   </section>
-                  <section class="postmortem-evidence" data-postmortem-evidence></section>
+                  <section
+                    class="postmortem-evidence"
+                    data-postmortem-evidence
+                  ></section>
                 </div>
                 <div
                   class="revision-table postmortem-revision-table"
@@ -1140,6 +1174,21 @@
             <h2 id="overview-chart-dialog-title">Overview chart</h2>
           </div>
           <div class="chart-dialog__actions">
+            <button
+              class="vintage-selector__trigger vintage-selector__trigger--dialog"
+              data-vintage-selector-trigger
+              type="button"
+              aria-label="Choose forecast vintages to compare"
+              aria-haspopup="dialog"
+              aria-expanded="false"
+              hidden
+            >
+              <svg viewBox="0 0 20 20" aria-hidden="true">
+                <path d="M4 6h12M4 10h12M4 14h12" />
+              </svg>
+              Vintages
+              <strong data-vintage-selector-count>1</strong>
+            </button>
             <button
               class="btn btn--accent"
               data-action="fullscreen-filters"

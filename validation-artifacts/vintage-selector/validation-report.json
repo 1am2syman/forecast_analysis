@@ -1,0 +1,104 @@
+{
+  "initial": {
+    "lineIds": [
+      "oldest_available",
+      "latest_available"
+    ],
+    "fixed": 1,
+    "count": "1",
+    "triggerBeforeFullscreen": true,
+    "actionsContained": true,
+    "toolbarInsideFrame": true,
+    "pathsContained": true,
+    "pageOverflow": 0
+  },
+  "initialCohort": {
+    "series": 2,
+    "months": 16
+  },
+  "menu": {
+    "fixedText": "Latest availableFixed",
+    "options": [
+      {
+        "value": "oldest_available",
+        "checked": true
+      },
+      {
+        "value": "specific_horizon:4",
+        "checked": false
+      },
+      {
+        "value": "specific_horizon:3",
+        "checked": false
+      },
+      {
+        "value": "specific_horizon:2",
+        "checked": false
+      }
+    ],
+    "overflow": -718.828125
+  },
+  "multi": {
+    "lineIds": [
+      "oldest_available",
+      "specific_horizon:4",
+      "specific_horizon:3",
+      "latest_available"
+    ],
+    "fixed": 1,
+    "count": "3",
+    "triggerBeforeFullscreen": true,
+    "actionsContained": true,
+    "toolbarInsideFrame": true,
+    "pathsContained": true,
+    "pageOverflow": 0
+  },
+  "multiCohort": {
+    "series": 4,
+    "months": 16
+  },
+  "hit": {
+    "cohort": "97",
+    "denominator": "2,597.6 KL"
+  },
+  "replaced": {
+    "lineIds": [
+      "specific_horizon:4",
+      "specific_horizon:3",
+      "latest_available"
+    ],
+    "fixed": 1,
+    "count": "2",
+    "triggerBeforeFullscreen": true,
+    "actionsContained": true,
+    "toolbarInsideFrame": true,
+    "pathsContained": true,
+    "pageOverflow": 0
+  },
+  "latestOnly": {
+    "lineIds": [
+      "latest_available"
+    ],
+    "fixed": 1,
+    "count": "0",
+    "triggerBeforeFullscreen": true,
+    "actionsContained": true,
+    "toolbarInsideFrame": true,
+    "pathsContained": true,
+    "pageOverflow": 0
+  },
+  "latestOnlyCohort": {
+    "series": 1,
+    "months": 16
+  },
+  "fullscreen": {
+    "triggerVisible": true,
+    "fixed": 1,
+    "lines": 1,
+    "overflow": 0
+  },
+  "fullscreenMenu": {
+    "insideViewport": true,
+    "anchored": true
+  }
+}

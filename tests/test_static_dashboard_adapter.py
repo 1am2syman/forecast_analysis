@@ -48,13 +48,13 @@ class StaticDashboardAdapterTests(unittest.TestCase):
         self.assertAlmostEqual(summary["actual_volume_kl"], 42_851.483835, places=5)
 
         metrics = payload["metrics"]
-        self.assertAlmostEqual(metrics["forecast_accuracy_pct"], 81.8050871, places=5)
-        self.assertAlmostEqual(metrics["bias_pct"], 1.8013579, places=5)
-        self.assertAlmostEqual(metrics["absolute_error_kl"], 7_749.9382406, places=5)
+        self.assertAlmostEqual(metrics["forecast_accuracy_pct"], 82.8214736, places=5)
+        self.assertAlmostEqual(metrics["bias_pct"], -8.0893002, places=5)
+        self.assertAlmostEqual(metrics["absolute_error_kl"], 7_317.0187365, places=5)
         self.assertAlmostEqual(metrics["coverage_pct"], 99.3990871, places=5)
-        self.assertAlmostEqual(metrics["accuracy_delta_pp"], 2.6787964, places=5)
+        self.assertAlmostEqual(metrics["accuracy_delta_pp"], 4.3340599, places=5)
         self.assertAlmostEqual(
-            metrics["revision_effectiveness_pct"], 56.3492063, places=5
+            metrics["revision_effectiveness_pct"], 57.3333333, places=5
         )
 
         self.assertGreater(payload["monthly_performance"]["total"], 0)
@@ -144,9 +144,9 @@ class StaticDashboardAdapterTests(unittest.TestCase):
         self.assertEqual(actual["count"], 16)
         self.assertEqual(forecast["count"], actual["count"])
         self.assertAlmostEqual(actual["median"], 2_628.2443305, places=6)
-        self.assertAlmostEqual(forecast["median"], 2_670.563408456, places=6)
+        self.assertAlmostEqual(forecast["median"], 2_414.224535592, places=6)
         self.assertAlmostEqual(actual["whisker_high"], 3_344.828521, places=6)
-        self.assertAlmostEqual(forecast["whisker_high"], 3_071.207993975, places=6)
+        self.assertAlmostEqual(forecast["whisker_high"], 2_792.059525762, places=6)
         for distribution in distributions.values():
             self.assertLessEqual(distribution["whisker_low"], distribution["q1"])
             self.assertLessEqual(distribution["q1"], distribution["median"])
@@ -173,6 +173,160 @@ class StaticDashboardAdapterTests(unittest.TestCase):
             all(any(row[field] is not None for field in chart_value_fields) for row in rows)
         )
         self.assertEqual(rows[-1]["snop_month"], "2026-08-01")
+
+    def test_accuracy_vintage_request_defaults_and_validation(self) -> None:
+        option_ids = [
+            option["id"] for option in self.bootstrap["accuracy_vintages"]["options"]
+        ]
+
+        self.assertEqual(self.defaults["accuracy_vintage_ids"], ["oldest_available"])
+        self.assertEqual(
+            option_ids,
+            [
+                "oldest_available",
+                "specific_horizon:4",
+                "specific_horizon:3",
+                "specific_horizon:2",
+            ],
+        )
+        self.assertNotIn(
+            self.bootstrap["accuracy_vintages"]["latest"]["id"],
+            option_ids,
+        )
+
+        request = dict(self.defaults)
+        request["accuracy_vintage_ids"] = [
+            "specific_horizon:2",
+            "oldest_available",
+            "specific_horizon:4",
+        ]
+        normalized = self.service.compact_view(request)["request"]
+        self.assertEqual(
+            normalized["accuracy_vintage_ids"],
+            ["oldest_available", "specific_horizon:4", "specific_horizon:2"],
+        )
+
+        request["accuracy_vintage_ids"] = []
+        latest_only = self.service.compact_view(request)
+        self.assertEqual(latest_only["request"]["accuracy_vintage_ids"], [])
+        self.assertFalse(
+            any(
+                option["selected"]
+                for option in latest_only["accuracy_vintages"]["options"]
+            )
+        )
+        self.assertTrue(latest_only["accuracy_vintages"]["latest"]["rows"])
+
+        invalid_values = (
+            "oldest_available",
+            ["oldest_available", 4],
+            ["oldest_available", "oldest_available"],
+            ["latest_available"],
+            ["specific_horizon:5"],
+            ["unsupported"],
+        )
+        for invalid in invalid_values:
+            with self.subTest(invalid=invalid):
+                with self.assertRaisesRegex(
+                    DashboardRequestError,
+                    "accuracy_vintage_ids",
+                ):
+                    self.service.compact_view({"accuracy_vintage_ids": invalid})
+
+    def test_accuracy_vintages_use_common_cohort_without_changing_global_metrics(
+        self,
+    ) -> None:
+        request = dict(self.defaults)
+        request["accuracy_vintage_ids"] = [
+            "specific_horizon:3",
+            "oldest_available",
+            "specific_horizon:4",
+        ]
+        payload = self.service.compact_view(request)
+        vintages = payload["accuracy_vintages"]
+        options = vintages["options"]
+        selected = [option for option in options if option["selected"]]
+        series = [*selected, vintages["latest"]]
+
+        self.assertEqual(
+            [option["id"] for option in selected],
+            ["oldest_available", "specific_horizon:4", "specific_horizon:3"],
+        )
+        self.assertEqual(
+            [option["id"] for option in options],
+            [
+                "oldest_available",
+                "specific_horizon:4",
+                "specific_horizon:3",
+                "specific_horizon:2",
+            ],
+        )
+        self.assertEqual(options[-1]["rows"], [])
+        self.assertTrue(vintages["latest"]["fixed"])
+        self.assertNotIn(
+            vintages["latest"]["id"],
+            payload["request"]["accuracy_vintage_ids"],
+        )
+
+        row_fields = {
+            "snop_month",
+            "forecast_accuracy_pct",
+            "eligible_parents",
+            "actual_denominator_kl",
+            "absolute_error_numerator_kl",
+        }
+        rows_by_series = {
+            item["id"]: {row["snop_month"]: row for row in item["rows"]}
+            for item in series
+        }
+        self.assertTrue(all(rows for rows in rows_by_series.values()))
+        self.assertEqual(
+            {tuple(rows) for rows in rows_by_series.values()},
+            {tuple(rows_by_series[series[0]["id"]])},
+        )
+        for target_month in rows_by_series[series[0]["id"]]:
+            monthly_rows = [rows[target_month] for rows in rows_by_series.values()]
+            self.assertTrue(all(set(row) == row_fields for row in monthly_rows))
+            self.assertEqual(
+                {row["eligible_parents"] for row in monthly_rows},
+                {monthly_rows[0]["eligible_parents"]},
+            )
+            self.assertEqual(
+                {row["actual_denominator_kl"] for row in monthly_rows},
+                {monthly_rows[0]["actual_denominator_kl"]},
+            )
+
+        self.assertEqual(payload["metrics"], self.bootstrap["metrics"])
+        self.assertEqual(
+            payload["monthly_performance"],
+            self.bootstrap["monthly_performance"],
+        )
+        full_payload = self.service.view(request)
+        baseline_full_payload = self.service.view(self.defaults)
+        for field in (
+            "population_summary",
+            "revision_diagnostics",
+            "revision_history",
+            "revision_scatter",
+            "revision_actions",
+            "revision_drilldown",
+            "exceptions",
+            "quality",
+        ):
+            with self.subTest(unchanged_field=field):
+                self.assertEqual(full_payload[field], baseline_full_payload[field])
+        default_oldest = self.bootstrap["accuracy_vintages"]["options"][0]["rows"]
+        selected_oldest = selected[0]["rows"]
+        self.assertTrue(
+            any(
+                default_row["eligible_parents"] != selected_row["eligible_parents"]
+                for default_row, selected_row in zip(
+                    default_oldest,
+                    selected_oldest,
+                    strict=True,
+                )
+            )
+        )
 
     def test_specific_filters_recompute_every_projection(self) -> None:
         request = dict(self.defaults)
@@ -624,15 +778,15 @@ class StaticDashboardAdapterTests(unittest.TestCase):
         self.assertTrue(comparison["ready"])
         self.assertFalse(comparison["blocked"])
         self.assertEqual(comparison["selected_horizon"], 1)
-        self.assertEqual(comparison["comparable_pairs"], 1_275)
+        self.assertEqual(comparison["comparable_pairs"], 1_365)
         self.assertAlmostEqual(
             comparison["tm_metrics"]["forecast_accuracy_pct"],
-            79.2404577,
+            78.5604081,
             places=5,
         )
         self.assertAlmostEqual(
             comparison["ml_metrics"]["forecast_accuracy_pct"],
-            81.8359790,
+            82.9001812,
             places=5,
         )
         self.assertEqual(payload["request"]["revision_direction"], None)

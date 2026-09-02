@@ -22,9 +22,11 @@ import polars as pl
 from forecast_analysis import (
     AnalysisDataset,
     DashboardFilters,
+    VintageAccuracySeries,  # pyright: ignore[reportAttributeAccessIssue]
     VintageRule,
     available_filter_values,
     build_analysis_dataset,
+    build_common_vintage_accuracy,  # pyright: ignore[reportAttributeAccessIssue]
     build_dashboard_view,
     build_product_detail,
     build_product_postmortem,  # pyright: ignore[reportAttributeAccessIssue]
@@ -690,6 +692,82 @@ def _volume_distributions(view: DashboardView, source: str) -> dict[str, Any]:
     }
 
 
+def _accuracy_vintage_rules(horizons: list[int]) -> tuple[VintageRule, ...]:
+    """Return canonical M5-to-M2 choices, excluding fixed M1 latest."""
+    unexpected = sorted(set(horizons).difference(range(1, 6)))
+    if unexpected:
+        raise ValueError(f"unsupported forecast accuracy horizons: {unexpected}")
+    return (
+        VintageRule.oldest_available(),
+        VintageRule.specific_horizon(4),
+        VintageRule.specific_horizon(3),
+        VintageRule.specific_horizon(2),
+    )
+
+
+def _accuracy_vintage_rows(
+    series: VintageAccuracySeries,
+) -> list[dict[str, Any]]:
+    return [
+        {
+            "snop_month": _iso(row.target_month),
+            "forecast_accuracy_pct": row.forecast_accuracy_pct,
+            "eligible_parents": row.eligible_parents,
+            "actual_denominator_kl": row.actual_denominator_kl,
+            "absolute_error_numerator_kl": row.absolute_error_numerator_kl,
+        }
+        for row in series.rows
+    ]
+
+
+def _accuracy_vintages(
+    view: DashboardView,
+    source: str,
+    selected_ids: list[str],
+    horizons: list[int],
+) -> dict[str, Any]:
+    """Project canonical common-cohort results without hiding unselected options."""
+    option_rules = _accuracy_vintage_rules(horizons)
+    rules_by_id = {rule.label: rule for rule in option_rules}
+    selected_rules = tuple(rules_by_id[rule_id] for rule_id in selected_ids)
+    result = build_common_vintage_accuracy(
+        view.filtered_population,
+        source,
+        comparison_rules=selected_rules,
+    )
+    selected_series = {series.rule_id: series for series in result.series}
+
+    options = []
+    for rule in option_rules:
+        series = selected_series.get(rule.label)
+        options.append(
+            {
+                "id": rule.label,
+                "label": (
+                    "Oldest (5 months ahead)"
+                    if rule.kind == "oldest_available"
+                    else f"{rule.value} months ahead"
+                ),
+                "rule": {"kind": rule.kind, "value": _json_value(rule.value)},
+                "selected": series is not None,
+                "rows": _accuracy_vintage_rows(series) if series is not None else [],
+            }
+        )
+
+    latest_rule = VintageRule.latest_available()
+    latest = selected_series[latest_rule.label]
+    return {
+        "latest": {
+            "id": latest.rule_id,
+            "label": latest.label,
+            "rule": {"kind": latest.rule.kind, "value": _json_value(latest.rule.value)},
+            "fixed": True,
+            "rows": _accuracy_vintage_rows(latest),
+        },
+        "options": options,
+    }
+
+
 def _parse_bool(payload: dict[str, Any], field: str, default: bool = False) -> bool:
     value = payload.get(field, default)
     if not isinstance(value, bool):
@@ -737,6 +815,29 @@ def _parse_int(
     if minimum is not None and parsed < minimum:
         raise DashboardRequestError(f"{field} must be at least {minimum}")
     return parsed
+
+
+def _parse_accuracy_vintage_ids(
+    payload: dict[str, Any],
+    supported_rules: tuple[VintageRule, ...],
+) -> list[str]:
+    field = "accuracy_vintage_ids"
+    value = payload.get(field, [VintageRule.oldest_available().label])
+    if not isinstance(value, list):
+        raise DashboardRequestError(f"{field} must be an array")
+    if any(not isinstance(item, str) for item in value):
+        raise DashboardRequestError(f"{field} must contain strings")
+    if len(value) != len(set(value)):
+        raise DashboardRequestError(f"{field} must not contain duplicates")
+
+    supported_ids = [rule.label for rule in supported_rules]
+    unsupported = [rule_id for rule_id in value if rule_id not in supported_ids]
+    if unsupported:
+        raise DashboardRequestError(
+            f"{field} contains unsupported IDs: {', '.join(unsupported)}"
+        )
+    selected = set(value)
+    return [rule_id for rule_id in supported_ids if rule_id in selected]
 
 
 def _parse_int_list(
@@ -911,6 +1012,7 @@ class DashboardDataService:
             "minimum_actual_volume": 0.0,
             "vintage_a": {"kind": "oldest_available", "value": None},
             "vintage_b": {"kind": "latest_available", "value": None},
+            "accuracy_vintage_ids": ["oldest_available"],
             "revision_direction": None,
             "revision_outcome": None,
             "revision_tolerance_kl": 0.01,
@@ -1050,12 +1152,14 @@ class DashboardDataService:
         request, options, filters, vintage_a, vintage_b = self._normalize_request(
             raw_request
         )
-        key = json.dumps(request, sort_keys=True, separators=(",", ":"))
+        analysis_request = dict(request)
+        analysis_request.pop("accuracy_vintage_ids")
+        key = json.dumps(analysis_request, sort_keys=True, separators=(",", ":"))
+        cached: _ComputedView | None = None
         with self._cache_lock:
             cached = self._cache.get(key)
             if cached is not None:
                 self._cache.move_to_end(key)
-                return cached
             pending = self._inflight.get(key)
             if pending is None:
                 pending = _PendingView(Event())
@@ -1063,13 +1167,15 @@ class DashboardDataService:
                 owner = True
             else:
                 owner = False
+        if cached is not None:
+            return self._with_accuracy_selection(cached, request)
         if not owner:
             pending.ready.wait()
             if pending.error is not None:
                 raise pending.error
             if pending.result is None:
                 raise RuntimeError("dashboard computation completed without a result")
-            return pending.result
+            return self._with_accuracy_selection(pending.result, request)
 
         try:
             view = build_dashboard_view(
@@ -1100,6 +1206,32 @@ class DashboardDataService:
             pending.ready.set()
         return computed
 
+    def _with_accuracy_selection(
+        self,
+        computed: _ComputedView,
+        request: dict[str, Any],
+    ) -> _ComputedView:
+        """Reuse the analytical view when only the chart cohort selection changes."""
+        if computed.request["accuracy_vintage_ids"] == request["accuracy_vintage_ids"]:
+            return computed
+        payload = {
+            **computed.payload,
+            "request": request,
+            "accuracy_vintages": _accuracy_vintages(
+                computed.view,
+                request["source"],
+                request["accuracy_vintage_ids"],
+                cast(list[int], computed.options["horizons"]),
+            ),
+        }
+        return _ComputedView(
+            request,
+            computed.options,
+            computed.view,
+            computed.product_detail,
+            payload,
+        )
+
     def _normalize_request(
         self, raw: dict[str, Any]
     ) -> tuple[
@@ -1129,6 +1261,10 @@ class DashboardDataService:
         )
         horizon = _parse_int(raw, "horizon", minimum=0)
         available_horizons = cast(list[int], options["horizons"])
+        accuracy_vintage_ids = _parse_accuracy_vintage_ids(
+            raw,
+            _accuracy_vintage_rules(available_horizons),
+        )
         if horizon is not None and horizon not in available_horizons:
             raise DashboardRequestError("horizon is not available for the selected source")
         comparison_horizon: int | None = None
@@ -1270,6 +1406,7 @@ class DashboardDataService:
             ),
             "vintage_a": self._rule_request(vintage_a, "oldest_available"),
             "vintage_b": self._rule_request(vintage_b, "latest_available"),
+            "accuracy_vintage_ids": accuracy_vintage_ids,
             "revision_direction": None if comparison_mode else revision_direction,
             "revision_outcome": None if comparison_mode else revision_outcome,
             "revision_tolerance_kl": _parse_float(
@@ -1521,6 +1658,7 @@ class DashboardDataService:
             "metrics": payload["metrics"],
             "volume_distributions": payload["volume_distributions"],
             "monthly_performance": payload["monthly_performance"],
+            "accuracy_vintages": payload["accuracy_vintages"],
         }
 
     @staticmethod
@@ -1693,6 +1831,12 @@ class DashboardDataService:
             "metrics": metrics,
             "volume_distributions": _volume_distributions(view, request["source"]),
             "monthly_performance": _frame_payload(view.monthly_performance, limit=60),
+            "accuracy_vintages": _accuracy_vintages(
+                view,
+                request["source"],
+                request["accuracy_vintage_ids"],
+                cast(list[int], options["horizons"]),
+            ),
             "monthly_audit": _frame_payload(view.monthly_audit, limit=60),
             "horizon_performance": _frame_payload(view.horizon_performance, limit=30),
             "horizon_audit": _frame_payload(view.horizon_audit, limit=30),

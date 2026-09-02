@@ -383,11 +383,78 @@ class DashboardUiSourceContractTests(unittest.TestCase):
         self.assertIn("function renderTrendMonthlyChart(payload)", self.source)
         self.assertIn('monthlyMetric === "forecast_accuracy_pct"', self.source)
         self.assertIn("title.textContent = chartDialogContent.accuracy.title", self.source)
-        self.assertIn("setHtml(legend, chartDialogContent.accuracy.legend)", self.source)
+        self.assertIn("setHtml(legend, accuracyVintageLegend(payload))", self.source)
         self.assertIn("overviewPerformanceChart(monthly.rows", self.source)
         self.assertIn("height: overviewChartHeight(chartContainer)", self.source)
         self.assertIn("[data-trend-chart]", self.source)
         self.assertIn(".trend-main .chart--overview", self.styles)
+
+    def test_accuracy_selector_requests_common_cohort_series(self) -> None:
+        build_request = self.source[
+            self.source.index("  function buildRequest()") : self.source.index(
+                "  function updateFilterCount()"
+            )
+        ]
+        selector_change = self.source[
+            self.source.index(
+                '  document.addEventListener("change", (event) => {'
+            ) : self.source.index(
+                '  document\n    .querySelector("[data-exception-limit]")'
+            )
+        ]
+        accuracy_chart = self.source[
+            self.source.index("  function overviewPerformanceChart(") : self.source.index(
+                "  function overviewVolumeChart("
+            )
+        ]
+
+        self.assertIn("accuracy_vintage_ids: requestedAccuracyVintageIds()", build_request)
+        self.assertIn('event.target.matches?.("[data-vintage-option]")', selector_change)
+        self.assertIn(
+            "scheduleRefresh({ immediate: true, closeSelector: false })",
+            selector_change,
+        )
+        self.assertIn("closeSelector = true", self.source)
+        self.assertIn("if (closeSelector) closeVintageSelector();", self.source)
+        self.assertNotIn("renderAccuracyVintageCharts()", selector_change)
+        self.assertIn("option.selected", self.source)
+        self.assertIn('jsonRequest("api/view/compact"', self.source)
+        self.assertIn("closeVintageSelector();", self.source)
+        self.assertIn('"accuracy_vintage_ids",', self.source)
+        self.assertIn("eligible_parents", accuracy_chart)
+        self.assertIn("actual_denominator_kl", accuracy_chart)
+        self.assertIn("data-tooltip-common-cohort", accuracy_chart)
+        self.assertIn("data-tooltip-actual-denominator", accuracy_chart)
+        self.assertNotIn("selectedAccuracyVintages", self.source)
+        self.assertNotIn("accuracyVintageSignature", self.source)
+        self.assertNotIn("accuracyVintageSelectionInitialized", self.source)
+        self.assertNotIn(
+            "metrics.accuracy_numerator_kl /",
+            self.source,
+        )
+
+    def test_accuracy_chart_exposes_local_multi_vintage_selector(self) -> None:
+        accuracy_start = self.index.index('id="overview-chart-title"')
+        accuracy_end = self.index.index('id="volume-chart-title"')
+        accuracy = self.index[accuracy_start:accuracy_end]
+
+        self.assertIn("data-vintage-selector-trigger", accuracy)
+        self.assertIn("data-vintage-selector-count", accuracy)
+        self.assertLess(
+            accuracy.index("data-vintage-selector-trigger"),
+            accuracy.index('data-chart-fullscreen="accuracy"'),
+        )
+        self.assertEqual(self.index.count("data-vintage-selector-trigger"), 2)
+        self.assertIn("function syncAccuracyVintageSelection", self.source)
+        self.assertIn("function requestedAccuracyVintageIds", self.source)
+        self.assertIn("function accuracyVintageSeries", self.source)
+        self.assertIn("Latest forecast fixed", self.source)
+        self.assertIn('data-vintage-fixed="${isLatest}"', self.source)
+        self.assertIn("data-vintage-option", self.source)
+        self.assertIn("option.selected", self.source)
+        self.assertIn(".vintage-selector__trigger {", self.styles)
+        self.assertIn(".vintage-selector {", self.styles)
+        self.assertIn(".vintage-selector__option {", self.styles)
 
     def test_overview_axis_labels_have_clear_line_spacing_without_bias_caption(self) -> None:
         self.assertNotIn('class="chart__section-label"', self.source)
@@ -461,7 +528,7 @@ class DashboardUiSourceContractTests(unittest.TestCase):
         self.assertNotIn("explicit analytical modes", comparison.lower())
         self.assertIn(".pane__head-actions .subtabs", self.styles)
 
-    def test_history_controls_collapse_into_header_and_context_rows(self) -> None:
+    def test_history_controls_and_nonduplicated_context_share_one_row(self) -> None:
         history_start = self.index.index('id="pane-history"')
         history_end = self.index.index('id="pane-quality"')
         history = self.index[history_start:history_end]
@@ -477,13 +544,33 @@ class DashboardUiSourceContractTests(unittest.TestCase):
         self.assertIn('data-product-summary', context)
         self.assertIn('class="toolbar history-toolbar"', context)
         self.assertLess(
-            context.index('data-product-summary'),
             context.index('class="toolbar history-toolbar"'),
+            context.index('data-product-summary'),
         )
         self.assertNotIn('data-product-source', history)
         self.assertIn(".history-context {", self.styles)
         self.assertIn(".history-context .history-toolbar {", self.styles)
+        self.assertIn(".history-context .product-summary {", self.styles)
         self.assertNotIn('populationItem("Product", detail.parent_code)', self.source)
+        self.assertNotIn(
+            'populationItem("Description", detail.parent_description)', self.source
+        )
+        self.assertNotIn(
+            'populationItem("Mapping", labelize(detail.mapping_status))', self.source
+        )
+        self.assertNotIn(
+            'populationItem("Target", monthLabel(detail.target_month))', self.source
+        )
+        summary_start = self.source.index(
+            'document.querySelector("[data-product-summary]")'
+        )
+        summary_end = self.source.index("renderProductPostmortem(detail)", summary_start)
+        summary = self.source[summary_start:summary_end]
+        self.assertIn('populationItem("Brand", detail.brand || "Unmapped")', summary)
+        self.assertIn(
+            'populationItem("SKU class", detail.sku_class || "Unclassified")',
+            summary,
+        )
 
     def test_revision_instruction_tags_are_embedded_in_outcome_strip(self) -> None:
         self.assertIn("function revisionOutcomeInstructions", self.source)

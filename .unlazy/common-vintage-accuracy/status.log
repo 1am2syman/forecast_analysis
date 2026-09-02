@@ -1,0 +1,5 @@
+leaf-1.1.1 in-flight: red-green canonical common cohort
+leaf-1.1.1 verified: adversarial canonical cohort tests pass
+leaf-1.1.2 verified: request contract and common-cohort payload pass
+node-1.1 verified: canonical and adapter pipeline integrated
+All 22 depth-3 gates met after final analytical, browser, diagnostics, and visual re-verification; 0 unmet, 0 abandoned. Three unrelated full-adapter snapshot expectations remain stale after the concurrent forecast-history artifact update.

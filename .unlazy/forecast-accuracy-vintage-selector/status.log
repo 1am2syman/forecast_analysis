@@ -1,0 +1,4 @@
+leaf-1.1 in-flight: implementing accuracy_vintages adapter contract
+leaf-1.1 verified: focused and full adapter suites pass
+leaf-1.2 verified: source, Chromium interaction, and screenshot gates pass
+node-1 verified: integration, diagnostics, and screenshot review pass
