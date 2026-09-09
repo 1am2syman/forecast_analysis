@@ -14,10 +14,10 @@
   },
   "initialCohort": {
     "series": 2,
-    "months": 16
+    "months": 17
   },
   "menu": {
-    "fixedText": "Latest availableFixed",
+    "fixedText": "Latest (1 month ahead)Fixed",
     "options": [
       {
         "value": "oldest_available",
@@ -55,11 +55,11 @@
   },
   "multiCohort": {
     "series": 4,
-    "months": 16
+    "months": 17
   },
   "hit": {
     "cohort": "97",
-    "denominator": "2,597.6 KL"
+    "denominator": "2,610.5 KL"
   },
   "replaced": {
     "lineIds": [
@@ -89,7 +89,7 @@
   },
   "latestOnlyCohort": {
     "series": 1,
-    "months": 16
+    "months": 17
   },
   "fullscreen": {
     "triggerVisible": true,

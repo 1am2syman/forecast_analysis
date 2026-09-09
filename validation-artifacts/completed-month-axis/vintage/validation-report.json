@@ -1,0 +1,358 @@
+{
+  "initial": {
+    "lineIds": [
+      "oldest_available",
+      "latest_available"
+    ],
+    "fixed": 1,
+    "count": "1",
+    "triggerBeforeFullscreen": true,
+    "actionsContained": true,
+    "toolbarInsideFrame": true,
+    "pathsContained": true,
+    "pageOverflow": 0
+  },
+  "initialCohort": {
+    "series": 2,
+    "months": 16
+  },
+  "initialKpis": {
+    "primary": {
+      "id": "oldest_available",
+      "label": "Oldest (5 months ahead)",
+      "rule": {
+        "kind": "oldest_available",
+        "value": null
+      }
+    },
+    "metrics": {
+      "forecast_accuracy_pct": 78.17170613283587,
+      "wape_pct": 21.828293867164128,
+      "bias_pct": -9.727824860492607,
+      "accuracy_numerator_kl": 6972.316252951289,
+      "accuracy_denominator_actual_kl": 31941.645533000665,
+      "bias_numerator_kl": -3107.2273350096652,
+      "bias_denominator_actual_kl": 31941.645533000665,
+      "eligible_observations": 1083,
+      "accuracy_delta_pp": 4.746016825956841,
+      "revision_effectiveness_pct": 57.17073170731707,
+      "effectiveness_numerator": 586,
+      "effectiveness_denominator": 1025,
+      "primary_error_kl": 6972.316252951289,
+      "latest_error_kl": 5456.360381467586
+    },
+    "cards": {
+      "Forecast accuracy": {
+        "value": "78.2%",
+        "caption": "M−5 · n 1,083"
+      },
+      "Bias": {
+        "value": "-9.7%",
+        "caption": "M−5 · −3,107 KL"
+      },
+      "Actual volume": {},
+      "Forecast volume": {},
+      "WAPE": {
+        "value": "21.8%",
+        "caption": "M−5 · 31,942 KL"
+      },
+      "Revision eff.": {
+        "value": "57.2%",
+        "caption": "M−5→M−1 cohort"
+      },
+      "Error accumulated": {
+        "value": "6,972",
+        "caption": "M−5 vs M−1"
+      }
+    }
+  },
+  "menu": {
+    "fixedText": "Latest (1 month ahead)Fixed",
+    "options": [
+      {
+        "value": "oldest_available",
+        "checked": true
+      },
+      {
+        "value": "specific_horizon:4",
+        "checked": false
+      },
+      {
+        "value": "specific_horizon:3",
+        "checked": false
+      },
+      {
+        "value": "specific_horizon:2",
+        "checked": false
+      }
+    ],
+    "overflow": -958.828125
+  },
+  "multi": {
+    "lineIds": [
+      "oldest_available",
+      "specific_horizon:4",
+      "specific_horizon:3",
+      "latest_available"
+    ],
+    "fixed": 1,
+    "count": "3",
+    "triggerBeforeFullscreen": true,
+    "actionsContained": true,
+    "toolbarInsideFrame": true,
+    "pathsContained": true,
+    "pageOverflow": 0
+  },
+  "multiCohort": {
+    "series": 4,
+    "months": 16
+  },
+  "multiKpis": {
+    "primary": {
+      "id": "oldest_available",
+      "label": "Oldest (5 months ahead)",
+      "rule": {
+        "kind": "oldest_available",
+        "value": null
+      }
+    },
+    "metrics": {
+      "forecast_accuracy_pct": 78.21442194899741,
+      "wape_pct": 21.785578051002588,
+      "bias_pct": -9.716576963132724,
+      "accuracy_numerator_kl": 6953.23024261829,
+      "accuracy_denominator_actual_kl": 31916.666275000665,
+      "bias_numerator_kl": -3101.207442676666,
+      "bias_denominator_actual_kl": 31916.666275000665,
+      "eligible_observations": 1062,
+      "accuracy_delta_pp": 4.730498300818143,
+      "revision_effectiveness_pct": 56.77290836653387,
+      "effectiveness_numerator": 570,
+      "effectiveness_denominator": 1004,
+      "primary_error_kl": 6953.23024261829,
+      "latest_error_kl": 5443.412886801586
+    },
+    "cards": {
+      "Forecast accuracy": {
+        "value": "78.2%",
+        "caption": "M−5 · n 1,062"
+      },
+      "Bias": {
+        "value": "-9.7%",
+        "caption": "M−5 · −3,101 KL"
+      },
+      "Actual volume": {},
+      "Forecast volume": {},
+      "WAPE": {
+        "value": "21.8%",
+        "caption": "M−5 · 31,917 KL"
+      },
+      "Revision eff.": {
+        "value": "56.8%",
+        "caption": "M−5→M−1 cohort"
+      },
+      "Error accumulated": {
+        "value": "6,953",
+        "caption": "M−5 vs M−1"
+      }
+    }
+  },
+  "hit": {
+    "cohort": "97",
+    "denominator": "2,610.5 KL"
+  },
+  "replaced": {
+    "lineIds": [
+      "specific_horizon:4",
+      "specific_horizon:3",
+      "latest_available"
+    ],
+    "fixed": 1,
+    "count": "2",
+    "triggerBeforeFullscreen": true,
+    "actionsContained": true,
+    "toolbarInsideFrame": true,
+    "pathsContained": true,
+    "pageOverflow": 0
+  },
+  "replacedKpis": {
+    "primary": {
+      "id": "specific_horizon:4",
+      "label": "4 months ahead",
+      "rule": {
+        "kind": "specific_horizon",
+        "value": 4
+      }
+    },
+    "metrics": {
+      "forecast_accuracy_pct": 78.37435163344925,
+      "wape_pct": 21.625648366550735,
+      "bias_pct": -9.246499943988896,
+      "accuracy_numerator_kl": 7453.076191420117,
+      "accuracy_denominator_actual_kl": 34464.058904000725,
+      "bias_numerator_kl": -3186.719187254727,
+      "bias_denominator_actual_kl": 34464.058904000725,
+      "eligible_observations": 1170,
+      "accuracy_delta_pp": 4.466768829759511,
+      "revision_effectiveness_pct": 56.63082437275986,
+      "effectiveness_numerator": 632,
+      "effectiveness_denominator": 1116,
+      "primary_error_kl": 7453.076191420117,
+      "latest_error_kl": 5913.646350826255
+    },
+    "cards": {
+      "Forecast accuracy": {
+        "value": "78.4%",
+        "caption": "M−4 · n 1,170"
+      },
+      "Bias": {
+        "value": "-9.2%",
+        "caption": "M−4 · −3,187 KL"
+      },
+      "Actual volume": {},
+      "Forecast volume": {},
+      "WAPE": {
+        "value": "21.6%",
+        "caption": "M−4 · 34,464 KL"
+      },
+      "Revision eff.": {
+        "value": "56.6%",
+        "caption": "M−4→M−1 cohort"
+      },
+      "Error accumulated": {
+        "value": "7,453",
+        "caption": "M−4 vs M−1"
+      }
+    }
+  },
+  "singleKpis": {
+    "primary": {
+      "id": "specific_horizon:3",
+      "label": "3 months ahead",
+      "rule": {
+        "kind": "specific_horizon",
+        "value": 3
+      }
+    },
+    "metrics": {
+      "forecast_accuracy_pct": 78.82304500862045,
+      "wape_pct": 21.176954991379542,
+      "bias_pct": -11.076901959379782,
+      "accuracy_numerator_kl": 7767.115288548303,
+      "accuracy_denominator_actual_kl": 36677.20544200073,
+      "bias_numerator_kl": -4062.6980882507273,
+      "bias_denominator_actual_kl": 36677.20544200073,
+      "eligible_observations": 1279,
+      "accuracy_delta_pp": 4.247791516873358,
+      "revision_effectiveness_pct": 55.933609958506224,
+      "effectiveness_numerator": 674,
+      "effectiveness_denominator": 1205,
+      "primary_error_kl": 7767.115288548303,
+      "latest_error_kl": 6209.1440671567825
+    },
+    "cards": {
+      "Forecast accuracy": {
+        "value": "78.8%",
+        "caption": "M−3 · n 1,279"
+      },
+      "Bias": {
+        "value": "-11.1%",
+        "caption": "M−3 · −4,063 KL"
+      },
+      "Actual volume": {},
+      "Forecast volume": {},
+      "WAPE": {
+        "value": "21.2%",
+        "caption": "M−3 · 36,677 KL"
+      },
+      "Revision eff.": {
+        "value": "55.9%",
+        "caption": "M−3→M−1 cohort"
+      },
+      "Error accumulated": {
+        "value": "7,767",
+        "caption": "M−3 vs M−1"
+      }
+    }
+  },
+  "singleApplicableMonths": {
+    "applicable": 14,
+    "total": 16
+  },
+  "latestOnly": {
+    "lineIds": [
+      "latest_available"
+    ],
+    "fixed": 1,
+    "count": "0",
+    "triggerBeforeFullscreen": true,
+    "actionsContained": true,
+    "toolbarInsideFrame": true,
+    "pathsContained": true,
+    "pageOverflow": 0
+  },
+  "latestOnlyCohort": {
+    "series": 1,
+    "months": 16
+  },
+  "latestOnlyKpis": {
+    "primary": {
+      "id": "latest_available",
+      "label": "Latest (1 month ahead)",
+      "rule": {
+        "kind": "latest_available",
+        "value": null
+      }
+    },
+    "metrics": {
+      "forecast_accuracy_pct": 83.07100149852897,
+      "wape_pct": 16.928998501471025,
+      "bias_pct": -6.673380112466653,
+      "accuracy_numerator_kl": 7095.021356295067,
+      "accuracy_denominator_actual_kl": 41910.461246000785,
+      "bias_numerator_kl": -2796.84438583366,
+      "bias_denominator_actual_kl": 41910.461246000785,
+      "eligible_observations": 1489,
+      "accuracy_delta_pp": 0,
+      "revision_effectiveness_pct": null,
+      "effectiveness_numerator": 0,
+      "effectiveness_denominator": 0,
+      "primary_error_kl": 7095.021356295067,
+      "latest_error_kl": 7095.021356295067
+    },
+    "cards": {
+      "Forecast accuracy": {
+        "value": "83.1%",
+        "caption": "M−1 · n 1,489"
+      },
+      "Bias": {
+        "value": "-6.7%",
+        "caption": "M−1 · −2,797 KL"
+      },
+      "Actual volume": {},
+      "Forecast volume": {},
+      "WAPE": {
+        "value": "16.9%",
+        "caption": "M−1 · 41,910 KL"
+      },
+      "Revision eff.": {
+        "value": "—",
+        "caption": "M−1 · n/a"
+      },
+      "Error accumulated": {
+        "value": "7,095",
+        "caption": "M−1 error"
+      }
+    }
+  },
+  "fullscreen": {
+    "triggerVisible": true,
+    "fixed": 1,
+    "lines": 1,
+    "overflow": 0
+  },
+  "fullscreenMenu": {
+    "insideViewport": true,
+    "anchored": true
+  }
+}

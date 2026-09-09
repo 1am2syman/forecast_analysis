@@ -84,6 +84,11 @@ class DashboardHandler(BaseHTTPRequestHandler):
             if path == "/api/product":
                 self._send_json({"product_detail": self.dashboard_server.service.product_detail(payload)})
                 return
+            if path == "/api/vintage-gap-drilldown":
+                self._send_json(
+                    self.dashboard_server.service.vintage_gap_drilldown(payload)
+                )
+                return
             if path == "/api/export":
                 request = payload.get("request")
                 if not isinstance(request, dict):

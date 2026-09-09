@@ -1,0 +1,67 @@
+{
+  "compacted": true,
+  "fullOutputPath": "/root/.pi/agent/sessions/--root-GitHub-forecast_analysis--/.pi-agent-browser-artifacts/01a06fd6-eeae-7884-be32-ed656e192044/pi-agent-browser-snapshot-8fd5d9dce9124808.json",
+  "origin": "http://127.0.0.1:8766/?kpi-microbars=4#overview",
+  "previewMode": "structured",
+  "viewportOrdering": "dom-signal-prioritized",
+  "previewRefIds": [
+    "e2",
+    "e3",
+    "e4",
+    "e1",
+    "e5",
+    "e10",
+    "e11",
+    "e12",
+    "e15",
+    "e22",
+    "e20",
+    "e67"
+  ],
+  "highValueControlRefIds": [
+    "e13",
+    "e30",
+    "e23",
+    "e16",
+    "e14",
+    "e48",
+    "e24",
+    "e17",
+    "e25",
+    "e18"
+  ],
+  "additionalSectionsOmitted": 1,
+  "previewSections": [
+    {
+      "linesShown": 8,
+      "omittedLines": 2,
+      "role": "heading",
+      "title": "Forecast performance"
+    },
+    {
+      "linesShown": 2,
+      "omittedLines": 6,
+      "role": "heading",
+      "title": "Performance at a glance"
+    },
+    {
+      "linesShown": 2,
+      "omittedLines": 20,
+      "role": "region",
+      "title": "Monthly vintage accuracy and bias"
+    }
+  ],
+  "refCount": 69,
+  "roleCounts": {
+    "navigation": 1,
+    "heading": 4,
+    "button": 15,
+    "LabelText": 4,
+    "tab": 5,
+    "checkbox": 4,
+    "region": 2,
+    "image": 34
+  },
+  "snapshotLineCount": 69,
+  "structuredPreviewUsed": true
+}

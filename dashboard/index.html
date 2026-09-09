@@ -242,13 +242,54 @@
                     <option value="ml" selected>ML</option>
                   </select></label
                 >
+              </fieldset>
+
+              <fieldset
+                class="filter-group filter-group--product-period"
+                data-product-group
+              >
+                <legend>Product &amp; period</legend>
+                <div class="compact-field compact-field--multiselect">
+                  <span>Parent</span>
+                  <div
+                    data-product-filter="parent_codes"
+                    data-all-label="All products"
+                  ></div>
+                </div>
+                <div class="compact-field compact-field--multiselect">
+                  <span>Brand</span>
+                  <div
+                    data-product-filter="brands"
+                    data-all-label="All brands"
+                  ></div>
+                </div>
+                <div class="compact-field compact-field--multiselect">
+                  <span>SKU class</span>
+                  <div
+                    data-product-filter="sku_classes"
+                    data-all-label="All classes"
+                  ></div>
+                </div>
+                <label class="compact-field"
+                  ><span>Horizon</span
+                  ><select data-control="horizon"></select
+                ></label>
+                <label class="compact-field"
+                  ><span>Minimum actual</span
+                  ><input
+                    data-control="minimum_actual_volume"
+                    type="number"
+                    min="0"
+                    step="1"
+                    value="0"
+                /></label>
                 <section
                   class="timeline-control"
                   data-timeline-control
-                  aria-labelledby="timeline-title"
+                  aria-label="Planning timeline in filter workbench"
                 >
                   <div class="timeline-control__head">
-                    <span id="timeline-title">Planning timeline</span>
+                    <span>Planning timeline</span>
                     <output data-timeline-summary aria-live="polite"
                       >Loading periods…</output
                     >
@@ -261,6 +302,7 @@
                     <button
                       type="button"
                       data-timeline-grain="month"
+                      data-action="timeline-grain"
                       aria-pressed="true"
                     >
                       Month
@@ -268,6 +310,7 @@
                     <button
                       type="button"
                       data-timeline-grain="quarter"
+                      data-action="timeline-grain"
                       aria-pressed="false"
                     >
                       Quarter
@@ -278,18 +321,46 @@
                     role="group"
                     aria-label="Planning horizon"
                   >
-                    <button type="button" data-timeline-months="3">3M</button>
-                    <button type="button" data-timeline-months="6">6M</button>
-                    <button type="button" data-timeline-months="12">12M</button>
-                    <button type="button" data-timeline-months="24">24M</button>
-                    <button type="button" data-timeline-months="all">
+                    <button
+                      type="button"
+                      data-timeline-months="3"
+                      data-action="timeline-preset"
+                    >
+                      3M
+                    </button>
+                    <button
+                      type="button"
+                      data-timeline-months="6"
+                      data-action="timeline-preset"
+                    >
+                      6M
+                    </button>
+                    <button
+                      type="button"
+                      data-timeline-months="12"
+                      data-action="timeline-preset"
+                    >
+                      12M
+                    </button>
+                    <button
+                      type="button"
+                      data-timeline-months="24"
+                      data-action="timeline-preset"
+                    >
+                      24M
+                    </button>
+                    <button
+                      type="button"
+                      data-timeline-months="all"
+                      data-action="timeline-preset"
+                    >
                       All
                     </button>
                   </div>
                   <div
                     class="timeline-slider"
                     data-timeline-range-control
-                    aria-describedby="timeline-range-copy"
+                    aria-label="Selected target month range"
                   >
                     <span class="timeline-slider__label">Selected range</span>
                     <div class="timeline-slider__rail" data-timeline-rail>
@@ -325,86 +396,29 @@
                       aria-hidden="true"
                     ></div>
                   </div>
-                  <div class="timeline-range" id="timeline-range-copy">
+                  <div class="timeline-range">
                     <span data-timeline-start>—</span><i aria-hidden="true"></i
                     ><strong data-timeline-end>—</strong>
                   </div>
-                  <div class="timeline-custom" data-timeline-custom-fields>
+                  <div class="timeline-custom">
                     <label class="compact-field"
                       ><span>From</span
-                      ><select data-control="target_start"></select
+                      ><select data-timeline-start-select></select
                     ></label>
                     <label class="compact-field"
                       ><span>To</span
-                      ><select data-control="target_end"></select
+                      ><select data-timeline-end-select></select
                     ></label>
                   </div>
                   <p class="timeline-hint" data-timeline-hint>
-                    Drag either end, or move the highlighted window. Presets
-                    reposition both ends.
+                    Drag either end, move the highlighted window, or use a
+                    preset.
                   </p>
                 </section>
-                <label class="compact-field"
-                  ><span>Brand</span
-                  ><select data-control="brand"></select
-                ></label>
-                <label class="compact-field"
-                  ><span>SKU Class</span
-                  ><select data-control="sku_class">
-                    <option value="">All SKU classes</option>
-                  </select></label
-                >
-                <label class="compact-field"
-                  ><span>Parent product</span
-                  ><select data-control="parent_code"></select
-                ></label>
-                <label class="compact-field"
-                  ><span>Horizon</span
-                  ><select data-control="horizon"></select
-                ></label>
-                <label class="compact-field"
-                  ><span>Minimum actual</span
-                  ><input
-                    data-control="minimum_actual_volume"
-                    type="number"
-                    min="0"
-                    step="1"
-                    value="0"
-                /></label>
               </fieldset>
 
-              <fieldset class="filter-group" data-vintage-group>
-                <legend>Vintage comparison</legend>
-                <label class="compact-field"
-                  ><span>Vintage A</span
-                  ><select data-control="vintage_a_kind">
-                    <option value="oldest_available">Oldest available</option>
-                    <option value="latest_available">Latest available</option>
-                    <option value="specific_calculation_month">
-                      Exact calculation month
-                    </option>
-                    <option value="specific_horizon">Exact horizon</option>
-                  </select></label
-                >
-                <label class="compact-field"
-                  ><span>A value</span
-                  ><select data-control="vintage_a_value"></select
-                ></label>
-                <label class="compact-field"
-                  ><span>Vintage B</span
-                  ><select data-control="vintage_b_kind">
-                    <option value="latest_available">Latest available</option>
-                    <option value="oldest_available">Oldest available</option>
-                    <option value="specific_calculation_month">
-                      Exact calculation month
-                    </option>
-                    <option value="specific_horizon">Exact horizon</option>
-                  </select></label
-                >
-                <label class="compact-field"
-                  ><span>B value</span
-                  ><select data-control="vintage_b_value"></select
-                ></label>
+              <fieldset class="filter-group" data-performance-group>
+                <legend>Performance</legend>
                 <label class="compact-field"
                   ><span>Revision direction</span
                   ><select data-control="revision_direction">
@@ -432,10 +446,6 @@
                     step="0.01"
                     value="0.01"
                 /></label>
-              </fieldset>
-
-              <fieldset class="filter-group" data-performance-group>
-                <legend>Performance</legend>
                 <label class="compact-field"
                   ><span>Direction</span
                   ><select data-control="forecast_direction">
@@ -563,10 +573,101 @@
               aria-labelledby="tab-overview"
             >
               <div
-                class="overview-health"
-                aria-label="Active population summary"
+                class="overview-health quick-filter-row"
+                aria-label="Quick dashboard filters"
               >
-                <div class="overview-health__facts" data-population></div>
+                <div
+                  class="quick-filter-field quick-filter-field--parent compact-field compact-field--multiselect"
+                >
+                  <span>Parent</span>
+                  <div
+                    data-product-filter="parent_codes"
+                    data-all-label="All products"
+                  ></div>
+                </div>
+                <div
+                  class="quick-filter-field quick-filter-field--brand compact-field compact-field--multiselect"
+                >
+                  <span>Brand</span>
+                  <div
+                    data-product-filter="brands"
+                    data-all-label="All brands"
+                  ></div>
+                </div>
+                <div class="quick-filter-field quick-filter-field--timeline">
+                  <span>Time period</span>
+                  <section
+                    class="quick-timeline"
+                    data-timeline-control
+                    aria-label="Target month range"
+                  >
+                    <span class="quick-timeline__date" data-timeline-start
+                      >—</span
+                    >
+                    <div class="timeline-slider__rail" data-timeline-rail>
+                      <div
+                        class="timeline-slider__selection"
+                        data-timeline-selection
+                        tabindex="0"
+                        role="slider"
+                        aria-label="Move selected timeline window"
+                      ></div>
+                      <input
+                        data-timeline-start-slider
+                        type="range"
+                        min="0"
+                        max="0"
+                        value="0"
+                        step="1"
+                        aria-label="Start month"
+                      />
+                      <input
+                        data-timeline-end-slider
+                        type="range"
+                        min="0"
+                        max="0"
+                        value="0"
+                        step="1"
+                        aria-label="End month"
+                      />
+                    </div>
+                    <strong class="quick-timeline__date" data-timeline-end
+                      >—</strong
+                    >
+                    <select data-control="target_start" hidden></select>
+                    <select data-control="target_end" hidden></select>
+                    <output data-timeline-summary hidden
+                      >Loading periods…</output
+                    >
+                    <div data-timeline-axis hidden></div>
+                    <p data-timeline-hint hidden></p>
+                  </section>
+                </div>
+                <div
+                  class="quick-filter-field quick-filter-field--sku compact-field compact-field--multiselect"
+                >
+                  <span>SKU class</span>
+                  <div
+                    data-product-filter="sku_classes"
+                    data-all-label="All classes"
+                  ></div>
+                </div>
+                <button
+                  class="btn btn--accent quick-filter-row__action"
+                  data-action="scope"
+                  type="button"
+                  aria-expanded="false"
+                  aria-controls="scope-drawer"
+                >
+                  Filters · 0
+                </button>
+                <button
+                  class="btn quick-filter-row__action"
+                  data-action="reset"
+                  type="button"
+                >
+                  Reset
+                </button>
                 <details class="overview-details">
                   <summary>Data details</summary>
                   <div
@@ -584,9 +685,22 @@
                 <section class="frame" aria-labelledby="overview-chart-title">
                   <header class="frame__head">
                     <div>
-                      <h3 class="frame__title" id="overview-chart-title">
-                        Monthly vintage accuracy and bias
-                      </h3>
+                      <div class="frame__title-row">
+                        <h3 class="frame__title" id="overview-chart-title">
+                          Monthly vintage accuracy and bias
+                        </h3>
+                        <button
+                          class="chart-guide-trigger"
+                          type="button"
+                          data-action="overview-guide-open"
+                          data-overview-guide="accuracy-chart"
+                          aria-label="Explain monthly vintage accuracy and bias"
+                          aria-haspopup="dialog"
+                          aria-controls="overview-guide-dialog"
+                        >
+                          ?
+                        </button>
+                      </div>
                       <p class="frame__sub" data-accuracy-chart-subtitle>
                         Latest forecast fixed · oldest vintage selected
                       </p>
@@ -626,29 +740,30 @@
                 </section>
 
                 <section class="frame" aria-labelledby="volume-chart-title">
-                  <header class="frame__head">
+                  <header class="frame__head frame__head--volume">
                     <div>
-                      <h3 class="frame__title" id="volume-chart-title">
-                        Forecast versus actual volume
-                      </h3>
-                      <p class="frame__sub">
-                        Vintage A, Vintage B and actual share one KL scale
+                      <div class="frame__title-row">
+                        <h3 class="frame__title" id="volume-chart-title">
+                          Forecast versus actual volume
+                        </h3>
+                        <button
+                          class="chart-guide-trigger"
+                          type="button"
+                          data-action="overview-guide-open"
+                          data-overview-guide="volume-chart"
+                          aria-label="Explain forecast versus actual volume"
+                          aria-haspopup="dialog"
+                          aria-controls="overview-guide-dialog"
+                        >
+                          ?
+                        </button>
+                      </div>
+                      <p class="frame__sub" data-volume-chart-subtitle>
+                        Selected vintages, fixed latest and actual share one
+                        common cohort
                       </p>
                     </div>
                     <div class="frame__actions">
-                      <div class="legend">
-                        <span
-                          ><i class="key key--volume-vintage-b"></i>Vintage
-                          B</span
-                        >
-                        <span
-                          ><i class="key key--volume-vintage-a"></i>Vintage
-                          A</span
-                        >
-                        <span
-                          ><i class="key key--volume-actual"></i>Actual</span
-                        >
-                      </div>
                       <button
                         class="chart-expand"
                         data-action="chart-fullscreen"
@@ -664,6 +779,7 @@
                         Full screen
                       </button>
                     </div>
+                    <div class="legend" data-volume-chart-legend></div>
                   </header>
                   <div class="frame__body" data-overview-volume-chart></div>
                 </section>
@@ -896,23 +1012,25 @@
                     <header class="frame__head">
                       <div>
                         <h3 class="frame__title">
-                          Latest forecast versus actual
+                          Actual demand + forward outlook
                         </h3>
-                        <p class="frame__sub">
-                          Actualized target months · latest available forecast
+                        <p class="frame__sub" data-year-overlay-summary>
+                          Apr–Mar FY comparison · actual history · latest
+                          coherent source run
                         </p>
                       </div>
                       <div class="frame__actions">
-                        <div class="legend">
-                          <span><i class="key key--teal"></i>Forecast</span
-                          ><span><i class="key key--blue"></i>Actual</span>
-                        </div>
+                        <div
+                          class="legend year-overlay-legend"
+                          data-year-overlay-legend
+                          aria-label="FY chart controls"
+                        ></div>
                         <button
                           class="chart-expand"
                           data-action="chart-fullscreen"
                           data-chart-fullscreen="postmortem-performance"
                           type="button"
-                          aria-label="Open latest forecast versus actual chart full screen"
+                          aria-label="Open actual demand and forward outlook chart full screen"
                           aria-haspopup="dialog"
                           aria-controls="overview-chart-dialog"
                         >
@@ -1215,6 +1333,2667 @@
         <div class="chart-dialog__body" data-overview-chart-fullscreen></div>
       </div>
 
+      <div
+        class="vintage-gap-dialog"
+        id="vintage-gap-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="vintage-gap-title"
+        aria-describedby="vintage-gap-subtitle"
+        hidden
+      >
+        <section class="vintage-gap-dialog__panel">
+          <header class="vintage-gap-dialog__head">
+            <div>
+              <p class="eyebrow" data-vintage-gap-eyebrow>
+                Monthly WAPE reconciliation
+              </p>
+              <h2 id="vintage-gap-title" data-vintage-gap-title>
+                Vintage gap drivers
+              </h2>
+              <p id="vintage-gap-subtitle" data-vintage-gap-subtitle></p>
+            </div>
+            <button
+              class="chart-expand"
+              data-action="vintage-gap-close"
+              type="button"
+              aria-label="Close vintage gap drivers"
+            >
+              <svg viewBox="0 0 20 20" aria-hidden="true">
+                <path d="m5 5 10 10M15 5 5 15" />
+              </svg>
+              Close
+            </button>
+          </header>
+          <div class="vintage-gap-dialog__body" data-vintage-gap-body></div>
+        </section>
+      </div>
+
+      <div
+        class="revision-effectiveness-dialog"
+        id="revision-effectiveness-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="revision-effectiveness-title"
+        hidden
+      >
+        <section class="revision-effectiveness-dialog__panel">
+          <header class="revision-effectiveness-dialog__head">
+            <div>
+              <p class="eyebrow" data-effectiveness-eyebrow>
+                Selected target month · vintage
+              </p>
+              <h2 id="revision-effectiveness-title" data-effectiveness-title>
+                Revision effectiveness breakdown
+              </h2>
+              <p data-effectiveness-subtitle></p>
+            </div>
+            <button
+              class="chart-expand"
+              data-action="revision-effectiveness-close"
+              type="button"
+              aria-label="Close revision effectiveness breakdown"
+            >
+              <svg viewBox="0 0 20 20" aria-hidden="true">
+                <path d="m5 5 10 10M15 5 5 15" />
+              </svg>
+              Close
+            </button>
+          </header>
+          <div
+            class="revision-effectiveness-dialog__body"
+            data-effectiveness-body
+          ></div>
+        </section>
+      </div>
+
+      <div
+        class="revision-effectiveness-guide-dialog"
+        id="revision-effectiveness-guide-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="revision-effectiveness-guide-title"
+        aria-describedby="revision-effectiveness-guide-summary"
+        hidden
+      >
+        <section class="revision-effectiveness-guide-dialog__panel">
+          <header class="revision-effectiveness-guide-dialog__head">
+            <div>
+              <p class="eyebrow" data-effectiveness-guide-context>
+                Chart guide · five-vintage target-month journeys
+              </p>
+              <h2 id="revision-effectiveness-guide-title">
+                How to read the balanced revision effectiveness score
+              </h2>
+              <p id="revision-effectiveness-guide-summary">
+                This chart asks whether each new forecast version made the
+                forecast meaningfully better—not merely whether it changed.
+              </p>
+            </div>
+            <button
+              class="chart-expand"
+              data-action="revision-effectiveness-guide-close"
+              type="button"
+              aria-label="Close revision effectiveness chart guide"
+            >
+              <svg viewBox="0 0 20 20" aria-hidden="true">
+                <path d="m5 5 10 10M15 5 5 15" />
+              </svg>
+              Close
+            </button>
+          </header>
+
+          <div class="revision-effectiveness-guide-dialog__body">
+            <div class="revision-guide__distinction">
+              <strong>Two related measures, two different questions</strong>
+              <span
+                ><b>Revision effectiveness %</b> counts how many material
+                revisions helped.</span
+              >
+              <span
+                ><b>This balanced score</b> measures how much error was removed,
+                how efficiently, and how consistently.</span
+              >
+            </div>
+
+            <article class="revision-guide__card revision-guide__card--reading">
+              <div class="revision-guide__card-head">
+                <span>01</span>
+                <div>
+                  <h3>Read one month as a journey</h3>
+                  <p>Every target month starts again at a neutral 50.</p>
+                </div>
+              </div>
+              <svg
+                class="revision-guide__step-visual"
+                viewBox="0 0 480 190"
+                role="img"
+                aria-label="Two example target months. The first rises from a neutral score of 50 to an effective score of 82. The second falls from 50 to a harmful score of 28."
+              >
+                <g class="revision-guide__micro-grid">
+                  <line x1="35" x2="445" y1="38" y2="38" />
+                  <line x1="35" x2="445" y1="85" y2="85" />
+                  <line x1="35" x2="445" y1="132" y2="132" />
+                  <text x="26" y="42" text-anchor="end">80</text>
+                  <text x="26" y="89" text-anchor="end">50</text>
+                  <text x="26" y="136" text-anchor="end">20</text>
+                </g>
+                <line
+                  class="revision-guide__neutral-line"
+                  x1="35"
+                  x2="445"
+                  y1="85"
+                  y2="85"
+                />
+                <path
+                  class="revision-guide__example-path revision-guide__example-path--good"
+                  d="M 54 85 H 91 V 69 H 128 V 77 H 165 V 52 H 202 V 35"
+                />
+                <path
+                  class="revision-guide__example-path revision-guide__example-path--bad"
+                  d="M 278 85 H 315 V 97 H 352 V 118 H 389 V 110 H 426 V 139"
+                />
+                <g class="revision-guide__micro-points">
+                  <circle cx="54" cy="85" r="5" />
+                  <circle cx="91" cy="69" r="5" />
+                  <circle cx="128" cy="77" r="5" />
+                  <circle cx="165" cy="52" r="5" />
+                  <circle cx="202" cy="35" r="6" />
+                  <circle cx="278" cy="85" r="5" />
+                  <circle cx="315" cy="97" r="5" />
+                  <circle cx="352" cy="118" r="5" />
+                  <circle cx="389" cy="110" r="5" />
+                  <circle cx="426" cy="139" r="6" />
+                </g>
+                <g class="revision-guide__micro-labels">
+                  <text x="128" y="170" text-anchor="middle">
+                    Target month A · error removed
+                  </text>
+                  <text x="352" y="170" text-anchor="middle">
+                    Target month B · error added
+                  </text>
+                  <text x="202" y="24" text-anchor="middle">82</text>
+                  <text x="426" y="154" text-anchor="middle">28</text>
+                </g>
+              </svg>
+              <div class="revision-guide__reading-key">
+                <span
+                  ><i class="is-up"></i>Step up: the new vintage helped</span
+                >
+                <span><i class="is-down"></i>Step down: it added error</span>
+                <span
+                  ><i class="is-latest"></i>Outlined point: latest vintage</span
+                >
+              </div>
+            </article>
+
+            <article class="revision-guide__card revision-guide__card--formula">
+              <div class="revision-guide__card-head">
+                <span>02</span>
+                <div>
+                  <h3>Three ingredients build the score</h3>
+                  <p>Each ingredient is centred on 50 and bounded 0–100.</p>
+                </div>
+              </div>
+              <div class="revision-guide__formula">
+                <div class="revision-guide__ingredient">
+                  <div><strong>50%</strong><b>Accuracy gain</b></div>
+                  <p>How much of V1’s starting absolute error was removed?</p>
+                  <div class="revision-guide__ingredient-visual">
+                    <span>V1 error</span><i style="--score-width: 78%"></i
+                    ><em>error removed</em>
+                  </div>
+                </div>
+                <div class="revision-guide__ingredient">
+                  <div><strong>30%</strong><b>Revision efficiency</b></div>
+                  <p>How much error was removed per 1 KL of total movement?</p>
+                  <div class="revision-guide__ratio-visual">
+                    <span>forecast movement</span><b>→</b
+                    ><span>error removed</span>
+                  </div>
+                </div>
+                <div class="revision-guide__ingredient">
+                  <div><strong>20%</strong><b>Consistency</b></div>
+                  <p>Were movement-weighted vintage steps mostly helpful?</p>
+                  <div class="revision-guide__outcome-visual">
+                    <i class="is-helpful"></i><i class="is-helpful"></i
+                    ><i class="is-harmful"></i><i class="is-helpful"></i>
+                  </div>
+                </div>
+              </div>
+              <div class="revision-guide__equation">
+                <span>Overall</span><b>=</b><span>50% accuracy</span><b>+</b
+                ><span>30% efficiency</span><b>+</b><span>20% consistency</span
+                ><b>→</b><strong>0–100</strong>
+              </div>
+            </article>
+
+            <article
+              class="revision-guide__card revision-guide__card--interpretation"
+            >
+              <div class="revision-guide__card-head">
+                <span>03</span>
+                <div>
+                  <h3>Interpret level and shape together</h3>
+                  <p>The destination matters, but so does the path.</p>
+                </div>
+              </div>
+              <div class="revision-guide__bands">
+                <div class="is-high">
+                  <b>80–100</b><span>Highly effective</span
+                  ><small>Large, efficient and dependable improvement</small>
+                </div>
+                <div class="is-useful">
+                  <b>60–79</b><span>Effective</span
+                  ><small>Revisions produced useful net improvement</small>
+                </div>
+                <div class="is-mixed">
+                  <b>40–59</b><span>Mixed</span
+                  ><small>Inspect whipsaw, timing and weak signals</small>
+                </div>
+                <div class="is-harmful">
+                  <b>0–39</b><span>Harmful</span
+                  ><small>Revisions added material forecast error</small>
+                </div>
+              </div>
+              <div class="revision-guide__shape-notes">
+                <span
+                  ><b>↗ Steady rise</b> Preserve the signals and process.</span
+                >
+                <span
+                  ><b>↕ Whipsaw</b> Test cadence, assumptions and
+                  ownership.</span
+                >
+                <span
+                  ><b>↘ Decline</b> Find which vintage introduced error.</span
+                >
+              </div>
+            </article>
+
+            <section class="revision-guide__discussion">
+              <div class="revision-guide__discussion-intro">
+                <span>04</span>
+                <div>
+                  <h3>Turn the pattern into a better review</h3>
+                  <p>
+                    Use the chart to examine decision quality and timing—not to
+                    grade an individual planner from one score.
+                  </p>
+                </div>
+              </div>
+              <div>
+                <strong>With the forecasting team</strong>
+                <ul>
+                  <li>Which vintage created the largest rise or fall?</li>
+                  <li>What signal, override or assumption caused it?</li>
+                  <li>Could the useful information have arrived earlier?</li>
+                </ul>
+              </div>
+              <div>
+                <strong>With the business team</strong>
+                <ul>
+                  <li>What business assumption changed between vintages?</li>
+                  <li>Was the amount moved proportionate to the evidence?</li>
+                  <li>What decision or input should change next cycle?</li>
+                </ul>
+              </div>
+            </section>
+          </div>
+
+          <footer class="revision-effectiveness-guide-dialog__foot">
+            <span
+              ><b>Fixed cohort:</b> products present in all five vintages</span
+            >
+            <span><b>Window:</b> latest six target months with actuals</span>
+            <span
+              ><b>Important:</b> each month is independent and resets at
+              V1</span
+            >
+            <span
+              ><b>Next:</b> click a chart point for its evidence breakdown</span
+            >
+          </footer>
+        </section>
+      </div>
+
+      <div
+        class="revision-effectiveness-guide-dialog"
+        id="revision-scatter-guide-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="revision-scatter-guide-title"
+        aria-describedby="revision-scatter-guide-summary"
+        hidden
+      >
+        <section class="revision-effectiveness-guide-dialog__panel">
+          <header class="revision-effectiveness-guide-dialog__head">
+            <div>
+              <p class="eyebrow" data-scatter-guide-context>
+                Chart guide · parent-level revision behaviour
+              </p>
+              <h2 id="revision-scatter-guide-title">
+                How to read parent vintage trend vs improvement score
+              </h2>
+              <p id="revision-scatter-guide-summary">
+                Each bubble connects the direction forecasts moved with whether
+                that movement made the forecast more accurate.
+              </p>
+            </div>
+            <button
+              class="chart-expand"
+              data-action="revision-scatter-guide-close"
+              type="button"
+              aria-label="Close parent vintage scatter chart guide"
+            >
+              <svg viewBox="0 0 20 20" aria-hidden="true">
+                <path d="m5 5 10 10M15 5 5 15" />
+              </svg>
+              Close
+            </button>
+          </header>
+
+          <div class="scatter-guide__body">
+            <div class="scatter-guide__scope">
+              <strong>One bubble is one parent code</strong>
+              <span>Six complete target months</span><b>×</b
+              ><span>Five vintages per month</span><b>→</b
+              ><span>Median parent behaviour</span>
+            </div>
+
+            <article class="revision-guide__card scatter-guide__card--read">
+              <div class="revision-guide__card-head">
+                <span>01</span>
+                <div>
+                  <h3>Start with the two axes</h3>
+                  <p>Direction is horizontal; decision quality is vertical.</p>
+                </div>
+              </div>
+              <svg
+                class="scatter-guide__quadrant"
+                viewBox="0 0 470 270"
+                role="img"
+                aria-label="Four-quadrant scatter guide with a density heatmap. Bubbles above zero improved accuracy. Bubbles below zero worsened it. Left means forecasts trended down, right means forecasts trended up, and darker teal cells contain more parent bubbles."
+              >
+                <g class="scatter-guide__grid">
+                  <line x1="48" x2="448" y1="32" y2="32" />
+                  <line x1="48" x2="448" y1="125" y2="125" />
+                  <line x1="48" x2="448" y1="218" y2="218" />
+                  <line x1="118" x2="118" y1="20" y2="230" />
+                  <line x1="248" x2="248" y1="20" y2="230" />
+                  <line x1="378" x2="378" y1="20" y2="230" />
+                </g>
+                <g class="scatter-guide__heat-cells" aria-hidden="true">
+                  <rect x="197" y="87" width="49" height="36" rx="3" />
+                  <rect x="250" y="87" width="49" height="36" rx="3" />
+                  <rect x="303" y="87" width="49" height="36" rx="3" />
+                  <rect
+                    class="is-medium"
+                    x="197"
+                    y="127"
+                    width="49"
+                    height="36"
+                    rx="3"
+                  />
+                  <rect
+                    class="is-peak"
+                    x="250"
+                    y="127"
+                    width="49"
+                    height="36"
+                    rx="3"
+                  />
+                  <rect
+                    class="is-medium"
+                    x="303"
+                    y="127"
+                    width="49"
+                    height="36"
+                    rx="3"
+                  />
+                </g>
+                <line
+                  class="scatter-guide__zero"
+                  x1="48"
+                  x2="448"
+                  y1="125"
+                  y2="125"
+                />
+                <line
+                  class="scatter-guide__zero"
+                  x1="248"
+                  x2="248"
+                  y1="20"
+                  y2="230"
+                />
+                <g class="scatter-guide__quadrant-labels">
+                  <text x="145" y="49" text-anchor="middle">
+                    LOWER FORECAST
+                  </text>
+                  <text x="145" y="62" text-anchor="middle">MORE ACCURATE</text>
+                  <text x="351" y="49" text-anchor="middle">
+                    HIGHER FORECAST
+                  </text>
+                  <text x="351" y="62" text-anchor="middle">MORE ACCURATE</text>
+                  <text x="145" y="199" text-anchor="middle">
+                    LOWER FORECAST
+                  </text>
+                  <text x="145" y="212" text-anchor="middle">
+                    LESS ACCURATE
+                  </text>
+                  <text x="351" y="199" text-anchor="middle">
+                    HIGHER FORECAST
+                  </text>
+                  <text x="351" y="212" text-anchor="middle">
+                    LESS ACCURATE
+                  </text>
+                </g>
+                <g class="scatter-guide__bubbles">
+                  <circle class="is-good" cx="131" cy="83" r="15" />
+                  <circle class="is-good" cx="339" cy="70" r="23" />
+                  <circle class="is-bad" cx="160" cy="169" r="11" />
+                  <circle class="is-bad" cx="366" cy="181" r="18" />
+                  <circle class="is-neutral" cx="252" cy="122" r="8" />
+                </g>
+                <text
+                  class="scatter-guide__axis"
+                  x="248"
+                  y="257"
+                  text-anchor="middle"
+                >
+                  Forecast trend · down ← 0 → up
+                </text>
+                <text
+                  class="scatter-guide__axis"
+                  x="14"
+                  y="125"
+                  text-anchor="middle"
+                  transform="rotate(-90 14 125)"
+                >
+                  Accuracy trend · worse ← 0 → better
+                </text>
+              </svg>
+              <div class="scatter-guide__reading-key">
+                <span
+                  ><i class="is-good"></i><b>Above zero</b> revisions improved
+                  accuracy</span
+                >
+                <span
+                  ><i class="is-bad"></i><b>Below zero</b> revisions worsened
+                  accuracy</span
+                >
+                <span
+                  ><i class="is-density"></i><b>Darker heat cell</b> more parent
+                  bubbles occupy that area</span
+                >
+              </div>
+            </article>
+
+            <article class="revision-guide__card scatter-guide__card--build">
+              <div class="revision-guide__card-head">
+                <span>02</span>
+                <div>
+                  <h3>How one bubble is calculated</h3>
+                  <p>
+                    The chart looks for a repeatable trend, not one isolated
+                    edit.
+                  </p>
+                </div>
+              </div>
+              <div class="scatter-guide__build-flow">
+                <div>
+                  <b>1</b><span>For each target month, line up V1 → V5.</span>
+                </div>
+                <div>
+                  <b>2</b
+                  ><span
+                    >Measure the forecast-level trend as % of actual per
+                    vintage.</span
+                  >
+                </div>
+                <div>
+                  <b>3</b
+                  ><span
+                    >Measure the accuracy trend as forecast-accuracy points per
+                    vintage.</span
+                  >
+                </div>
+                <div>
+                  <b>4</b
+                  ><span
+                    >Take the median across six months to place the parent
+                    bubble.</span
+                  >
+                </div>
+              </div>
+              <div class="scatter-guide__axis-cards">
+                <div>
+                  <strong>X · Forecast trend</strong>
+                  <p><b>Positive:</b> forecasts rose through the vintages.</p>
+                  <p><b>Negative:</b> forecasts fell through the vintages.</p>
+                </div>
+                <div>
+                  <strong>Y · Improvement score</strong>
+                  <p><b>Positive:</b> forecast accuracy improved.</p>
+                  <p><b>Negative:</b> forecast accuracy deteriorated.</p>
+                </div>
+              </div>
+              <p class="scatter-guide__caution">
+                X is not bias and Y is not the balanced 0–100 score. Both are
+                slopes across vintages, summarized by the six-month median.
+              </p>
+            </article>
+
+            <article class="revision-guide__card scatter-guide__card--act">
+              <div class="revision-guide__card-head">
+                <span>03</span>
+                <div>
+                  <h3>Read bubbles and heatmap together</h3>
+                  <p>
+                    Separate individual parents from the population’s common
+                    pattern.
+                  </p>
+                </div>
+              </div>
+              <div class="scatter-guide__signals">
+                <div class="is-good">
+                  <b>Good pattern</b
+                  ><span
+                    >Upper half, repeated across months. Preserve the signal and
+                    timing.</span
+                  >
+                </div>
+                <div class="is-watch">
+                  <b>Watch closely</b
+                  ><span
+                    >Near zero or dense clusters. The process may be stable but
+                    not learning much.</span
+                  >
+                </div>
+                <div class="is-bad">
+                  <b>Bad pattern</b
+                  ><span
+                    >Lower half—especially large-error or extreme bubbles.
+                    Revisions repeatedly added error.</span
+                  >
+                </div>
+              </div>
+              <div class="scatter-guide__heatmap-explainer">
+                <div class="scatter-guide__heatmap-scale" aria-hidden="true">
+                  <i></i><i></i><i></i><i></i><i></i>
+                </div>
+                <div>
+                  <strong>Heatmap = concentration, not performance</strong>
+                  <p>
+                    The plot is divided into <b>14 × 8 cells</b>. Every parent
+                    bubble adds one count to its cell; darker teal means more
+                    parents there relative to the busiest cell.
+                  </p>
+                </div>
+              </div>
+              <div class="scatter-guide__controls">
+                <strong>Use the controls intentionally</strong>
+                <span
+                  ><b>Density</b> turns the heatmap layer on or off; it counts
+                  parents, not KL or impact.</span
+                >
+                <span
+                  ><b>Size by error</b> is the default; it shows the latest
+                  vintage’s absolute error summed across six target
+                  months.</span
+                >
+                <span
+                  ><b>Size by volume / Uniform dots</b> switches to commercial
+                  scale or removes size encoding.</span
+                >
+                <span
+                  ><b>Top volume / Outliers</b> hides bubbles while retaining
+                  the heatmap as population context.</span
+                >
+                <span
+                  ><b>SKU class</b> changes the plotted population and its
+                  heatmap.</span
+                >
+              </div>
+              <p class="scatter-guide__caution">
+                A dark cell is not automatically good or bad—its vertical
+                position provides that meaning. The heatmap can also hide
+                overlapping parents, so use bubbles and selected evidence before
+                agreeing an action.
+              </p>
+            </article>
+
+            <section
+              class="revision-guide__discussion scatter-guide__discussion"
+            >
+              <div class="revision-guide__discussion-intro">
+                <span>04</span>
+                <div>
+                  <h3>Use the quadrant to structure the conversation</h3>
+                  <p>Start with what moved, then test why it helped or hurt.</p>
+                </div>
+              </div>
+              <div>
+                <strong>With the forecasting team</strong>
+                <ul>
+                  <li>
+                    Which parents show a repeatable helpful or harmful trend?
+                  </li>
+                  <li>Did the useful signal arrive early enough to act on?</li>
+                  <li>
+                    Do outliers reflect process, data quality or a one-off
+                    event?
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <strong>With the business team</strong>
+                <ul>
+                  <li>What assumption explains the direction of movement?</li>
+                  <li>Which high-error parents deserve decision priority?</li>
+                  <li>What input or commitment should change next cycle?</li>
+                </ul>
+              </div>
+            </section>
+          </div>
+
+          <footer class="revision-effectiveness-guide-dialog__foot">
+            <span
+              ><b>Cohort:</b> parents with six complete months × five
+              vintages</span
+            >
+            <span><b>Aggregation:</b> median monthly trend</span>
+            <span><b>Excluded:</b> listed super-seasonal families</span>
+            <span
+              ><b>Next:</b> select a bubble to filter KPIs and action
+              evidence</span
+            >
+          </footer>
+        </section>
+      </div>
+
+      <div
+        class="revision-effectiveness-guide-dialog"
+        id="comparison-kpi-guide-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="comparison-kpi-guide-title"
+        aria-describedby="comparison-kpi-guide-summary"
+        hidden
+      >
+        <section class="revision-effectiveness-guide-dialog__panel">
+          <header class="revision-effectiveness-guide-dialog__head">
+            <div>
+              <p class="eyebrow" data-comparison-kpi-guide-context>
+                Metric guide · active comparison population
+              </p>
+              <h2 id="comparison-kpi-guide-title">How to read this metric</h2>
+              <p id="comparison-kpi-guide-summary"></p>
+            </div>
+            <button
+              class="chart-expand"
+              data-action="comparison-kpi-guide-close"
+              type="button"
+              aria-label="Close comparison metric guide"
+            >
+              <svg viewBox="0 0 20 20" aria-hidden="true">
+                <path d="m5 5 10 10M15 5 5 15" />
+              </svg>
+              Close
+            </button>
+          </header>
+
+          <div class="comparison-kpi-guide__body">
+            <section data-comparison-kpi-guide="accuracy-delta">
+              <div class="comparison-kpi-guide__definition">
+                <strong>The question it answers</strong>
+                <span
+                  >Did Vintage B reduce forecast error relative to Vintage A,
+                  after scaling the result by actual demand?</span
+                >
+              </div>
+              <article
+                class="revision-guide__card comparison-kpi-guide__visual-card"
+              >
+                <div class="revision-guide__card-head">
+                  <span>01</span>
+                  <div>
+                    <h3>Read the number as error removed</h3>
+                    <p>
+                      Positive percentage points mean the later vintage was more
+                      accurate.
+                    </p>
+                  </div>
+                </div>
+                <div class="comparison-kpi-guide__error-bars">
+                  <div>
+                    <span>Vintage A error</span><i style="--guide-bar: 88%"></i
+                    ><b>starting error</b>
+                  </div>
+                  <div class="is-good">
+                    <span>Vintage B error</span><i style="--guide-bar: 55%"></i
+                    ><b>smaller</b>
+                  </div>
+                  <em>the gap is error removed</em>
+                </div>
+                <div class="comparison-kpi-guide__example">
+                  <b>Example · +4.6 pp</b
+                  ><span
+                    >Vintage B removed absolute error equal to 4.6% of the
+                    population’s actual volume.</span
+                  >
+                </div>
+              </article>
+              <article
+                class="revision-guide__card comparison-kpi-guide__formula-card"
+              >
+                <div class="revision-guide__card-head">
+                  <span>02</span>
+                  <div>
+                    <h3>How it is calculated</h3>
+                    <p>All complete product-target-month pairs contribute.</p>
+                  </div>
+                </div>
+                <div class="comparison-kpi-guide__equation">
+                  <span>Σ |A − actual|</span><b>−</b><span>Σ |B − actual|</span
+                  ><b>÷</b><span>Σ actual</span><b>× 100</b>
+                </div>
+                <div class="comparison-kpi-guide__steps">
+                  <span
+                    ><b>1.</b> Find absolute error for A and B in each
+                    pair.</span
+                  >
+                  <span
+                    ><b>2.</b> Add the errors across the active
+                    population.</span
+                  >
+                  <span
+                    ><b>3.</b> Divide net error removed by total actual
+                    volume.</span
+                  >
+                </div>
+                <p class="comparison-kpi-guide__caution">
+                  This is population-weighted: large-volume observations
+                  influence the result more. It is not an average of SKU
+                  accuracy percentages.
+                </p>
+              </article>
+              <article
+                class="revision-guide__card comparison-kpi-guide__interpret-card"
+              >
+                <div class="revision-guide__card-head">
+                  <span>03</span>
+                  <div>
+                    <h3>What good and bad look like</h3>
+                    <p>
+                      Direction is clear; context explains whether the gain is
+                      repeatable.
+                    </p>
+                  </div>
+                </div>
+                <div class="comparison-kpi-guide__bands">
+                  <div class="is-good">
+                    <b>Positive</b><span>B removed net error</span>
+                  </div>
+                  <div class="is-watch">
+                    <b>Near zero</b
+                    ><span>Little net change or gains offset losses</span>
+                  </div>
+                  <div class="is-bad">
+                    <b>Negative</b><span>B added net error</span>
+                  </div>
+                </div>
+                <p class="comparison-kpi-guide__caution">
+                  Oldest and latest available forecasts can represent different
+                  horizons by product-month unless exact horizons are selected.
+                  A positive total can also hide pockets that worsened.
+                </p>
+              </article>
+              <section
+                class="revision-guide__discussion comparison-kpi-guide__discussion"
+              >
+                <div class="revision-guide__discussion-intro">
+                  <span>04</span>
+                  <div>
+                    <h3>Use it to discuss the value of revision</h3>
+                    <p>
+                      Pair the aggregate result with the action queue before
+                      deciding what to repeat.
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  <strong>With the forecasting team</strong>
+                  <ul>
+                    <li>
+                      Which products created most of the net gain or loss?
+                    </li>
+                    <li>Was improvement consistent across horizons?</li>
+                    <li>Which late signal could have been used earlier?</li>
+                  </ul>
+                </div>
+                <div>
+                  <strong>With the business team</strong>
+                  <ul>
+                    <li>
+                      Which changed assumption produced measurable accuracy
+                      value?
+                    </li>
+                    <li>Did better accuracy arrive in time for a decision?</li>
+                    <li>Where did offsetting losses occur?</li>
+                  </ul>
+                </div>
+              </section>
+            </section>
+
+            <section data-comparison-kpi-guide="effectiveness" hidden>
+              <div class="comparison-kpi-guide__definition">
+                <strong>The question it answers</strong>
+                <span
+                  >When the forecast was meaningfully changed, how often did
+                  that change move closer to actual demand?</span
+                >
+              </div>
+              <article
+                class="revision-guide__card comparison-kpi-guide__visual-card"
+              >
+                <div class="revision-guide__card-head">
+                  <span>01</span>
+                  <div>
+                    <h3>Read it as a hit rate</h3>
+                    <p>
+                      Every materially revised pair gets one vote, regardless of
+                      volume.
+                    </p>
+                  </div>
+                </div>
+                <div
+                  class="comparison-kpi-guide__hit-rate"
+                  aria-label="Example hit rate with seven improved revisions and five revisions that did not improve"
+                >
+                  <i class="is-good"></i><i class="is-good"></i
+                  ><i class="is-good"></i><i class="is-good"></i
+                  ><i class="is-good"></i><i class="is-good"></i
+                  ><i class="is-good"></i><i class="is-bad"></i
+                  ><i class="is-bad"></i><i class="is-bad"></i
+                  ><i class="is-bad"></i><i class="is-bad"></i>
+                </div>
+                <div class="comparison-kpi-guide__example">
+                  <b>Example · 58.3%</b
+                  ><span
+                    >About 58 of every 100 meaningful revisions improved
+                    accuracy; roughly 42 did not.</span
+                  >
+                </div>
+              </article>
+              <article
+                class="revision-guide__card comparison-kpi-guide__formula-card"
+              >
+                <div class="revision-guide__card-head">
+                  <span>02</span>
+                  <div>
+                    <h3>How it is calculated</h3>
+                    <p>
+                      Unchanged or immaterial pairs stay out of the denominator.
+                    </p>
+                  </div>
+                </div>
+                <div class="comparison-kpi-guide__equation">
+                  <span>Revised pairs that improved</span><b>÷</b
+                  ><span>All materially revised pairs</span><b>× 100</b>
+                </div>
+                <div class="comparison-kpi-guide__steps">
+                  <span
+                    ><b>Improved:</b> B’s absolute error is meaningfully lower
+                    than A’s.</span
+                  >
+                  <span
+                    ><b>Worsened:</b> B’s absolute error is meaningfully
+                    higher.</span
+                  >
+                  <span
+                    ><b>Neutral:</b> the forecast moved, but accuracy barely
+                    changed.</span
+                  >
+                </div>
+                <p class="comparison-kpi-guide__caution">
+                  This is count-based, not volume-weighted. A tiny product and a
+                  major product each count as one pair.
+                </p>
+              </article>
+              <article
+                class="revision-guide__card comparison-kpi-guide__interpret-card"
+              >
+                <div class="revision-guide__card-head">
+                  <span>03</span>
+                  <div>
+                    <h3>What good and bad look like</h3>
+                    <p>
+                      Higher is better, but magnitude belongs in the other two
+                      KPIs.
+                    </p>
+                  </div>
+                </div>
+                <div class="comparison-kpi-guide__bands">
+                  <div class="is-good">
+                    <b>Clearly above 50%</b
+                    ><span>Most meaningful revisions helped</span>
+                  </div>
+                  <div class="is-watch">
+                    <b>Around 50%</b
+                    ><span
+                      >Mixed process; inspect where wins and losses occur</span
+                    >
+                  </div>
+                  <div class="is-bad">
+                    <b>Below 50%</b
+                    ><span>More meaningful revisions failed than helped</span>
+                  </div>
+                </div>
+                <p class="comparison-kpi-guide__caution">
+                  A high hit rate can still deliver little value if gains are
+                  tiny. A lower hit rate can coexist with positive net
+                  improvement if a few large gains dominate. Always triangulate
+                  all three cards.
+                </p>
+              </article>
+              <section
+                class="revision-guide__discussion comparison-kpi-guide__discussion"
+              >
+                <div class="revision-guide__discussion-intro">
+                  <span>04</span>
+                  <div>
+                    <h3>Use it to discuss process reliability</h3>
+                    <p>
+                      Ask why revision decisions succeed or fail repeatedly.
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  <strong>With the forecasting team</strong>
+                  <ul>
+                    <li>Which revision types have the strongest hit rate?</li>
+                    <li>
+                      Are failures concentrated by planner, horizon or product?
+                    </li>
+                    <li>Which checks would prevent avoidable harmful moves?</li>
+                  </ul>
+                </div>
+                <div>
+                  <strong>With the business team</strong>
+                  <ul>
+                    <li>Which inputs consistently improve the forecast?</li>
+                    <li>Where are assumption changes creating noise?</li>
+                    <li>
+                      What evidence should be required before a late override?
+                    </li>
+                  </ul>
+                </div>
+              </section>
+            </section>
+
+            <section data-comparison-kpi-guide="error-improvement" hidden>
+              <div class="comparison-kpi-guide__definition">
+                <strong>The question it answers</strong>
+                <span
+                  >How many KL of absolute forecast error did Vintage B
+                  remove—or add—across the complete comparison population?</span
+                >
+              </div>
+              <article
+                class="revision-guide__card comparison-kpi-guide__visual-card"
+              >
+                <div class="revision-guide__card-head">
+                  <span>01</span>
+                  <div>
+                    <h3>Read it as a net error ledger</h3>
+                    <p>
+                      Helpful and harmful pairs are added together in physical
+                      volume.
+                    </p>
+                  </div>
+                </div>
+                <div class="comparison-kpi-guide__ledger">
+                  <span class="is-good" style="--ledger-height: 72%"
+                    ><b>+820</b></span
+                  >
+                  <span class="is-good" style="--ledger-height: 52%"
+                    ><b>+590</b></span
+                  >
+                  <span class="is-bad" style="--ledger-height: 38%"
+                    ><b>−430</b></span
+                  >
+                  <span class="is-good" style="--ledger-height: 64%"
+                    ><b>+730</b></span
+                  >
+                  <span class="is-bad" style="--ledger-height: 26%"
+                    ><b>−290</b></span
+                  >
+                  <em>individual pair contributions → net total</em>
+                </div>
+                <div class="comparison-kpi-guide__example">
+                  <b>Example · +1,943.1 KL</b
+                  ><span
+                    >After gains and losses were combined, Vintage B removed
+                    1,943.1 KL of absolute error.</span
+                  >
+                </div>
+              </article>
+              <article
+                class="revision-guide__card comparison-kpi-guide__formula-card"
+              >
+                <div class="revision-guide__card-head">
+                  <span>02</span>
+                  <div>
+                    <h3>How it is calculated</h3>
+                    <p>
+                      Each complete pair contributes a positive or negative KL
+                      amount.
+                    </p>
+                  </div>
+                </div>
+                <div class="comparison-kpi-guide__equation">
+                  <span>For every pair</span><b>Σ</b
+                  ><span>(|A − actual| − |B − actual|)</span>
+                </div>
+                <div class="comparison-kpi-guide__steps">
+                  <span
+                    ><b>Positive contribution:</b> B has less absolute
+                    error.</span
+                  >
+                  <span
+                    ><b>Negative contribution:</b> B has more absolute
+                    error.</span
+                  >
+                  <span
+                    ><b>Net total:</b> all helpful and harmful contributions
+                    combined.</span
+                  >
+                </div>
+                <p class="comparison-kpi-guide__caution">
+                  The unit is KL, so the number grows with both impact and
+                  population size. Use accuracy delta when you need a normalized
+                  percentage-point comparison.
+                </p>
+              </article>
+              <article
+                class="revision-guide__card comparison-kpi-guide__interpret-card"
+              >
+                <div class="revision-guide__card-head">
+                  <span>03</span>
+                  <div>
+                    <h3>What good and bad look like</h3>
+                    <p>
+                      Magnitude shows business impact, not how consistently the
+                      process worked.
+                    </p>
+                  </div>
+                </div>
+                <div class="comparison-kpi-guide__bands">
+                  <div class="is-good">
+                    <b>Positive</b><span>Net absolute error was removed</span>
+                  </div>
+                  <div class="is-watch">
+                    <b>Near zero</b
+                    ><span>Limited impact or gains offset losses</span>
+                  </div>
+                  <div class="is-bad">
+                    <b>Negative</b><span>Net absolute error was added</span>
+                  </div>
+                </div>
+                <p class="comparison-kpi-guide__caution">
+                  One large-volume gain can mask many smaller failures, and one
+                  major loss can overwhelm many small wins. Pair this with
+                  revision effectiveness to separate magnitude from frequency.
+                </p>
+              </article>
+              <section
+                class="revision-guide__discussion comparison-kpi-guide__discussion"
+              >
+                <div class="revision-guide__discussion-intro">
+                  <span>04</span>
+                  <div>
+                    <h3>Use it to discuss commercial impact</h3>
+                    <p>
+                      Trace the net result back to the parents and decisions
+                      that created it.
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  <strong>With the forecasting team</strong>
+                  <ul>
+                    <li>
+                      Which parents contributed most to error removed or added?
+                    </li>
+                    <li>
+                      Were the largest losses detectable before the revision?
+                    </li>
+                    <li>Which successful patterns should be repeated?</li>
+                  </ul>
+                </div>
+                <div>
+                  <strong>With the business team</strong>
+                  <ul>
+                    <li>
+                      What is the operational value of the KL error removed?
+                    </li>
+                    <li>
+                      Which high-volume assumption changes drove the result?
+                    </li>
+                    <li>Where should accountability or inputs change?</li>
+                  </ul>
+                </div>
+              </section>
+            </section>
+          </div>
+
+          <footer class="revision-effectiveness-guide-dialog__foot">
+            <span
+              ><b>Population:</b> complete A/B/actual pairs in active
+              filters</span
+            >
+            <span
+              ><b>Important:</b> the three KPIs answer different questions</span
+            >
+            <span
+              ><b>Best practice:</b> interpret frequency, normalized gain and KL
+              impact together</span
+            >
+          </footer>
+        </section>
+      </div>
+
+      <div
+        class="revision-effectiveness-guide-dialog"
+        id="overview-guide-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="overview-guide-title"
+        aria-describedby="overview-guide-summary"
+        hidden
+      >
+        <section class="revision-effectiveness-guide-dialog__panel">
+          <header class="revision-effectiveness-guide-dialog__head">
+            <div>
+              <p class="eyebrow" data-overview-guide-context>
+                Guide · accuracy chart common cohort
+              </p>
+              <h2 id="overview-guide-title">How to read this metric</h2>
+              <p id="overview-guide-summary"></p>
+            </div>
+            <button
+              class="chart-expand"
+              data-action="overview-guide-close"
+              type="button"
+              aria-label="Close overview guide"
+            >
+              <svg viewBox="0 0 20 20" aria-hidden="true">
+                <path d="m5 5 10 10M15 5 5 15" />
+              </svg>
+              Close
+            </button>
+          </header>
+
+          <div class="comparison-kpi-guide__body overview-guide__body">
+            <section data-overview-guide="accuracy" hidden>
+              <div class="comparison-kpi-guide__definition">
+                <strong>The question it answers</strong>
+                <span
+                  >Across the accuracy chart’s common cohort, how large was the
+                  KPI vintage’s absolute error relative to actual demand?</span
+                >
+              </div>
+              <article
+                class="revision-guide__card comparison-kpi-guide__visual-card"
+              >
+                <div class="revision-guide__card-head">
+                  <span>01</span>
+                  <div>
+                    <h3>Read it as 100% minus the error burden</h3>
+                    <p>
+                      Higher means the chart’s KPI vintage was closer to actual
+                      demand.
+                    </p>
+                  </div>
+                </div>
+                <div class="comparison-kpi-guide__error-bars">
+                  <div>
+                    <span>Large parent</span><i style="--guide-bar: 20%"></i
+                    ><b>err 18 / 90 KL</b>
+                  </div>
+                  <div>
+                    <span>Small parent</span><i style="--guide-bar: 50%"></i
+                    ><b>err 5 / 10 KL</b>
+                  </div>
+                  <div class="is-good">
+                    <span>Population</span><i style="--guide-bar: 23%"></i
+                    ><b>err 23 / 100 KL</b>
+                  </div>
+                  <em>bars show each row’s error share of its actual volume</em>
+                </div>
+                <div class="comparison-kpi-guide__example">
+                  <b>Example · 77%</b
+                  ><span
+                    >The population carried 23 KL of absolute error for every
+                    100 KL of actual demand. It does not mean 77% of forecasts
+                    were correct.</span
+                  >
+                </div>
+              </article>
+              <article
+                class="revision-guide__card comparison-kpi-guide__formula-card"
+              >
+                <div class="revision-guide__card-head">
+                  <span>02</span>
+                  <div>
+                    <h3>Add first, divide once</h3>
+                    <p>One population ratio, not an average of products.</p>
+                  </div>
+                </div>
+                <div class="comparison-kpi-guide__equation">
+                  <span>100</span><b>−</b><span>Σ |forecast − actual|</span
+                  ><b>÷</b><span>Σ actual</span><b>× 100</b>
+                </div>
+                <div class="comparison-kpi-guide__steps">
+                  <span
+                    ><b>1.</b> Keep complete pairs with a positive actual.</span
+                  >
+                  <span><b>2.</b> Take each pair’s absolute error in KL.</span>
+                  <span
+                    ><b>3.</b> Sum errors and actuals, then form one
+                    ratio.</span
+                  >
+                </div>
+                <p class="comparison-kpi-guide__caution">
+                  This is 100% − WAPE. It is not MAPE and not an average of SKU
+                  accuracies. Missing and zero actuals do not enter the ratio.
+                </p>
+              </article>
+              <article
+                class="revision-guide__card comparison-kpi-guide__interpret-card"
+              >
+                <div class="revision-guide__card-head">
+                  <span>03</span>
+                  <div>
+                    <h3>What good and bad look like</h3>
+                    <p>
+                      Judge thresholds against your own target, not a universal
+                      rule.
+                    </p>
+                  </div>
+                </div>
+                <div class="comparison-kpi-guide__bands">
+                  <div class="is-good">
+                    <b>100%</b><span>Perfect: no absolute error</span>
+                  </div>
+                  <div class="is-good">
+                    <b>Closer to 100%</b
+                    ><span>Less error per unit of actual</span>
+                  </div>
+                  <div class="is-watch">
+                    <b>0%</b><span>Error equals total actual volume</span>
+                  </div>
+                  <div class="is-bad">
+                    <b>Below 0%</b
+                    ><span>Valid: error exceeded actual volume</span>
+                  </div>
+                </div>
+                <p class="comparison-kpi-guide__caution">
+                  No universal “good” cutoff exists. Check coverage before
+                  celebrating a high score, and use Bias for direction—the
+                  accuracy score cannot say over or under.
+                </p>
+              </article>
+              <section
+                class="revision-guide__discussion comparison-kpi-guide__discussion"
+              >
+                <div class="revision-guide__discussion-intro">
+                  <span>04</span>
+                  <div>
+                    <h3>Use it in the planning discussion</h3>
+                    <p>
+                      Move from the aggregate score to the decisions behind it.
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  <strong>With the forecasting team</strong>
+                  <ul>
+                    <li>
+                      Which products and months contribute most absolute error?
+                    </li>
+                    <li>
+                      Did accuracy change, or did population, mix or horizon?
+                    </li>
+                    <li>
+                      Is the miss consistently over or under (check Bias)?
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <strong>With the business team</strong>
+                  <ul>
+                    <li>Are we meeting target where decisions are made?</li>
+                    <li>
+                      Which assumptions explain the largest error pockets?
+                    </li>
+                    <li>What service, inventory or waste trade-off follows?</li>
+                  </ul>
+                </div>
+              </section>
+            </section>
+
+            <section
+              class="wape-guide bias-guide"
+              data-overview-guide="bias"
+              hidden
+            >
+              <div class="wape-guide__formula">
+                <strong>Formula first</strong>
+                <span>Bias =</span>
+                <span class="wape-guide__fraction">
+                  <b>Σ ( Forecast − Actual )</b>
+                  <b>Σ Actual</b>
+                </span>
+                <span>× 100</span>
+                <em
+                  >Over-forecast gaps are positive; under-forecast gaps are
+                  negative, so opposite directions cancel.</em
+                >
+              </div>
+
+              <div class="wape-guide__layout">
+                <article class="revision-guide__card wape-guide__chart-card">
+                  <div class="wape-guide__card-head">
+                    <div>
+                      <h3>Actual volume with the forecast laid over it</h3>
+                      <p>
+                        Eight high-error rows from distinct SKUs in the active
+                        pipeline. Each bracket keeps its direction before the
+                        rows are added.
+                      </p>
+                    </div>
+                    <div class="wape-guide__legend" aria-label="Chart legend">
+                      <span><i class="is-actual"></i>Actual bar</span>
+                      <span><i class="is-forecast"></i>Forecast marker</span>
+                      <span><i class="is-gap"></i>Signed gap</span>
+                    </div>
+                  </div>
+                  <div class="wape-guide__axis">
+                    <span>SKU · target month</span>
+                    <div>
+                      <b>0</b><b data-bias-guide-axis-quarter>—</b
+                      ><b data-bias-guide-axis-half>—</b
+                      ><b data-bias-guide-axis-three-quarter>—</b
+                      ><b data-bias-guide-axis-max>—</b>
+                    </div>
+                    <span>Forecast / actual</span>
+                  </div>
+                  <div
+                    class="wape-guide__lanes"
+                    data-bias-guide-lanes
+                    role="img"
+                  ></div>
+                </article>
+
+                <aside class="revision-guide__card wape-guide__sum-card">
+                  <h3>
+                    Each signed bracket is<br /><strong
+                      >added to the net error</strong
+                    >
+                  </h3>
+                  <p class="wape-guide__primary">
+                    KPI vintage: <b data-bias-guide-primary>—</b>
+                  </p>
+                  <div class="wape-guide__sum" data-bias-guide-sum></div>
+                  <div class="wape-guide__shown-total">
+                    <span>Eight shown · net</span
+                    ><b data-bias-guide-shown-error>—</b>
+                  </div>
+                  <div class="wape-guide__remaining-total">
+                    <span data-bias-guide-remaining>+ remaining rows</span>
+                    <b data-bias-guide-remaining-error>—</b>
+                  </div>
+                  <div class="wape-guide__error-total">
+                    <span
+                      >Σ signed error · all
+                      <b data-bias-guide-observations>—</b> rows</span
+                    >
+                    <strong data-bias-guide-total-error>—</strong>
+                  </div>
+                  <div class="wape-guide__division">
+                    <span>÷</span><b data-bias-guide-total-actual>—</b
+                    ><span>× 100</span>
+                  </div>
+                  <div class="wape-guide__answer">
+                    <span>Portfolio bias</span>
+                    <strong data-bias-guide-result>—</strong>
+                    <p data-bias-guide-interpretation>
+                      The sign shows whether the portfolio forecast finished
+                      above or below actual demand.
+                    </p>
+                  </div>
+                </aside>
+              </div>
+
+              <p class="wape-guide__note">
+                Positive bias means over-forecast; negative bias means
+                under-forecast. Near zero can still hide large opposing errors,
+                so read Bias beside WAPE.
+              </p>
+            </section>
+
+            <section data-overview-guide="actual-volume" hidden>
+              <div class="comparison-kpi-guide__definition">
+                <strong>The question it answers</strong>
+                <span
+                  >What is a typical month of actual demand, how much do monthly
+                  totals vary, and are any months unusually high or low?</span
+                >
+              </div>
+              <article
+                class="revision-guide__card comparison-kpi-guide__visual-card"
+              >
+                <div class="revision-guide__card-head">
+                  <span>01</span>
+                  <div>
+                    <h3>Read the line, box and whiskers</h3>
+                    <p>Every position is one month’s total on the KL scale.</p>
+                  </div>
+                </div>
+                <svg
+                  class="overview-guide__boxes"
+                  viewBox="0 0 470 130"
+                  role="img"
+                  aria-label="Box plot anatomy: whiskers reach the most extreme months within one and a half interquartile ranges, the box spans the middle 50 percent of monthly totals, and the centre line is the median month."
+                >
+                  <g class="is-actual">
+                    <line
+                      class="box-whisker"
+                      x1="70"
+                      x2="400"
+                      y1="62"
+                      y2="62"
+                    />
+                    <line class="box-whisker" x1="70" x2="70" y1="52" y2="72" />
+                    <line
+                      class="box-whisker"
+                      x1="400"
+                      x2="400"
+                      y1="52"
+                      y2="72"
+                    />
+                    <rect
+                      class="box-body"
+                      x="150"
+                      y="50"
+                      width="170"
+                      height="24"
+                      rx="2"
+                    />
+                    <line
+                      class="box-median"
+                      x1="235"
+                      x2="235"
+                      y1="46"
+                      y2="78"
+                    />
+                  </g>
+                  <text x="150" y="36" text-anchor="middle">Q1</text>
+                  <text x="235" y="26" text-anchor="middle">Median month</text>
+                  <text x="320" y="36" text-anchor="middle">Q3</text>
+                  <text x="235" y="100" text-anchor="middle">
+                    whiskers = extreme months still within 1.5 × IQR
+                  </text>
+                  <text x="235" y="116" text-anchor="middle">
+                    box = middle 50% of months · beyond-fence months are not
+                    drawn
+                  </text>
+                </svg>
+              </article>
+              <article
+                class="revision-guide__card comparison-kpi-guide__formula-card"
+              >
+                <div class="revision-guide__card-head">
+                  <span>02</span>
+                  <div>
+                    <h3>One observation is one month</h3>
+                    <p>Products are summed before the distribution is built.</p>
+                  </div>
+                </div>
+                <div class="scatter-guide__build-flow">
+                  <div>
+                    <b>1</b><span>Apply the active source and filters.</span>
+                  </div>
+                  <div>
+                    <b>2</b
+                    ><span
+                      >Sum product-level values into one total per month.</span
+                    >
+                  </div>
+                  <div>
+                    <b>3</b
+                    ><span
+                      >Keep the common parent-month cohort shared by every
+                      displayed accuracy vintage.</span
+                    >
+                  </div>
+                  <div>
+                    <b>4</b
+                    ><span>Take quartiles across those monthly totals.</span>
+                  </div>
+                </div>
+                <p class="comparison-kpi-guide__caution">
+                  This is not a distribution of SKUs. A small month count makes
+                  quartiles sensitive, and incomplete periods can create extreme
+                  months.
+                </p>
+              </article>
+              <article
+                class="revision-guide__card comparison-kpi-guide__interpret-card"
+              >
+                <div class="revision-guide__card-head">
+                  <span>03</span>
+                  <div>
+                    <h3>Interpret—do not score</h3>
+                    <p>There is no universal good or bad shape.</p>
+                  </div>
+                </div>
+                <div class="comparison-kpi-guide__bands">
+                  <div class="is-watch">
+                    <b>Narrow box</b
+                    ><span>Stable demand—useful for base-load planning</span>
+                  </div>
+                  <div class="is-watch">
+                    <b>Wide box</b
+                    ><span>Variable demand—investigate the drivers</span>
+                  </div>
+                  <div class="is-watch">
+                    <b>Similar boxes</b
+                    ><span>Do not prove accuracy; compare with care</span>
+                  </div>
+                </div>
+                <p class="comparison-kpi-guide__caution">
+                  Matching distributions can hide per-month misses: errors
+                  cancel inside monthly totals. Use the Comparison KPIs for
+                  paired accuracy evidence.
+                </p>
+              </article>
+              <section
+                class="revision-guide__discussion comparison-kpi-guide__discussion"
+              >
+                <div class="revision-guide__discussion-intro">
+                  <span>04</span>
+                  <div>
+                    <h3>Use it to frame variability</h3>
+                    <p>Start with the shape, then find the months behind it.</p>
+                  </div>
+                </div>
+                <div>
+                  <strong>With the forecasting team</strong>
+                  <ul>
+                    <li>Which months sit outside the whiskers, and why?</li>
+                    <li>Does the forecast reproduce or flatten variability?</li>
+                    <li>Do results change after excluding partial periods?</li>
+                  </ul>
+                </div>
+                <div>
+                  <strong>With the business team</strong>
+                  <ul>
+                    <li>What capacity covers a typical month?</li>
+                    <li>Which events explain the spread?</li>
+                    <li>What trade-off follows from the variability?</li>
+                  </ul>
+                </div>
+              </section>
+            </section>
+
+            <section data-overview-guide="forecast-volume" hidden>
+              <div class="comparison-kpi-guide__definition">
+                <strong>The question it answers</strong>
+                <span
+                  >What does a typical month’s KPI-vintage forecast total look
+                  like, and does it sit above, below or alongside actual
+                  demand?</span
+                >
+              </div>
+              <article
+                class="revision-guide__card comparison-kpi-guide__visual-card"
+              >
+                <div class="revision-guide__card-head">
+                  <span>01</span>
+                  <div>
+                    <h3>One shared scale, two boxes</h3>
+                    <p>
+                      Compare shift and spread directly—the axis is identical.
+                    </p>
+                  </div>
+                </div>
+                <svg
+                  class="overview-guide__boxes"
+                  viewBox="0 0 470 150"
+                  role="img"
+                  aria-label="Actual and forecast monthly totals on one shared KL scale: the forecast box shifted left of the actual box means systematic under-forecasting, and a wider forecast box means extra month-to-month variability."
+                >
+                  <line class="box-axis" x1="40" x2="430" y1="126" y2="126" />
+                  <g class="is-actual">
+                    <line
+                      class="box-whisker"
+                      x1="80"
+                      x2="380"
+                      y1="44"
+                      y2="44"
+                    />
+                    <line class="box-whisker" x1="80" x2="80" y1="36" y2="52" />
+                    <line
+                      class="box-whisker"
+                      x1="380"
+                      x2="380"
+                      y1="36"
+                      y2="52"
+                    />
+                    <rect
+                      class="box-body"
+                      x="150"
+                      y="32"
+                      width="160"
+                      height="24"
+                      rx="2"
+                    />
+                    <line
+                      class="box-median"
+                      x1="235"
+                      x2="235"
+                      y1="28"
+                      y2="60"
+                    />
+                    <text x="66" y="48" text-anchor="end">Actual</text>
+                  </g>
+                  <g class="is-forecast">
+                    <line
+                      class="box-whisker"
+                      x1="70"
+                      x2="360"
+                      y1="98"
+                      y2="98"
+                    />
+                    <line
+                      class="box-whisker"
+                      x1="70"
+                      x2="70"
+                      y1="90"
+                      y2="106"
+                    />
+                    <line
+                      class="box-whisker"
+                      x1="360"
+                      x2="360"
+                      y1="90"
+                      y2="106"
+                    />
+                    <rect
+                      class="box-body"
+                      x="130"
+                      y="86"
+                      width="180"
+                      height="24"
+                      rx="2"
+                    />
+                    <line
+                      class="box-median"
+                      x1="215"
+                      x2="215"
+                      y1="82"
+                      y2="114"
+                    />
+                    <text x="66" y="102" text-anchor="end">Forecast</text>
+                  </g>
+                  <text x="430" y="118" text-anchor="end">same KL scale →</text>
+                  <text x="235" y="143" text-anchor="middle">
+                    shifted median = systematic over/under · wider box = more
+                    variability
+                  </text>
+                </svg>
+              </article>
+              <article
+                class="revision-guide__card comparison-kpi-guide__formula-card"
+              >
+                <div class="revision-guide__card-head">
+                  <span>02</span>
+                  <div>
+                    <h3>Monthly totals of the KPI vintage</h3>
+                    <p>
+                      The KPI vintage is summed over the chart’s common cohort.
+                    </p>
+                  </div>
+                </div>
+                <div class="scatter-guide__build-flow">
+                  <div>
+                    <b>1</b
+                    ><span
+                      >Use the oldest displayed historical vintage when several
+                      are selected, the specific vintage when one is selected,
+                      or latest when none are selected.</span
+                    >
+                  </div>
+                  <div>
+                    <b>2</b
+                    ><span
+                      >Sum product forecasts into one total per month.</span
+                    >
+                  </div>
+                  <div>
+                    <b>3</b
+                    ><span>Keep months that also have actual volume.</span>
+                  </div>
+                  <div>
+                    <b>4</b
+                    ><span>Plot on the same KL scale as actual volume.</span>
+                  </div>
+                </div>
+                <p class="comparison-kpi-guide__caution">
+                  In comparison mode both sources align to one exact horizon;
+                  this card still shows only the request’s selected source.
+                </p>
+              </article>
+              <article
+                class="revision-guide__card comparison-kpi-guide__interpret-card"
+              >
+                <div class="revision-guide__card-head">
+                  <span>03</span>
+                  <div>
+                    <h3>Compare level and spread—not accuracy</h3>
+                    <p>Similar boxes do not certify a good forecast.</p>
+                  </div>
+                </div>
+                <div class="comparison-kpi-guide__bands">
+                  <div class="is-watch">
+                    <b>Shifted median</b
+                    ><span>Systematic over- or under-forecasting</span>
+                  </div>
+                  <div class="is-watch">
+                    <b>Wider box</b
+                    ><span>Extra month-to-month variability</span>
+                  </div>
+                  <div class="is-watch">
+                    <b>Matching boxes</b
+                    ><span>Product errors can still cancel inside totals</span>
+                  </div>
+                </div>
+                <p class="comparison-kpi-guide__caution">
+                  These are aggregate months, not paired SKU performance.
+                  Per-product misses can offset, so use the Comparison KPIs to
+                  judge accuracy.
+                </p>
+              </article>
+              <section
+                class="revision-guide__discussion comparison-kpi-guide__discussion"
+              >
+                <div class="revision-guide__discussion-intro">
+                  <span>04</span>
+                  <div>
+                    <h3>Use it to discuss forecast posture</h3>
+                    <p>
+                      Ask whether the forecast’s typical month matches the
+                      business need.
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  <strong>With the forecasting team</strong>
+                  <ul>
+                    <li>Which months drive the forecast’s wide spread?</li>
+                    <li>Do median shifts match known bias months?</li>
+                    <li>Should outlier months be re-forecast?</li>
+                  </ul>
+                </div>
+                <div>
+                  <strong>With the business team</strong>
+                  <ul>
+                    <li>How stable is a “typical” month for planning?</li>
+                    <li>Must the business buffer the variability?</li>
+                    <li>What would a narrower spread be worth?</li>
+                  </ul>
+                </div>
+              </section>
+            </section>
+
+            <section class="wape-guide" data-overview-guide="wape" hidden>
+              <div class="wape-guide__formula">
+                <strong>Formula first</strong>
+                <span>WAPE =</span>
+                <span class="wape-guide__fraction">
+                  <b>Σ | Forecast − Actual |</b>
+                  <b>Σ Actual</b>
+                </span>
+                <span>× 100</span>
+                <em
+                  >Every coloured distance is positive error, whether the
+                  forecast is high or low.</em
+                >
+              </div>
+
+              <div class="wape-guide__layout">
+                <article class="revision-guide__card wape-guide__chart-card">
+                  <div class="wape-guide__card-head">
+                    <div>
+                      <h3>Actual volume with the forecast laid over it</h3>
+                      <p>
+                        Eight high-error rows from distinct SKUs in the active
+                        pipeline. SKUs are the y-axis; every row uses one KL
+                        scale.
+                      </p>
+                    </div>
+                    <div class="wape-guide__legend" aria-label="Chart legend">
+                      <span><i class="is-actual"></i>Actual bar</span>
+                      <span><i class="is-forecast"></i>Forecast marker</span>
+                      <span><i class="is-gap"></i>Absolute gap</span>
+                    </div>
+                  </div>
+                  <div class="wape-guide__axis">
+                    <span>SKU · target month</span>
+                    <div>
+                      <b>0</b><b data-wape-guide-axis-quarter>—</b
+                      ><b data-wape-guide-axis-half>—</b
+                      ><b data-wape-guide-axis-three-quarter>—</b
+                      ><b data-wape-guide-axis-max>—</b>
+                    </div>
+                    <span>Forecast / actual</span>
+                  </div>
+                  <div
+                    class="wape-guide__lanes"
+                    data-wape-guide-lanes
+                    role="img"
+                  ></div>
+                </article>
+
+                <aside class="revision-guide__card wape-guide__sum-card">
+                  <h3>
+                    Each bracket is<br /><strong
+                      >added to the error total</strong
+                    >
+                  </h3>
+                  <p class="wape-guide__primary">
+                    KPI vintage: <b data-wape-guide-primary>—</b>
+                  </p>
+                  <div class="wape-guide__sum" data-wape-guide-sum></div>
+                  <div class="wape-guide__shown-total">
+                    <span>Eight shown</span><b data-wape-guide-shown-error>—</b>
+                  </div>
+                  <div class="wape-guide__remaining-total">
+                    <span data-wape-guide-remaining>+ remaining rows</span>
+                    <b data-wape-guide-remaining-error>—</b>
+                  </div>
+                  <div class="wape-guide__error-total">
+                    <span
+                      >Σ absolute error · all
+                      <b data-wape-guide-observations>—</b> rows</span
+                    >
+                    <strong data-wape-guide-total-error>—</strong>
+                  </div>
+                  <div class="wape-guide__division">
+                    <span>÷</span><b data-wape-guide-total-actual>—</b
+                    ><span>× 100</span>
+                  </div>
+                  <div class="wape-guide__answer">
+                    <span>Portfolio WAPE</span>
+                    <strong data-wape-guide-result>—</strong>
+                    <p>
+                      For every 100 KL actually sold, this is the KL missed by
+                      the KPI forecast.
+                    </p>
+                  </div>
+                </aside>
+              </div>
+
+              <p class="wape-guide__note">
+                Eligible rows have a positive actual and a forecast for every
+                displayed vintage. Over- and under-forecasts both enter the
+                numerator positively; lower is better.
+              </p>
+            </section>
+
+            <section data-overview-guide="effectiveness" hidden>
+              <div class="comparison-kpi-guide__definition">
+                <strong>The question it answers</strong>
+                <span
+                  >Within the accuracy chart’s common cohort, how often did a
+                  material move from the KPI vintage to latest improve the
+                  forecast?</span
+                >
+              </div>
+              <article
+                class="revision-guide__card comparison-kpi-guide__visual-card"
+              >
+                <div class="revision-guide__card-head">
+                  <span>01</span>
+                  <div>
+                    <h3>Read it as a hit rate</h3>
+                    <p>
+                      Every materially revised pair gets one vote, any volume.
+                    </p>
+                  </div>
+                </div>
+                <div
+                  class="comparison-kpi-guide__hit-rate"
+                  aria-label="Example hit rate with six improved revisions and four revisions that did not improve"
+                >
+                  <i class="is-good"></i><i class="is-good"></i
+                  ><i class="is-good"></i><i class="is-good"></i
+                  ><i class="is-good"></i><i class="is-good"></i
+                  ><i class="is-bad"></i><i class="is-bad"></i
+                  ><i class="is-bad"></i><i class="is-bad"></i>
+                </div>
+                <div
+                  class="comparison-kpi-guide__dot-legend"
+                  aria-hidden="true"
+                >
+                  <span><i class="is-good"></i>improved</span>
+                  <span><i class="is-bad"></i>did not improve</span>
+                </div>
+                <div class="comparison-kpi-guide__example">
+                  <b>Example · 60%</b
+                  ><span
+                    >6 of 10 material revisions improved accuracy. It does not
+                    mean error fell by 60%.</span
+                  >
+                </div>
+              </article>
+              <article
+                class="revision-guide__card comparison-kpi-guide__formula-card"
+              >
+                <div class="revision-guide__card-head">
+                  <span>02</span>
+                  <div>
+                    <h3>Count what qualifies</h3>
+                    <p>
+                      Start from common-cohort pairs with positive actual
+                      demand.
+                    </p>
+                  </div>
+                </div>
+                <div class="comparison-kpi-guide__equation">
+                  <span>Improved revised pairs</span><b>÷</b
+                  ><span>All materially revised pairs</span><b>× 100</b>
+                </div>
+                <div class="comparison-kpi-guide__steps">
+                  <span
+                    ><b>Improved:</b> error improvement above the
+                    tolerance.</span
+                  >
+                  <span><b>Worsened:</b> materially farther from actual.</span>
+                  <span
+                    ><b>Neutral:</b> moved but barely changed—still counted
+                    below the line.</span
+                  >
+                  <span><b>Unchanged:</b> excluded entirely.</span>
+                </div>
+                <p class="comparison-kpi-guide__caution">
+                  Count-based, not volume-weighted. With no materially revised
+                  pairs the KPI is undefined—not zero.
+                </p>
+              </article>
+              <article
+                class="revision-guide__card comparison-kpi-guide__interpret-card"
+              >
+                <div class="revision-guide__card-head">
+                  <span>03</span>
+                  <div>
+                    <h3>What good and bad look like</h3>
+                    <p>Frequency here; magnitude lives in the other cards.</p>
+                  </div>
+                </div>
+                <div class="comparison-kpi-guide__bands">
+                  <div class="is-good">
+                    <b>Above 50%</b><span>Most material revisions helped</span>
+                  </div>
+                  <div class="is-watch">
+                    <b>Around 50%</b><span>Mixed process—inspect where</span>
+                  </div>
+                  <div class="is-bad">
+                    <b>Below 50%</b
+                    ><span>More revisions failed than helped</span>
+                  </div>
+                  <div class="is-watch">
+                    <b>N/A</b><span>No materially revised pairs—not 0%</span>
+                  </div>
+                </div>
+                <p class="comparison-kpi-guide__caution">
+                  A high hit rate can hide tiny gains; a low one can coexist
+                  with large net improvement. On the Comparison tab, read beside
+                  accuracy delta and KL error improvement.
+                </p>
+              </article>
+              <section
+                class="revision-guide__discussion comparison-kpi-guide__discussion"
+              >
+                <div class="revision-guide__discussion-intro">
+                  <span>04</span>
+                  <div>
+                    <h3>Use it to discuss process reliability</h3>
+                    <p>
+                      Ask why revision decisions succeed or fail repeatedly.
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  <strong>With the forecasting team</strong>
+                  <ul>
+                    <li>Which revision types hold the strongest hit rate?</li>
+                    <li>Are failures concentrated by horizon or product?</li>
+                    <li>Which checks prevent avoidable harmful moves?</li>
+                  </ul>
+                </div>
+                <div>
+                  <strong>With the business team</strong>
+                  <ul>
+                    <li>Which inputs consistently improve the forecast?</li>
+                    <li>Where do assumption changes add noise?</li>
+                    <li>What evidence is required before a late override?</li>
+                  </ul>
+                </div>
+              </section>
+            </section>
+
+            <section
+              class="error-accumulated-guide"
+              data-overview-guide="error-accumulated"
+              hidden
+            >
+              <article class="error-accumulated-guide__chart-card">
+                <div class="error-accumulated-guide__card-head">
+                  <div>
+                    <h3>First, measure the gap each month</h3>
+                    <p>
+                      Simple one-product example. Labels show the size of each
+                      shaded miss.
+                    </p>
+                  </div>
+                  <div
+                    class="error-accumulated-guide__legend"
+                    aria-label="Chart legend"
+                  >
+                    <span><i class="is-actual"></i>Actual</span>
+                    <span><i class="is-forecast"></i>Forecast</span>
+                    <span><i class="is-over"></i>Over</span>
+                    <span><i class="is-under"></i>Under</span>
+                  </div>
+                </div>
+                <svg
+                  class="error-accumulated-guide__chart"
+                  viewBox="0 0 850 300"
+                  role="img"
+                  aria-label="Actual and forecast lines with shaded monthly forecast errors"
+                >
+                  <g class="error-accumulated-guide__grid">
+                    <line x1="58" y1="50" x2="790" y2="50" />
+                    <line x1="58" y1="100" x2="790" y2="100" />
+                    <line x1="58" y1="150" x2="790" y2="150" />
+                    <line x1="58" y1="200" x2="790" y2="200" />
+                    <line x1="58" y1="250" x2="790" y2="250" />
+                  </g>
+                  <g class="error-accumulated-guide__axis-labels">
+                    <text x="15" y="54">High</text>
+                    <text x="18" y="254">Low</text>
+                    <text x="15" y="155" transform="rotate(-90 15 155)">
+                      Volume
+                    </text>
+                  </g>
+                  <g
+                    aria-label="Continuous shaded space between forecast and actual"
+                  >
+                    <path class="is-under" d="M120 170 L189 157 L120 215 Z" />
+                    <path
+                      class="is-over"
+                      d="M189 157 L250 145 L330 159 L250 105 Z"
+                    />
+                    <path
+                      class="is-under"
+                      d="M330 159 L380 168 L426 151 L380 193 Z"
+                    />
+                    <path
+                      class="is-over"
+                      d="M426 151 L510 121 L595 142 L510 76 Z"
+                    />
+                    <path
+                      class="is-under"
+                      d="M595 142 L640 153 L770 106 L770 138 L640 177 Z"
+                    />
+                  </g>
+                  <g class="error-accumulated-guide__gap-labels">
+                    <text class="is-under" x="120" y="159">10 KL under</text>
+                    <text class="is-over" x="250" y="94">15 KL over</text>
+                    <text class="is-under" x="380" y="157">5 KL under</text>
+                    <text class="is-over" x="510" y="65">20 KL over</text>
+                    <text class="is-under" x="640" y="142">5 KL under</text>
+                    <text class="is-under" x="770" y="95">8 KL under</text>
+                  </g>
+                  <polyline
+                    class="error-accumulated-guide__actual-line"
+                    points="120,170 250,145 380,168 510,121 640,153 770,106"
+                  />
+                  <polyline
+                    class="error-accumulated-guide__forecast-line"
+                    points="120,215 250,105 380,193 510,76 640,177 770,138"
+                  />
+                  <g class="error-accumulated-guide__actual-points">
+                    <circle cx="120" cy="170" r="6" />
+                    <circle cx="250" cy="145" r="6" />
+                    <circle cx="380" cy="168" r="6" />
+                    <circle cx="510" cy="121" r="6" />
+                    <circle cx="640" cy="153" r="6" />
+                    <circle cx="770" cy="106" r="6" />
+                  </g>
+                  <g class="error-accumulated-guide__forecast-points">
+                    <circle cx="120" cy="215" r="6" />
+                    <circle cx="250" cy="105" r="6" />
+                    <circle cx="380" cy="193" r="6" />
+                    <circle cx="510" cy="76" r="6" />
+                    <circle cx="640" cy="177" r="6" />
+                    <circle cx="770" cy="138" r="6" />
+                  </g>
+                  <text
+                    class="error-accumulated-guide__line-label is-actual"
+                    x="793"
+                    y="107"
+                  >
+                    Actual
+                  </text>
+                  <text
+                    class="error-accumulated-guide__line-label is-forecast"
+                    x="793"
+                    y="141"
+                  >
+                    Forecast
+                  </text>
+                  <g class="error-accumulated-guide__month-labels">
+                    <text x="120" y="280">May</text>
+                    <text x="250" y="280">Jun</text>
+                    <text x="380" y="280">Jul</text>
+                    <text x="510" y="280">Aug</text>
+                    <text x="640" y="280">Sep</text>
+                    <text x="770" y="280">Oct</text>
+                  </g>
+                </svg>
+                <div
+                  class="error-accumulated-guide__example-equation"
+                  aria-label="Example errors added into a total"
+                >
+                  <span class="is-under">10</span><b>+</b>
+                  <span class="is-over">15</span><b>+</b>
+                  <span class="is-under">5</span><b>+</b>
+                  <span class="is-over">20</span><b>+</b>
+                  <span class="is-under">5</span><b>+</b>
+                  <span class="is-under">8</span><b>=</b>
+                  <strong>63 KL total error</strong>
+                </div>
+              </article>
+
+              <aside class="error-accumulated-guide__rule-card">
+                <div class="error-accumulated-guide__rule-top">
+                  <p class="eyebrow">The whole rule</p>
+                  <h3>
+                    Measure every gap.
+                    <strong>Ignore the direction.</strong>
+                    Add the sizes.
+                  </h3>
+                </div>
+                <div class="error-accumulated-guide__rule-steps">
+                  <div>
+                    <b>1</b>
+                    <p>
+                      <strong>Find the shaded space</strong>
+                      <span
+                        >The vertical distance between forecast and
+                        actual.</span
+                      >
+                    </p>
+                  </div>
+                  <div>
+                    <b>2</b>
+                    <p>
+                      <strong>Turn every gap positive</strong>
+                      <span
+                        >10 under counts as 10. Fifteen over counts as 15.</span
+                      >
+                    </p>
+                  </div>
+                  <div>
+                    <b>3</b>
+                    <p>
+                      <strong>Add every product and month</strong>
+                      <span>The resulting pile is accumulated error.</span>
+                    </p>
+                  </div>
+                </div>
+                <p class="error-accumulated-guide__no-cancel">
+                  <strong>Important:</strong> over and under misses do not
+                  cancel. Both increase accumulated error.
+                </p>
+              </aside>
+
+              <section class="error-accumulated-guide__rollup">
+                <div class="error-accumulated-guide__rollup-months">
+                  <div class="error-accumulated-guide__rollup-title">
+                    <h3>
+                      Then repeat that calculation across the dashboard’s
+                      <span data-error-accumulated-month-count>months</span>
+                    </h3>
+                    <span>Monthly absolute errors · KL</span>
+                  </div>
+                  <div
+                    class="error-accumulated-guide__month-errors"
+                    data-error-accumulated-months
+                    aria-label="Monthly absolute error totals"
+                  ></div>
+                </div>
+                <div
+                  class="error-accumulated-guide__result"
+                  aria-label="Accumulated error comparison"
+                >
+                  <div class="is-primary">
+                    <strong data-error-accumulated-primary>—</strong>
+                    <span data-error-accumulated-primary-label
+                      >selected forecast</span
+                    >
+                  </div>
+                  <b>−</b>
+                  <div>
+                    <strong data-error-accumulated-latest>—</strong>
+                    <span>latest forecast</span>
+                  </div>
+                  <b>=</b>
+                  <div class="is-extra" data-error-accumulated-extra-box>
+                    <strong data-error-accumulated-extra>—</strong>
+                    <span>extra error</span>
+                  </div>
+                </div>
+              </section>
+            </section>
+
+            <section data-overview-guide="accuracy-chart" hidden>
+              <div class="comparison-kpi-guide__definition">
+                <strong>The question it answers</strong>
+                <span
+                  >Did waiting for newer forecasts improve accuracy, and is the
+                  KPI vintage systematically too high or too low?</span
+                >
+              </div>
+              <article
+                class="revision-guide__card comparison-kpi-guide__visual-card"
+              >
+                <div class="revision-guide__card-head">
+                  <span>01</span>
+                  <div>
+                    <h3>Two stacked zones</h3>
+                    <p>Accuracy lines on top; signed bias bars below.</p>
+                  </div>
+                </div>
+                <svg
+                  class="overview-guide__micro"
+                  viewBox="0 0 470 210"
+                  role="img"
+                  aria-label="Miniature accuracy chart: coloured historical vintage lines and a fixed teal latest line above, with amber over-bias and blue under-bias bars around a dashed zero line below."
+                >
+                  <g class="grid">
+                    <line x1="40" x2="440" y1="20" y2="20" />
+                    <line x1="40" x2="440" y1="45" y2="45" />
+                    <line x1="40" x2="440" y1="70" y2="70" />
+                    <line x1="40" x2="440" y1="95" y2="95" />
+                    <line x1="40" x2="440" y1="120" y2="120" />
+                  </g>
+                  <path
+                    class="line-old"
+                    d="M50 96 C 120 88, 200 78, 280 72 S 400 62, 430 58"
+                  />
+                  <path
+                    class="line-mid"
+                    d="M50 88 C 130 84, 210 74, 290 68 S 400 56, 430 50"
+                  />
+                  <path
+                    class="line-fixed"
+                    d="M50 80 C 140 74, 220 66, 300 60 S 400 48, 430 42"
+                  />
+                  <text x="446" y="32" text-anchor="end" class="is-teal">
+                    latest · fixed
+                  </text>
+                  <text x="446" y="80" text-anchor="end">
+                    selected vintages
+                  </text>
+                  <text x="235" y="10" text-anchor="middle">
+                    read the gap between lines—not their height
+                  </text>
+                  <line class="bias-zero" x1="40" x2="440" y1="165" y2="165" />
+                  <rect
+                    class="bias-bar--over"
+                    x="60"
+                    y="147"
+                    width="12"
+                    height="18"
+                    rx="1"
+                  />
+                  <rect
+                    class="bias-bar--under"
+                    x="120"
+                    y="165"
+                    width="12"
+                    height="14"
+                    rx="1"
+                  />
+                  <rect
+                    class="bias-bar--over"
+                    x="180"
+                    y="152"
+                    width="12"
+                    height="13"
+                    rx="1"
+                  />
+                  <rect
+                    class="bias-bar--under"
+                    x="240"
+                    y="165"
+                    width="12"
+                    height="20"
+                    rx="1"
+                  />
+                  <rect
+                    class="bias-bar--over"
+                    x="300"
+                    y="150"
+                    width="12"
+                    height="15"
+                    rx="1"
+                  />
+                  <rect
+                    class="bias-bar--under"
+                    x="360"
+                    y="165"
+                    width="12"
+                    height="10"
+                    rx="1"
+                  />
+                  <text x="66" y="141" text-anchor="middle">over</text>
+                  <text x="126" y="192" text-anchor="middle">under</text>
+                  <text x="235" y="205" text-anchor="middle">
+                    amber bars lean over actual · blue bars lean under
+                  </text>
+                </svg>
+              </article>
+              <article
+                class="revision-guide__card comparison-kpi-guide__formula-card"
+              >
+                <div class="revision-guide__card-head">
+                  <span>02</span>
+                  <div>
+                    <h3>One shared cohort, recomputed</h3>
+                    <p>
+                      Every selected vintage must exist for a parent to count.
+                    </p>
+                  </div>
+                </div>
+                <div class="comparison-kpi-guide__equation">
+                  <span>FA% = 100 × (1 − Σ|forecast − actual| ÷ Σ actual)</span>
+                </div>
+                <div class="comparison-kpi-guide__steps">
+                  <span
+                    ><b>1.</b> Keep parents with positive actual volume.</span
+                  >
+                  <span
+                    ><b>2.</b> Keep a parent only if every selected vintage and
+                    the latest (M1) forecast exist.</span
+                  >
+                  <span
+                    ><b>3.</b> Bias uses the KPI vintage on this same cohort:
+                    oldest selected, or latest M1 when none are selected.</span
+                  >
+                </div>
+                <p class="comparison-kpi-guide__caution">
+                  Accuracy lines, bias bars and KPI cards share one cohort.
+                  Selecting vintages can change that cohort and the bias bars.
+                  Deselecting the oldest promotes the next oldest selection.
+                </p>
+              </article>
+              <article
+                class="revision-guide__card comparison-kpi-guide__interpret-card"
+              >
+                <div class="revision-guide__card-head">
+                  <span>03</span>
+                  <div>
+                    <h3>What good and bad look like</h3>
+                    <p>Consistent gaps beat lucky months.</p>
+                  </div>
+                </div>
+                <div class="comparison-kpi-guide__bands">
+                  <div class="is-good">
+                    <b>Good</b
+                    ><span
+                      >Historical lines sit below the teal line; bias bars stay
+                      small</span
+                    >
+                  </div>
+                  <div class="is-watch">
+                    <b>Watch</b
+                    ><span
+                      >Lines crossing or converging—waiting buys nothing</span
+                    >
+                  </div>
+                  <div class="is-bad">
+                    <b>Bad</b
+                    ><span>One-sided amber or blue bias runs for months</span>
+                  </div>
+                </div>
+                <p class="comparison-kpi-guide__caution">
+                  The y-axis zooms to the data. Check the tooltip’s “common
+                  cohort” before trusting a small-month swing.
+                </p>
+              </article>
+              <section
+                class="revision-guide__discussion comparison-kpi-guide__discussion"
+              >
+                <div class="revision-guide__discussion-intro">
+                  <span>04</span>
+                  <div>
+                    <h3>Use it to time the signal</h3>
+                    <p>
+                      Ask how much accuracy each extra month of waiting buys.
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  <strong>With the forecasting team</strong>
+                  <ul>
+                    <li>Which months show the biggest vintage accuracy gap?</li>
+                    <li>Do 2–4-month-ahead forecasts already match latest?</li>
+                    <li>Which months had the smallest cohort, and why?</li>
+                  </ul>
+                </div>
+                <div>
+                  <strong>With the business team</strong>
+                  <ul>
+                    <li>
+                      Is the KPI vintage over or under (amber/blue) in decision
+                      months?
+                    </li>
+                    <li>What did systematic bias cost in service or waste?</li>
+                    <li>Which decision changes with one month’s notice?</li>
+                  </ul>
+                </div>
+              </section>
+            </section>
+
+            <section data-overview-guide="volume-chart" hidden>
+              <div class="comparison-kpi-guide__definition">
+                <strong>The question it answers</strong>
+                <span
+                  >Were selected historical forecasts aligned with actual
+                  demand, and did latest M1 move the aggregate forecast
+                  closer?</span
+                >
+              </div>
+              <article
+                class="revision-guide__card comparison-kpi-guide__visual-card"
+              >
+                <div class="revision-guide__card-head">
+                  <span>01</span>
+                  <div>
+                    <h3>Read every selected line</h3>
+                    <p>
+                      All selected vintages, latest M1 and actual share one
+                      cohort.
+                    </p>
+                  </div>
+                </div>
+                <svg
+                  class="overview-guide__micro"
+                  viewBox="0 0 470 190"
+                  role="img"
+                  aria-label="Illustrative volume comparison: navy actual, dashed historical A and latest B. The live chart shows every selected historical vintage with colors matching the accuracy chart."
+                >
+                  <g class="grid">
+                    <line x1="40" x2="440" y1="20" y2="20" />
+                    <line x1="40" x2="440" y1="60" y2="60" />
+                    <line x1="40" x2="440" y1="100" y2="100" />
+                    <line x1="40" x2="440" y1="140" y2="140" />
+                  </g>
+                  <text x="44" y="14">4,500 KL</text>
+                  <text x="44" y="156">1,600 KL</text>
+                  <path
+                    class="line-actual"
+                    d="M60 92 C 130 84, 210 76, 290 70 S 400 58, 430 54"
+                  />
+                  <path
+                    class="line-vintage-a"
+                    d="M60 118 C 130 108, 210 100, 290 88 S 400 70, 430 64"
+                  />
+                  <path
+                    class="line-vintage-b"
+                    d="M60 106 C 130 98, 210 88, 290 78 S 400 62, 430 58"
+                  />
+                  <text x="446" y="56" text-anchor="end">actual</text>
+                  <text x="446" y="70" text-anchor="end">B</text>
+                  <text x="446" y="84" text-anchor="end">A</text>
+                  <text x="235" y="170" text-anchor="middle">
+                    smaller gap to actual = closer aggregate alignment for that
+                    month
+                  </text>
+                  <text x="235" y="184" text-anchor="middle">
+                    example: A = historical · B = latest M1 · navy = actual
+                  </text>
+                </svg>
+              </article>
+              <article
+                class="revision-guide__card comparison-kpi-guide__formula-card"
+              >
+                <div class="revision-guide__card-head">
+                  <span>02</span>
+                  <div>
+                    <h3>Separate revision from outcome</h3>
+                    <p>First how the forecast moved; then whether it helped.</p>
+                  </div>
+                </div>
+                <div class="comparison-kpi-guide__steps">
+                  <span
+                    ><b>B − A</b> is the revision: how much the forecast
+                    moved.</span
+                  >
+                  <span
+                    ><b>B − actual</b> is the signed gap shown in the
+                    tooltip.</span
+                  >
+                  <span
+                    ><b>Compare</b> |A − actual| with |B − actual| to judge
+                    whether the revision helped.</span
+                  >
+                </div>
+                <p class="comparison-kpi-guide__caution">
+                  A means a selected historical vintage; B means fixed latest
+                  M1. Hover or focus a month for every selected forecast, actual
+                  and latest − actual. Colors match the accuracy chart and
+                  selector.
+                </p>
+              </article>
+              <article
+                class="revision-guide__card comparison-kpi-guide__interpret-card"
+              >
+                <div class="revision-guide__card-head">
+                  <span>03</span>
+                  <div>
+                    <h3>What good and bad look like</h3>
+                    <p>Judge B against A, not against perfection.</p>
+                  </div>
+                </div>
+                <div class="comparison-kpi-guide__bands">
+                  <div class="is-good">
+                    <b>Good</b><span>B sits closer to actual than A</span>
+                  </div>
+                  <div class="is-watch">
+                    <b>Watch</b
+                    ><span>Lines cross, or both gaps stay large</span>
+                  </div>
+                  <div class="is-bad">
+                    <b>Bad</b><span>B sits farther from actual than A</span>
+                  </div>
+                </div>
+                <p class="comparison-kpi-guide__caution">
+                  The 1,600–4,500 KL scale is fixed and clips out-of-range
+                  values—the tooltip keeps exact numbers. Aggregate closeness
+                  can hide offsetting product errors.
+                </p>
+              </article>
+              <section
+                class="revision-guide__discussion comparison-kpi-guide__discussion"
+              >
+                <div class="revision-guide__discussion-intro">
+                  <span>04</span>
+                  <div>
+                    <h3>Use it to discuss demand alignment</h3>
+                    <p>
+                      Find the months worth investigating, then open the
+                      evidence.
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  <strong>With the forecasting team</strong>
+                  <ul>
+                    <li>
+                      Which months show B moving toward or away from actual?
+                    </li>
+                    <li>Which products created the largest A-to-B movement?</li>
+                    <li>
+                      Did the revision use better evidence, or just shift
+                      volume?
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <strong>With the business team</strong>
+                  <ul>
+                    <li>Which demand event explains the gap?</li>
+                    <li>Did revised volume arrive in time to act on?</li>
+                    <li>Are alignment gains hiding mix risk?</li>
+                  </ul>
+                </div>
+              </section>
+            </section>
+          </div>
+
+          <footer class="revision-effectiveness-guide-dialog__foot">
+            <span
+              ><b>Population:</b> active source, filters and vintage rules</span
+            >
+            <span
+              ><b>Tip:</b> the ? button is available on every KPI and
+              chart</span
+            >
+            <span
+              ><b>Best practice:</b> read accuracy, bias and volume
+              together</span
+            >
+          </footer>
+        </section>
+      </div>
+
       <footer class="statusbar">
         <span class="statusbar__seg"
           ><i class="lamp lamp--live" aria-hidden="true"></i
@@ -1241,6 +4020,7 @@
       aria-atomic="true"
     ></div>
     <script src="timeline.js"></script>
+    <script src="filter-multiselect.js"></script>
     <script src="app.js"></script>
   </body>
 </html>

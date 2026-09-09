@@ -946,6 +946,59 @@ def apply_actual_filters(
     return filtered.sort(["parent_code", "snop_month"])
 
 
+def available_product_filter_values(
+    frame: pl.DataFrame,
+    source: str,
+    *,
+    comparison_mode: bool = False,
+    brands: tuple[str, ...] | None = None,
+    sku_classes: tuple[str, ...] | None = None,
+    parent_codes: tuple[int, ...] | None = None,
+) -> dict[str, list[object]]:
+    """Return Product facet availability under the other Product selections.
+
+    A field never filters its own availability, preserving OR semantics for
+    multi-selection. The other two fields constrain it, providing AND semantics
+    across Brand, SKU Class, and Parent product.
+    """
+    require_columns(frame, ANALYSIS_COLUMNS, "analysis population")
+    normalized_source = str(source).strip().lower()
+    if normalized_source not in FORECAST_SOURCES:
+        raise ValueError(f"unsupported dashboard source {source!r}")
+    selected_sources = (
+        tuple(sorted(FORECAST_SOURCES)) if comparison_mode else (normalized_source,)
+    )
+    source_frame = with_display_brand(frame).filter(
+        pl.col("source").is_in(selected_sources)
+    )
+
+    def scoped(*, exclude: str) -> pl.DataFrame:
+        filtered = source_frame
+        if exclude != "brands" and brands:
+            filtered = filtered.filter(pl.col("brand_display").is_in(brands))
+        if exclude != "sku_classes" and sku_classes:
+            filtered = filtered.filter(pl.col("sku_class").is_in(sku_classes))
+        if exclude != "parent_codes" and parent_codes:
+            filtered = filtered.filter(pl.col("parent_code").is_in(parent_codes))
+        return filtered
+
+    available_classes = set(
+        scoped(exclude="sku_classes")["sku_class"].drop_nulls().unique().to_list()
+    )
+    return {
+        "brands": sorted(
+            scoped(exclude="brands")["brand_display"].drop_nulls().unique().to_list()
+        ),
+        "sku_classes": [value for value in SKU_CLASSES if value in available_classes],
+        "parent_codes": sorted(
+            scoped(exclude="parent_codes")["parent_code"]
+            .drop_nulls()
+            .unique()
+            .to_list()
+        ),
+    }
+
+
 def available_filter_values(
     frame: pl.DataFrame,
     source: str,

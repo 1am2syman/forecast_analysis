@@ -1,0 +1,100 @@
+{
+  "lifecycle": {
+    "effectiveLaunch": {
+      "browserLaunched": true,
+      "engine": "chrome",
+      "launchHash": 7707568497978554000
+    },
+    "launched": false,
+    "relaunchedBrowser": false,
+    "restartedBackground": false,
+    "restoreStatus": "loaded",
+    "reused": true,
+    "saveStatus": "saved"
+  },
+  "origin": "http://127.0.0.1:8766/#overview",
+  "result": {
+    "checks": {
+      "biasZeroLineOnly": true,
+      "chartsContained": true,
+      "equalHeights": true,
+      "flushBottom": true,
+      "fourCards": true,
+      "helpUnderHeader": true,
+      "largerFigures": true,
+      "noMonthAxisText": true,
+      "noOverlap": true,
+      "strongerBars": true,
+      "strongerLatest": true,
+      "tallerCharts": true,
+      "twelveBarsEach": true
+    },
+    "passed": true,
+    "rows": [
+      {
+        "barCount": 12,
+        "barOpacity": 0.62,
+        "bottomGap": 1,
+        "cardHeight": 83,
+        "chartHeight": 32,
+        "chartInsideCard": true,
+        "helpBelowLabel": true,
+        "label": "BIAS",
+        "labelValueOverlap": false,
+        "latestOpacity": 0.96,
+        "svgTextCount": 0,
+        "valueFontSize": 18,
+        "zeroLines": 1
+      },
+      {
+        "barCount": 12,
+        "barOpacity": 0.62,
+        "bottomGap": 1,
+        "cardHeight": 83,
+        "chartHeight": 32,
+        "chartInsideCard": true,
+        "helpBelowLabel": true,
+        "label": "WAPE",
+        "labelValueOverlap": false,
+        "latestOpacity": 0.96,
+        "svgTextCount": 0,
+        "valueFontSize": 18,
+        "zeroLines": 0
+      },
+      {
+        "barCount": 12,
+        "barOpacity": 0.62,
+        "bottomGap": 1,
+        "cardHeight": 83,
+        "chartHeight": 32,
+        "chartInsideCard": true,
+        "helpBelowLabel": true,
+        "label": "REV.",
+        "labelValueOverlap": false,
+        "latestOpacity": 0.96,
+        "svgTextCount": 0,
+        "valueFontSize": 18,
+        "zeroLines": 0
+      },
+      {
+        "barCount": 12,
+        "barOpacity": 0.62,
+        "bottomGap": 1,
+        "cardHeight": 83,
+        "chartHeight": 32,
+        "chartInsideCard": true,
+        "helpBelowLabel": true,
+        "label": "ERROR",
+        "labelValueOverlap": false,
+        "latestOpacity": 0.96,
+        "svgTextCount": 0,
+        "valueFontSize": 18,
+        "zeroLines": 0
+      }
+    ],
+    "viewport": {
+      "height": 720,
+      "width": 1280
+    }
+  }
+}

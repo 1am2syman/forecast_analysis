@@ -634,6 +634,7 @@ REVISION_SCATTER_COLUMNS = [
     "window_start_month",
     "window_end_month",
     "actual_kl",
+    "absolute_error_kl",
     "target_months_used",
     "vintages_per_month",
     "transitions_used",
@@ -658,6 +659,7 @@ REVISION_SCATTER_SCHEMA = {
     "window_start_month": pl.Date,
     "window_end_month": pl.Date,
     "actual_kl": pl.Float64,
+    "absolute_error_kl": pl.Float64,
     "target_months_used": pl.Int64,
     "vintages_per_month": pl.Int64,
     "transitions_used": pl.Int64,
@@ -771,7 +773,8 @@ def build_revision_scatter(
     accuracy trend is expressed in percentage points per vintage. Monthly trends
     are retained as calculated, including seasonal extremes. The parent bubble
     uses the median of the six monthly trends, so one volatile month cannot
-    dominate.
+    dominate. Its absolute-error magnitude is the latest vintage's error summed
+    across the same six target months.
     """
     history_columns = {
         "source",
@@ -798,25 +801,32 @@ def build_revision_scatter(
         end_month = end_month.date()
     if not isinstance(end_month, date):
         return _empty_revision_scatter()
-    available_months = sorted(
-        frame.filter(pl.col("snop_month") <= end_month)
+    eligible_history = frame.filter(
+        (pl.col("snop_month") <= end_month)
+        & pl.col("calculation_month").is_not_null()
+        & pl.col("forecast_kl").is_not_null()
+        & pl.col("actual_kl").is_not_null()
+        & (pl.col("actual_kl") > 0)
+    )
+    complete_target_months = (
+        eligible_history.group_by("snop_month")
+        .agg(pl.col("calculation_month").n_unique().alias("_vintage_count"))
+        .filter(
+            pl.col("_vintage_count")
+            >= REVISION_SCATTER_VINTAGES_PER_MONTH
+        )
         .get_column("snop_month")
-        .drop_nulls()
-        .unique()
         .to_list()
-    )[-REVISION_SCATTER_TARGET_MONTHS:]
+    )
+    available_months = sorted(complete_target_months)[
+        -REVISION_SCATTER_TARGET_MONTHS:
+    ]
     if len(available_months) < REVISION_SCATTER_TARGET_MONTHS:
         return _empty_revision_scatter()
 
     keys = ["source", "parent_code", "snop_month"]
     candidates = (
-        frame.filter(
-            pl.col("snop_month").is_in(available_months)
-            & pl.col("calculation_month").is_not_null()
-            & pl.col("forecast_kl").is_not_null()
-            & pl.col("actual_kl").is_not_null()
-            & (pl.col("actual_kl") > 0)
-        )
+        eligible_history.filter(pl.col("snop_month").is_in(available_months))
         .unique(subset=[*keys, "calculation_month"], keep="last")
         .sort([*keys, "calculation_month"])
         .group_by(keys, maintain_order=True)
@@ -848,6 +858,9 @@ def build_revision_scatter(
             (pl.col("forecast_kl") / pl.col("actual_kl") * 100).alias(
                 "_forecast_pct_actual"
             ),
+            (pl.col("forecast_kl") - pl.col("actual_kl"))
+            .abs()
+            .alias("_absolute_error_kl"),
             (
                 1
                 - (pl.col("forecast_kl") - pl.col("actual_kl")).abs()
@@ -863,6 +876,10 @@ def build_revision_scatter(
         pl.col("brand").first(),
         pl.col("sku_class").first().fill_null("Unclassified"),
         pl.col("actual_kl").first().cast(pl.Float64),
+        pl.col("_absolute_error_kl")
+        .sort_by("calculation_month")
+        .last()
+        .alias("_latest_absolute_error_kl"),
         (centered_index * pl.col("_forecast_pct_actual"))
         .sum()
         .truediv(10.0)
@@ -883,6 +900,10 @@ def build_revision_scatter(
             .first()
             .fill_null("Unclassified"),
             pl.col("actual_kl").sum().cast(pl.Float64),
+            pl.col("_latest_absolute_error_kl")
+            .sum()
+            .cast(pl.Float64)
+            .alias("absolute_error_kl"),
             pl.col("snop_month").n_unique().cast(pl.Int64).alias(
                 "target_months_used"
             ),

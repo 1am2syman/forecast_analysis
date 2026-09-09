@@ -1,0 +1,1292 @@
+<!doctype html>
+<!--
+  THROWAWAY UI PROTOTYPE — not production code.
+  Question: Does one bullet-chart explanation make the Overview WAPE card intuitive without using a data table?
+  Single agreed direction: actual bars, forecast markers, error braces, and visible summation.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WAPE visual explainer prototype</title>
+    <style>
+      @font-face {
+        font-family: "Chakra Petch";
+        font-style: normal;
+        font-weight: 600;
+        font-display: swap;
+        src: url("fonts/chakra-petch-600.ttf") format("truetype");
+      }
+      @font-face {
+        font-family: "IBM Plex Sans";
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+        src: url("fonts/ibm-plex-sans-400.ttf") format("truetype");
+      }
+      @font-face {
+        font-family: "IBM Plex Sans";
+        font-style: normal;
+        font-weight: 500;
+        font-display: swap;
+        src: url("fonts/ibm-plex-sans-500.ttf") format("truetype");
+      }
+      @font-face {
+        font-family: "IBM Plex Sans";
+        font-style: normal;
+        font-weight: 600;
+        font-display: swap;
+        src: url("fonts/ibm-plex-sans-600.ttf") format("truetype");
+      }
+      @font-face {
+        font-family: "IBM Plex Mono";
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+        src: url("fonts/ibm-plex-mono-400.ttf") format("truetype");
+      }
+      @font-face {
+        font-family: "IBM Plex Mono";
+        font-style: normal;
+        font-weight: 500;
+        font-display: swap;
+        src: url("fonts/ibm-plex-mono-500.ttf") format("truetype");
+      }
+      @font-face {
+        font-family: "IBM Plex Mono";
+        font-style: normal;
+        font-weight: 600;
+        font-display: swap;
+        src: url("fonts/ibm-plex-mono-600.ttf") format("truetype");
+      }
+      :root {
+        color-scheme: light;
+        --bg: #edf3f1;
+        --bg-2: #f4f7f6;
+        --panel: #fff;
+        --panel-2: #eef3f1;
+        --panel-3: #e8f3f0;
+        --hairline: #c8d5d1;
+        --hairline-soft: #dbe4e1;
+        --teal: #087f75;
+        --teal-dim: #69aaa3;
+        --amber: #9a5e00;
+        --red: #b63b35;
+        --blue: #2e79a5;
+        --actual: #183f3d;
+        --forecast: #b63b35;
+        --text: #172421;
+        --muted: #536762;
+        --faint: #586b66;
+        --display: "Chakra Petch", system-ui, sans-serif;
+        --body: "IBM Plex Sans", system-ui, sans-serif;
+        --mono: "IBM Plex Mono", ui-monospace, monospace;
+        --shadow: 0 32px 100px rgba(15, 34, 29, 0.3);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        overflow: hidden;
+      }
+      body {
+        color: var(--text);
+        background: var(--bg);
+        font: 14px/1.5 var(--body);
+        -webkit-font-smoothing: antialiased;
+      }
+      button {
+        font: inherit;
+        cursor: pointer;
+      }
+      button:focus-visible {
+        outline: 2px solid var(--teal);
+        outline-offset: 2px;
+      }
+      .app {
+        display: grid;
+        grid-template-rows: 56px 1fr 30px;
+        height: 100vh;
+        background: var(--bg-2);
+      }
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 20px;
+        background: #f8fbfa;
+        border-bottom: 1px solid var(--hairline);
+      }
+      .brand {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+      .brand-mark {
+        display: grid;
+        width: 28px;
+        height: 28px;
+        place-items: center;
+        color: #fff;
+        background: var(--teal);
+        border-radius: 6px;
+        font: 600 11px var(--mono);
+      }
+      .brand h1 {
+        margin: 0;
+        font: 600 17px/1 var(--display);
+        letter-spacing: -0.01em;
+      }
+      .brand p {
+        margin: 4px 0 0;
+        color: var(--muted);
+        font: 8px var(--mono);
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+      }
+      .live {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        color: var(--teal);
+        font: 600 9px var(--mono);
+        letter-spacing: 0.08em;
+      }
+      .live i {
+        width: 7px;
+        height: 7px;
+        background: var(--teal);
+        border-radius: 50%;
+        box-shadow: 0 0 0 4px rgba(8, 127, 117, 0.12);
+      }
+      .body {
+        display: grid;
+        grid-template-columns: 214px 1fr;
+        min-height: 0;
+      }
+      .rail {
+        padding: 18px 12px;
+        background: #eaf0ee;
+        border-right: 1px solid var(--hairline);
+      }
+      .rail-label {
+        margin: 0 10px 9px;
+        color: var(--faint);
+        font: 600 8px var(--mono);
+        letter-spacing: 0.12em;
+      }
+      .nav {
+        display: grid;
+        gap: 4px;
+      }
+      .nav span {
+        padding: 9px 11px;
+        color: var(--muted);
+        border-radius: 5px;
+        font-size: 12px;
+      }
+      .nav span.active {
+        color: var(--teal);
+        background: #fff;
+        border: 1px solid var(--hairline);
+        box-shadow: 0 1px 2px rgba(23, 36, 33, 0.05);
+        font-weight: 600;
+      }
+      main {
+        min-width: 0;
+        padding: 14px 18px;
+        overflow: hidden;
+        background-image:
+          repeating-linear-gradient(
+            0deg,
+            rgba(23, 36, 33, 0.025) 0 1px,
+            transparent 1px 34px
+          ),
+          repeating-linear-gradient(
+            90deg,
+            rgba(23, 36, 33, 0.025) 0 1px,
+            transparent 1px 34px
+          );
+      }
+      .scope {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        align-items: center;
+        margin-bottom: 10px;
+        padding: 8px 12px;
+        background: #fff;
+        border: 1px solid var(--hairline);
+        border-radius: 7px;
+      }
+      .scope strong {
+        font: 600 12px var(--display);
+      }
+      .scope span {
+        color: var(--muted);
+        font: 9px var(--mono);
+      }
+      .kpis {
+        display: grid;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        gap: 8px;
+      }
+      .kpi {
+        min-width: 0;
+        min-height: 78px;
+        padding: 8px 10px;
+        background: #fff;
+        border: 1px solid var(--hairline);
+        border-radius: 7px;
+        box-shadow: 0 1px 2px rgba(23, 36, 33, 0.055);
+      }
+      .kpi-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 5px;
+        align-items: flex-start;
+      }
+      .kpi-label {
+        color: var(--faint);
+        font: 600 7.5px var(--mono);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .kpi-value {
+        margin-top: 5px;
+        font: 600 18px var(--display);
+      }
+      .kpi-cap {
+        margin-top: 8px;
+        overflow: hidden;
+        color: var(--muted);
+        font: 7.5px var(--mono);
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+      .help {
+        display: grid;
+        width: 16px;
+        height: 16px;
+        padding: 0;
+        place-items: center;
+        color: var(--teal);
+        background: #f3f8f6;
+        border: 1px solid #9dbdb6;
+        border-radius: 50%;
+        font: 700 9px var(--mono);
+      }
+      .help:hover {
+        color: #fff;
+        background: var(--teal);
+        border-color: var(--teal);
+      }
+      .wape-card {
+        border-color: var(--teal-dim);
+        background: linear-gradient(150deg, #fff 30%, #edf7f4);
+      }
+      .wape-card .kpi-value {
+        color: var(--teal);
+      }
+      .charts {
+        display: grid;
+        grid-template-columns: 1.25fr 0.75fr;
+        gap: 10px;
+        margin-top: 10px;
+      }
+      .chart {
+        height: 225px;
+        padding: 12px;
+        background: #fff;
+        border: 1px solid var(--hairline);
+        border-radius: 7px;
+      }
+      .chart h3 {
+        margin: 0;
+        font: 600 12px var(--display);
+      }
+      .chart p {
+        margin: 3px 0;
+        color: var(--muted);
+        font: 8px var(--mono);
+      }
+      .ghost-lines {
+        height: 165px;
+        margin-top: 14px;
+        background:
+          linear-gradient(
+            165deg,
+            transparent 0 12%,
+            rgba(8, 127, 117, 0.12) 12.5% 13%,
+            transparent 13.5% 32%,
+            rgba(46, 121, 165, 0.12) 32.5% 33%,
+            transparent 33.5% 52%,
+            rgba(182, 59, 53, 0.1) 52.5% 53%,
+            transparent 53.5%
+          ),
+          repeating-linear-gradient(
+            0deg,
+            var(--hairline-soft) 0 1px,
+            transparent 1px 38px
+          );
+      }
+      .status {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 18px;
+        color: var(--muted);
+        background: #e6eeeb;
+        border-top: 1px solid var(--hairline);
+        font: 8px var(--mono);
+      }
+      .scrim {
+        position: fixed;
+        inset: 0;
+        z-index: 20;
+        display: grid;
+        place-items: center;
+        padding: 3vh 2vw;
+        background: rgba(18, 31, 28, 0.58);
+        backdrop-filter: blur(4px) saturate(0.76);
+      }
+      .scrim[hidden] {
+        display: none;
+      }
+      .dialog {
+        position: relative;
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr) auto;
+        width: min(1450px, 96vw);
+        height: min(720px, 94vh);
+        overflow: hidden;
+        background: #f9fbfa;
+        border: 1px solid #a9c0bb;
+        border-radius: 10px;
+        box-shadow: var(--shadow);
+      }
+      .dialog:before {
+        position: absolute;
+        inset: 0 0 auto;
+        height: 4px;
+        background: linear-gradient(
+          90deg,
+          var(--teal),
+          var(--teal-dim) 58%,
+          var(--amber)
+        );
+        content: "";
+      }
+      .dialog-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        align-items: flex-start;
+        padding: 16px 20px 13px;
+        background: #fff;
+        border-bottom: 1px solid var(--hairline);
+      }
+      .eyebrow {
+        margin: 0;
+        color: var(--teal);
+        font: 600 8px var(--mono);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .dialog h2 {
+        margin: 3px 0 0;
+        font: 600 25px/1.08 var(--display);
+        letter-spacing: -0.02em;
+      }
+      .summary {
+        max-width: 880px;
+        margin: 5px 0 0;
+        color: var(--muted);
+        font-size: 11.5px;
+      }
+      .close {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        padding: 6px 9px;
+        color: var(--muted);
+        background: #fff;
+        border: 1px solid var(--hairline);
+        border-radius: 5px;
+        font: 600 9px var(--mono);
+      }
+      .formula {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        min-width: 0;
+      }
+      .formula-label {
+        color: var(--teal);
+        font: 600 14px var(--display);
+      }
+      .fraction {
+        display: grid;
+        text-align: center;
+        font: 600 11px var(--mono);
+      }
+      .fraction span:first-child {
+        padding: 0 10px 4px;
+        border-bottom: 1.5px solid var(--text);
+      }
+      .fraction span:last-child {
+        padding-top: 4px;
+      }
+      .formula-tail {
+        font: 600 11px var(--mono);
+      }
+      .dialog-body {
+        min-height: 0;
+        padding: 12px 15px;
+        overflow: hidden;
+        background-image: repeating-linear-gradient(
+          45deg,
+          rgba(23, 36, 33, 0.017) 0 1px,
+          transparent 1px 13px
+        );
+      }
+      .variant {
+        height: 100%;
+      }
+      .variant[hidden] {
+        display: none;
+      }
+      .definition {
+        display: flex;
+        gap: 9px;
+        align-items: center;
+        padding: 7px 10px;
+        color: var(--muted);
+        background: #eef5f3;
+        border: 1px solid #cbded9;
+        border-radius: 5px;
+        font-size: 10px;
+      }
+      .definition strong {
+        flex: 0 0 auto;
+        color: var(--teal);
+        font: 600 8px var(--mono);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+      .dialog-foot {
+        display: flex;
+        justify-content: center;
+        gap: 22px;
+        padding: 7px 12px;
+        color: var(--faint);
+        background: var(--panel-2);
+        border-top: 1px solid var(--hairline);
+        font: 8px var(--mono);
+      }
+      .dialog-foot b {
+        color: var(--muted);
+      }
+      .legend {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        color: var(--muted);
+        font: 8px var(--mono);
+      }
+      .legend span {
+        display: flex;
+        gap: 5px;
+        align-items: center;
+      }
+      .legend i {
+        display: inline-block;
+      }
+      .legend .actual-dot {
+        width: 9px;
+        height: 9px;
+        background: var(--actual);
+        border-radius: 50%;
+      }
+      .legend .forecast-dot {
+        width: 9px;
+        height: 9px;
+        background: var(--forecast);
+        transform: rotate(45deg);
+      }
+      .legend .actual-bar {
+        width: 18px;
+        height: 7px;
+        background: var(--teal);
+        border-radius: 2px;
+      }
+      .legend .forecast-marker {
+        width: 3px;
+        height: 13px;
+        background: var(--forecast);
+        border-radius: 1px;
+      }
+      .legend .gap-line {
+        width: 18px;
+        height: 3px;
+        background: linear-gradient(90deg, var(--blue), var(--red));
+        border-radius: 99px;
+      }
+      /* Agreed bullet-chart direction */
+      .a-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.55fr) minmax(290px, 0.72fr);
+        grid-template-rows: auto minmax(0, 1fr);
+        gap: 10px;
+        height: 100%;
+      }
+      .a-layout .definition {
+        grid-column: 1/-1;
+      }
+      .lanes-card,
+      .rollup-card,
+      .stream-card,
+      .ratio-card {
+        min-height: 0;
+        background: #fff;
+        border: 1px solid var(--hairline);
+        border-radius: 8px;
+      }
+      .lanes-card {
+        display: grid;
+        grid-template-rows: auto auto minmax(0, 1fr);
+        padding: 11px 13px;
+      }
+      .card-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        align-items: flex-start;
+      }
+      .card-head h3 {
+        margin: 0;
+        font: 600 15px var(--display);
+      }
+      .card-head p {
+        margin: 2px 0 0;
+        color: var(--muted);
+        font-size: 9px;
+      }
+      .bullet-axis {
+        display: grid;
+        grid-template-columns: 190px minmax(0, 1fr) 112px;
+        align-items: end;
+        margin: 9px 0 2px;
+        color: var(--faint);
+        font: 7px var(--mono);
+      }
+      .bullet-axis__ticks {
+        display: flex;
+        justify-content: space-between;
+        padding: 0 1px 3px;
+        border-bottom: 1px solid var(--hairline);
+      }
+      .bullet-axis__unit {
+        text-align: right;
+      }
+      .lanes {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 3px;
+        align-content: space-evenly;
+        min-height: 0;
+      }
+      .lane {
+        display: grid;
+        grid-template-columns: 190px minmax(0, 1fr) 112px;
+        gap: 9px;
+        align-items: center;
+        min-width: 0;
+      }
+      .lane-title {
+        min-width: 0;
+      }
+      .lane-title strong {
+        display: block;
+        overflow: hidden;
+        font: 600 8px var(--mono);
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+      .lane-title span {
+        display: block;
+        margin-top: 1px;
+        color: var(--muted);
+        font: 7px var(--mono);
+      }
+      .lane-visual {
+        position: relative;
+        height: 43px;
+        background: repeating-linear-gradient(
+          90deg,
+          transparent 0 calc(25% - 1px),
+          var(--hairline-soft) calc(25% - 1px) 25%
+        );
+      }
+      .lane-base {
+        position: absolute;
+        top: 5px;
+        left: 0;
+        height: 9px;
+        background: rgba(8, 127, 117, 0.72);
+        border-radius: 2px;
+      }
+      .lane-gap {
+        position: absolute;
+        top: 8px;
+        height: 3px;
+        background: var(--gap-color);
+        border-radius: 99px;
+      }
+      .lane-point.forecast {
+        position: absolute;
+        top: 0;
+        width: 3px;
+        height: 19px;
+        background: var(--forecast);
+        border: 1px solid #fff;
+        border-radius: 1px;
+        box-shadow: 0 0 0 1px var(--forecast);
+        transform: translateX(-50%);
+      }
+      .lane-brace {
+        position: absolute;
+        top: 18px;
+        height: 10px;
+        overflow: visible;
+        color: var(--gap-color);
+      }
+      .lane-brace path {
+        fill: none;
+        stroke: currentcolor;
+        stroke-width: 1.5;
+        vector-effect: non-scaling-stroke;
+      }
+      .lane-error-label {
+        position: absolute;
+        top: 29px;
+        min-width: 66px;
+        color: var(--gap-color);
+        font: 600 7px var(--mono);
+        text-align: center;
+        white-space: nowrap;
+        transform: translateX(-50%);
+      }
+      .lane-values {
+        color: var(--muted);
+        font: 7px var(--mono);
+        line-height: 1.3;
+      }
+      .lane-values span {
+        display: block;
+      }
+      .rollup-card {
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr) auto auto;
+        padding: 13px 15px;
+      }
+      .rollup-card h3 {
+        margin: 0;
+        font: 600 19px/1.05 var(--display);
+      }
+      .rollup-card h3 strong {
+        display: block;
+        color: var(--red);
+      }
+      .error-sum {
+        display: grid;
+        align-content: start;
+        margin: 8px 0 6px;
+        border-top: 1px solid var(--hairline-soft);
+      }
+      .error-sum__row {
+        display: grid;
+        grid-template-columns: 52px minmax(0, 1fr) auto;
+        gap: 7px;
+        align-items: center;
+        min-height: 25px;
+        border-bottom: 1px solid var(--hairline-soft);
+        font: 7.5px var(--mono);
+      }
+      .error-sum__row span:first-child {
+        color: var(--faint);
+      }
+      .error-sum__row i {
+        height: 3px;
+        background: var(--sum-color);
+        border-radius: 999px;
+      }
+      .error-sum__row b {
+        color: var(--sum-color);
+        font-size: 9px;
+      }
+      .error-sum__row b::before {
+        margin-right: 5px;
+        color: var(--faint);
+        content: "+";
+      }
+      .shown-subtotal,
+      .remaining-total {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 6px 8px;
+        font: 8px var(--mono);
+      }
+      .shown-subtotal {
+        color: var(--muted);
+        background: var(--panel-2);
+      }
+      .remaining-total {
+        color: var(--red);
+        border-top: 1px solid var(--hairline);
+        border-bottom: 1px solid var(--hairline);
+        font-weight: 600;
+      }
+      .division-line {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        align-items: center;
+        margin: 6px 0;
+        color: var(--teal);
+        font: 600 9px var(--mono);
+      }
+      .division-line b {
+        color: var(--text);
+        font-size: 11px;
+      }
+      .metric-box {
+        padding: 9px 10px;
+        background: #eef5f3;
+        border-left: 3px solid var(--teal);
+        border-radius: 0 5px 5px 0;
+      }
+      .metric-box.error {
+        background: #fbefed;
+        border-color: var(--red);
+      }
+      .metric-box span {
+        display: block;
+        color: var(--muted);
+        font: 7.5px var(--mono);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+      .metric-box b {
+        display: block;
+        margin-top: 2px;
+        font: 600 18px var(--display);
+      }
+      .answer {
+        align-self: end;
+        padding: 10px 11px;
+        color: #fff;
+        background: var(--teal);
+        border-radius: 7px;
+      }
+      .answer span {
+        font: 8px var(--mono);
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+      .answer b {
+        display: block;
+        font: 600 34px/1 var(--display);
+      }
+      .answer p {
+        margin: 5px 0 0;
+        font-size: 9.5px;
+        line-height: 1.3;
+      }
+      .prototype-tag {
+        position: fixed;
+        z-index: 41;
+        right: 14px;
+        bottom: 39px;
+        padding: 5px 8px;
+        color: #fff;
+        background: var(--red);
+        border-radius: 4px;
+        font: 600 7px var(--mono);
+        letter-spacing: 0.08em;
+      }
+      @media (max-height: 760px) {
+        .dialog-head {
+          padding: 11px 16px 9px;
+        }
+        .dialog h2 {
+          font-size: 20px;
+        }
+        .summary {
+          font-size: 9.5px;
+        }
+        .dialog-body {
+          padding: 8px 10px;
+        }
+        .lanes-card {
+          padding: 8px 10px;
+        }
+        .bullet-axis {
+          margin-top: 5px;
+        }
+        .lane-visual {
+          height: 36px;
+        }
+        .lane-base {
+          top: 3px;
+          height: 8px;
+        }
+        .lane-gap {
+          top: 6px;
+        }
+        .lane-point.forecast {
+          top: 0;
+          height: 15px;
+        }
+        .lane-brace {
+          top: 14px;
+          height: 9px;
+        }
+        .lane-error-label {
+          top: 24px;
+          font-size: 6.5px;
+        }
+        .error-sum__row {
+          min-height: 20px;
+        }
+        .rollup-card {
+          padding: 10px 12px;
+        }
+        .metric-box {
+          padding: 6px 8px;
+        }
+        .metric-box b {
+          font-size: 15px;
+        }
+        .answer {
+          padding: 7px 9px;
+        }
+        .answer b {
+          font-size: 27px;
+        }
+        .dialog-foot {
+          padding: 4px 10px;
+          font-size: 7px;
+        }
+      }
+      @media (max-width: 1100px) {
+        .body {
+          grid-template-columns: 72px 1fr;
+        }
+        .rail-label {
+          display: none;
+        }
+        .nav span {
+          padding: 9px 5px;
+          text-align: center;
+          font-size: 9px;
+        }
+        .kpis {
+          grid-template-columns: repeat(7, minmax(0, 1fr));
+        }
+        .charts {
+          grid-template-columns: 1fr;
+        }
+        .charts .chart:last-child {
+          display: none;
+        }
+        .a-layout {
+          grid-template-columns: minmax(0, 1.4fr) minmax(245px, 0.6fr);
+        }
+        .bullet-axis,
+        .lane {
+          grid-template-columns: 150px minmax(0, 1fr) 98px;
+        }
+        .dialog-foot {
+          gap: 10px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app" aria-hidden="true">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark">FA</div>
+          <div>
+            <h1>Forecast performance</h1>
+            <p>Accuracy · bias · revisions · coverage</p>
+          </div>
+        </div>
+        <div class="live"><i></i>LIVE DATA</div>
+      </header>
+      <div class="body">
+        <aside class="rail">
+          <p class="rail-label">NAVIGATE</p>
+          <div class="nav">
+            <span class="active">Overview</span><span>Trends</span
+            ><span>Comparison</span><span>Product history</span
+            ><span>Data quality</span>
+          </div>
+        </aside>
+        <main>
+          <div class="scope">
+            <strong>Performance at a glance</strong
+            ><span
+              >ML · May 2025–Sep 2026 · all products · canonical common
+              cohort</span
+            >
+          </div>
+          <section class="kpis">
+            <article class="kpi">
+              <div class="kpi-head">
+                <span class="kpi-label">Forecast accuracy</span>
+              </div>
+              <div class="kpi-value">78.2%</div>
+              <div class="kpi-cap">M−5 · n 1,083</div>
+            </article>
+            <article class="kpi">
+              <div class="kpi-head"><span class="kpi-label">Bias</span></div>
+              <div class="kpi-value">−9.7%</div>
+              <div class="kpi-cap">M−5 · −3,107 KL</div>
+            </article>
+            <article class="kpi">
+              <div class="kpi-head">
+                <span class="kpi-label">Actual volume</span>
+              </div>
+              <div class="kpi-value">31,942</div>
+              <div class="kpi-cap">common cohort · KL</div>
+            </article>
+            <article class="kpi">
+              <div class="kpi-head">
+                <span class="kpi-label">Forecast volume</span>
+              </div>
+              <div class="kpi-value">28,834</div>
+              <div class="kpi-cap">M−5 · KL</div>
+            </article>
+            <article class="kpi wape-card">
+              <div class="kpi-head">
+                <span class="kpi-label">WAPE</span
+                ><button class="help" id="open-guide" aria-label="Explain WAPE">
+                  ?
+                </button>
+              </div>
+              <div class="kpi-value">21.8%</div>
+              <div class="kpi-cap">6,972 miss ÷ 31,942 actual</div>
+            </article>
+            <article class="kpi">
+              <div class="kpi-head">
+                <span class="kpi-label">Revision effectiveness</span>
+              </div>
+              <div class="kpi-value">57.2%</div>
+              <div class="kpi-cap">586 / 1,025</div>
+            </article>
+            <article class="kpi">
+              <div class="kpi-head">
+                <span class="kpi-label">Error accumulated</span>
+              </div>
+              <div class="kpi-value">6,972</div>
+              <div class="kpi-cap">M−5 vs M−1</div>
+            </article>
+          </section>
+          <div class="charts">
+            <section class="chart">
+              <h3>Monthly vintage accuracy and bias</h3>
+              <p>Oldest selected forecast compared with fixed latest</p>
+              <div class="ghost-lines"></div>
+            </section>
+            <section class="chart">
+              <h3>Forecast versus actual volume</h3>
+              <p>Same common cohort</p>
+              <div class="ghost-lines"></div>
+            </section>
+          </div>
+        </main>
+      </div>
+      <footer class="status">
+        <span>canonical dataset ready · 16,035 forecast rows</span
+        ><span>metrics computed by forecast_analysis</span>
+      </footer>
+    </div>
+
+    <div class="scrim" id="guide">
+      <section
+        class="dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="guide-title"
+      >
+        <header class="dialog-head">
+          <div>
+            <p class="eyebrow">Guide · WAPE · M−5 common cohort</p>
+            <h2 id="guide-title">Where does 21.8% come from?</h2>
+            <p class="summary">
+              Start with the formula, see eight genuine forecast-to-actual gaps,
+              then follow every eligible gap into one portfolio-level division.
+            </p>
+          </div>
+          <button class="close" id="close-guide">×&nbsp; Close</button>
+        </header>
+        <div class="dialog-body">
+          <section class="variant" data-variant="A">
+            <div class="a-layout">
+              <div class="definition">
+                <strong>Formula first</strong>
+                <div class="formula">
+                  <span class="formula-label">WAPE =</span
+                  ><span class="fraction"
+                    ><span>Σ | Forecast − Actual |</span
+                    ><span>Σ Actual</span></span
+                  ><span class="formula-tail">× 100</span>
+                </div>
+                <span
+                  >Each coloured distance is positive error, whether the
+                  forecast was high or low.</span
+                >
+              </div>
+              <article class="lanes-card">
+                <div class="card-head">
+                  <div>
+                    <h3>Actual volume with the forecast laid over it</h3>
+                    <p>
+                      Eight real product-months from the active pipeline. SKU is
+                      the y-axis; all rows share one KL scale.
+                    </p>
+                  </div>
+                  <div class="legend">
+                    <span><i class="actual-bar"></i>Actual bar</span
+                    ><span><i class="forecast-marker"></i>Forecast marker</span
+                    ><span><i class="gap-line"></i>Absolute gap</span>
+                  </div>
+                </div>
+                <div class="bullet-axis">
+                  <span>SKU · target month</span>
+                  <div class="bullet-axis__ticks">
+                    <span>0</span><span>200</span><span>400</span
+                    ><span>600</span><span>800</span>
+                  </div>
+                  <span class="bullet-axis__unit">Forecast / actual / gap</span>
+                </div>
+                <div class="lanes" id="lanes"></div>
+              </article>
+              <aside class="rollup-card">
+                <h3>
+                  Each bracket is <strong>added to the error total</strong>
+                </h3>
+                <div class="error-sum" id="error-sum"></div>
+                <div>
+                  <div class="shown-subtotal">
+                    <span>Eight shown</span><b>808.7 KL</b>
+                  </div>
+                  <div class="remaining-total">
+                    <span>+ remaining 1,075 rows</span><b>6,163.6 KL</b>
+                  </div>
+                  <div class="metric-box error">
+                    <span>Σ absolute error · all 1,083 rows</span
+                    ><b>6,972.3 KL</b>
+                  </div>
+                  <div class="division-line">
+                    <span>÷</span><b>31,941.6 KL actual</b><span>× 100</span>
+                  </div>
+                </div>
+                <div class="answer">
+                  <span>Portfolio WAPE</span><b>21.8%</b>
+                  <p>
+                    For every 100 KL actually sold, the M−5 forecast missed by
+                    21.8 KL.
+                  </p>
+                </div>
+              </aside>
+            </div>
+          </section>
+        </div>
+        <footer class="dialog-foot">
+          <span
+            ><b>Population:</b> positive-actual rows with both M−5 and M−1
+            forecasts</span
+          ><span
+            ><b>Direction:</b> over and under misses both count positively</span
+          ><span><b>Reading:</b> lower is better</span>
+        </footer>
+      </section>
+    </div>
+    <div class="prototype-tag">THROWAWAY PROTOTYPE</div>
+    <script>
+      const rows = [
+        {
+          code: "723536",
+          name: "PN shampoo sachet 2-pack",
+          month: "May 2026",
+          forecast: 449.946,
+          actual: 763.285,
+          error: 313.339,
+          direction: "under",
+        },
+        {
+          code: "711848",
+          name: "Beliphool 200 ml",
+          month: "Apr 2026",
+          forecast: 361.015,
+          actual: 255.337,
+          error: 105.678,
+          direction: "over",
+        },
+        {
+          code: "706088",
+          name: "PCNO 200 ml bottle",
+          month: "Jul 2026",
+          forecast: 631.735,
+          actual: 529.937,
+          error: 101.798,
+          direction: "over",
+        },
+        {
+          code: "706059",
+          name: "PCNO 100 ml bottle",
+          month: "Apr 2026",
+          forecast: 324.43,
+          actual: 241.899,
+          error: 82.531,
+          direction: "over",
+        },
+        {
+          code: "706090",
+          name: "PCNO 500 ml bottle",
+          month: "Jan 2026",
+          forecast: 189.683,
+          actual: 112.063,
+          error: 77.62,
+          direction: "over",
+        },
+        {
+          code: "710085",
+          name: "Beliphool 100 ml",
+          month: "Feb 2026",
+          forecast: 133.418,
+          actual: 190.258,
+          error: 56.839,
+          direction: "under",
+        },
+        {
+          code: "711378",
+          name: "Beliphool 300 ml",
+          month: "Mar 2026",
+          forecast: 89.887,
+          actual: 131.702,
+          error: 41.816,
+          direction: "under",
+        },
+        {
+          code: "719861",
+          name: "Beliphool 35 ml",
+          month: "Jul 2026",
+          forecast: 12.785,
+          actual: 41.873,
+          error: 29.088,
+          direction: "under",
+        },
+      ];
+      const fmt = (n) =>
+        n.toLocaleString("en-US", {
+          minimumFractionDigits: 1,
+          maximumFractionDigits: 1,
+        });
+      const color = (d) => (d === "over" ? "#b63b35" : "#2e79a5");
+      const node = (tag, className, text) => {
+        const el = document.createElement(tag);
+        if (className) el.className = className;
+        if (text !== undefined) el.textContent = text;
+        return el;
+      };
+      function lane(row) {
+        const scaleMax = 850,
+          forecastPosition = Math.min((row.forecast / scaleMax) * 100, 100),
+          actualWidth = Math.min((row.actual / scaleMax) * 100, 100),
+          left = Math.min(forecastPosition, actualWidth),
+          width = Math.abs(forecastPosition - actualWidth),
+          center = left + width / 2;
+        const root = node("div", "lane");
+        root.style.setProperty("--gap-color", color(row.direction));
+        const title = node("div", "lane-title");
+        title.append(
+          node("strong", "", `${row.code} · ${row.name}`),
+          node("span", "", row.month),
+        );
+        const visual = node("div", "lane-visual"),
+          actual = node("i", "lane-base"),
+          gap = node("i", "lane-gap"),
+          forecast = node("i", "lane-point forecast"),
+          brace = document.createElementNS("http://www.w3.org/2000/svg", "svg"),
+          bracePath = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "path",
+          ),
+          errorLabel = node(
+            "span",
+            "lane-error-label",
+            `${fmt(row.error)} KL error`,
+          );
+        actual.style.width = `${actualWidth}%`;
+        gap.style.left = `${left}%`;
+        gap.style.width = `${width}%`;
+        forecast.style.left = `${forecastPosition}%`;
+        brace.classList.add("lane-brace");
+        brace.setAttribute("viewBox", "0 0 100 10");
+        brace.setAttribute("preserveAspectRatio", "none");
+        brace.setAttribute("aria-hidden", "true");
+        brace.style.left = `${left}%`;
+        brace.style.width = `${Math.max(width, 1.5)}%`;
+        bracePath.setAttribute("d", "M1 1 V9 H99 V1");
+        brace.append(bracePath);
+        errorLabel.style.left = `${center}%`;
+        visual.append(actual, gap, forecast, brace, errorLabel);
+        const values = node("div", "lane-values");
+        values.append(
+          node("span", "", `F ${fmt(row.forecast)} KL`),
+          node("span", "", `A ${fmt(row.actual)} KL`),
+        );
+        root.append(title, visual, values);
+        return root;
+      }
+      document.querySelector("#lanes").append(...rows.map(lane));
+      const maximumShownError = Math.max(...rows.map((row) => row.error));
+      const errorSumRows = rows.map((row) => {
+        const item = node("div", "error-sum__row");
+        item.style.setProperty("--sum-color", color(row.direction));
+        const bar = node("i");
+        bar.style.width = `${Math.max((row.error / maximumShownError) * 100, 9)}%`;
+        item.append(
+          node("span", "", row.code),
+          bar,
+          node("b", "", `${fmt(row.error)} KL`),
+        );
+        return item;
+      });
+      document.querySelector("#error-sum").append(...errorSumRows);
+      const params = new URLSearchParams(location.search);
+      document.addEventListener("keydown", (e) => {
+        if (
+          ["INPUT", "TEXTAREA"].includes(e.target.tagName) ||
+          e.target.isContentEditable
+        )
+          return;
+        if (e.key === "Escape") document.querySelector("#guide").hidden = true;
+      });
+      document.querySelector("#close-guide").onclick = () =>
+        (document.querySelector("#guide").hidden = true);
+      document.querySelector("#open-guide").onclick = () =>
+        (document.querySelector("#guide").hidden = false);
+      if (params.get("closed") === "1")
+        document.querySelector("#guide").hidden = true;
+    </script>
+  </body>
+</html>

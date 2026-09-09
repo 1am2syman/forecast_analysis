@@ -1928,10 +1928,31 @@ class DashboardRevisionTests(unittest.TestCase):
         self.assertEqual(scatter["target_months_used"].unique().to_list(), [6])
         self.assertEqual(scatter["vintages_per_month"].unique().to_list(), [5])
         self.assertEqual(scatter["transitions_used"].unique().to_list(), [24])
+
+        partial_latest = history.filter(
+            (pl.col("snop_month") == date(2026, 6, 1))
+            & (pl.col("calculation_month") < date(2025, 5, 1))
+        ).with_columns(pl.lit(date(2026, 7, 1)).alias("snop_month"))
+        scatter_with_partial_latest = build_revision_scatter(
+            pl.concat([history, partial_latest], how="vertical_relaxed"),
+            target_end_month=date(2026, 7, 1),
+        )
+        self.assertEqual(scatter_with_partial_latest.height, 21)
+        self.assertEqual(
+            scatter_with_partial_latest["window_start_month"].unique().to_list(),
+            [date(2026, 1, 1)],
+        )
+        self.assertEqual(
+            scatter_with_partial_latest["window_end_month"].unique().to_list(),
+            [date(2026, 6, 1)],
+        )
+
         ordinary = scatter.filter(pl.col("parent_code") == 1).row(0, named=True)
         outlier = scatter.filter(pl.col("parent_code") == 21).row(0, named=True)
         self.assertAlmostEqual(ordinary["revision_score_pct"], -10.0)
         self.assertAlmostEqual(ordinary["vintage_improvement_score_pp"], 10.0)
+        self.assertAlmostEqual(ordinary["absolute_error_kl"], 60.0)
+        self.assertAlmostEqual(outlier["absolute_error_kl"], 0.0)
         self.assertAlmostEqual(outlier["revision_score_pct"], -100.0)
         self.assertAlmostEqual(outlier["vintage_improvement_score_pp"], 100.0)
         self.assertEqual(
@@ -2066,7 +2087,7 @@ class RealDashboardCoverageTests(unittest.TestCase):
         ) / selected_actual * 100
         self.assertEqual(
             [summary[key]["observations"] for key in ("common", "tm_only", "ml_only")],
-            [1275, 430, 229],
+            [1365, 397, 139],
         )
         self.assertGreater(summary["tm_only"]["actual_kl"], 0.0)
         self.assertGreater(summary["ml_only"]["actual_kl"], 0.0)
@@ -2077,9 +2098,9 @@ class RealDashboardCoverageTests(unittest.TestCase):
         }
         self.assertAlmostEqual(metrics["tm"]["coverage_pct"], expected_tm_coverage)
         self.assertAlmostEqual(metrics["ml"]["coverage_pct"], expected_ml_coverage)
-        self.assertAlmostEqual(metrics["tm"]["coverage_pct"], 92.52985339685515)
-        self.assertAlmostEqual(metrics["ml"]["coverage_pct"], 97.50580756834091)
-        self.assertGreater(metrics["ml"]["coverage_pct"], metrics["tm"]["coverage_pct"])
+        self.assertAlmostEqual(metrics["tm"]["coverage_pct"], 99.26570501589038)
+        self.assertAlmostEqual(metrics["ml"]["coverage_pct"], 97.67256119424648)
+        self.assertGreater(metrics["tm"]["coverage_pct"], metrics["ml"]["coverage_pct"])
         coverage_delta = next(
             row["delta_ml_minus_tm"]
             for row in comparison.deltas.iter_rows(named=True)
@@ -2089,7 +2110,7 @@ class RealDashboardCoverageTests(unittest.TestCase):
             coverage_delta,
             expected_ml_coverage - expected_tm_coverage,
         )
-        self.assertGreater(coverage_delta, 0.0)
+        self.assertLess(coverage_delta, 0.0)
 
 
 class ProductVintageHistoryTests(unittest.TestCase):

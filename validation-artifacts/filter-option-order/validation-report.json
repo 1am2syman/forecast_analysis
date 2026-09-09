@@ -1,0 +1,151 @@
+{
+  "generatedAt": "2026-09-06T15:55:06.692Z",
+  "screenshots": [
+    {
+      "name": "parent-to-brand-1280x720.png",
+      "viewport": "1280x720",
+      "state": "parent-to-brand",
+      "selected": "702082 · PCNO 20ml FT BOT NEW",
+      "metrics": {
+        "enabled": 1,
+        "disabled": 39,
+        "firstDisabled": 1,
+        "lastEnabled": 0
+      }
+    },
+    {
+      "name": "parent-to-sku-1280x720.png",
+      "viewport": "1280x720",
+      "state": "parent-to-sku",
+      "selected": "702082 · PCNO 20ml FT BOT NEW",
+      "metrics": {
+        "enabled": 1,
+        "disabled": 3,
+        "firstDisabled": 1,
+        "lastEnabled": 0
+      }
+    },
+    {
+      "name": "brand-to-sku-1280x720.png",
+      "viewport": "1280x720",
+      "state": "brand-to-sku",
+      "selected": "BBEL_LUP",
+      "metrics": {
+        "enabled": 1,
+        "disabled": 3,
+        "firstDisabled": 1,
+        "lastEnabled": 0
+      }
+    },
+    {
+      "name": "sku-to-brand-1280x720.png",
+      "viewport": "1280x720",
+      "state": "sku-to-brand",
+      "selected": "A",
+      "metrics": {
+        "enabled": 4,
+        "disabled": 36,
+        "firstDisabled": 4,
+        "lastEnabled": 3
+      }
+    },
+    {
+      "name": "parent-to-brand-search-1280x720.png",
+      "viewport": "1280x720",
+      "state": "parent-to-brand-search",
+      "selected": "702082 · PCNO 20ml FT BOT NEW",
+      "query": "BPCNO",
+      "metrics": {
+        "enabled": 1,
+        "disabled": 2,
+        "firstDisabled": 1,
+        "lastEnabled": 0,
+        "labels": [
+          "BPCNO-SP",
+          "BPCNO_LUP",
+          "BPCNO-LP"
+        ]
+      }
+    },
+    {
+      "name": "parent-to-brand-1920x1080.png",
+      "viewport": "1920x1080",
+      "state": "parent-to-brand",
+      "selected": "702082 · PCNO 20ml FT BOT NEW",
+      "metrics": {
+        "enabled": 1,
+        "disabled": 39,
+        "firstDisabled": 1,
+        "lastEnabled": 0
+      }
+    },
+    {
+      "name": "parent-to-sku-1920x1080.png",
+      "viewport": "1920x1080",
+      "state": "parent-to-sku",
+      "selected": "702082 · PCNO 20ml FT BOT NEW",
+      "metrics": {
+        "enabled": 1,
+        "disabled": 3,
+        "firstDisabled": 1,
+        "lastEnabled": 0
+      }
+    },
+    {
+      "name": "brand-to-sku-1920x1080.png",
+      "viewport": "1920x1080",
+      "state": "brand-to-sku",
+      "selected": "BBEL_LUP",
+      "metrics": {
+        "enabled": 1,
+        "disabled": 3,
+        "firstDisabled": 1,
+        "lastEnabled": 0
+      }
+    },
+    {
+      "name": "sku-to-brand-1920x1080.png",
+      "viewport": "1920x1080",
+      "state": "sku-to-brand",
+      "selected": "A",
+      "metrics": {
+        "enabled": 4,
+        "disabled": 36,
+        "firstDisabled": 4,
+        "lastEnabled": 3
+      }
+    },
+    {
+      "name": "parent-to-brand-search-1920x1080.png",
+      "viewport": "1920x1080",
+      "state": "parent-to-brand-search",
+      "selected": "702082 · PCNO 20ml FT BOT NEW",
+      "query": "BPCNO",
+      "metrics": {
+        "enabled": 1,
+        "disabled": 2,
+        "firstDisabled": 1,
+        "lastEnabled": 0,
+        "labels": [
+          "BPCNO-SP",
+          "BPCNO_LUP",
+          "BPCNO-LP"
+        ]
+      }
+    }
+  ],
+  "browserErrors": [],
+  "assertions": [
+    "Applicable options form one contiguous prefix before disabled options.",
+    "Search preserves availability priority before textual tie-breaking.",
+    "Popovers remain fully within both desktop viewports.",
+    "The quick-filter bar remains a single non-wrapping row."
+  ],
+  "judgments": {
+    "improved": [
+      "Applicable candidates now move to the top of every affected Brand and SKU Class list."
+    ],
+    "regressed": [],
+    "outOfPlace": []
+  }
+}

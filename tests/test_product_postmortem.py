@@ -5,7 +5,10 @@ from datetime import date
 
 import polars as pl
 
-from forecast_analysis import build_product_postmortem
+from forecast_analysis import (
+    build_product_postmortem,
+    build_product_year_overlay,
+)
 from forecast_analysis.vintages import select_vintage_pair
 
 
@@ -84,6 +87,100 @@ def _pairs(frame: pl.DataFrame, source: str = "tm") -> pl.DataFrame:
 
 
 class ProductPostmortemTests(unittest.TestCase):
+    def test_year_overlay_keeps_actual_history_and_uses_one_forward_run(self) -> None:
+        frame = _analysis_frame(
+            [
+                ("tm", 100, "Selected", "Alpha", "A", date(2024, 10, 1), date(2024, 11, 1), 90.0, 100.0),
+                ("ml", 100, "Selected", "Alpha", "A", date(2024, 11, 1), date(2024, 12, 1), 95.0, 120.0),
+                ("tm", 100, "Selected", "Alpha", "A", date(2025, 1, 1), date(2025, 1, 1), 110.0, 110.0),
+                ("ml", 100, "Selected", "Alpha", "A", date(2025, 2, 1), date(2025, 2, 1), 111.0, 111.0),
+                ("ml", 100, "Selected", "Alpha", "A", date(2025, 2, 1), date(2025, 3, 1), 112.0, None),
+                ("ml", 100, "Selected", "Alpha", "A", date(2025, 3, 1), date(2025, 3, 1), 113.0, None),
+                ("ml", 100, "Selected", "Alpha", "A", date(2025, 3, 1), date(2025, 4, 1), 114.0, None),
+            ]
+        )
+
+        actual_history = pl.concat(
+            [
+                pl.DataFrame(
+                    {
+                        "parent_code": [100],
+                        "snop_month": [date(2024, 10, 1)],
+                        "actual_kl": [80.0],
+                    }
+                ),
+                frame.select(["parent_code", "snop_month", "actual_kl"])
+                .filter(pl.col("actual_kl").is_not_null())
+                .unique(
+                    subset=["parent_code", "snop_month"], maintain_order=True
+                ),
+            ]
+        )
+        result = build_product_year_overlay(
+            frame,
+            actual_history,
+            100,
+            source="ml",
+        )
+        rows = result.points.to_dicts()
+
+        self.assertEqual(result.actual_through, date(2025, 2, 1))
+        self.assertEqual(result.forecast_run, date(2025, 3, 1))
+        self.assertEqual(
+            [
+                (row["snop_month"], row["fiscal_year"], row["fiscal_month"])
+                for row in rows
+            ],
+            [
+                (date(2024, 10, 1), 2024, 7),
+                (date(2024, 11, 1), 2024, 8),
+                (date(2024, 12, 1), 2024, 9),
+                (date(2025, 1, 1), 2024, 10),
+                (date(2025, 2, 1), 2024, 11),
+                (date(2025, 3, 1), 2024, 12),
+                (date(2025, 4, 1), 2025, 1),
+            ],
+        )
+        self.assertEqual(
+            [(row["snop_month"], row["actual_kl"], row["forecast_kl"]) for row in rows],
+            [
+                (date(2024, 10, 1), 80.0, None),
+                (date(2024, 11, 1), 100.0, None),
+                (date(2024, 12, 1), 120.0, None),
+                (date(2025, 1, 1), 110.0, None),
+                (date(2025, 2, 1), 111.0, None),
+                (date(2025, 3, 1), None, 113.0),
+                (date(2025, 4, 1), None, 114.0),
+            ],
+        )
+
+    def test_year_overlay_does_not_fall_back_when_latest_run_has_no_future_targets(
+        self,
+    ) -> None:
+        frame = _analysis_frame(
+            [
+                ("ml", 100, "Selected", "Alpha", "A", date(2025, 2, 1), date(2025, 4, 1), 114.0, None),
+                ("ml", 100, "Selected", "Alpha", "A", date(2025, 3, 1), date(2025, 2, 1), 113.0, 111.0),
+            ]
+        )
+        actual_history = pl.DataFrame(
+            {
+                "parent_code": [100],
+                "snop_month": [date(2025, 2, 1)],
+                "actual_kl": [111.0],
+            }
+        )
+
+        result = build_product_year_overlay(
+            frame,
+            actual_history,
+            100,
+            source="ml",
+        )
+
+        self.assertEqual(result.forecast_run, date(2025, 3, 1))
+        self.assertEqual(result.points["forecast_kl"].drop_nulls().len(), 0)
+
     def test_builds_latest_monthly_performance_revision_points_and_target_summary(self) -> None:
         january = date(2026, 1, 1)
         february = date(2026, 2, 1)

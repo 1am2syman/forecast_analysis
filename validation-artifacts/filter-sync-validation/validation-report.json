@@ -1,0 +1,1057 @@
+{
+  "generatedAt": "2026-09-07T06:26:02.510Z",
+  "baseUrl": "http://127.0.0.1:35319/",
+  "checks": [
+    {
+      "name": "compact bootstrap paints overview without eager modules",
+      "status": "pass",
+      "durationMs": 17,
+      "detail": {
+        "bootstrap": {
+          "name": "http://127.0.0.1:35319/api/bootstrap",
+          "durationMs": 26.799999952316284,
+          "transferSize": 38751,
+          "encodedBodySize": 38451
+        },
+        "apiResources": [
+          {
+            "name": "http://127.0.0.1:35319/api/bootstrap",
+            "durationMs": 26.799999952316284,
+            "transferSize": 38751,
+            "encodedBodySize": 38451
+          }
+        ]
+      }
+    },
+    {
+      "name": "shared control · source",
+      "status": "pass",
+      "durationMs": 1797,
+      "detail": {
+        "selected": "tm",
+        "requestValue": "tm"
+      }
+    },
+    {
+      "name": "shared control · target_start",
+      "status": "pass",
+      "durationMs": 2154,
+      "detail": {
+        "selected": "2025-06-01",
+        "requestValue": "2025-06-01"
+      }
+    },
+    {
+      "name": "shared control · target_end",
+      "status": "fail",
+      "durationMs": 395,
+      "detail": "Error: target_end did not update the active-filter count\n    at assert (file:///root/GitHub/forecast_analysis/scripts/validate_dashboard_functionality.mjs:44:25)\n    at mutateShared (file:///root/GitHub/forecast_analysis/scripts/validate_dashboard_functionality.mjs:458:7)\n    at async check (file:///root/GitHub/forecast_analysis/scripts/validate_dashboard_functionality.mjs:340:24)\n    at async main (file:///root/GitHub/forecast_analysis/scripts/validate_dashboard_functionality.mjs:544:7)"
+    },
+    {
+      "name": "shared control · revision_direction",
+      "status": "pass",
+      "durationMs": 1597,
+      "detail": {
+        "selected": "up",
+        "requestValue": "up"
+      }
+    },
+    {
+      "name": "shared control · revision_outcome",
+      "status": "pass",
+      "durationMs": 1528,
+      "detail": {
+        "selected": "improved",
+        "requestValue": "improved"
+      }
+    },
+    {
+      "name": "shared control · revision_tolerance_kl",
+      "status": "pass",
+      "durationMs": 1787,
+      "detail": {
+        "selected": 1,
+        "requestValue": 1
+      }
+    },
+    {
+      "name": "shared control · forecast_direction",
+      "status": "pass",
+      "durationMs": 1380,
+      "detail": {
+        "selected": "over",
+        "requestValue": "over"
+      }
+    },
+    {
+      "name": "shared control · accuracy_band",
+      "status": "pass",
+      "durationMs": 1342,
+      "detail": {
+        "selected": "0_50",
+        "requestValue": "0_50"
+      }
+    },
+    {
+      "name": "shared control · bias_band",
+      "status": "pass",
+      "durationMs": 1303,
+      "detail": {
+        "selected": "0_50",
+        "requestValue": "0_50"
+      }
+    },
+    {
+      "name": "shared control · minimum_absolute_error_kl",
+      "status": "pass",
+      "durationMs": 1615,
+      "detail": {
+        "selected": 1,
+        "requestValue": 1
+      }
+    },
+    {
+      "name": "shared control · top_n",
+      "status": "pass",
+      "durationMs": 1089,
+      "detail": {
+        "selected": 10,
+        "requestValue": 10
+      }
+    },
+    {
+      "name": "shared control · top_n_metric",
+      "status": "pass",
+      "durationMs": 1477,
+      "detail": {
+        "selected": "absolute_error",
+        "requestValue": "absolute_error"
+      }
+    },
+    {
+      "name": "shared control · hierarchy_status",
+      "status": "pass",
+      "durationMs": 1576,
+      "detail": {
+        "selected": "mapped",
+        "requestValue": "mapped"
+      }
+    },
+    {
+      "name": "shared control · actual_status",
+      "status": "pass",
+      "durationMs": 1495,
+      "detail": {
+        "selected": "matched_positive",
+        "requestValue": "matched_positive"
+      }
+    },
+    {
+      "name": "shared control · pair_status",
+      "status": "pass",
+      "durationMs": 1628,
+      "detail": {
+        "selected": "complete",
+        "requestValue": "complete"
+      }
+    },
+    {
+      "name": "shared control · source_availability",
+      "status": "pass",
+      "durationMs": 852,
+      "detail": {
+        "selected": "tm_only",
+        "requestValue": "tm_only"
+      }
+    },
+    {
+      "name": "shared control · zero_forecast_only",
+      "status": "pass",
+      "durationMs": 1043,
+      "detail": {
+        "selected": true,
+        "requestValue": true
+      }
+    },
+    {
+      "name": "shared control · complete_vintage_history_only",
+      "status": "pass",
+      "durationMs": 1411,
+      "detail": {
+        "selected": true,
+        "requestValue": true
+      }
+    },
+    {
+      "name": "shared control · comparison_mode and disabled groups",
+      "status": "fail",
+      "durationMs": 1302,
+      "detail": "Error: TypeError: Cannot read properties of null (reading 'disabled')\n    at <anonymous>:1:209\n    at CdpPage.evaluate (file:///root/GitHub/forecast_analysis/scripts/validate_dashboard_functionality.mjs:180:13)\n    at async file:///root/GitHub/forecast_analysis/scripts/validate_dashboard_functionality.mjs:556:11\n    at async check (file:///root/GitHub/forecast_analysis/scripts/validate_dashboard_functionality.mjs:340:24)\n    at async main (file:///root/GitHub/forecast_analysis/scripts/validate_dashboard_functionality.mjs:548:5)"
+    },
+    {
+      "name": "product multi-select · brands",
+      "status": "pass",
+      "durationMs": 1095,
+      "detail": {
+        "values": [
+          "BBEL-PO-R",
+          "BBEL_LUP"
+        ],
+        "summary": "2 selected",
+        "query": "bbl",
+        "open": true
+      }
+    },
+    {
+      "name": "product multi-select · sku_classes",
+      "status": "pass",
+      "durationMs": 692,
+      "detail": {
+        "values": [
+          "Unclassified"
+        ],
+        "summary": "1 selected",
+        "query": "unclass",
+        "open": true
+      }
+    },
+    {
+      "name": "product multi-select · parent_codes",
+      "status": "pass",
+      "durationMs": 658,
+      "detail": {
+        "values": [
+          703584
+        ],
+        "summary": "1 selected",
+        "query": "3584",
+        "open": true
+      }
+    },
+    {
+      "name": "product multi-select clear and Escape behavior",
+      "status": "pass",
+      "durationMs": 1313,
+      "detail": {
+        "popoverHidden": true,
+        "drawerHidden": false,
+        "focusReturned": true
+      }
+    },
+    {
+      "name": "interconnected product facets",
+      "status": "pass",
+      "durationMs": 1641,
+      "detail": {
+        "classFacet": {
+          "parents": [
+            706059,
+            706088,
+            706090,
+            710085,
+            711848,
+            723536,
+            706059,
+            706088,
+            706090,
+            710085,
+            711848,
+            723536
+          ],
+          "disabledBrand": "true"
+        },
+        "reverseFacet": {
+          "disabledClassB": "true",
+          "disabledBrand": "true",
+          "before": "All brands"
+        },
+        "afterDisabledClick": "All brands"
+      }
+    },
+    {
+      "name": "product facet removal feedback",
+      "status": "pass",
+      "durationMs": 1437,
+      "detail": {
+        "request": "{\"source\":\"tm\",\"comparison_mode\":false,\"target_start\":\"2025-05-01\",\"target_end\":\"2026-03-01\",\"brands\":[\"BBEL_LUP\"],\"sku_classes\":[],\"parent_codes\":[],\"horizon\":null,\"minimum_actual_volume\":0,\"accuracy_vintage_ids\":[\"oldest_available\"],\"revision_direction\":null,\"revision_outcome\":null,\"revision_tolerance_kl\":0.01,\"forecast_direction\":null,\"accuracy_band\":null,\"bias_band\":null,\"minimum_absolute_error_kl\":0,\"top_n\":null,\"top_n_metric\":\"actual_volume\",\"hierarchy_status\":null,\"actual_status\":null,\"pair_status\":null,\"source_availability\":null,\"zero_forecast_only\":false,\"complete_vintage_history_only\":false,\"product_parent_code\":null,\"product_target_month\":null}",
+        "toast": "1 removed Brand selection",
+        "summary": "All brands"
+      }
+    },
+    {
+      "name": "all shared controls exercised",
+      "status": "fail",
+      "durationMs": 0,
+      "detail": "Error: Unexercised shared controls: horizon, minimum_actual_volume, target_end\n    at assert (file:///root/GitHub/forecast_analysis/scripts/validate_dashboard_functionality.mjs:44:25)\n    at file:///root/GitHub/forecast_analysis/scripts/validate_dashboard_functionality.mjs:761:7\n    at check (file:///root/GitHub/forecast_analysis/scripts/validate_dashboard_functionality.mjs:340:30)\n    at main (file:///root/GitHub/forecast_analysis/scripts/validate_dashboard_functionality.mjs:757:11)"
+    },
+    {
+      "name": "discrete filters dispatch without artificial delay",
+      "status": "pass",
+      "durationMs": 308,
+      "detail": {
+        "elapsedMs": 35
+      }
+    },
+    {
+      "name": "same-state filter changes coalesce",
+      "status": "pass",
+      "durationMs": 331,
+      "detail": {
+        "compactRequests": 1
+      }
+    },
+    {
+      "name": "superseded compact requests abort without an error toast",
+      "status": "pass",
+      "durationMs": 600,
+      "detail": {
+        "aborted": true,
+        "latestStatus": 200
+      }
+    },
+    {
+      "name": "lazy modules load only for the active tab",
+      "status": "pass",
+      "durationMs": 350,
+      "detail": {
+        "urls": [
+          "http://127.0.0.1:35319/api/module/trends",
+          "http://127.0.0.1:35319/api/module/heatmap"
+        ]
+      }
+    },
+    {
+      "name": "filter drawer toggle and Escape",
+      "status": "pass",
+      "durationMs": 303,
+      "detail": null
+    },
+    {
+      "name": "primary tabs, keyboard navigation, and hash history",
+      "status": "pass",
+      "durationMs": 584,
+      "detail": {
+        "beforeLength": 3,
+        "afterLength": 7
+      }
+    },
+    {
+      "name": "every subview toggle",
+      "status": "pass",
+      "durationMs": 43,
+      "detail": null
+    },
+    {
+      "name": "all trend metric options render",
+      "status": "pass",
+      "durationMs": 298,
+      "detail": {
+        "monthly": [
+          "forecast_accuracy_pct",
+          "bias_pct",
+          "absolute_error_kl",
+          "forecast_kl"
+        ],
+        "horizon": [
+          "forecast_accuracy_pct",
+          "bias_pct",
+          "absolute_error_kl"
+        ],
+        "heatmap": [
+          "forecast_accuracy_pct",
+          "bias_pct",
+          "absolute_error_kl",
+          "vintage_a_accuracy_pct",
+          "vintage_b_accuracy_pct",
+          "accuracy_delta_pp",
+          "revision_effectiveness_pct"
+        ]
+      }
+    },
+    {
+      "name": "horizon bars have visible geometry",
+      "status": "pass",
+      "durationMs": 51,
+      "detail": [
+        {
+          "before": 0,
+          "after": 323.828
+        },
+        {
+          "before": 0,
+          "after": 346.219
+        },
+        {
+          "before": 0,
+          "after": 360.281
+        },
+        {
+          "before": 0,
+          "after": 335.703
+        },
+        {
+          "before": 0,
+          "after": 328.531
+        }
+      ]
+    },
+    {
+      "name": "product parent and target-month drill-down",
+      "status": "fail",
+      "durationMs": 60459,
+      "detail": "Error: Timed out: product parent drill-down\n    at waitFor (file:///root/GitHub/forecast_analysis/scripts/validate_dashboard_functionality.mjs:224:9)\n    at async file:///root/GitHub/forecast_analysis/scripts/validate_dashboard_functionality.mjs:1062:7\n    at async check (file:///root/GitHub/forecast_analysis/scripts/validate_dashboard_functionality.mjs:340:24)\n    at async main (file:///root/GitHub/forecast_analysis/scripts/validate_dashboard_functionality.mjs:1049:5)"
+    },
+    {
+      "name": "exception search and row limits",
+      "status": "pass",
+      "durationMs": 303,
+      "detail": {
+        "product": "723536",
+        "searched": 10
+      }
+    },
+    {
+      "name": "revision chart respects the selected source",
+      "status": "fail",
+      "durationMs": 60353,
+      "detail": "Error: Timed out: ML revision action view\n    at waitFor (file:///root/GitHub/forecast_analysis/scripts/validate_dashboard_functionality.mjs:224:9)\n    at async file:///root/GitHub/forecast_analysis/scripts/validate_dashboard_functionality.mjs:1124:7\n    at async check (file:///root/GitHub/forecast_analysis/scripts/validate_dashboard_functionality.mjs:340:24)\n    at async main (file:///root/GitHub/forecast_analysis/scripts/validate_dashboard_functionality.mjs:1119:5)"
+    },
+    {
+      "name": "dynamic comparison mode action buttons",
+      "status": "pass",
+      "durationMs": 2792,
+      "detail": null
+    },
+    {
+      "name": "all CSV export buttons download",
+      "status": "fail",
+      "durationMs": 3482,
+      "detail": "Error: TypeError: Cannot read properties of null (reading 'click')\n    at <anonymous>:1:183\n    at CdpPage.evaluate (file:///root/GitHub/forecast_analysis/scripts/validate_dashboard_functionality.mjs:180:13)\n    at async file:///root/GitHub/forecast_analysis/scripts/validate_dashboard_functionality.mjs:1610:9\n    at async check (file:///root/GitHub/forecast_analysis/scripts/validate_dashboard_functionality.mjs:340:24)\n    at async main (file:///root/GitHub/forecast_analysis/scripts/validate_dashboard_functionality.mjs:1575:5)"
+    },
+    {
+      "name": "baseline details toggle",
+      "status": "pass",
+      "durationMs": 8,
+      "detail": null
+    },
+    {
+      "name": "Reset restores local and shared UI state",
+      "status": "pass",
+      "durationMs": 195,
+      "detail": {
+        "monthly": "forecast_accuracy_pct",
+        "search": "",
+        "limit": "10",
+        "source": "ml",
+        "tab": "overview"
+      }
+    },
+    {
+      "name": "collapsible navigation rail",
+      "status": "pass",
+      "durationMs": 1026,
+      "detail": {
+        "initial": {
+          "button": true,
+          "rail": 232,
+          "workspace": 1208
+        },
+        "collapsed": {
+          "rail": 72,
+          "workspace": 1368,
+          "names": "none",
+          "expanded": "false",
+          "label": "Expand navigation",
+          "overflowX": 0
+        }
+      }
+    },
+    {
+      "name": "zoom and responsive fixed-viewport states",
+      "status": "pass",
+      "durationMs": 1354,
+      "detail": {
+        "rail": 72,
+        "pageVertical": 0,
+        "pageHorizontal": 0,
+        "names": "none"
+      }
+    },
+    {
+      "name": "all buttons classified and operable",
+      "status": "fail",
+      "durationMs": 9,
+      "detail": "Error: Unclassified buttons: [{\"text\":\"Month\",\"action\":null,\"target\":null,\"subtab\":null,\"exportKind\":null,\"fullscreenKind\":null,\"modeAction\":null,\"revisionSort\":null,\"scatterAction\":null,\"drilldownCategory\":null,\"drilldownParentCode\":null,\"drilldownClose\":false,\"drilldownClear\":false,\"disabled\":false},{\"text\":\"Quarter\",\"action\":null,\"target\":null,\"subtab\":null,\"exportKind\":null,\"fullscreenKind\":null,\"modeAction\":null,\"revisionSort\":null,\"scatterAction\":null,\"drilldownCategory\":null,\"drilldownParentCode\":null,\"drilldownClose\":false,\"drilldownClear\":false,\"disabled\":false},{\"text\":\"3M\",\"action\":null,\"target\":null,\"subtab\":null,\"exportKind\":null,\"fullscreenKind\":null,\"modeAction\":null,\"revisionSort\":null,\"scatterAction\":null,\"drilldownCategory\":null,\"drilldownParentCode\":null,\"drilldownClose\":false,\"drilldownClear\":false,\"disabled\":false},{\"text\":\"6M\",\"action\":null,\"target\":null,\"subtab\":null,\"exportKind\":null,\"fullscreenKind\":null,\"modeAction\":null,\"revisionSort\":null,\"scatterAction\":null,\"drilldownCategory\":null,\"drilldownParentCode\":null,\"drilldownClose\":false,\"drilldownClear\":false,\"disabled\":false},{\"text\":\"12M\",\"action\":null,\"target\":null,\"subtab\":null,\"exportKind\":null,\"fullscreenKind\":null,\"modeAction\":null,\"revisionSort\":null,\"scatterAction\":null,\"drilldownCategory\":null,\"drilldownParentCode\":null,\"drilldownClose\":false,\"drilldownClear\":false,\"disabled\":false},{\"text\":\"24M\",\"action\":null,\"target\":null,\"subtab\":null,\"exportKind\":null,\"fullscreenKind\":null,\"modeAction\":null,\"revisionSort\":null,\"scatterAction\":null,\"drilldownCategory\":null,\"drilldownParentCode\":null,\"drilldownClose\":false,\"drilldownClear\":false,\"disabled\":true},{\"text\":\"All\",\"action\":null,\"target\":null,\"subtab\":null,\"exportKind\":null,\"fullscreenKind\":null,\"modeAction\":null,\"revisionSort\":null,\"scatterAction\":null,\"drilldownCategory\":null,\"drilldownParentCode\":null,\"drilldownClose\":false,\"drilldownClear\":false,\"disabled\":false},{\"text\":\"Vintages\\n                        1\",\"action\":null,\"target\":null,\"subtab\":null,\"exportKind\":null,\"fullscreenKind\":null,\"modeAction\":null,\"revisionSort\":null,\"scatterAction\":null,\"drilldownCategory\":null,\"drilldownParentCode\":null,\"drilldownClose\":false,\"drilldownClear\":false,\"disabled\":false},{\"text\":\"Vintages\\n              1\",\"action\":null,\"target\":null,\"subtab\":null,\"exportKind\":null,\"fullscreenKind\":null,\"modeAction\":null,\"revisionSort\":null,\"scatterAction\":null,\"drilldownCategory\":null,\"drilldownParentCode\":null,\"drilldownClose\":false,\"drilldownClear\":false,\"disabled\":false}]\n    at assert (file:///root/GitHub/forecast_analysis/scripts/validate_dashboard_functionality.mjs:44:25)\n    at file:///root/GitHub/forecast_analysis/scripts/validate_dashboard_functionality.mjs:1853:7\n    at async check (file:///root/GitHub/forecast_analysis/scripts/validate_dashboard_functionality.mjs:340:24)\n    at async main (file:///root/GitHub/forecast_analysis/scripts/validate_dashboard_functionality.mjs:1832:5)"
+    },
+    {
+      "name": "no console, page, network, or HTTP failures",
+      "status": "pass",
+      "durationMs": 0,
+      "detail": null
+    }
+  ],
+  "failures": [
+    "shared control · target_end: target_end did not update the active-filter count",
+    "shared control · comparison_mode and disabled groups: TypeError: Cannot read properties of null (reading 'disabled')\n    at <anonymous>:1:209",
+    "all shared controls exercised: Unexercised shared controls: horizon, minimum_actual_volume, target_end",
+    "product parent and target-month drill-down: Timed out: product parent drill-down",
+    "revision chart respects the selected source: Timed out: ML revision action view",
+    "all CSV export buttons download: TypeError: Cannot read properties of null (reading 'click')\n    at <anonymous>:1:183",
+    "all buttons classified and operable: Unclassified buttons: [{\"text\":\"Month\",\"action\":null,\"target\":null,\"subtab\":null,\"exportKind\":null,\"fullscreenKind\":null,\"modeAction\":null,\"revisionSort\":null,\"scatterAction\":null,\"drilldownCategory\":null,\"drilldownParentCode\":null,\"drilldownClose\":false,\"drilldownClear\":false,\"disabled\":false},{\"text\":\"Quarter\",\"action\":null,\"target\":null,\"subtab\":null,\"exportKind\":null,\"fullscreenKind\":null,\"modeAction\":null,\"revisionSort\":null,\"scatterAction\":null,\"drilldownCategory\":null,\"drilldownParentCode\":null,\"drilldownClose\":false,\"drilldownClear\":false,\"disabled\":false},{\"text\":\"3M\",\"action\":null,\"target\":null,\"subtab\":null,\"exportKind\":null,\"fullscreenKind\":null,\"modeAction\":null,\"revisionSort\":null,\"scatterAction\":null,\"drilldownCategory\":null,\"drilldownParentCode\":null,\"drilldownClose\":false,\"drilldownClear\":false,\"disabled\":false},{\"text\":\"6M\",\"action\":null,\"target\":null,\"subtab\":null,\"exportKind\":null,\"fullscreenKind\":null,\"modeAction\":null,\"revisionSort\":null,\"scatterAction\":null,\"drilldownCategory\":null,\"drilldownParentCode\":null,\"drilldownClose\":false,\"drilldownClear\":false,\"disabled\":false},{\"text\":\"12M\",\"action\":null,\"target\":null,\"subtab\":null,\"exportKind\":null,\"fullscreenKind\":null,\"modeAction\":null,\"revisionSort\":null,\"scatterAction\":null,\"drilldownCategory\":null,\"drilldownParentCode\":null,\"drilldownClose\":false,\"drilldownClear\":false,\"disabled\":false},{\"text\":\"24M\",\"action\":null,\"target\":null,\"subtab\":null,\"exportKind\":null,\"fullscreenKind\":null,\"modeAction\":null,\"revisionSort\":null,\"scatterAction\":null,\"drilldownCategory\":null,\"drilldownParentCode\":null,\"drilldownClose\":false,\"drilldownClear\":false,\"disabled\":true},{\"text\":\"All\",\"action\":null,\"target\":null,\"subtab\":null,\"exportKind\":null,\"fullscreenKind\":null,\"modeAction\":null,\"revisionSort\":null,\"scatterAction\":null,\"drilldownCategory\":null,\"drilldownParentCode\":null,\"drilldownClose\":false,\"drilldownClear\":false,\"disabled\":false},{\"text\":\"Vintages\\n                        1\",\"action\":null,\"target\":null,\"subtab\":null,\"exportKind\":null,\"fullscreenKind\":null,\"modeAction\":null,\"revisionSort\":null,\"scatterAction\":null,\"drilldownCategory\":null,\"drilldownParentCode\":null,\"drilldownClose\":false,\"drilldownClear\":false,\"disabled\":false},{\"text\":\"Vintages\\n              1\",\"action\":null,\"target\":null,\"subtab\":null,\"exportKind\":null,\"fullscreenKind\":null,\"modeAction\":null,\"revisionSort\":null,\"scatterAction\":null,\"drilldownCategory\":null,\"drilldownParentCode\":null,\"drilldownClose\":false,\"drilldownClear\":false,\"disabled\":false}]"
+  ],
+  "controlInventory": [
+    {
+      "name": "comparison_mode",
+      "tag": "SELECT",
+      "type": "select-one",
+      "disabled": false,
+      "options": [
+        {
+          "value": "false",
+          "label": "Single source"
+        },
+        {
+          "value": "true",
+          "label": "Compare TM vs ML"
+        }
+      ]
+    },
+    {
+      "name": "source",
+      "tag": "SELECT",
+      "type": "select-one",
+      "disabled": false,
+      "options": [
+        {
+          "value": "tm",
+          "label": "TM"
+        },
+        {
+          "value": "ml",
+          "label": "ML"
+        }
+      ]
+    },
+    {
+      "name": "horizon",
+      "tag": "SELECT",
+      "type": "select-one",
+      "disabled": false,
+      "options": [
+        {
+          "value": "",
+          "label": "All available horizons"
+        },
+        {
+          "value": "5",
+          "label": "M−5"
+        },
+        {
+          "value": "4",
+          "label": "M−4"
+        },
+        {
+          "value": "3",
+          "label": "M−3"
+        },
+        {
+          "value": "2",
+          "label": "M−2"
+        },
+        {
+          "value": "1",
+          "label": "M−1"
+        }
+      ]
+    },
+    {
+      "name": "minimum_actual_volume",
+      "tag": "INPUT",
+      "type": "number",
+      "disabled": false,
+      "options": []
+    },
+    {
+      "name": "revision_direction",
+      "tag": "SELECT",
+      "type": "select-one",
+      "disabled": false,
+      "options": [
+        {
+          "value": "",
+          "label": "All directions"
+        },
+        {
+          "value": "up",
+          "label": "Up"
+        },
+        {
+          "value": "down",
+          "label": "Down"
+        },
+        {
+          "value": "unchanged",
+          "label": "Unchanged"
+        }
+      ]
+    },
+    {
+      "name": "revision_outcome",
+      "tag": "SELECT",
+      "type": "select-one",
+      "disabled": false,
+      "options": [
+        {
+          "value": "",
+          "label": "All outcomes"
+        },
+        {
+          "value": "improved",
+          "label": "Improved"
+        },
+        {
+          "value": "worsened",
+          "label": "Worsened"
+        },
+        {
+          "value": "neutral",
+          "label": "Neutral"
+        }
+      ]
+    },
+    {
+      "name": "revision_tolerance_kl",
+      "tag": "INPUT",
+      "type": "number",
+      "disabled": false,
+      "options": []
+    },
+    {
+      "name": "forecast_direction",
+      "tag": "SELECT",
+      "type": "select-one",
+      "disabled": false,
+      "options": [
+        {
+          "value": "",
+          "label": "All directions"
+        },
+        {
+          "value": "over",
+          "label": "Over forecast"
+        },
+        {
+          "value": "under",
+          "label": "Under forecast"
+        },
+        {
+          "value": "within_tolerance",
+          "label": "Within tolerance"
+        }
+      ]
+    },
+    {
+      "name": "accuracy_band",
+      "tag": "SELECT",
+      "type": "select-one",
+      "disabled": false,
+      "options": [
+        {
+          "value": "",
+          "label": "All bands"
+        },
+        {
+          "value": "below_0",
+          "label": "Below 0%"
+        },
+        {
+          "value": "0_50",
+          "label": "0–50%"
+        },
+        {
+          "value": "50_100",
+          "label": "50–100%"
+        },
+        {
+          "value": "above_100",
+          "label": "Above 100%"
+        }
+      ]
+    },
+    {
+      "name": "bias_band",
+      "tag": "SELECT",
+      "type": "select-one",
+      "disabled": false,
+      "options": [
+        {
+          "value": "",
+          "label": "All bands"
+        },
+        {
+          "value": "below_0",
+          "label": "Below 0%"
+        },
+        {
+          "value": "0_50",
+          "label": "0–50%"
+        },
+        {
+          "value": "above_50",
+          "label": "Above 50%"
+        }
+      ]
+    },
+    {
+      "name": "minimum_absolute_error_kl",
+      "tag": "INPUT",
+      "type": "number",
+      "disabled": false,
+      "options": []
+    },
+    {
+      "name": "top_n",
+      "tag": "SELECT",
+      "type": "select-one",
+      "disabled": false,
+      "options": [
+        {
+          "value": "",
+          "label": "All products"
+        },
+        {
+          "value": "10",
+          "label": "Top 10"
+        },
+        {
+          "value": "20",
+          "label": "Top 20"
+        },
+        {
+          "value": "50",
+          "label": "Top 50"
+        }
+      ]
+    },
+    {
+      "name": "top_n_metric",
+      "tag": "SELECT",
+      "type": "select-one",
+      "disabled": false,
+      "options": [
+        {
+          "value": "actual_volume",
+          "label": "Actual volume"
+        },
+        {
+          "value": "absolute_error",
+          "label": "Absolute error"
+        },
+        {
+          "value": "deterioration",
+          "label": "Deterioration"
+        }
+      ]
+    },
+    {
+      "name": "hierarchy_status",
+      "tag": "SELECT",
+      "type": "select-one",
+      "disabled": false,
+      "options": [
+        {
+          "value": "",
+          "label": "All statuses"
+        },
+        {
+          "value": "mapped",
+          "label": "Mapped"
+        },
+        {
+          "value": "unmapped",
+          "label": "Unmapped"
+        },
+        {
+          "value": "conflict",
+          "label": "Conflict"
+        }
+      ]
+    },
+    {
+      "name": "actual_status",
+      "tag": "SELECT",
+      "type": "select-one",
+      "disabled": false,
+      "options": [
+        {
+          "value": "",
+          "label": "All statuses"
+        },
+        {
+          "value": "matched_positive",
+          "label": "Positive actual"
+        },
+        {
+          "value": "matched_zero",
+          "label": "Zero actual"
+        },
+        {
+          "value": "missing",
+          "label": "Missing actual"
+        }
+      ]
+    },
+    {
+      "name": "pair_status",
+      "tag": "SELECT",
+      "type": "select-one",
+      "disabled": false,
+      "options": [
+        {
+          "value": "",
+          "label": "All statuses"
+        },
+        {
+          "value": "complete",
+          "label": "Complete"
+        },
+        {
+          "value": "missing_a",
+          "label": "Missing A"
+        },
+        {
+          "value": "missing_b",
+          "label": "Missing B"
+        },
+        {
+          "value": "missing_both",
+          "label": "Missing both"
+        },
+        {
+          "value": "missing_actual",
+          "label": "Missing actual"
+        },
+        {
+          "value": "zero_actual",
+          "label": "Zero actual"
+        }
+      ]
+    },
+    {
+      "name": "source_availability",
+      "tag": "SELECT",
+      "type": "select-one",
+      "disabled": false,
+      "options": [
+        {
+          "value": "",
+          "label": "All statuses"
+        },
+        {
+          "value": "tm_only",
+          "label": "TM only"
+        },
+        {
+          "value": "ml_only",
+          "label": "ML only"
+        },
+        {
+          "value": "both_sources",
+          "label": "Both sources"
+        }
+      ]
+    },
+    {
+      "name": "zero_forecast_only",
+      "tag": "INPUT",
+      "type": "checkbox",
+      "disabled": false,
+      "options": []
+    },
+    {
+      "name": "complete_vintage_history_only",
+      "tag": "INPUT",
+      "type": "checkbox",
+      "disabled": false,
+      "options": []
+    },
+    {
+      "name": "target_start",
+      "tag": "SELECT",
+      "type": "select-one",
+      "disabled": false,
+      "options": [
+        {
+          "value": "2025-05-01",
+          "label": "May 2025"
+        },
+        {
+          "value": "2025-06-01",
+          "label": "Jun 2025"
+        },
+        {
+          "value": "2025-07-01",
+          "label": "Jul 2025"
+        },
+        {
+          "value": "2025-08-01",
+          "label": "Aug 2025"
+        },
+        {
+          "value": "2025-09-01",
+          "label": "Sep 2025"
+        },
+        {
+          "value": "2025-10-01",
+          "label": "Oct 2025"
+        },
+        {
+          "value": "2025-11-01",
+          "label": "Nov 2025"
+        },
+        {
+          "value": "2025-12-01",
+          "label": "Dec 2025"
+        },
+        {
+          "value": "2026-01-01",
+          "label": "Jan 2026"
+        },
+        {
+          "value": "2026-02-01",
+          "label": "Feb 2026"
+        },
+        {
+          "value": "2026-03-01",
+          "label": "Mar 2026"
+        },
+        {
+          "value": "2026-04-01",
+          "label": "Apr 2026"
+        },
+        {
+          "value": "2026-05-01",
+          "label": "May 2026"
+        },
+        {
+          "value": "2026-06-01",
+          "label": "Jun 2026"
+        },
+        {
+          "value": "2026-07-01",
+          "label": "Jul 2026"
+        },
+        {
+          "value": "2026-08-01",
+          "label": "Aug 2026"
+        },
+        {
+          "value": "2026-09-01",
+          "label": "Sep 2026"
+        }
+      ]
+    },
+    {
+      "name": "target_end",
+      "tag": "SELECT",
+      "type": "select-one",
+      "disabled": false,
+      "options": [
+        {
+          "value": "2025-05-01",
+          "label": "May 2025"
+        },
+        {
+          "value": "2025-06-01",
+          "label": "Jun 2025"
+        },
+        {
+          "value": "2025-07-01",
+          "label": "Jul 2025"
+        },
+        {
+          "value": "2025-08-01",
+          "label": "Aug 2025"
+        },
+        {
+          "value": "2025-09-01",
+          "label": "Sep 2025"
+        },
+        {
+          "value": "2025-10-01",
+          "label": "Oct 2025"
+        },
+        {
+          "value": "2025-11-01",
+          "label": "Nov 2025"
+        },
+        {
+          "value": "2025-12-01",
+          "label": "Dec 2025"
+        },
+        {
+          "value": "2026-01-01",
+          "label": "Jan 2026"
+        },
+        {
+          "value": "2026-02-01",
+          "label": "Feb 2026"
+        },
+        {
+          "value": "2026-03-01",
+          "label": "Mar 2026"
+        },
+        {
+          "value": "2026-04-01",
+          "label": "Apr 2026"
+        },
+        {
+          "value": "2026-05-01",
+          "label": "May 2026"
+        },
+        {
+          "value": "2026-06-01",
+          "label": "Jun 2026"
+        },
+        {
+          "value": "2026-07-01",
+          "label": "Jul 2026"
+        },
+        {
+          "value": "2026-08-01",
+          "label": "Aug 2026"
+        },
+        {
+          "value": "2026-09-01",
+          "label": "Sep 2026"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "name": "desktop-expanded.png",
+      "label": "Desktop · expanded rail",
+      "sha256": "862b6b8660bbacbeace70b3cf5689cacb801da54cb2e518246b09230f6c7d5c9"
+    },
+    {
+      "name": "desktop-collapsed.png",
+      "label": "Desktop · collapsed rail",
+      "sha256": "8a41eda45fd1d55b6ef4fb9537babafa33d2ac01489bd3bd1e3318b5568a3b10"
+    },
+    {
+      "name": "narrow-collapsed.png",
+      "label": "Narrow · collapsed rail",
+      "sha256": "55e15e92eb50f39db9176bda71b0897759506bf3a5724c3a773159cbd241a00f"
+    },
+    {
+      "name": "narrow-expanded.png",
+      "label": "Narrow · responsive rail",
+      "sha256": "c95c42271466494d494715c70283c4394ebd894c184c0df51863dbfb0147ab98"
+    }
+  ],
+  "consoleErrors": [],
+  "pageErrors": [],
+  "networkFailures": [],
+  "httpErrors": []
+}

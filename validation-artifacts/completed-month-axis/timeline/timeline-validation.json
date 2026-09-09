@@ -1,0 +1,57 @@
+{
+  "generatedAt": "2026-09-06T06:25:52.039Z",
+  "screenshots": [
+    {
+      "name": "1280x720-filter-timeline.png",
+      "width": 1280,
+      "height": 720,
+      "geometry": {
+        "visible": true,
+        "timelineOverflow": 0,
+        "drawerOverflow": 0,
+        "buttonsVisible": true,
+        "clippedRight": false,
+        "clippedLeft": false
+      }
+    },
+    {
+      "name": "1920x1080-filter-timeline.png",
+      "width": 1920,
+      "height": 1080,
+      "geometry": {
+        "visible": true,
+        "timelineOverflow": 0,
+        "drawerOverflow": 0,
+        "buttonsVisible": true,
+        "clippedRight": false,
+        "clippedLeft": false
+      }
+    },
+    {
+      "name": "desktop-6m-selected.png",
+      "width": 1440,
+      "height": 900,
+      "state": "6M selected"
+    },
+    {
+      "name": "desktop-keyboard-focus.png",
+      "width": 1440,
+      "height": 900,
+      "state": "Keyboard focus visible"
+    },
+    {
+      "name": "desktop-quarter-selected.png",
+      "width": 1440,
+      "height": 900,
+      "state": "Quarter and 4Q selected"
+    },
+    {
+      "name": "desktop-custom-period.png",
+      "width": 1440,
+      "height": 900,
+      "state": "Exact fields synchronized with handles"
+    }
+  ],
+  "screenshotsOnly": false,
+  "browserErrors": []
+}

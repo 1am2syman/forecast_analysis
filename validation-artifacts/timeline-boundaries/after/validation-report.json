@@ -1,0 +1,378 @@
+{
+  "generatedAt": "2026-09-06T16:23:59.000Z",
+  "screenshots": [
+    {
+      "name": "default-1280x720.png",
+      "viewport": "1280x720",
+      "state": "default",
+      "geometry": {
+        "row": {
+          "left": 250,
+          "right": 1262,
+          "top": 114,
+          "bottom": 149,
+          "width": 1012,
+          "height": 35,
+          "overflow": 0,
+          "whiteSpace": "nowrap",
+          "gridTemplateRows": "27px"
+        },
+        "children": [
+          {
+            "left": 258,
+            "right": 443.65625,
+            "top": 118,
+            "bottom": 145,
+            "width": 185.65625,
+            "height": 27
+          },
+          {
+            "left": 450.65625,
+            "right": 586.609375,
+            "top": 118,
+            "bottom": 145,
+            "width": 135.953125,
+            "height": 27
+          },
+          {
+            "left": 593.609375,
+            "right": 883.71875,
+            "top": 118,
+            "bottom": 145,
+            "width": 290.109375,
+            "height": 27
+          },
+          {
+            "left": 890.71875,
+            "right": 1023.328125,
+            "top": 118,
+            "bottom": 145,
+            "width": 132.609375,
+            "height": 27
+          },
+          {
+            "left": 1030.328125,
+            "right": 1108.171875,
+            "top": 118,
+            "bottom": 145,
+            "width": 77.84375,
+            "height": 27
+          },
+          {
+            "left": 1115.171875,
+            "right": 1160.375,
+            "top": 118,
+            "bottom": 145,
+            "width": 45.203125,
+            "height": 27
+          },
+          {
+            "left": 1167.375,
+            "right": 1253.984375,
+            "top": 120.703125,
+            "bottom": 142.296875,
+            "width": 86.609375,
+            "height": 21.59375
+          }
+        ],
+        "sliderWidth": 136.171875,
+        "populationFacts": 0
+      },
+      "minimalSliderStyle": {
+        "trackHeight": "3px",
+        "trackBorderWidth": "0px",
+        "selectionHeight": "20px",
+        "selectionBackgroundSize": "100% 3px",
+        "inputExtensionLeft": 10,
+        "inputExtensionRight": 10
+      }
+    },
+    {
+      "name": "parent-open-1280x720.png",
+      "viewport": "1280x720",
+      "state": "parent menu open",
+      "menuGeometry": {
+        "left": 291.515625,
+        "right": 631.515625,
+        "top": 150,
+        "bottom": 481.1875,
+        "visible": true,
+        "withinViewport": true
+      }
+    },
+    {
+      "name": "parent-selected-1280x720.png",
+      "viewport": "1280x720",
+      "state": "parent selected"
+    },
+    {
+      "name": "brand-open-1280x720.png",
+      "viewport": "1280x720",
+      "state": "brand menu open",
+      "menuGeometry": {
+        "left": 479.59375,
+        "right": 819.59375,
+        "top": 150,
+        "bottom": 481.1875,
+        "visible": true,
+        "withinViewport": true
+      }
+    },
+    {
+      "name": "brand-selected-1280x720.png",
+      "viewport": "1280x720",
+      "state": "brand selected"
+    },
+    {
+      "name": "sku-class-open-1280x720.png",
+      "viewport": "1280x720",
+      "state": "sku-class menu open",
+      "menuGeometry": {
+        "left": 683.328125,
+        "right": 1023.328125,
+        "top": 150,
+        "bottom": 362.1875,
+        "visible": true,
+        "withinViewport": true
+      }
+    },
+    {
+      "name": "sku-class-selected-1280x720.png",
+      "viewport": "1280x720",
+      "state": "sku-class selected"
+    },
+    {
+      "name": "time-changed-1280x720.png",
+      "viewport": "1280x720",
+      "state": "time range changed",
+      "sliderState": {
+        "start": 1,
+        "end": 15,
+        "startText": "June 2025",
+        "endText": "August 2026",
+        "selectedWidth": 115.234375,
+        "presets": 0,
+        "visibleDateSelects": false
+      }
+    },
+    {
+      "name": "time-tight-1280x720.png",
+      "viewport": "1280x720",
+      "state": "single-month tight range",
+      "tightSliderState": {
+        "start": 15,
+        "end": 15,
+        "isTight": true,
+        "startTransform": "none",
+        "endTransform": "none"
+      }
+    },
+    {
+      "name": "drawer-open-1280x720.png",
+      "viewport": "1280x720",
+      "state": "advanced drawer open",
+      "drawerState": {
+        "visible": true,
+        "withinViewport": true,
+        "productGroupPresent": false,
+        "timelinePresent": false
+      }
+    },
+    {
+      "name": "default-1920x1080.png",
+      "viewport": "1920x1080",
+      "state": "default",
+      "geometry": {
+        "row": {
+          "left": 250,
+          "right": 1902,
+          "top": 117,
+          "bottom": 152,
+          "width": 1652,
+          "height": 35,
+          "overflow": 0,
+          "whiteSpace": "nowrap",
+          "gridTemplateRows": "27px"
+        },
+        "children": [
+          {
+            "left": 258,
+            "right": 603.3125,
+            "top": 121,
+            "bottom": 148,
+            "width": 345.3125,
+            "height": 27
+          },
+          {
+            "left": 610.3125,
+            "right": 863.125,
+            "top": 121,
+            "bottom": 148,
+            "width": 252.8125,
+            "height": 27
+          },
+          {
+            "left": 870.125,
+            "right": 1409.6875,
+            "top": 121,
+            "bottom": 148,
+            "width": 539.5625,
+            "height": 27
+          },
+          {
+            "left": 1416.6875,
+            "right": 1663.328125,
+            "top": 121,
+            "bottom": 148,
+            "width": 246.640625,
+            "height": 27
+          },
+          {
+            "left": 1670.328125,
+            "right": 1748.171875,
+            "top": 121,
+            "bottom": 148,
+            "width": 77.84375,
+            "height": 27
+          },
+          {
+            "left": 1755.171875,
+            "right": 1800.375,
+            "top": 121,
+            "bottom": 148,
+            "width": 45.203125,
+            "height": 27
+          },
+          {
+            "left": 1807.375,
+            "right": 1893.984375,
+            "top": 123.703125,
+            "bottom": 145.296875,
+            "width": 86.609375,
+            "height": 21.59375
+          }
+        ],
+        "sliderWidth": 385.625,
+        "populationFacts": 0
+      },
+      "minimalSliderStyle": {
+        "trackHeight": "3px",
+        "trackBorderWidth": "0px",
+        "selectionHeight": "20px",
+        "selectionBackgroundSize": "100% 3px",
+        "inputExtensionLeft": 10,
+        "inputExtensionRight": 10
+      }
+    },
+    {
+      "name": "parent-open-1920x1080.png",
+      "viewport": "1920x1080",
+      "state": "parent menu open",
+      "menuGeometry": {
+        "left": 291.515625,
+        "right": 631.515625,
+        "top": 153,
+        "bottom": 484.1875,
+        "visible": true,
+        "withinViewport": true
+      }
+    },
+    {
+      "name": "parent-selected-1920x1080.png",
+      "viewport": "1920x1080",
+      "state": "parent selected"
+    },
+    {
+      "name": "brand-open-1920x1080.png",
+      "viewport": "1920x1080",
+      "state": "brand menu open",
+      "menuGeometry": {
+        "left": 639.25,
+        "right": 979.25,
+        "top": 153,
+        "bottom": 484.1875,
+        "visible": true,
+        "withinViewport": true
+      }
+    },
+    {
+      "name": "brand-selected-1920x1080.png",
+      "viewport": "1920x1080",
+      "state": "brand selected"
+    },
+    {
+      "name": "sku-class-open-1920x1080.png",
+      "viewport": "1920x1080",
+      "state": "sku-class menu open",
+      "menuGeometry": {
+        "left": 1323.328125,
+        "right": 1663.328125,
+        "top": 153,
+        "bottom": 365.1875,
+        "visible": true,
+        "withinViewport": true
+      }
+    },
+    {
+      "name": "sku-class-selected-1920x1080.png",
+      "viewport": "1920x1080",
+      "state": "sku-class selected"
+    },
+    {
+      "name": "time-changed-1920x1080.png",
+      "viewport": "1920x1080",
+      "state": "time range changed",
+      "sliderState": {
+        "start": 1,
+        "end": 15,
+        "startText": "June 2025",
+        "endText": "August 2026",
+        "selectedWidth": 333.5,
+        "presets": 0,
+        "visibleDateSelects": false
+      }
+    },
+    {
+      "name": "time-tight-1920x1080.png",
+      "viewport": "1920x1080",
+      "state": "single-month tight range",
+      "tightSliderState": {
+        "start": 15,
+        "end": 15,
+        "isTight": true,
+        "startTransform": "none",
+        "endTransform": "none"
+      }
+    },
+    {
+      "name": "drawer-open-1920x1080.png",
+      "viewport": "1920x1080",
+      "state": "advanced drawer open",
+      "drawerState": {
+        "visible": true,
+        "withinViewport": true,
+        "productGroupPresent": false,
+        "timelinePresent": false
+      }
+    }
+  ],
+  "browserErrors": [],
+  "assertions": [
+    "The timeline track is a borderless 3px line.",
+    "The selected range is visually 3px while retaining a 20px drag target.",
+    "Each native range thumb uses a 2px by 14px vertical-line visual inside a 20px hit target.",
+    "The range inputs extend 10px past both sides so handle centers cover the track boundaries.",
+    "Overlapping handles enter the separated tight state.",
+    "The complete quick-filter bar remains one non-wrapping row."
+  ],
+  "judgments": {
+    "improved": [
+      "The time slider is visually lighter and no longer dominates the filter row.",
+      "Circular handles were replaced by restrained vertical-line handles.",
+      "The larger invisible interaction targets preserve drag usability.",
+      "The endpoint markers now cover the full track boundaries like the former circular handles."
+    ],
+    "regressed": [],
+    "outOfPlace": []
+  }
+}

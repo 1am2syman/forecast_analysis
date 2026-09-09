@@ -117,6 +117,89 @@ async function waitFor(page, expression, label) {
 }
 
 const requestKey = (ids) => JSON.stringify(ids);
+const REQUIRED_VIEWPORTS = [
+  { width: 1280, height: 720 },
+  { width: 1920, height: 1080 },
+];
+
+async function captureRequiredState(page, state) {
+  if (
+    !(await page.evaluate(`document.querySelector('.vintage-selector').hidden`))
+  ) {
+    await page.evaluate(
+      `document.querySelector('[data-vintage-selector-trigger][aria-expanded="true"]')?.click()`,
+    );
+  }
+  for (const viewport of REQUIRED_VIEWPORTS) {
+    await page.viewport(viewport.width, viewport.height);
+    await sleep(100);
+    await page.screenshot(
+      join(output, `${viewport.width}x${viewport.height}-${state}.png`),
+    );
+  }
+}
+
+async function captureSelectorOpen(page) {
+  for (const viewport of REQUIRED_VIEWPORTS) {
+    await page.viewport(viewport.width, viewport.height);
+    await sleep(100);
+    await page.screenshot(
+      join(output, `${viewport.width}x${viewport.height}-selector-open.png`),
+    );
+  }
+}
+
+async function captureAccuracyFullscreen(page, state) {
+  await page.evaluate(
+    `document.querySelector('[data-chart-fullscreen="accuracy"]').click()`,
+  );
+  await waitFor(
+    page,
+    `!document.querySelector('#overview-chart-dialog').hidden && document.querySelector('#overview-chart-dialog').dataset.chartKind === 'accuracy'`,
+    `accuracy full screen ${state}`,
+  );
+  for (const viewport of REQUIRED_VIEWPORTS) {
+    await page.viewport(viewport.width, viewport.height);
+    await sleep(100);
+    await page.screenshot(
+      join(
+        output,
+        `${viewport.width}x${viewport.height}-${state}-accuracy-fullscreen.png`,
+      ),
+    );
+  }
+  await page.evaluate(
+    `document.querySelector('[data-action="overview-fullscreen-close"]').click()`,
+  );
+}
+
+async function captureVolumeFullscreen(page, state, payload) {
+  await page.evaluate(
+    `document.querySelector('[data-chart-fullscreen="volume"]').click()`,
+  );
+  await waitFor(
+    page,
+    `!document.querySelector('#overview-chart-dialog').hidden && document.querySelector('#overview-chart-dialog').dataset.chartKind === 'volume'`,
+    `volume full screen ${state}`,
+  );
+  verifyOverviewVolumeSync(
+    await inspectOverviewVolume(page, ".chart-dialog__body"),
+    payload,
+  );
+  for (const viewport of REQUIRED_VIEWPORTS) {
+    await page.viewport(viewport.width, viewport.height);
+    await sleep(100);
+    await page.screenshot(
+      join(
+        output,
+        `${viewport.width}x${viewport.height}-${state}-volume-fullscreen.png`,
+      ),
+    );
+  }
+  await page.evaluate(
+    `document.querySelector('[data-action="overview-fullscreen-close"]').click()`,
+  );
+}
 
 async function selectVintageIds(page, ids) {
   const before = await page.evaluate(
@@ -163,6 +246,152 @@ async function selectVintageIds(page, ids) {
     })()`,
     `selection ${requestKey(ids)}`,
   );
+}
+
+async function verifyOverviewKpiPrimary(page, response, expectedId) {
+  const overview = response?.payload?.accuracy_vintages?.overview;
+  assert(
+    overview?.primary?.id === expectedId,
+    `overview primary ${overview?.primary?.id} !== ${expectedId}`,
+  );
+  const cards = await page.evaluate(
+    `(() => Object.fromEntries([...document.querySelectorAll('[data-kpis] .kpi')].map((card) => { const label = card.querySelector('.kpi__label-long') || card.querySelector('.kpi__label'); const caption = card.querySelector('.kpi__cap') || card.querySelector('.sr-only'); return [label?.textContent.trim(), {value:card.querySelector('.kpi__val')?.textContent.trim(),caption:caption?.textContent.trim()}]; })))()`,
+  );
+  const pctText = (value) =>
+    value === null || value === undefined
+      ? "—"
+      : `${Number(value).toFixed(1)}%`;
+  assert(
+    cards["Forecast accuracy"]?.value ===
+      pctText(overview.metrics.forecast_accuracy_pct),
+    "forecast accuracy card does not match cohort payload",
+  );
+  assert(
+    cards.Bias?.value === pctText(overview.metrics.bias_pct),
+    `bias card ${cards.Bias?.value} does not match cohort payload ${pctText(overview.metrics.bias_pct)}`,
+  );
+  assert(
+    cards.WAPE?.value === pctText(overview.metrics.wape_pct),
+    "WAPE card does not match cohort payload",
+  );
+  const revisionEffectiveness =
+    cards["Revision effectiveness"] || cards["Revision eff."];
+  assert(
+    revisionEffectiveness?.value ===
+      pctText(overview.metrics.revision_effectiveness_pct),
+    "revision effectiveness card does not match cohort payload",
+  );
+  let primaryShortLabel = `M−${overview.primary.rule.value}`;
+  if (overview.primary.rule.kind === "oldest_available")
+    primaryShortLabel = "M−5";
+  if (overview.primary.rule.kind === "latest_available")
+    primaryShortLabel = "M−1";
+  const labelledCaptions = [
+    cards["Forecast accuracy"]?.caption,
+    cards.Bias?.caption,
+    cards.WAPE?.caption,
+    revisionEffectiveness?.caption,
+    cards["Error accumulated"]?.caption,
+  ];
+  assert(
+    labelledCaptions.every((caption) => caption?.includes(primaryShortLabel)),
+    `KPI captions do not identify ${primaryShortLabel}`,
+  );
+  return { primary: overview.primary, metrics: overview.metrics, cards };
+}
+
+async function inspectOverviewVolume(
+  page,
+  root = "[data-overview-volume-chart]",
+) {
+  return page.evaluate(`(() => {
+    const root = document.querySelector(${JSON.stringify(root)});
+    return {
+      forecasts: [...root.querySelectorAll('path[data-volume-role="forecast"]')].map((path) => ({
+        id: path.dataset.vintageId,
+        values: JSON.parse(path.dataset.volumeValues || '[]'),
+      })),
+      actualValues: JSON.parse(root.querySelector('path[data-volume-role="actual"]')?.dataset.volumeValues || '[]'),
+    };
+  })()`);
+}
+
+function verifyOverviewVolumeSync(chart, payload) {
+  const vintages = payload?.accuracy_vintages;
+  const primaryId = vintages?.overview?.primary?.id;
+  const expectedSeries = [
+    ...(vintages?.options || []),
+    vintages?.latest,
+  ].filter(Boolean);
+  const expectedIds = [
+    ...(vintages?.options || []).filter((series) => series.selected),
+    vintages?.latest,
+  ]
+    .filter(Boolean)
+    .map((series) => series.id);
+  assert(
+    JSON.stringify(chart.forecasts.map((series) => series.id)) ===
+      JSON.stringify(expectedIds),
+    `overview volume vintages ${JSON.stringify(chart.forecasts)} !== ${JSON.stringify(expectedIds)}`,
+  );
+  for (const rendered of chart.forecasts) {
+    const expected = expectedSeries.find((series) => series.id === rendered.id);
+    const applicableRows = expected.rows.filter(
+      (row) => row.eligible_parents > 0,
+    );
+    assert(
+      JSON.stringify(rendered.values) ===
+        JSON.stringify(applicableRows.map((row) => row.forecast_kl)),
+      `overview volume values do not match ${rendered.id}`,
+    );
+  }
+  const primary = expectedSeries.find((series) => series.id === primaryId);
+  const applicablePrimaryRows = primary.rows.filter(
+    (row) => row.eligible_parents > 0,
+  );
+  assert(
+    JSON.stringify(chart.actualValues) ===
+      JSON.stringify(
+        applicablePrimaryRows.map((row) => row.actual_denominator_kl),
+      ),
+    "overview volume actuals do not use the primary common cohort",
+  );
+}
+
+async function verifyOverviewApplicableMonths(
+  page,
+  payload,
+  requireHidden = false,
+) {
+  const vintages = payload?.accuracy_vintages;
+  const primaryId = vintages?.overview?.primary?.id;
+  const primary = [...(vintages?.options || []), vintages?.latest].find(
+    (series) => series?.id === primaryId,
+  );
+  const applicable = (primary?.rows || []).filter(
+    (row) => row.eligible_parents > 0,
+  );
+  const rendered = await page.evaluate(`(() => ({
+    accuracyLabels: document.querySelectorAll('[data-overview-chart] .chart__labels > text').length,
+    accuracyHits: document.querySelectorAll('[data-overview-chart] .chart__month-hit').length,
+    volumeLabels: document.querySelectorAll('[data-overview-volume-chart] .chart__labels > text').length,
+    volumeHits: document.querySelectorAll('[data-overview-volume-chart] .chart__month-hit').length,
+  }))()`);
+  assert(
+    [
+      rendered.accuracyLabels,
+      rendered.accuracyHits,
+      rendered.volumeLabels,
+      rendered.volumeHits,
+    ].every((count) => count === applicable.length),
+    `overview axes do not match ${applicable.length} applicable months: ${JSON.stringify(rendered)}`,
+  );
+  if (requireHidden)
+    assert(
+      applicable.length < (primary?.rows || []).length,
+      "selected vintage did not exercise an unavailable axis month",
+    );
+  return { applicable: applicable.length, total: primary?.rows?.length || 0 };
 }
 
 function verifyCommonCohort(payload) {
@@ -295,6 +524,11 @@ async function main() {
       `default request is not oldest-only selection: ${JSON.stringify(initialResponse.request)}`,
     );
     const initialCohort = verifyCommonCohort(initialResponse.payload);
+    const initialKpis = await verifyOverviewKpiPrimary(
+      page,
+      initialResponse,
+      "oldest_available",
+    );
     const initialMetrics = JSON.stringify(initialResponse.payload.metrics);
 
     const inspect = () =>
@@ -315,6 +549,8 @@ async function main() {
     })()`);
 
     const initial = await inspect();
+    const initialVolume = await inspectOverviewVolume(page);
+    verifyOverviewVolumeSync(initialVolume, initialResponse.payload);
     assert(initial.fixed === 1, "latest series is not fixed and unique");
     assert(
       initial.lineIds.includes("oldest_available") &&
@@ -329,6 +565,8 @@ async function main() {
         initial.pathsContained,
       "selector or chart geometry is invalid",
     );
+    await captureRequiredState(page, "default");
+    await captureVolumeFullscreen(page, "default", initialResponse.payload);
 
     await page.evaluate(
       `document.querySelector('[data-vintage-selector-trigger]').click()`,
@@ -354,6 +592,7 @@ async function main() {
     );
     assert(menu.overflow <= 0, "selector popover overflows viewport");
     await page.screenshot(join(output, "desktop-open.png"));
+    await captureSelectorOpen(page);
 
     const extraVintageIds = menu.options
       .slice(1, 3)
@@ -365,6 +604,15 @@ async function main() {
       `window.__vintageValidation.compactResponses.at(-1)`,
     );
     const multiCohort = verifyCommonCohort(multiResponse.payload);
+    const multiKpis = await verifyOverviewKpiPrimary(
+      page,
+      multiResponse,
+      "oldest_available",
+    );
+    verifyOverviewVolumeSync(
+      await inspectOverviewVolume(page),
+      multiResponse.payload,
+    );
     assert(
       JSON.stringify(multiResponse.payload.metrics) === initialMetrics,
       "chart-local vintage selection changed global KPI metrics",
@@ -405,8 +653,26 @@ async function main() {
       "tooltip dismissed before screenshot",
     );
     await page.screenshot(join(output, "desktop-multi.png"));
+    await captureRequiredState(page, "multiple-with-oldest");
+    await captureVolumeFullscreen(
+      page,
+      "multiple-with-oldest",
+      multiResponse.payload,
+    );
 
     await selectVintageIds(page, extraVintageIds);
+    const replacedResponse = await page.evaluate(
+      `window.__vintageValidation.compactResponses.at(-1)`,
+    );
+    const replacedKpis = await verifyOverviewKpiPrimary(
+      page,
+      replacedResponse,
+      extraVintageIds[0],
+    );
+    verifyOverviewVolumeSync(
+      await inspectOverviewVolume(page),
+      replacedResponse.payload,
+    );
     const replaced = await inspect();
     assert(
       replaced.fixed === 1 &&
@@ -414,19 +680,64 @@ async function main() {
         replaced.count === "2",
       "oldest could not be deselected while retaining latest",
     );
+    await captureRequiredState(page, "multiple-promoted-oldest");
+    await captureVolumeFullscreen(
+      page,
+      "multiple-promoted-oldest",
+      replacedResponse.payload,
+    );
 
     await selectVintageIds(page, [extraVintageIds[1]]);
+    const singleResponse = await page.evaluate(
+      `window.__vintageValidation.compactResponses.at(-1)`,
+    );
+    const singleKpis = await verifyOverviewKpiPrimary(
+      page,
+      singleResponse,
+      extraVintageIds[1],
+    );
+    const singleApplicableMonths = await verifyOverviewApplicableMonths(
+      page,
+      singleResponse.payload,
+      true,
+    );
+    verifyOverviewVolumeSync(
+      await inspectOverviewVolume(page),
+      singleResponse.payload,
+    );
+    await captureRequiredState(page, "single-specific");
+    await captureAccuracyFullscreen(page, "single-specific");
+    await captureVolumeFullscreen(
+      page,
+      "single-specific",
+      singleResponse.payload,
+    );
     await selectVintageIds(page, []);
     const latestOnlyResponse = await page.evaluate(
       `window.__vintageValidation.compactResponses.at(-1)`,
     );
     const latestOnlyCohort = verifyCommonCohort(latestOnlyResponse.payload);
+    const latestOnlyKpis = await verifyOverviewKpiPrimary(
+      page,
+      latestOnlyResponse,
+      "latest_available",
+    );
+    verifyOverviewVolumeSync(
+      await inspectOverviewVolume(page),
+      latestOnlyResponse.payload,
+    );
     const latestOnly = await inspect();
     assert(
       latestOnly.fixed === 1 &&
         latestOnly.lineIds.length === 1 &&
         latestOnly.count === "0",
       "latest-only state failed",
+    );
+    await captureRequiredState(page, "latest-only");
+    await captureVolumeFullscreen(
+      page,
+      "latest-only",
+      latestOnlyResponse.payload,
     );
 
     await page.evaluate(
@@ -501,7 +812,7 @@ async function main() {
     assert(page.errors.length === 0, `page errors: ${page.errors.join(" | ")}`);
     writeFileSync(
       join(output, "validation-report.json"),
-      `${JSON.stringify({ initial, initialCohort, menu, multi, multiCohort, hit, replaced, latestOnly, latestOnlyCohort, fullscreen, fullscreenMenu }, null, 2)}\n`,
+      `${JSON.stringify({ initial, initialCohort, initialKpis, menu, multi, multiCohort, multiKpis, hit, replaced, replacedKpis, singleKpis, singleApplicableMonths, latestOnly, latestOnlyCohort, latestOnlyKpis, fullscreen, fullscreenMenu }, null, 2)}\n`,
     );
     process.stdout.write("VINTAGE SELECTOR VALIDATION PASSED\n");
   } finally {

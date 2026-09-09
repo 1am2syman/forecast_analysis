@@ -310,6 +310,8 @@ class CanonicalPopulationTests(unittest.TestCase):
         )
 
         self.assertEqual(dataset.frame.columns, ANALYSIS_DATASET_COLUMNS)
+        self.assertEqual(dataset.actual_history.columns, ACTUAL_COLUMNS)
+        self.assertEqual(dataset.actual_history.to_dicts(), actuals.to_dicts())
         self.assertEqual(dataset.frame.height, 4)
         self.assertEqual(set(dataset.frame["source"].to_list()), {"tm", "ml"})
         self.assertEqual(
@@ -389,10 +391,15 @@ class CurrentConsolidatedArtifactTests(unittest.TestCase):
 
         self.assertEqual(dataset.frame.height, inputs.forecast_history.height)
         self.assertEqual(dataset.frame.height, 16_035)
-        self.assertEqual(inputs.actuals.height, 2_222)
+        self.assertEqual(inputs.actuals.height, 2_269)
         self.assertIsNotNone(inputs.actual_history)
         assert inputs.actual_history is not None
         self.assertGreater(inputs.actual_history.height, inputs.actuals.height)
+        self.assertEqual(dataset.actual_history.height, inputs.actual_history.height)
+        self.assertEqual(
+            dataset.actual_history.get_column("snop_month").min(),
+            inputs.actual_history.get_column("snop_month").min(),
+        )
         self.assertEqual(dataset.frame["sku_class"].null_count(), 0)
         self.assertEqual(dataset.diagnostics.height, 18)
         self.assertEqual(set(dataset.frame["source"].unique().to_list()), {"ml", "tm"})

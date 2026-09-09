@@ -60,6 +60,9 @@ The dashboard must:
 | Comparable pair | Two selected vintages for the same source, parent product, and target month. |
 | Forecast accuracy | Volume-weighted accuracy derived from absolute error and actual volume. |
 | Bias | Signed forecast error relative to actual volume. |
+| FY (financial year) | The operating year starts in April and ends in March; the FY label uses the starting calendar year. April 2027 through March 2028 is FY27, and April 2028 starts FY28. |
+| FY overlay | History-chart view with month positions Apr through Mar and one selectable series per FY. |
+| Long horizon | History-chart view with all available months in chronological order, preserving FY boundaries as separators. |
 
 ## 4. Architectural decisions
 
@@ -323,7 +326,7 @@ Revision metrics must use only `complete` pairs. Coverage views must include eve
 
 ## 8. Vintage-selection rules
 
-Each selected source has independent Vintage A and Vintage B controls.
+The browser dashboard uses fixed global Vintage A/B defaults rather than exposing Vintage A/B controls in the shared filter workbench. The adapter retains the supported rule contract for internal and API callers.
 
 Supported rules:
 
@@ -560,18 +563,17 @@ Actual-volume coverage % =
 
 Filters must update KPI cards, charts, tables, coverage counts, and downloads from one shared filtered population.
 
-### 10.1 Primary filters
+### 10.1 Primary and product filters
 
-| Filter | Control | Default |
-| --- | --- | --- |
-| Forecast source | Multi-select: TM, ML | TM |
-| Target month | Date range | Full matched range |
-| Brand | Multi-select | All mapped brands plus quality groups |
-| Parent product | Searchable multi-select by code and description | All |
-| Forecast horizon | Multi-select populated from selected sources | All available |
-| Vintage A | Rule selector with conditional value control | Oldest available |
-| Vintage B | Rule selector with conditional value control | Latest available |
-| Minimum actual volume | Numeric input | `0 KL` |
+| Group | Filter | Control | Default |
+| --- | --- | --- | --- |
+| Primary scope | Forecast source | Single source or aligned TM-versus-ML mode | ML |
+| Primary scope | Target month | Date range | Full matched range |
+| Product | Brand | Searchable faceted multi-select with minor-typo tolerance | All available brands |
+| Product | SKU class | Searchable faceted multi-select | All classes |
+| Product | Parent product | Searchable faceted multi-select by partial code or description | All products |
+
+An empty Product selection means all values. Selections use OR within a field and AND across fields. Each Product field is faceted by the other two fields within the selected source/mode. Incompatible Parent products are omitted; incompatible Brand and SKU Class values remain visible but disabled. Source/mode changes retain valid selections, remove unavailable selections, and announce removed counts by field. Direct adapter requests with mutually incompatible Product selections fail with a field-specific validation error.
 
 ### 10.2 Performance filters
 
@@ -742,7 +744,17 @@ Selecting a parent product opens or updates a detail section containing:
 - actual-volume reference line;
 - forecast horizon labels;
 - consecutive revision table;
-- source-specific error and bias.
+- source-specific error and bias;
+- an actual-plus-forward-forecast History chart.
+
+The History chart has two explicit layouts:
+
+- **FY overlay (default):** the horizontal axis is Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec, Jan, Feb, Mar. Each visible FY is a separate selectable line color. Actual segments are solid and forward-forecast segments are dashed. FY controls support toggle, double-click isolate, and Reset.
+- **Long horizon:** all real months are plotted in chronological order. The chart retains missing months as gaps, uses an FY separator at each April boundary, and keeps the actual-through boundary distinct from FY boundaries. The source’s latest coherent forecast run supplies the forward forecast.
+
+FY labels always use the starting calendar year: April 2027–March 2028 is FY27; April 2028–March 2029 is FY28. The chart must not relabel these periods by their ending year.
+
+Both layouts use the dashboard’s persistent month-wide tooltip interaction: every populated month has a transparent, keyboard-focusable hit band spanning the plot height; pointer hover and keyboard focus show the shared fixed chart tooltip with the month, source, FY, actual/forecast values, and forecast-run provenance. Missing months do not receive synthetic observations or tooltip rows.
 
 ### 11.9 Exceptions table
 
@@ -984,7 +996,7 @@ Forecast accuracy, bias, absolute error, revision amount, error improvement, rev
 
 ### AC7 — Required filters
 
-The dashboard provides source, target month, brand, parent product, horizon, Vintage A, Vintage B, minimum actual volume, revision direction, revision outcome, and data-quality filters.
+The dashboard provides source, target month, searchable multi-select brand, SKU class, and parent product filters, revision direction, revision outcome, performance filters, and data-quality filters. Global Vintage A/B, forecast-horizon, and minimum-actual controls are not shown in the shared filter workbench.
 
 ### AC8 — Required views
 
@@ -1047,14 +1059,12 @@ Completion criterion: all acceptance criteria pass.
 On first load:
 
 ```text
-Source: TM
+Source: ML
 Target months: full matched range
 Brands: all
+SKU classes: all
 Products: all
-Forecast horizons: all available
-Vintage A: oldest available
-Vintage B: latest available
-Minimum actual volume: 0 KL
+Vintage A/B analysis defaults: oldest available → latest available
 Revision filters: all
 Data-quality population: metric-eligible rows, with exclusions summarized
 ```

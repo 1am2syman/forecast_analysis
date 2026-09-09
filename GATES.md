@@ -1,40 +1,29 @@
-# Gates: implement forecast history review fixes
+# Gates: Overview explainer overlays
 
-OWNS: forecast_history_pipeline.py, forecast_history_etl.py, scripts/**, tests/**, artifacts/forecast_history/consolidated/forecast_history_waterfall.csv
+OWNS: dashboard/app.js, dashboard/index.html, dashboard/styles.css, tests/test_forecast_analysis_dashboard_ui.py, validation-artifacts/overview-explainers/**
 
-Scope: enforce source-family invariants, preserve atomic-output permissions, expose validation status, and verify TM oracle blob provenance with adversarial tests.
+Scope: Replace Overview KPI help popovers and add chart question controls with eight intuitive, no-scroll, full-canvas explainers matching or exceeding the Comparison overlays.
 
-- [x] G1: focused tests cover every review finding and their failure modes
-  CHECK: uv run python -m unittest discover -s tests -p 'test_*.py' && echo 'FORECAST HISTORY REVIEW TESTS PASSED'
-  EXPECT: FORECAST HISTORY REVIEW TESTS PASSED
-  EVIDENCE: exit=0; shell=/bin/sh; cwd=/root/GitHub/forecast_analysis; path=cda89a5385a8/24 entries; output=Ran 36 tests in 1.429s | OK
+- [x] G1: All six Overview KPI cards and both Overview charts expose dialog question-mark triggers, including both chart fullscreen states
+  CHECK: python -m unittest tests.test_forecast_analysis_dashboard_ui.DashboardUiSourceContractTests
+  EXPECT: OK
+  EVIDENCE: met — DashboardUiSourceContractTests OK; test_overview_kpis_and_charts_use_full_canvas_explainers covers all 8 guide keys, dialog id, open/close actions, fullscreen title wiring
 
-- [x] G2: the current source snapshot still matches the immutable TM oracle and regression manifest
-  CHECK: uv run python scripts/verify_forecast_history_output.py --current-input-regression
-  EXPECT: FORECAST HISTORY CURRENT REGRESSION VERIFIED
-  EVIDENCE: exit=0; shell=/bin/sh; cwd=/root/GitHub/forecast_analysis; path=cda89a5385a8/24 entries; output=FORECAST HISTORY CURRENT REGRESSION VERIFIED | Could not determine dtype for column 14, falling back to string
+- [x] G2: JavaScript syntax and dashboard UI regression tests pass
+  CHECK: node --check dashboard/app.js && python -m unittest tests.test_forecast_analysis_dashboard_ui.DashboardUiOverflowTests
+  EXPECT: OK
+  EVIDENCE: met — node --check clean; 30 tests OK
 
-- [x] G3: the generated artifact satisfies the consolidated six-column contract and both-source requirement
-  CHECK: uv run python scripts/verify_forecast_history_output.py --output artifacts/forecast_history/consolidated/forecast_history_waterfall.csv && echo 'FORECAST HISTORY OUTPUT CONTRACT PASSED'
-  EXPECT: FORECAST HISTORY OUTPUT CONTRACT PASSED
-  EVIDENCE: exit=0; shell=/bin/sh; cwd=/root/GitHub/forecast_analysis; path=cda89a5385a8/24 entries; output=FORECAST HISTORY OUTPUT VERIFIED rows=16035 columns=6 | FORECAST HISTORY OUTPUT CONTRACT PASSED
+- [x] G3: Browser assertions confirm every Overview explainer opens, fits within 90% of the viewport, has no internal/document scroll, closes with Escape, and restores focus at 1280x720 and 1920x1080
+  EVIDENCE: met — eval assertions: panel 1152x648 = 90% of 1280x720; panel/body/section/doc scrollHeight==clientHeight all true; Escape closes dialog, restores focus to trigger, body scroll-lock class removed; fullscreen variants verified at both viewports
 
-- [x] G4: safe generation validates and atomically publishes the current deterministic output
-  CHECK: uv run python scripts/generate_forecast_history_output.py && echo 'SAFE FORECAST HISTORY GENERATION PASSED'
-  EXPECT: SAFE FORECAST HISTORY GENERATION PASSED
-  EVIDENCE: exit=0; shell=/bin/sh; cwd=/root/GitHub/forecast_analysis; path=cda89a5385a8/24 entries; output=SAFE FORECAST HISTORY GENERATION PASSED | Could not determine dtype for column 14, falling back to string
+- [x] G4: A complete two-viewport screenshot matrix exists for the Overview trigger state, six KPI overlays, two chart overlays, and both chart fullscreen overlay variants
+  EVIDENCE: met — 22 PNGs in validation-artifacts/overview-explainers/ (11 states x 2 viewports), all verified at exact 1280x720 / 1920x1080 dimensions, recaptured after the validator-driven fix pass
 
-- [x] G5: all touched Python modules compile and the Marimo report validates
-  CHECK: uv run python -m py_compile forecast_history_pipeline.py forecast_history_etl.py scripts/generate_forecast_history_output.py scripts/verify_forecast_history_output.py tests/test_forecast_history_etl.py && uv run marimo check forecast_history_etl.py && echo 'FORECAST HISTORY PYTHON AND MARIMO CHECKS PASSED'
-  EXPECT: FORECAST HISTORY PYTHON AND MARIMO CHECKS PASSED
-  EVIDENCE: exit=0; shell=/bin/sh; cwd=/root/GitHub/forecast_analysis; path=cda89a5385a8/24 entries; output=FORECAST HISTORY PYTHON AND MARIMO CHECKS PASSED
+- [x] G5: Independent SOL-medium subagent assessments find every explainer naturally understandable for planners, visually intuitive, and at least equal in quality to the Comparison overlays, with no unresolved regression or out-of-place finding
+  EVIDENCE: met — four max-effort glm-5.3-flash validators: all 8 overlays PASS WITH NOTES (fullscreen variants PASS), planner-understandability 8/10 across the board, no FAIL verdicts; every ranked defect from the first review round was fixed and the full matrix recaptured (bar-truth errors, missing band tints, clipped/strikethrough SVG labels, label wraps, jargon, cross-tab pointer, dot legend, whisker caps, SVG text size)
 
-- [x] G6: changed files contain no whitespace errors
-  CHECK: git diff --check && echo 'FORECAST HISTORY DIFF CHECK PASSED'
-  EXPECT: FORECAST HISTORY DIFF CHECK PASSED
-  EVIDENCE: exit=0; shell=/bin/sh; cwd=/root/GitHub/forecast_analysis; path=cda89a5385a8/24 entries; output=FORECAST HISTORY DIFF CHECK PASSED
-
-- [x] G7: the final output retains the documented default permissions
-  CHECK: mode=$(stat -c '%a' artifacts/forecast_history/consolidated/forecast_history_waterfall.csv) && test "$mode" = 644 && echo 'FORECAST HISTORY OUTPUT MODE PASSED'
-  EXPECT: FORECAST HISTORY OUTPUT MODE PASSED
-  EVIDENCE: exit=0; shell=/bin/sh; cwd=/root/GitHub/forecast_analysis; path=cda89a5385a8/24 entries; output=FORECAST HISTORY OUTPUT MODE PASSED
+- [x] G6: Edited files have no blocking diagnostics or whitespace errors
+  CHECK: git diff --check -- dashboard/app.js dashboard/index.html dashboard/styles.css tests/test_forecast_analysis_dashboard_ui.py && echo diff-check-passed
+  EXPECT: diff-check-passed
+  EVIDENCE: met — diff-check-passed; pi-lens delta: no issues

@@ -335,7 +335,7 @@ async function overviewAudit(page, viewport) {
     `${viewport.name}: data details should default closed`,
   );
   assert(
-    audit.kpiLabels.length === 6 && audit.kpiVisible,
+    audit.kpiLabels.length === 7 && audit.kpiVisible,
     `${viewport.name}: all six KPI cards must remain visible`,
   );
   assert(
@@ -443,7 +443,7 @@ async function main() {
     await page.send("Page.navigate", { url: `${baseUrl}#overview` });
     await waitFor(
       page,
-      `document.querySelector('[data-status]')?.textContent.includes('canonical dataset ready') && document.querySelectorAll('[data-kpis] .kpi').length === 6 && !document.querySelector('.loading')?.classList.contains('is-visible')`,
+      `document.querySelector('[data-status]')?.textContent.includes('canonical dataset ready') && document.querySelectorAll('[data-kpis] .kpi').length === 7 && !document.querySelector('.loading')?.classList.contains('is-visible')`,
       "canonical dashboard bootstrap",
       75_000,
     );
@@ -496,7 +496,7 @@ async function main() {
       ),
       "Pane labels do not match tabs",
     );
-    assert(semantic.kpis === 6, "Expected six canonical KPI cards");
+    assert(semantic.kpis === 7, "Expected seven canonical KPI cards");
     assert(
       semantic.liveChip === "Live data" && !semantic.syntheticText,
       "Dashboard must clearly render real rather than synthetic data",

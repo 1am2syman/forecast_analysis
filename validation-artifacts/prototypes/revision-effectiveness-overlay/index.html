@@ -1,0 +1,1660 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PROTOTYPE — Revision effectiveness evolution</title>
+    <style>
+      /*
+       * THROWAWAY PROTOTYPE — not production code.
+       * Question: Can five vintage positions per target month make revision
+       * effectiveness evolution legible while preserving a detailed overlay?
+       */
+      @font-face {
+        font-family: "Chakra Petch";
+        src: url("fonts/chakra-petch-600.ttf") format("truetype");
+        font-weight: 600;
+      }
+      @font-face {
+        font-family: "IBM Plex Mono";
+        src: url("fonts/ibm-plex-mono-400.ttf") format("truetype");
+        font-weight: 400;
+      }
+      @font-face {
+        font-family: "IBM Plex Mono";
+        src: url("fonts/ibm-plex-mono-600.ttf") format("truetype");
+        font-weight: 600;
+      }
+      @font-face {
+        font-family: "IBM Plex Sans";
+        src: url("fonts/ibm-plex-sans-400.ttf") format("truetype");
+        font-weight: 400;
+      }
+      @font-face {
+        font-family: "IBM Plex Sans";
+        src: url("fonts/ibm-plex-sans-600.ttf") format("truetype");
+        font-weight: 600;
+      }
+
+      :root {
+        color-scheme: light;
+        --bg: #edf3f1;
+        --bg-2: #f4f7f6;
+        --panel: #ffffff;
+        --panel-2: #eef3f1;
+        --panel-3: #e4f2ef;
+        --hairline: #c8d5d1;
+        --hairline-soft: #dbe4e1;
+        --teal: #087f75;
+        --teal-dark: #076d62;
+        --teal-dim: #69aaa3;
+        --teal-pale: #d9ece8;
+        --amber: #9a5e00;
+        --amber-pale: #f3e6ce;
+        --red: #b63b35;
+        --red-pale: #f4dfdd;
+        --blue: #2e79a5;
+        --text: #172421;
+        --muted: #536762;
+        --faint: #5d6f6a;
+        --display: "Chakra Petch", system-ui, sans-serif;
+        --body: "IBM Plex Sans", system-ui, sans-serif;
+        --mono: "IBM Plex Mono", ui-monospace, monospace;
+        --shadow:
+          0 28px 80px rgba(15, 34, 29, 0.22), 0 2px 10px rgba(15, 34, 29, 0.08);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+      }
+      body {
+        min-width: 720px;
+        color: var(--text);
+        background:
+          radial-gradient(
+            900px 460px at 84% -12%,
+            rgba(8, 127, 117, 0.08),
+            transparent 62%
+          ),
+          repeating-linear-gradient(
+            0deg,
+            rgba(23, 36, 33, 0.022) 0 1px,
+            transparent 1px 34px
+          ),
+          repeating-linear-gradient(
+            90deg,
+            rgba(23, 36, 33, 0.022) 0 1px,
+            transparent 1px 34px
+          ),
+          var(--bg-2);
+        font: 14px/1.45 var(--body);
+        -webkit-font-smoothing: antialiased;
+      }
+      button {
+        font: inherit;
+      }
+      button:focus-visible,
+      .vintage-point:focus-visible {
+        outline: 2px solid var(--teal);
+        outline-offset: 3px;
+      }
+      [hidden] {
+        display: none !important;
+      }
+
+      .app {
+        display: grid;
+        grid-template-rows: 56px minmax(0, 1fr) 30px;
+        height: 100vh;
+      }
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 0 16px;
+        background: var(--panel);
+        border-bottom: 1px solid var(--hairline);
+      }
+      .topbar__group {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        min-width: 0;
+      }
+      .lamp {
+        width: 7px;
+        height: 7px;
+        flex: none;
+        border-radius: 50%;
+        background: var(--teal);
+        box-shadow: 0 0 8px rgba(8, 127, 117, 0.24);
+      }
+      .topbar h1 {
+        margin: 0;
+        font: 600 19px/1 var(--display);
+        white-space: nowrap;
+      }
+      .context {
+        padding-left: 11px;
+        color: var(--faint);
+        border-left: 1px solid var(--hairline);
+        font: 10px/1.4 var(--mono);
+        letter-spacing: 0.05em;
+        white-space: nowrap;
+      }
+      .chip,
+      .button {
+        min-height: 29px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 10px;
+        color: var(--muted);
+        background: var(--panel-2);
+        border: 1px solid var(--hairline);
+        border-radius: 4px;
+        font: 600 10px/1 var(--mono);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+      .chip {
+        color: var(--teal-dark);
+        background: var(--panel-3);
+        border-color: #a8cec7;
+      }
+      .button {
+        cursor: pointer;
+      }
+
+      .body {
+        display: grid;
+        grid-template-columns: 232px minmax(0, 1fr);
+        min-height: 0;
+      }
+      .rail {
+        padding: 18px 10px;
+        overflow: hidden;
+        background: rgba(255, 255, 255, 0.86);
+        border-right: 1px solid var(--hairline);
+      }
+      .rail__label {
+        margin: 4px 8px 12px;
+        color: var(--faint);
+        font: 9px/1 var(--mono);
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+      .nav-item {
+        display: grid;
+        grid-template-columns: 10px 1fr;
+        gap: 8px;
+        align-items: center;
+        min-height: 50px;
+        padding: 8px 12px;
+        color: var(--muted);
+        border: 1px solid transparent;
+        border-radius: 7px;
+      }
+      .nav-item.is-active {
+        color: var(--text);
+        background: #e5f1ee;
+        border-color: var(--hairline);
+        box-shadow: inset 2px 0 var(--teal);
+      }
+      .nav-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #8ca09b;
+      }
+      .nav-item.is-active .nav-dot {
+        background: var(--teal);
+      }
+      .nav-name {
+        display: block;
+        font-weight: 600;
+      }
+      .nav-meta {
+        display: block;
+        margin-top: 2px;
+        color: var(--faint);
+        font: 9px/1.3 var(--mono);
+      }
+
+      .workspace {
+        min-width: 0;
+        min-height: 0;
+        padding: 0 18px 18px;
+        overflow: auto;
+      }
+      .scopebar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 48px;
+        margin: 0 -18px 14px;
+        padding: 0 18px;
+        background: rgba(255, 255, 255, 0.78);
+        border-bottom: 1px solid var(--hairline-soft);
+      }
+      .scopebar h2 {
+        margin: 0;
+        font: 600 17px/1 var(--display);
+      }
+      .panel {
+        min-height: calc(100vh - 168px);
+        padding: 18px 20px 15px;
+        background: rgba(255, 255, 255, 0.92);
+        border: 1px solid var(--hairline);
+        border-radius: 8px;
+        box-shadow: 0 1px 2px rgba(23, 36, 33, 0.055);
+      }
+      .panel-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 24px;
+        margin-bottom: 9px;
+      }
+      .panel-head h3 {
+        margin: 0;
+        font: 600 19px/1.18 var(--display);
+      }
+      .panel-head p {
+        max-width: 720px;
+        margin: 6px 0 0;
+        color: var(--muted);
+      }
+      .legend {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 8px 14px;
+        color: var(--muted);
+        font: 10px/1.4 var(--mono);
+      }
+      .legend span {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+      }
+      .legend i {
+        width: 16px;
+        height: 3px;
+        display: inline-block;
+        background: var(--teal);
+      }
+      .legend .down {
+        background: var(--red);
+      }
+      .legend .flat {
+        background: #71827e;
+      }
+      .legend .latest {
+        width: 9px;
+        height: 9px;
+        background: var(--panel);
+        border: 2px solid var(--teal);
+        border-radius: 50%;
+      }
+
+      .chart-wrap {
+        position: relative;
+        min-height: 485px;
+      }
+      .chart {
+        width: 100%;
+        height: 500px;
+        display: block;
+      }
+      .chart text {
+        fill: var(--muted);
+        font-family: var(--mono);
+        font-size: 10px;
+      }
+      .grid-line {
+        stroke: #d6e1de;
+        stroke-width: 1;
+      }
+      .grid-line.major {
+        stroke: #b8cac5;
+      }
+      .threshold-band--high {
+        fill: rgba(8, 127, 117, 0.055);
+      }
+      .threshold-band--useful {
+        fill: rgba(105, 170, 163, 0.035);
+      }
+      .threshold-band--mixed {
+        fill: rgba(154, 94, 0, 0.035);
+      }
+      .threshold-band--harmful {
+        fill: rgba(182, 59, 53, 0.035);
+      }
+      .band-label {
+        fill: #6e827d !important;
+        font-size: 8.5px !important;
+        letter-spacing: 0.13em;
+        text-transform: uppercase;
+      }
+      .axis-label {
+        fill: #445954 !important;
+        font-weight: 600;
+      }
+      .month-band {
+        fill: rgba(238, 243, 241, 0.44);
+        stroke: #d5e0dd;
+        stroke-width: 1;
+        pointer-events: none;
+      }
+      .month-band.selected {
+        fill: rgba(8, 127, 117, 0.085);
+        stroke: #89bdb6;
+      }
+      .month-label {
+        fill: #243934 !important;
+        font-size: 11px !important;
+        font-weight: 600;
+      }
+      .vintage-label {
+        font-size: 8px !important;
+      }
+      .step-up,
+      .step-down,
+      .step-flat {
+        fill: none;
+        stroke-width: 2.4;
+        stroke-linejoin: round;
+      }
+      .step-up {
+        stroke: var(--teal);
+      }
+      .step-down {
+        stroke: var(--red);
+      }
+      .step-flat {
+        stroke: #71827e;
+      }
+      .vintage-point {
+        cursor: pointer;
+      }
+      .point-circle {
+        fill: var(--panel);
+        stroke-width: 2;
+      }
+      .point-up .point-circle {
+        stroke: var(--teal);
+      }
+      .point-down .point-circle {
+        stroke: var(--red);
+      }
+      .point-flat .point-circle {
+        stroke: #71827e;
+      }
+      .point-baseline .point-circle {
+        fill: #f0f4f3;
+        stroke: #71827e;
+        stroke-dasharray: 2 1;
+      }
+      .point-latest .point-circle {
+        stroke-width: 3;
+      }
+      .point-score {
+        fill: #172421 !important;
+        font-size: 8px !important;
+        font-weight: 600;
+        pointer-events: none;
+      }
+      .selection-ring {
+        fill: none;
+        stroke: var(--teal);
+        stroke-width: 1.5;
+        stroke-dasharray: 3 2;
+      }
+      .chart-note {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 10px 12px;
+        color: var(--faint);
+        background: var(--panel-2);
+        border: 1px solid var(--hairline-soft);
+        border-radius: 5px;
+        font: 10px/1.4 var(--mono);
+      }
+      .chart-note strong {
+        color: var(--text);
+      }
+      .statusbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 14px;
+        color: var(--faint);
+        background: var(--panel);
+        border-top: 1px solid var(--hairline);
+        font: 9px/1 var(--mono);
+        letter-spacing: 0.04em;
+      }
+
+      .tooltip {
+        position: fixed;
+        z-index: 60;
+        width: 235px;
+        padding: 10px 11px;
+        pointer-events: none;
+        color: var(--text);
+        background: var(--panel);
+        border: 1px solid var(--hairline);
+        border-radius: 6px;
+        box-shadow: 0 10px 28px rgba(20, 35, 31, 0.17);
+        font-size: 12px;
+      }
+      .tooltip strong {
+        display: block;
+        margin-bottom: 5px;
+        font: 600 13px/1.2 var(--display);
+      }
+      .tooltip-grid {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 3px 10px;
+        color: var(--muted);
+      }
+      .tooltip-grid b {
+        color: var(--text);
+        font-family: var(--mono);
+      }
+      .tooltip-hint {
+        margin-top: 7px;
+        padding-top: 7px;
+        color: var(--teal-dark);
+        border-top: 1px solid var(--hairline-soft);
+        font: 9px/1.3 var(--mono);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 40;
+        display: grid;
+        place-items: center;
+        padding: 30px;
+        background: rgba(18, 31, 28, 0.48);
+        backdrop-filter: blur(2.5px) saturate(0.8);
+      }
+      .dialog {
+        position: relative;
+        width: min(1060px, calc(100vw - 60px));
+        max-height: calc(100vh - 60px);
+        overflow: auto;
+        background: var(--panel);
+        border: 1px solid rgba(181, 200, 195, 0.95);
+        border-radius: 9px;
+        box-shadow: var(--shadow);
+      }
+      .dialog::before {
+        content: "";
+        position: absolute;
+        inset: 0 0 auto;
+        height: 3px;
+        background: linear-gradient(
+          90deg,
+          var(--teal),
+          #6cb8ae 68%,
+          transparent
+        );
+        border-radius: 9px 9px 0 0;
+      }
+      .dialog-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 22px;
+        padding: 20px 24px 16px;
+        border-bottom: 1px solid var(--hairline);
+      }
+      .eyebrow {
+        margin: 0 0 6px;
+        color: var(--teal-dark);
+        font: 600 9px/1 var(--mono);
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+      .dialog h2 {
+        margin: 0;
+        font: 600 22px/1.12 var(--display);
+      }
+      .subtitle {
+        margin: 7px 0 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .close {
+        width: 32px;
+        height: 32px;
+        flex: none;
+        display: grid;
+        place-items: center;
+        color: var(--muted);
+        background: var(--panel-2);
+        border: 1px solid var(--hairline);
+        border-radius: 5px;
+        font: 18px/1 var(--body);
+        cursor: pointer;
+      }
+      .dialog-body {
+        padding: 19px 24px 22px;
+      }
+      .summary {
+        display: grid;
+        grid-template-columns: 150px minmax(300px, 0.9fr) minmax(360px, 1.2fr);
+        gap: 24px;
+        align-items: start;
+      }
+      .score-block {
+        min-height: 164px;
+        padding-right: 20px;
+        border-right: 1px solid var(--hairline);
+      }
+      .score-number {
+        color: var(--teal-dark);
+        font: 600 56px/0.9 var(--display);
+        letter-spacing: -0.04em;
+      }
+      .score-label {
+        color: var(--faint);
+        font: 600 9px/1.35 var(--mono);
+        letter-spacing: 0.13em;
+        text-transform: uppercase;
+      }
+      .verdict {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        margin-top: 12px;
+        padding: 5px 8px;
+        color: var(--teal-dark);
+        background: var(--panel-3);
+        border: 1px solid #a8cec7;
+        border-radius: 4px;
+        font: 600 10px/1 var(--mono);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .verdict::before {
+        content: "";
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--teal);
+      }
+      .components {
+        display: grid;
+        gap: 13px;
+      }
+      .component {
+        display: grid;
+        gap: 6px;
+      }
+      .component-head {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .component-name {
+        font-weight: 600;
+      }
+      .component-value {
+        font: 600 13px/1 var(--mono);
+      }
+      .track {
+        position: relative;
+        height: 9px;
+        overflow: hidden;
+        background: #e4ebe9;
+        border: 1px solid #d6e0dd;
+        border-radius: 2px;
+      }
+      .track > span {
+        display: block;
+        height: 100%;
+        width: var(--value);
+        background: var(--teal);
+      }
+      .component-note {
+        color: var(--faint);
+        font: 9px/1.35 var(--mono);
+      }
+      .micro-evolution {
+        min-width: 0;
+      }
+      .section-label {
+        margin: 0 0 10px;
+        color: var(--faint);
+        font: 600 9px/1 var(--mono);
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+      .micro-chart {
+        width: 100%;
+        height: 150px;
+        display: block;
+        background: linear-gradient(
+          to bottom,
+          transparent 32%,
+          rgba(200, 213, 209, 0.45) 32.5%,
+          transparent 33%,
+          transparent 65%,
+          rgba(200, 213, 209, 0.45) 65.5%,
+          transparent 66%
+        );
+        border-bottom: 1px solid var(--hairline);
+      }
+      .micro-chart text {
+        font-family: var(--mono);
+        font-size: 9px;
+        fill: var(--muted);
+      }
+      .micro-path {
+        fill: none;
+        stroke: var(--teal);
+        stroke-width: 2.5;
+      }
+      .micro-point {
+        fill: var(--panel);
+        stroke: var(--teal);
+        stroke-width: 2;
+      }
+      .micro-point.current {
+        stroke-width: 3;
+      }
+      .micro-caption {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        margin-top: 7px;
+        color: var(--faint);
+        font: 9px/1.35 var(--mono);
+      }
+      .metric-grid {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        margin-top: 18px;
+        overflow: hidden;
+        border: 1px solid var(--hairline);
+        border-radius: 6px;
+      }
+      .metric {
+        min-width: 0;
+        padding: 12px 13px;
+        background: #fbfcfc;
+        border-right: 1px solid var(--hairline-soft);
+      }
+      .metric:last-child {
+        border-right: 0;
+      }
+      .metric dt {
+        margin: 0 0 5px;
+        color: var(--faint);
+        font: 8.5px/1.3 var(--mono);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .metric dd {
+        margin: 0;
+        font: 600 17px/1.1 var(--display);
+      }
+      .metric dd.good {
+        color: var(--teal-dark);
+      }
+      .metric dd.bad {
+        color: var(--red);
+      }
+      .dialog[data-tone="mixed"] .score-number,
+      .dialog[data-tone="mixed"] .verdict {
+        color: var(--amber);
+      }
+      .dialog[data-tone="mixed"] .verdict {
+        background: var(--amber-pale);
+        border-color: #d7b879;
+      }
+      .dialog[data-tone="mixed"] .verdict::before {
+        background: var(--amber);
+      }
+      .dialog[data-tone="harmful"] .score-number,
+      .dialog[data-tone="harmful"] .verdict {
+        color: var(--red);
+      }
+      .dialog[data-tone="harmful"] .verdict {
+        background: var(--red-pale);
+        border-color: #dca7a3;
+      }
+      .dialog[data-tone="harmful"] .verdict::before {
+        background: var(--red);
+      }
+      .evidence-strip {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 9px 16px;
+        margin-top: 12px;
+        padding: 10px 13px;
+        color: var(--muted);
+        background: var(--panel-2);
+        border: 1px solid var(--hairline-soft);
+        border-radius: 5px;
+        font: 9px/1.4 var(--mono);
+      }
+      .evidence-strip b {
+        color: var(--text);
+      }
+
+      @media (max-width: 1080px) {
+        .body {
+          grid-template-columns: 72px minmax(0, 1fr);
+        }
+        .rail {
+          padding-inline: 7px;
+        }
+        .rail__label,
+        .nav-copy {
+          display: none;
+        }
+        .nav-item {
+          grid-template-columns: 1fr;
+          justify-items: center;
+          padding: 8px;
+        }
+        .summary {
+          grid-template-columns: 145px 1fr;
+        }
+        .micro-evolution {
+          grid-column: 1 / -1;
+        }
+        .metric-grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
+        .metric:nth-child(3) {
+          border-right: 0;
+        }
+        .metric:nth-child(n + 4) {
+          border-top: 1px solid var(--hairline-soft);
+        }
+      }
+      @media (max-height: 760px) and (min-width: 1081px) {
+        .dialog-head {
+          padding-block: 15px 12px;
+        }
+        .dialog-body {
+          padding-block: 15px 17px;
+        }
+        .micro-chart {
+          height: 125px;
+        }
+        .metric-grid {
+          margin-top: 13px;
+        }
+        .evidence-strip {
+          margin-top: 9px;
+        }
+      }
+      @media (max-width: 1080px) and (max-height: 760px) {
+        .backdrop {
+          padding: 12px;
+        }
+        .dialog {
+          max-height: calc(100vh - 24px);
+        }
+        .dialog-head {
+          padding: 13px 18px 10px;
+        }
+        .dialog h2 {
+          font-size: 18px;
+        }
+        .subtitle {
+          margin-top: 4px;
+          font-size: 11px;
+        }
+        .dialog-body {
+          padding: 12px 18px 14px;
+        }
+        .summary {
+          gap: 13px;
+        }
+        .score-block {
+          min-height: 135px;
+        }
+        .components {
+          gap: 8px;
+        }
+        .component {
+          gap: 4px;
+        }
+        .micro-chart {
+          height: 100px;
+        }
+        .metric-grid {
+          margin-top: 10px;
+        }
+        .metric {
+          padding: 8px 10px;
+        }
+        .metric dd {
+          font-size: 15px;
+        }
+        .evidence-strip {
+          margin-top: 8px;
+          padding: 7px 9px;
+        }
+      }
+      @media (prefers-reduced-motion: no-preference) {
+        .dialog {
+          animation: enter 0.22s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+        }
+        @keyframes enter {
+          from {
+            opacity: 0;
+            transform: translateY(10px) scale(0.988);
+          }
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <header class="topbar">
+        <div class="topbar__group">
+          <span class="lamp"></span>
+          <h1>Forecast performance</h1>
+          <span class="context">Accuracy · bias · revisions · coverage</span>
+        </div>
+        <div class="topbar__group">
+          <span class="chip">Live data</span
+          ><button class="button" type="button">Filters · 0</button
+          ><button class="button" type="button">Reset</button>
+        </div>
+      </header>
+
+      <div class="body">
+        <aside class="rail">
+          <p class="rail__label">Navigate</p>
+          <div class="nav-item">
+            <span class="nav-dot"></span
+            ><span class="nav-copy"
+              ><span class="nav-name">Overview</span
+              ><span class="nav-meta">KPIs · population</span></span
+            >
+          </div>
+          <div class="nav-item">
+            <span class="nav-dot"></span
+            ><span class="nav-copy"
+              ><span class="nav-name">Trends</span
+              ><span class="nav-meta">month · horizon · brand</span></span
+            >
+          </div>
+          <div class="nav-item is-active">
+            <span class="nav-dot"></span
+            ><span class="nav-copy"
+              ><span class="nav-name">Comparison</span
+              ><span class="nav-meta">vintages · TM vs ML</span></span
+            >
+          </div>
+          <div class="nav-item">
+            <span class="nav-dot"></span
+            ><span class="nav-copy"
+              ><span class="nav-name">Product history</span
+              ><span class="nav-meta">stability · exceptions</span></span
+            >
+          </div>
+          <div class="nav-item">
+            <span class="nav-dot"></span
+            ><span class="nav-copy"
+              ><span class="nav-name">Data quality</span
+              ><span class="nav-meta">statuses · downloads</span></span
+            >
+          </div>
+        </aside>
+
+        <section class="workspace">
+          <div class="scopebar">
+            <h2>Vintage comparison</h2>
+            <span class="chip">TM · All products · Last 6 months</span>
+          </div>
+          <section class="panel">
+            <header class="panel-head">
+              <div>
+                <h3>Revision effectiveness evolution</h3>
+                <p>
+                  Each target month resets at a neutral baseline of 50. The
+                  stepped path shows how the balanced score changes as each
+                  forecast vintage arrives.
+                </p>
+              </div>
+              <div class="legend">
+                <span><i></i>Score improved</span
+                ><span><i class="down"></i>Score declined</span
+                ><span><i class="flat"></i>Neutral</span
+                ><span><i class="latest"></i>Latest vintage</span>
+              </div>
+            </header>
+            <div class="chart-wrap">
+              <svg
+                class="chart"
+                id="effectiveness-chart"
+                viewBox="0 0 1180 500"
+                role="img"
+                aria-label="Revision effectiveness score evolution across six target months and five forecast vintages per month"
+              ></svg>
+            </div>
+            <div class="chart-note">
+              <span
+                ><strong>How to read:</strong> vertical position is the
+                cumulative balanced score; step colour shows whether the next
+                vintage strengthened or weakened it.</span
+              ><span>Click any vintage point for the enlarged breakdown.</span>
+            </div>
+          </section>
+        </section>
+      </div>
+
+      <footer class="statusbar">
+        <span>canonical analysis data · metric concept prototype</span
+        ><span>comparison · vintage effectiveness</span>
+      </footer>
+    </main>
+
+    <div class="tooltip" id="tooltip" hidden></div>
+
+    <div class="backdrop" id="backdrop" hidden>
+      <section
+        class="dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="dialog-title"
+      >
+        <header class="dialog-head">
+          <div>
+            <p class="eyebrow" id="dialog-eyebrow">
+              Selected target month · TM
+            </p>
+            <h2 id="dialog-title">August 2026 revision breakdown</h2>
+            <p class="subtitle" id="dialog-subtitle">
+              Balanced score through latest forecast vintage V5.
+            </p>
+          </div>
+          <button
+            class="close"
+            id="close-dialog"
+            type="button"
+            aria-label="Close breakdown"
+          >
+            ×
+          </button>
+        </header>
+        <div class="dialog-body">
+          <div class="summary">
+            <div class="score-block">
+              <div class="score-number" id="dialog-score">82</div>
+              <div class="score-label">
+                Revision effectiveness<br />out of 100
+              </div>
+              <div class="verdict" id="dialog-verdict">Highly effective</div>
+            </div>
+            <div class="components">
+              <div class="component">
+                <div class="component-head">
+                  <span class="component-name">Accuracy gain</span
+                  ><span class="component-value" id="accuracy-value">84</span>
+                </div>
+                <div class="track" id="accuracy-track" style="--value: 84%">
+                  <span></span>
+                </div>
+                <div class="component-note" id="accuracy-note">
+                  52% of the oldest forecast error was removed
+                </div>
+              </div>
+              <div class="component">
+                <div class="component-head">
+                  <span class="component-name">Revision efficiency</span
+                  ><span class="component-value" id="efficiency-value">73</span>
+                </div>
+                <div class="track" id="efficiency-track" style="--value: 73%">
+                  <span></span>
+                </div>
+                <div class="component-note" id="efficiency-note">
+                  0.73 KL of error removed per 1 KL of movement
+                </div>
+              </div>
+              <div class="component">
+                <div class="component-head">
+                  <span class="component-name">Consistency</span
+                  ><span class="component-value" id="consistency-value"
+                    >88</span
+                  >
+                </div>
+                <div class="track" id="consistency-track" style="--value: 88%">
+                  <span></span>
+                </div>
+                <div class="component-note" id="consistency-note">
+                  Most meaningful revision movement improved accuracy
+                </div>
+              </div>
+            </div>
+            <div class="micro-evolution">
+              <p class="section-label">Score evolution within target month</p>
+              <svg
+                class="micro-chart"
+                id="micro-chart"
+                viewBox="0 0 430 150"
+                role="img"
+                aria-label="Selected target month vintage score evolution"
+              ></svg>
+              <div class="micro-caption">
+                <span>V1 = neutral starting index</span
+                ><span id="micro-caption-end">V5 = latest score 82</span>
+              </div>
+            </div>
+          </div>
+          <dl class="metric-grid">
+            <div class="metric">
+              <dt>Oldest error</dt>
+              <dd id="oldest-error">120 KL</dd>
+            </div>
+            <div class="metric">
+              <dt>Current error</dt>
+              <dd id="current-error">58 KL</dd>
+            </div>
+            <div class="metric">
+              <dt>Error removed</dt>
+              <dd class="good" id="error-removed">62 KL</dd>
+            </div>
+            <div class="metric">
+              <dt>Total movement</dt>
+              <dd id="total-movement">85 KL</dd>
+            </div>
+            <div class="metric">
+              <dt>Net forecast change</dt>
+              <dd id="net-change">+3.4%</dd>
+            </div>
+            <div class="metric">
+              <dt>Vintage reached</dt>
+              <dd id="vintage-reached">V5 of 5</dd>
+            </div>
+          </dl>
+          <div class="evidence-strip" id="evidence-strip">
+            <span><b>3</b> helpful revisions</span><span><b>0</b> harmful</span
+            ><span><b>1</b> neutral</span
+            ><span>Fixed cohort · <b>128 products</b></span
+            ><span>V1 score = <b>50 baseline</b></span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      const months = [
+        {
+          key: "mar",
+          label: "Mar",
+          year: "2026",
+          scores: [50, 44, 39, 48, 64],
+          accuracy: [50, 43, 38, 49, 67],
+          efficiency: [50, 45, 40, 46, 59],
+          consistency: [50, 44, 41, 49, 66],
+          errors: [96, 101, 108, 93, 78],
+          movement: [0, 14, 25, 38, 51],
+          net: "+8.7%",
+          products: 128,
+        },
+        {
+          key: "apr",
+          label: "Apr",
+          year: "2026",
+          scores: [50, 43, 45, 40, 31],
+          accuracy: [50, 42, 47, 39, 28],
+          efficiency: [50, 46, 44, 41, 34],
+          consistency: [50, 40, 46, 40, 32],
+          errors: [88, 95, 91, 99, 107],
+          movement: [0, 10, 18, 29, 41],
+          net: "−7.3%",
+          products: 128,
+        },
+        {
+          key: "may",
+          label: "May",
+          year: "2026",
+          scores: [50, 58, 41, 44, 73],
+          accuracy: [50, 61, 38, 43, 76],
+          efficiency: [50, 54, 44, 46, 68],
+          consistency: [50, 59, 42, 45, 75],
+          errors: [110, 98, 119, 114, 72],
+          movement: [0, 12, 27, 34, 58],
+          net: "+10.2%",
+          products: 128,
+        },
+        {
+          key: "jun",
+          label: "Jun",
+          year: "2026",
+          scores: [50, 29, 25, 43, 36],
+          accuracy: [50, 24, 20, 46, 33],
+          efficiency: [50, 34, 29, 40, 38],
+          consistency: [50, 27, 25, 44, 37],
+          errors: [102, 128, 134, 110, 121],
+          movement: [0, 18, 31, 49, 58],
+          net: "−4.6%",
+          products: 128,
+        },
+        {
+          key: "jul",
+          label: "Jul",
+          year: "2026",
+          scores: [50, 34, 59, 57, 69],
+          accuracy: [50, 31, 63, 58, 72],
+          efficiency: [50, 38, 55, 59, 65],
+          consistency: [50, 33, 60, 54, 71],
+          errors: [104, 123, 91, 94, 76],
+          movement: [0, 15, 32, 40, 55],
+          net: "+1.5%",
+          products: 128,
+        },
+        {
+          key: "aug",
+          label: "Aug",
+          year: "2026",
+          scores: [50, 86, 40, 62, 82],
+          accuracy: [50, 91, 35, 65, 84],
+          efficiency: [50, 80, 46, 57, 73],
+          consistency: [50, 88, 39, 66, 88],
+          errors: [120, 77, 129, 91, 58],
+          movement: [0, 22, 47, 68, 85],
+          net: "+3.4%",
+          products: 128,
+        },
+      ];
+
+      const svg = document.querySelector("#effectiveness-chart");
+      const tooltip = document.querySelector("#tooltip");
+      const backdrop = document.querySelector("#backdrop");
+      const closeDialog = document.querySelector("#close-dialog");
+      const ns = svg.namespaceURI;
+      const plot = { left: 62, right: 1160, top: 28, bottom: 405 };
+      const width = plot.right - plot.left;
+      const height = plot.bottom - plot.top;
+      const bandWidth = width / months.length;
+      const y = (score) => plot.bottom - (score / 100) * height;
+      let selected = { monthIndex: 5, vintageIndex: 4 };
+
+      function svgNode(name, attrs = {}, text = "") {
+        const node = document.createElementNS(ns, name);
+        Object.entries(attrs).forEach(([key, value]) =>
+          node.setAttribute(key, value),
+        );
+        if (text) node.textContent = text;
+        return node;
+      }
+
+      function outcomeClass(change) {
+        if (change > 1) return "up";
+        if (change < -1) return "down";
+        return "flat";
+      }
+
+      function renderChart() {
+        svg.replaceChildren();
+        [
+          { min: 80, max: 100, className: "high", label: "Highly effective" },
+          { min: 60, max: 80, className: "useful", label: "Useful" },
+          { min: 40, max: 60, className: "mixed", label: "Mixed" },
+          { min: 0, max: 40, className: "harmful", label: "Harmful" },
+        ].forEach((band) => {
+          svg.append(
+            svgNode("rect", {
+              x: plot.left,
+              y: y(band.max),
+              width,
+              height: y(band.min) - y(band.max),
+              class: `threshold-band--${band.className}`,
+            }),
+          );
+          svg.append(
+            svgNode(
+              "text",
+              {
+                x: plot.right - 7,
+                y: y(band.max) + 13,
+                "text-anchor": "end",
+                class: "band-label",
+              },
+              band.label,
+            ),
+          );
+        });
+        [0, 20, 40, 50, 60, 80, 100].forEach((tick) => {
+          svg.append(
+            svgNode("line", {
+              x1: plot.left,
+              x2: plot.right,
+              y1: y(tick),
+              y2: y(tick),
+              class: `grid-line${tick === 50 ? " major" : ""}`,
+            }),
+          );
+          svg.append(
+            svgNode(
+              "text",
+              {
+                x: plot.left - 10,
+                y: y(tick) + 3,
+                "text-anchor": "end",
+                class: "axis-label",
+              },
+              String(tick),
+            ),
+          );
+        });
+        svg.append(
+          svgNode(
+            "text",
+            {
+              x: 17,
+              y: (plot.top + plot.bottom) / 2,
+              transform: `rotate(-90 17 ${(plot.top + plot.bottom) / 2})`,
+              "text-anchor": "middle",
+              class: "axis-label",
+            },
+            "Balanced score · V1 baseline = 50",
+          ),
+        );
+
+        months.forEach((month, monthIndex) => {
+          const bandLeft = plot.left + monthIndex * bandWidth;
+          const innerLeft = bandLeft + 17;
+          const innerRight = bandLeft + bandWidth - 17;
+          const stepWidth = (innerRight - innerLeft) / 4;
+          const isSelectedMonth = monthIndex === selected.monthIndex;
+          svg.append(
+            svgNode("rect", {
+              x: bandLeft + 2,
+              y: plot.top,
+              width: bandWidth - 4,
+              height,
+              rx: 3,
+              class: `month-band${isSelectedMonth ? " selected" : ""}`,
+            }),
+          );
+
+          month.scores.slice(1).forEach((score, vintageOffset) => {
+            const previousIndex = vintageOffset;
+            const currentIndex = vintageOffset + 1;
+            const x1 = innerLeft + previousIndex * stepWidth;
+            const x2 = innerLeft + currentIndex * stepWidth;
+            const y1 = y(month.scores[previousIndex]);
+            const y2 = y(score);
+            const path = `M ${x1} ${y1} H ${x2} V ${y2}`;
+            svg.append(
+              svgNode("path", {
+                d: path,
+                class: `step-${outcomeClass(score - month.scores[previousIndex])}`,
+              }),
+            );
+          });
+
+          month.scores.forEach((score, vintageIndex) => {
+            const cx = innerLeft + vintageIndex * stepWidth;
+            const cy = y(score);
+            const change =
+              vintageIndex === 0 ? 0 : score - month.scores[vintageIndex - 1];
+            const group = svgNode("g", {
+              class: `vintage-point point-${vintageIndex === 0 ? "baseline" : outcomeClass(change)}${vintageIndex === 4 ? " point-latest" : ""}`,
+              tabindex: "0",
+              role: "button",
+              "aria-label": `${month.label} ${month.year}, vintage ${vintageIndex + 1}, balanced score ${score}`,
+              "data-month": monthIndex,
+              "data-vintage": vintageIndex,
+            });
+            if (
+              monthIndex === selected.monthIndex &&
+              vintageIndex === selected.vintageIndex
+            )
+              group.append(
+                svgNode("circle", { cx, cy, r: 10, class: "selection-ring" }),
+              );
+            group.append(
+              svgNode("circle", {
+                cx,
+                cy,
+                r: vintageIndex === 4 ? 5.5 : 4.5,
+                class: "point-circle",
+              }),
+            );
+            group.append(
+              svgNode(
+                "text",
+                {
+                  x: cx,
+                  y: cy - 9,
+                  "text-anchor": "middle",
+                  class: "point-score",
+                },
+                String(score),
+              ),
+            );
+            group.append(
+              svgNode(
+                "text",
+                {
+                  x: cx,
+                  y: plot.bottom + 17,
+                  "text-anchor": "middle",
+                  class: "vintage-label",
+                },
+                `V${vintageIndex + 1}`,
+              ),
+            );
+            group.addEventListener("mouseenter", showTooltip);
+            group.addEventListener("mousemove", positionTooltip);
+            group.addEventListener("mouseleave", hideTooltip);
+            group.addEventListener("focus", showTooltip);
+            group.addEventListener("blur", hideTooltip);
+            group.addEventListener("click", openBreakdown);
+            group.addEventListener("keydown", (event) => {
+              if (event.key === "Enter" || event.key === " ")
+                openBreakdown(event);
+            });
+            svg.append(group);
+          });
+          svg.append(
+            svgNode(
+              "text",
+              {
+                x: bandLeft + bandWidth / 2,
+                y: plot.bottom + 39,
+                "text-anchor": "middle",
+                class: "month-label",
+              },
+              month.label,
+            ),
+          );
+          svg.append(
+            svgNode(
+              "text",
+              {
+                x: bandLeft + bandWidth / 2,
+                y: plot.bottom + 53,
+                "text-anchor": "middle",
+              },
+              month.year,
+            ),
+          );
+        });
+      }
+
+      function selectedData(target) {
+        const monthIndex = Number(target.dataset.month);
+        const vintageIndex = Number(target.dataset.vintage);
+        return { monthIndex, vintageIndex, month: months[monthIndex] };
+      }
+
+      function showTooltip(event) {
+        const { vintageIndex, month } = selectedData(event.currentTarget);
+        const previous = vintageIndex ? month.scores[vintageIndex - 1] : 50;
+        const change = month.scores[vintageIndex] - previous;
+        let changeLabel = "Baseline";
+        if (vintageIndex > 0) changeLabel = `${change > 0 ? "+" : ""}${change}`;
+        const heading = document.createElement("strong");
+        heading.textContent = `${month.label} ${month.year} · V${vintageIndex + 1}`;
+        const grid = document.createElement("div");
+        grid.className = "tooltip-grid";
+        [
+          ["Balanced score", month.scores[vintageIndex]],
+          ["Change from prior", changeLabel],
+          ["Accuracy gain", month.accuracy[vintageIndex]],
+          ["Efficiency", month.efficiency[vintageIndex]],
+          ["Consistency", month.consistency[vintageIndex]],
+        ].forEach(([label, value]) => {
+          const labelNode = document.createElement("span");
+          const valueNode = document.createElement("b");
+          labelNode.textContent = label;
+          valueNode.textContent = value;
+          grid.append(labelNode, valueNode);
+        });
+        const hint = document.createElement("div");
+        hint.className = "tooltip-hint";
+        hint.textContent = `Click for breakdown through V${vintageIndex + 1}`;
+        tooltip.replaceChildren(heading, grid, hint);
+        tooltip.hidden = false;
+        positionTooltip(event);
+      }
+
+      function positionTooltip(event) {
+        const xPosition = Math.min(
+          window.innerWidth - 250,
+          Math.max(10, (event.clientX || 300) + 14),
+        );
+        const yPosition = Math.min(
+          window.innerHeight - 190,
+          Math.max(10, (event.clientY || 200) + 14),
+        );
+        tooltip.style.left = `${xPosition}px`;
+        tooltip.style.top = `${yPosition}px`;
+      }
+
+      function hideTooltip() {
+        tooltip.hidden = true;
+      }
+
+      function verdict(score) {
+        if (score >= 80) return "Highly effective";
+        if (score >= 60) return "Generally useful";
+        if (score >= 40) return "Mixed value";
+        return "Mostly harmful";
+      }
+
+      function setText(selector, value) {
+        document.querySelector(selector).textContent = value;
+      }
+      function setTrack(selector, value) {
+        document
+          .querySelector(selector)
+          .style.setProperty("--value", `${value}%`);
+      }
+
+      function renderMicroChart(month, vintageIndex) {
+        const micro = document.querySelector("#micro-chart");
+        micro.replaceChildren();
+        const left = 26;
+        const right = 408;
+        const top = 15;
+        const bottom = 116;
+        const microY = (score) => bottom - (score / 100) * (bottom - top);
+        [40, 60, 80].forEach((tick) =>
+          micro.append(
+            svgNode("line", {
+              x1: left,
+              x2: right,
+              y1: microY(tick),
+              y2: microY(tick),
+              stroke: "#d4e0dd",
+              "stroke-width": "1",
+            }),
+          ),
+        );
+        const visibleScores = month.scores.slice(0, vintageIndex + 1);
+        const step = (right - left) / 4;
+        let path = `M ${left} ${microY(visibleScores[0])}`;
+        visibleScores.slice(1).forEach((score, index) => {
+          path += ` H ${left + (index + 1) * step} V ${microY(score)}`;
+        });
+        micro.append(svgNode("path", { d: path, class: "micro-path" }));
+        visibleScores.forEach((score, index) => {
+          const cx = left + index * step;
+          const cy = microY(score);
+          micro.append(
+            svgNode("circle", {
+              cx,
+              cy,
+              r: index === vintageIndex ? 5.5 : 4.2,
+              class: `micro-point${index === vintageIndex ? " current" : ""}`,
+            }),
+          );
+          micro.append(
+            svgNode(
+              "text",
+              { x: cx, y: cy - 9, "text-anchor": "middle" },
+              String(score),
+            ),
+          );
+          micro.append(
+            svgNode(
+              "text",
+              { x: cx, y: bottom + 18, "text-anchor": "middle" },
+              `V${index + 1}`,
+            ),
+          );
+        });
+      }
+
+      function openBreakdown(event) {
+        const data = selectedData(event.currentTarget);
+        selected = {
+          monthIndex: data.monthIndex,
+          vintageIndex: data.vintageIndex,
+        };
+        const { month, vintageIndex } = data;
+        const score = month.scores[vintageIndex];
+        const oldestError = month.errors[0];
+        const currentError = month.errors[vintageIndex];
+        const removed = oldestError - currentError;
+        const helpful = month.errors
+          .slice(1, vintageIndex + 1)
+          .filter((error, index) => error < month.errors[index]).length;
+        const harmful = month.errors
+          .slice(1, vintageIndex + 1)
+          .filter((error, index) => error > month.errors[index]).length;
+        const neutral = Math.max(0, vintageIndex - helpful - harmful);
+
+        const monthNames = {
+          Mar: "March",
+          Apr: "April",
+          May: "May",
+          Jun: "June",
+          Jul: "July",
+          Aug: "August",
+        };
+        let dialogSubtitle = `Balanced score accumulated through forecast vintage V${vintageIndex + 1}.`;
+        let accuracyNote = `${Math.round((Math.abs(removed) / oldestError) * 100)}% of starting error ${removed >= 0 ? "removed" : "added"}`;
+        let efficiencyNote = `${(Math.abs(removed) / Math.max(month.movement[vintageIndex], 1)).toFixed(2)} KL of error ${removed >= 0 ? "removed" : "added"} per 1 KL movement`;
+        let netChange = "In progress";
+        if (vintageIndex === 0) {
+          dialogSubtitle =
+            "V1 establishes the neutral score baseline before any revision.";
+          accuracyNote = "No revision impact measured at the starting vintage";
+          efficiencyNote = "Efficiency begins when V2 arrives";
+          netChange = "0.0%";
+        } else if (vintageIndex === 4) {
+          netChange = month.net;
+        }
+        const errorRemovedLabel =
+          removed < 0 ? `+${Math.abs(removed)} KL added` : `${removed} KL`;
+
+        setText(
+          "#dialog-eyebrow",
+          `Selected target month · TM · Vintage V${vintageIndex + 1}`,
+        );
+        setText(
+          "#dialog-title",
+          `${monthNames[month.label]} ${month.year} revision breakdown`,
+        );
+        setText("#dialog-subtitle", dialogSubtitle);
+        const dialog = document.querySelector(".dialog");
+        let dialogTone = "good";
+        if (score < 40) dialogTone = "harmful";
+        else if (score < 60) dialogTone = "mixed";
+        dialog.dataset.tone = dialogTone;
+        setText("#dialog-score", score);
+        setText(
+          "#dialog-verdict",
+          vintageIndex === 0 ? "Neutral baseline" : verdict(score),
+        );
+        setText("#accuracy-value", month.accuracy[vintageIndex]);
+        setTrack("#accuracy-track", month.accuracy[vintageIndex]);
+        setText("#efficiency-value", month.efficiency[vintageIndex]);
+        setTrack("#efficiency-track", month.efficiency[vintageIndex]);
+        setText("#consistency-value", month.consistency[vintageIndex]);
+        setTrack("#consistency-track", month.consistency[vintageIndex]);
+        setText("#accuracy-note", accuracyNote);
+        setText("#efficiency-note", efficiencyNote);
+        setText(
+          "#consistency-note",
+          vintageIndex === 0
+            ? "No revision outcomes yet"
+            : `${helpful} helpful · ${harmful} harmful · ${neutral} neutral revisions`,
+        );
+        setText("#micro-caption-end", `V${vintageIndex + 1} score = ${score}`);
+        setText("#oldest-error", `${oldestError} KL`);
+        setText("#current-error", `${currentError} KL`);
+        const errorRemovedNode = document.querySelector("#error-removed");
+        errorRemovedNode.textContent = errorRemovedLabel;
+        errorRemovedNode.classList.toggle("good", removed >= 0);
+        errorRemovedNode.classList.toggle("bad", removed < 0);
+        setText("#total-movement", `${month.movement[vintageIndex]} KL`);
+        setText("#net-change", netChange);
+        setText("#vintage-reached", `V${vintageIndex + 1} of 5`);
+        const evidence = document.querySelector("#evidence-strip");
+        evidence.replaceChildren();
+        [
+          [`${helpful}`, " helpful revisions"],
+          [`${harmful}`, " harmful"],
+          [`${neutral}`, " neutral"],
+          [`${month.products} products`, "Fixed cohort · "],
+          ["50 baseline", "V1 score = "],
+        ].forEach(([value, label], index) => {
+          const item = document.createElement("span");
+          const strong = document.createElement("b");
+          strong.textContent = value;
+          if (index < 3) item.append(strong, label);
+          else item.append(label, strong);
+          evidence.append(item);
+        });
+        renderMicroChart(month, vintageIndex);
+        renderChart();
+        hideTooltip();
+        backdrop.hidden = false;
+        closeDialog.focus();
+      }
+
+      function closeBreakdown() {
+        backdrop.hidden = true;
+        renderChart();
+      }
+      closeDialog.addEventListener("click", closeBreakdown);
+      backdrop.addEventListener("click", (event) => {
+        if (event.target === backdrop) closeBreakdown();
+      });
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && !backdrop.hidden) closeBreakdown();
+      });
+
+      renderChart();
+
+      const params = new URLSearchParams(location.search);
+      if (params.get("open") === "aug") {
+        const target = svg.querySelector('[data-month="5"][data-vintage="4"]');
+        target?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      }
+    </script>
+  </body>
+</html>

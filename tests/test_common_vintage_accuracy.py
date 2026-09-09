@@ -9,6 +9,7 @@ from forecast_analysis import (
     VintageAccuracyRow,
     VintageRule,
     build_common_vintage_accuracy,
+    build_vintage_gap_drilldown,
 )
 
 
@@ -45,6 +46,10 @@ class CommonVintageAccuracyTests(unittest.TestCase):
                     {
                         "source": "tm",
                         "parent_code": parent_code,
+                        "parent_description": f"Parent {parent_code}",
+                        "brand_display": (
+                            "Brand A" if parent_code % 2 else "Brand B"
+                        ),
                         "calculation_month": calculation_month,
                         "snop_month": target_month,
                         "forecast_horizon_months": horizon,
@@ -132,6 +137,145 @@ class CommonVintageAccuracyTests(unittest.TestCase):
             self.assertIsNotNone(row.forecast_accuracy_pct)
             self.assertAlmostEqual(row.forecast_accuracy_pct or 0.0, expected_fa)
 
+        overview = result.overview
+        self.assertEqual(overview.primary_rule_id, "oldest_available")
+        self.assertEqual(overview.primary_label, "Oldest (5 months ahead)")
+        self.assertEqual(overview.eligible_observations, 4)
+        self.assertEqual(overview.accuracy_numerator_kl, 80.0)
+        self.assertEqual(overview.accuracy_denominator_actual_kl, 425.0)
+        self.assertEqual(overview.bias_numerator_kl, -80.0)
+        self.assertAlmostEqual(
+            overview.forecast_accuracy_pct or 0.0,
+            100.0 * (1.0 - 80.0 / 425.0),
+        )
+        self.assertAlmostEqual(overview.wape_pct or 0.0, 100.0 * 80.0 / 425.0)
+        self.assertAlmostEqual(overview.bias_pct or 0.0, -100.0 * 80.0 / 425.0)
+        self.assertAlmostEqual(
+            overview.accuracy_delta_pp or 0.0,
+            100.0 * (80.0 - 75.0) / 425.0,
+        )
+        self.assertAlmostEqual(overview.revision_effectiveness_pct or 0.0, 25.0)
+        self.assertEqual(overview.effectiveness_numerator, 1)
+        self.assertEqual(overview.effectiveness_denominator, 4)
+        self.assertEqual(overview.primary_error_kl, 80.0)
+        self.assertEqual(overview.latest_error_kl, 75.0)
+        self.assertEqual(
+            [
+                (
+                    row.parent_code,
+                    row.target_month,
+                    row.forecast_kl,
+                    row.actual_kl,
+                    row.absolute_error_kl,
+                    row.direction,
+                )
+                for row in result.wape_examples
+            ],
+            [
+                (201, date(2026, 2, 1), 150.0, 200.0, 50.0, "under"),
+                (101, date(2026, 1, 1), 80.0, 100.0, 20.0, "under"),
+                (202, date(2026, 2, 1), 90.0, 100.0, 10.0, "under"),
+                (103, date(2026, 1, 1), 25.0, 25.0, 0.0, "match"),
+            ],
+        )
+        self.assertTrue(
+            all(
+                row.parent_description == f"Parent {row.parent_code}"
+                for row in result.wape_examples
+            )
+        )
+        primary_rows = self.rows_by_month(result.series[0].rows)
+        january = primary_rows[date(2026, 1, 1)]
+        february = primary_rows[date(2026, 2, 1)]
+        self.assertEqual(january.forecast_kl, 105.0)
+        self.assertEqual(february.forecast_kl, 240.0)
+        self.assertEqual(january.revision_effectiveness_pct, 0.0)
+        self.assertEqual(january.effectiveness_numerator, 0)
+        self.assertEqual(january.effectiveness_denominator, 2)
+        self.assertEqual(january.latest_absolute_error_numerator_kl, 35.0)
+        self.assertEqual(february.revision_effectiveness_pct, 50.0)
+        self.assertEqual(february.effectiveness_numerator, 1)
+        self.assertEqual(february.effectiveness_denominator, 2)
+        self.assertEqual(february.latest_absolute_error_numerator_kl, 40.0)
+
+    def test_single_selected_vintage_becomes_overview_primary(self) -> None:
+        result = build_common_vintage_accuracy(
+            self.frame(),
+            "tm",
+            comparison_rules=(VintageRule.specific_horizon(2),),
+        )
+
+        self.assertEqual(result.overview.primary_rule_id, "specific_horizon:2")
+        self.assertEqual(result.overview.primary_label, "2 months ahead")
+        self.assertEqual(result.overview.accuracy_numerator_kl, 45.0)
+        self.assertAlmostEqual(
+            result.overview.forecast_accuracy_pct or 0.0,
+            100.0 * (1.0 - 45.0 / 425.0),
+        )
+
+    def test_monthly_gap_drivers_reconcile_wape_by_parent_and_brand(self) -> None:
+        result = build_vintage_gap_drilldown(
+            self.frame(),
+            "tm",
+            comparison_rules=(
+                VintageRule.oldest_available(),
+                VintageRule.specific_horizon(2),
+            ),
+            target_month=date(2026, 2, 1),
+        )
+
+        self.assertEqual(result.baseline_rule_id, "oldest_available")
+        self.assertEqual(result.latest_rule_id, "latest_available")
+        self.assertEqual(result.eligible_parents, 2)
+        self.assertEqual(result.actual_denominator_kl, 300.0)
+        self.assertEqual(result.baseline_absolute_error_kl, 60.0)
+        self.assertEqual(result.latest_absolute_error_kl, 40.0)
+        self.assertAlmostEqual(result.baseline_wape_pct or 0.0, 20.0)
+        self.assertAlmostEqual(result.latest_wape_pct or 0.0, 100.0 * 40.0 / 300.0)
+        self.assertAlmostEqual(result.net_wape_improvement_pp or 0.0, 100.0 * 20.0 / 300.0)
+        self.assertEqual(result.gross_fix_kl, 40.0)
+        self.assertEqual(result.regression_kl, 20.0)
+        self.assertAlmostEqual(
+            sum(row.wape_contribution_pp for row in result.parents),
+            result.net_wape_improvement_pp or 0.0,
+        )
+        self.assertAlmostEqual(
+            sum(row.wape_contribution_pp for row in result.brands),
+            result.net_wape_improvement_pp or 0.0,
+        )
+        self.assertEqual(
+            [
+                (
+                    row.parent_code,
+                    row.brand,
+                    row.error_change_kl,
+                    row.baseline_direction,
+                    row.latest_direction,
+                )
+                for row in result.parents
+            ],
+            [
+                (201, "Brand A", 40.0, "under", "over"),
+                (202, "Brand B", -20.0, "under", "under"),
+            ],
+        )
+        self.assertEqual(
+            [(row.brand, row.parent_count, row.error_change_kl) for row in result.brands],
+            [("Brand A", 1, 40.0), ("Brand B", 1, -20.0)],
+        )
+
+    def test_monthly_gap_drivers_require_a_historical_vintage(self) -> None:
+        with self.assertRaisesRegex(
+            ValueError,
+            "at least one historical accuracy vintage is required",
+        ):
+            build_vintage_gap_drilldown(
+                self.frame(),
+                "tm",
+                comparison_rules=(),
+                target_month=date(2026, 1, 1),
+            )
+
     def test_latest_only_and_duplicate_rule_contract(self) -> None:
         frame = self.frame()
         default_result = build_common_vintage_accuracy(frame, "tm")
@@ -174,6 +318,16 @@ class CommonVintageAccuracyTests(unittest.TestCase):
             january.forecast_accuracy_pct or 0.0,
             100.0 * (1.0 - 40.0 / 175.0),
         )
+        self.assertEqual(latest_only.overview.primary_rule_id, "latest_available")
+        self.assertEqual(latest_only.overview.primary_label, "Latest (1 month ahead)")
+        self.assertEqual(latest_only.overview.eligible_observations, 5)
+        self.assertEqual(latest_only.overview.accuracy_numerator_kl, 80.0)
+        self.assertEqual(latest_only.overview.accuracy_denominator_actual_kl, 475.0)
+        self.assertEqual(latest_only.overview.effectiveness_numerator, 0)
+        self.assertEqual(latest_only.overview.effectiveness_denominator, 0)
+        self.assertIsNone(latest_only.overview.revision_effectiveness_pct)
+        self.assertEqual(latest_only.overview.primary_error_kl, 80.0)
+        self.assertEqual(latest_only.overview.latest_error_kl, 80.0)
 
         duplicate = VintageRule.oldest_available()
         with self.assertRaisesRegex(

@@ -1,4 +1,6 @@
 # Forecast dashboard operations
 
 - Restart/share the dashboard via `.pi/workflows/restart-forecast-dashboard/SKILL.md`; always return the `/forecast-dashboard/` preview URL, not localhost.
-- For every dashboard UI or responsive change, follow `.pi/workflows/validate-dashboard-screenshot/SKILL.md`: reproduce the exact viewport/state, capture and inspect screenshots, validate the reported defect plus alignment/spacing/wrapping/overflow regressions, and check a wider and compact viewport before declaring success.
+- For every dashboard UI change, follow `.pi/workflows/validate-dashboard-screenshot/SKILL.md`: screenshot every impacted step/state at 1280×720 and 1920×1080, then explicitly classify findings as Improved, Regressed, and Out of place. Skip narrower viewports unless requested.
+- Browser validation and screenshot validation must be conducted by a background subagent using Luna at maximum reasoning effort. Use `cliproxyapi` as the primary provider; use `opencode-go` as the first fallback and `commandcode-go` as the second fallback. The subagent must return the complete viewport/state matrix, artifact verification, assertions, and the three required visual classifications before the work is reported complete.
+- Resolve routine implementation details from the repository, existing contracts, and established design language without interrupting the user. Use `ask_user` only for significant product, architecture, data-contract, safety, or irreversible-scope decisions that cannot be resolved from project evidence.

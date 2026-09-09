@@ -17,6 +17,7 @@ import polars as pl
 
 from ._utils import require_columns
 from .contracts import (
+    ACTUAL_COLUMNS,
     ANALYSIS_COLUMNS,
     DEFAULT_REVISION_TOLERANCE_KL,
     FORECAST_SOURCES,
@@ -131,6 +132,27 @@ COMMENTARY_SCHEMA = {
     "repeatability": pl.String,
 }
 
+YEAR_OVERLAY_COLUMNS = [
+    "snop_month",
+    "calendar_year",
+    "calendar_month",
+    "fiscal_year",
+    "fiscal_month",
+    "actual_kl",
+    "forecast_kl",
+    "actual_status",
+]
+YEAR_OVERLAY_SCHEMA = {
+    "snop_month": pl.Date,
+    "calendar_year": pl.Int64,
+    "calendar_month": pl.Int64,
+    "fiscal_year": pl.Int64,
+    "fiscal_month": pl.Int64,
+    "actual_kl": pl.Float64,
+    "forecast_kl": pl.Float64,
+    "actual_status": pl.String,
+}
+
 
 @dataclass(frozen=True)
 class TargetMonthSummary:
@@ -166,6 +188,17 @@ class ForwardTreatment:
 
     def as_dict(self) -> dict[str, object]:
         return asdict(self)
+
+
+@dataclass(frozen=True)
+class ProductYearOverlayView:
+    """April-to-March FY actuals plus one coherent forward forecast run."""
+
+    parent_code: int
+    source: str
+    forecast_run: date | None
+    actual_through: date | None
+    points: pl.DataFrame
 
 
 @dataclass(frozen=True)
@@ -251,6 +284,127 @@ def _accuracy(forecast: float | None, actual: float | None) -> float | None:
     if forecast is None or actual is None or actual <= 0:
         return None
     return (1.0 - abs(forecast - actual) / actual) * 100.0
+
+
+def build_product_year_overlay(
+    frame: pl.DataFrame,
+    actual_history: pl.DataFrame,
+    parent_code: int,
+    *,
+    source: str = "tm",
+) -> ProductYearOverlayView:
+    """Project all supplied actual months and one latest forward run by FY.
+
+    The financial year starts in April and is named for its starting calendar
+    year: April 2027 through March 2028 is ``FY27``. Actuals come from the
+    normalized dataset-level history. Forecasts come only from the latest
+    calculation month for the selected source and begin after the latest
+    non-null actual month. Missing months remain gaps rather than being
+    synthesized or backfilled from an older forecast run.
+    """
+    require_columns(frame, ANALYSIS_COLUMNS, "product year-overlay population")
+    require_columns(actual_history, ACTUAL_COLUMNS, "product actual history")
+    normalized_source = str(source).strip().lower()
+    if normalized_source not in FORECAST_SOURCES:
+        raise ValueError(f"unsupported product year-overlay source {source!r}")
+    normalized_parent = _parent_code(parent_code)
+    selected = frame.filter(
+        (pl.col("parent_code") == normalized_parent)
+        & (pl.col("source") == normalized_source)
+    )
+    actuals = (
+        actual_history.filter(pl.col("parent_code") == normalized_parent)
+        .filter(pl.col("actual_kl").is_not_null())
+        .sort("snop_month")
+        .unique(subset=["snop_month"], keep="last", maintain_order=True)
+    )
+    empty = _empty_frame(YEAR_OVERLAY_SCHEMA, YEAR_OVERLAY_COLUMNS)
+    actual_through = cast(
+        date | None,
+        actuals.get_column("snop_month").max() if actuals.height else None,
+    )
+    forecast_candidates = selected.filter(
+        pl.col("calculation_month").is_not_null()
+        & pl.col("forecast_kl").is_not_null()
+    )
+    forecast_run = cast(
+        date | None,
+        forecast_candidates.get_column("calculation_month").max()
+        if forecast_candidates.height
+        else None,
+    )
+    latest_forecasts = forecast_candidates.head(0)
+    if forecast_run is not None:
+        latest_forecasts = forecast_candidates.filter(
+            pl.col("calculation_month") == forecast_run
+        )
+        if actual_through is not None:
+            latest_forecasts = latest_forecasts.filter(
+                pl.col("snop_month") > actual_through
+            )
+        latest_forecasts = (
+            latest_forecasts.sort(
+                ["snop_month", "forecast_horizon_months"],
+                descending=[False, True],
+            )
+            .unique(subset=["snop_month"], keep="first", maintain_order=True)
+        )
+
+    fiscal_year = (
+        pl.when(pl.col("snop_month").dt.month() >= 4)
+        .then(pl.col("snop_month").dt.year())
+        .otherwise(pl.col("snop_month").dt.year() - 1)
+        .cast(pl.Int64)
+        .alias("fiscal_year")
+    )
+    fiscal_month = (
+        pl.when(pl.col("snop_month").dt.month() >= 4)
+        .then(pl.col("snop_month").dt.month() - 3)
+        .otherwise(pl.col("snop_month").dt.month() + 9)
+        .cast(pl.Int64)
+        .alias("fiscal_month")
+    )
+    actual_points = actuals.select(
+        [
+            "snop_month",
+            pl.col("snop_month").dt.year().alias("calendar_year"),
+            pl.col("snop_month").dt.month().alias("calendar_month"),
+            fiscal_year,
+            fiscal_month,
+            "actual_kl",
+            pl.lit(None, dtype=pl.Float64).alias("forecast_kl"),
+            pl.when(pl.col("actual_kl") == 0)
+            .then(pl.lit("matched_zero"))
+            .otherwise(pl.lit("matched_positive"))
+            .alias("actual_status"),
+        ]
+    )
+    forecast_points = latest_forecasts.select(
+        [
+            "snop_month",
+            pl.col("snop_month").dt.year().alias("calendar_year"),
+            pl.col("snop_month").dt.month().alias("calendar_month"),
+            fiscal_year,
+            fiscal_month,
+            pl.lit(None, dtype=pl.Float64).alias("actual_kl"),
+            "forecast_kl",
+            pl.lit("missing", dtype=pl.String).alias("actual_status"),
+        ]
+    )
+    points = (
+        pl.concat([actual_points, forecast_points], how="vertical")
+        .select(YEAR_OVERLAY_COLUMNS)
+        .sort("snop_month")
+        if actual_points.height or forecast_points.height
+        else empty
+    )
+    return ProductYearOverlayView(
+        normalized_parent,
+        normalized_source,
+        forecast_run,
+        actual_through,
+        points,
+    )
 
 
 def _latest_forecasts(frame: pl.DataFrame) -> pl.DataFrame:
@@ -974,6 +1128,8 @@ def build_product_postmortem(
 __all__ = [
     "ForwardTreatment",
     "ProductPostmortemView",
+    "ProductYearOverlayView",
     "TargetMonthSummary",
     "build_product_postmortem",
+    "build_product_year_overlay",
 ]

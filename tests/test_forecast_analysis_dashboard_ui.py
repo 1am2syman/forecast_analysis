@@ -314,14 +314,32 @@ class DashboardUiSourceContractTests(unittest.TestCase):
         cls.source = (ROOT / "dashboard/app.js").read_text(encoding="utf-8")
         cls.styles = (ROOT / "dashboard/styles.css").read_text(encoding="utf-8")
         cls.index = (ROOT / "dashboard/index.html").read_text(encoding="utf-8")
+        cls.server = (ROOT / "dashboard/server.py").read_text(encoding="utf-8")
+        cls.filter_multiselect = (ROOT / "dashboard/filter-multiselect.js").read_text(
+            encoding="utf-8"
+        )
 
-    def test_overview_renders_volume_box_plots_and_dedicated_wape_card(self) -> None:
+    def test_overview_renders_volume_box_plots_and_monthly_kpi_microbars(self) -> None:
         self.assertIn("function volumeBoxPlotCard", self.source)
         self.assertIn('"Actual volume",\n          volumeDistributions.actual', self.source)
         self.assertIn('"Forecast volume",\n          volumeDistributions.forecast', self.source)
         self.assertIn("const wape = finite(metrics.wape_pct)", self.source)
-        self.assertIn('kpi(\n          "WAPE"', self.source)
-        self.assertIn("pct(wape)", self.source)
+        self.assertIn("function overviewPrimaryRows", self.source)
+        self.assertIn("function kpiMicroBars", self.source)
+        self.assertIn(".filter((row) => row.actual_denominator_kl > 0)", self.source)
+        self.assertIn("function overviewKpiBarCard", self.source)
+        for field in (
+            'field: "bias_pct"',
+            'field: "wape_pct"',
+            'field: "revision_effectiveness_pct"',
+            'field: "absolute_error_numerator_kl"',
+        ):
+            self.assertIn(field, self.source)
+        self.assertIn("signed: true", self.source)
+        self.assertIn('class="kpi-microchart__zero"', self.source)
+        self.assertIn(".kpi-micro__summary {", self.styles)
+        self.assertIn(".kpi-micro__label .kpi-guide-trigger", self.styles)
+        self.assertIn(".kpi-microchart__bar.is-latest", self.styles)
         self.assertNotIn(">WAPE ${escapeHtml(pct(wape))}</text>", self.source)
         self.assertNotIn('"MAE"', self.source)
 
@@ -339,7 +357,8 @@ class DashboardUiSourceContractTests(unittest.TestCase):
         self.assertIn("Vintage A forecast</dt>", self.source)
         self.assertIn("Vintage B forecast</dt>", self.source)
         self.assertIn("Actual</dt>", self.source)
-        self.assertIn("B − actual</dt>", self.source)
+        self.assertIn("Latest − actual</dt>", self.source)
+        self.assertIn("data-tooltip-volume-series", self.source)
         self.assertIn("data-tooltip-variance", self.source)
 
     def test_forecast_vs_actual_palette_is_stable_across_filter_renders(self) -> None:
@@ -352,25 +371,14 @@ class DashboardUiSourceContractTests(unittest.TestCase):
         )
         self.assertIn("stroke-dasharray: 13 8", self.styles)
         self.assertIn(".chart-tooltip {\n  position: fixed;\n  z-index: 60;", self.styles)
-        self.assertIn(
-            'key key--volume-vintage-b"></i>Vintage B',
-            self.source,
-        )
-        self.assertIn('class="key key--volume-vintage-b"', self.index)
-        self.assertIn('class="key key--volume-vintage-a"', self.index)
-        self.assertIn('class="key key--volume-actual"', self.index)
-        self.assertIn(
-            'series("vintage_a_forecast_kl", "chart__series--vintage-a")',
-            self.source,
-        )
-        self.assertIn(
-            'series("vintage_b_forecast_kl", "chart__series--vintage-b")',
-            self.source,
-        )
-        self.assertIn(
-            'series("actual_kl", "chart__series--actual")',
-            self.source,
-        )
+        self.assertIn("function accuracyVintageSeriesColor", self.source)
+        self.assertIn("accuracyVintageSeriesColor(series, vintagePayload)", self.source)
+        self.assertIn("payload.accuracy_vintages", self.source)
+        self.assertGreaterEqual(self.source.count("accuracyVintageSeriesColor("), 4)
+        self.assertIn('data-volume-role="forecast"', self.source)
+        self.assertIn('data-volume-role="actual"', self.source)
+        self.assertIn("data-volume-chart-legend", self.index)
+        self.assertIn(".frame__head--volume > .legend", self.styles)
 
     def test_fullscreen_chart_tooltip_uses_the_shared_tooltip_layer(self) -> None:
         self.assertIn('document.addEventListener("pointerover"', self.source)
@@ -388,6 +396,43 @@ class DashboardUiSourceContractTests(unittest.TestCase):
         self.assertIn("height: overviewChartHeight(chartContainer)", self.source)
         self.assertIn("[data-trend-chart]", self.source)
         self.assertIn(".trend-main .chart--overview", self.styles)
+
+    def test_overview_charts_hide_months_without_selected_vintage_cohort_data(
+        self,
+    ) -> None:
+        accuracy_chart = self.source[
+            self.source.index("  function overviewPerformanceChart(") : self.source.index(
+                "  function overviewVolumeChart("
+            )
+        ]
+        volume_chart = self.source[
+            self.source.index("  function overviewVolumeChart(") : self.source.index(
+                "  function lineChart("
+            )
+        ]
+        trend_chart = self.source[
+            self.source.index("  function renderTrendMonthlyChart(") : self.source.index(
+                "  function renderTrends("
+            )
+        ]
+
+        self.assertIn("function overviewApplicableMonths", self.source)
+        self.assertIn("hideUnavailableMonths: true", self.source)
+        self.assertIn("overviewApplicableMonths(vintagePayload)", accuracy_chart)
+        self.assertIn("applicableMonthSet.has(row.snop_month)", accuracy_chart)
+        self.assertIn("overviewApplicableMonths(vintagePayload)", volume_chart)
+        self.assertIn("applicableMonthSet.has(row.snop_month)", volume_chart)
+        self.assertNotIn("hideUnavailableMonths: true", trend_chart)
+
+    def test_timeline_all_preset_stops_at_latest_completed_month(self) -> None:
+        preset = self.source[
+            self.source.index("  function applyTimelinePreset(") : self.source.index(
+                "  function syncControls("
+            )
+        ]
+
+        self.assertIn("latest_completed_target_month", preset)
+        self.assertIn("ForecastTimeline.clampRange", preset)
 
     def test_accuracy_selector_requests_common_cohort_series(self) -> None:
         build_request = self.source[
@@ -433,6 +478,28 @@ class DashboardUiSourceContractTests(unittest.TestCase):
             self.source,
         )
 
+    def test_overview_kpis_use_accuracy_chart_common_cohort_projection(self) -> None:
+        overview = self.source[
+            self.source.index("  function renderOverview(payload)") : self.source.index(
+                "  function chartExtent("
+            )
+        ]
+        accumulated = self.source[
+            self.source.index("  function errorAccumulatedSeries(payload)") : self.source.index(
+                "  function renderOverview(payload)"
+            )
+        ]
+
+        self.assertIn("payload.accuracy_vintages?.overview", overview)
+        self.assertIn("const metrics = cohortOverview?.metrics || payload.metrics", overview)
+        self.assertIn("cohortOverview?.volume_distributions", overview)
+        self.assertIn("payload.volume_distributions", overview)
+        self.assertIn("cohortOverview?.primary?.label", overview)
+        self.assertIn("payload.accuracy_vintages?.overview", accumulated)
+        self.assertIn("metrics.primary_error_kl", accumulated)
+        self.assertIn("metrics.latest_error_kl", accumulated)
+        self.assertNotIn("vintages.options || []", accumulated)
+
     def test_accuracy_chart_exposes_local_multi_vintage_selector(self) -> None:
         accuracy_start = self.index.index('id="overview-chart-title"')
         accuracy_end = self.index.index('id="volume-chart-title"')
@@ -472,20 +539,84 @@ class DashboardUiSourceContractTests(unittest.TestCase):
         self.assertIn(">KL</text><g class=\"chart__grid chart__grid--volume\"", self.source)
         self.assertNotIn(">'000 KL</text>", self.source)
 
-    def test_filter_workbench_exposes_sku_class_request_and_options(self) -> None:
-        self.assertIn('<span>SKU Class</span', self.index)
-        self.assertIn('data-control="sku_class"', self.index)
-        self.assertIn('"sku_class",\n      options.sku_classes.map', self.source)
-        self.assertIn('sku_class: value("sku_class") || null', self.source)
-        self.assertIn('"All SKU classes"', self.source)
+    def test_overview_and_workbench_share_product_and_time_controls(self) -> None:
+        overview_start = self.index.index('id="pane-overview"')
+        overview_end = self.index.index('class="kpis kpis--overview"')
+        quick_row = self.index[overview_start:overview_end]
+        workbench_start = self.index.index('id="scope-drawer"')
+        workbench_end = self.index.index('class="state-banner"')
+        workbench = self.index[workbench_start:workbench_end]
+
+        self.assertIn('class="overview-health quick-filter-row"', quick_row)
+        self.assertEqual(self.index.count("data-product-filter="), 6)
+        for name in ("parent_codes", "brands", "sku_classes"):
+            selector = f'data-product-filter="{name}"'
+            self.assertIn(selector, quick_row)
+            self.assertIn(selector, workbench)
+        self.assertIn("<legend>Product &amp; period</legend>", workbench)
+        self.assertEqual(self.index.count("data-timeline-control"), 2)
+        self.assertIn("data-timeline-control", quick_row)
+        self.assertIn("data-timeline-control", workbench)
+        self.assertIn('data-control="horizon"', workbench)
+        self.assertIn('data-control="minimum_actual_volume"', workbench)
+        self.assertIn("data-timeline-start-select", workbench)
+        self.assertIn("data-timeline-end-select", workbench)
+        self.assertNotIn('class="overview-health__facts"', quick_row)
+        self.assertNotIn("data-population></div>", quick_row)
+        self.assertIn('<script src="filter-multiselect.js"></script>', self.index)
+        self.assertIn("grid-template-columns:", self.styles)
+        self.assertIn(".quick-filter-row {", self.styles)
+        self.assertIn("white-space: nowrap", self.styles)
+        self.assertIn(".quick-timeline {", self.styles)
+        self.assertIn("height: 3px;", self.styles)
+        self.assertIn(
+            "linear-gradient(var(--teal), var(--teal)) center / 2px 14px no-repeat;",
+            self.styles,
+        )
+        self.assertIn("width: 20px;", self.styles)
+        self.assertIn("left: -10px;", self.styles)
+        self.assertIn("width: calc(100% + 20px);", self.styles)
+        self.assertIn("box-shadow: none;", self.styles)
+        self.assertIn("FilterMultiSelect.create", self.source)
+        self.assertIn('brands: productFilterValue("brands")', self.source)
+        self.assertIn('sku_classes: productFilterValue("sku_classes")', self.source)
+        self.assertIn('parent_codes: productFilterValue("parent_codes")', self.source)
+        self.assertIn('horizon: numeric("horizon")', self.source)
+        self.assertIn('minimum_actual_volume: numeric("minimum_actual_volume") ?? 0', self.source)
+        self.assertIn("candidate.setValue(selected)", self.source)
+        self.assertIn("timelines.forEach", self.source)
+        self.assertIn(".filter-multiselect__popover {", self.styles)
+        self.assertIn(".filter-multiselect__option {", self.styles)
+        self.assertIn('aria-disabled="${isDisabled}"', self.filter_multiselect)
+        self.assertIn("option.disabled", self.filter_multiselect)
+        self.assertIn("options.product_availability", self.source)
+        self.assertIn("disabled: !availableBrands.has(value)", self.source)
+        self.assertIn("disabled: !availableSkuClasses.has(value)", self.source)
+        self.assertIn("filter_adjustments", self.source)
+        self.assertIn('removed_product_selections', self.source)
+        self.assertIn('["parent_codes", "Parent product"]', self.source)
 
     def test_revision_scatter_has_local_sku_class_filter_and_full_default_viewbox(self) -> None:
+        scatter = self.source[
+            self.source.index("  function scatterChart(") : self.source.index(
+                "  function pairedScatter("
+            )
+        ]
         self.assertIn('data-scatter-sku-class', self.source)
         self.assertIn('revisionScatterSkuClass', self.source)
         self.assertIn('data-tooltip-sku-class', self.source)
-        self.assertNotIn('preserveAspectRatio="none"', self.source)
+        self.assertIn('let revisionScatterMode = "error";', self.source)
+        self.assertIn('"mode-error", "Error"', self.source)
+        self.assertIn('aria-label="Size bubbles by latest-vintage absolute error"', self.source)
+        self.assertIn('data-radius-error', self.source)
+        self.assertIn('data-tooltip-absolute-error', self.source)
+        self.assertIn('Latest-vintage absolute error', self.source)
+        self.assertIn('Size by volume / Uniform dots', self.index)
+        self.assertNotIn('preserveAspectRatio="none"', scatter)
         self.assertIn('const centerX = baseWidth / 2 + revisionScatterPan.x', self.source)
         self.assertIn('Seasonal extremes retained · six-month median', self.source)
+        self.assertIn('six complete target months × five vintages', self.source)
+        self.assertNotIn('selected end month · five vintages per month', self.source)
         self.assertNotIn('Winsorized months', self.source)
         self.assertIn('.scatter-toolbar__filter', self.styles)
         self.assertIn('Out of scope · super seasonal:', self.source)
@@ -616,7 +747,32 @@ class DashboardUiSourceContractTests(unittest.TestCase):
         self.assertIn('"postmortem-revision": {', self.source)
         self.assertIn('"product-history": {', self.source)
         self.assertIn("function renderProductPostmortem", self.source)
-        self.assertIn("function productPerformanceChart", self.source)
+        self.assertIn("Actual demand + forward outlook", self.index)
+        self.assertIn("data-year-overlay-summary", self.index)
+        self.assertIn("data-year-overlay-legend", self.index)
+        self.assertIn("function productYearOverlayChart", self.source)
+        self.assertIn("function yearOverlayLegend", self.source)
+        self.assertIn("function toggleYearOverlay", self.source)
+        self.assertIn("function resetYearOverlay", self.source)
+        self.assertIn("function productLongHorizonChart", self.source)
+        self.assertIn("function financialYearLabel", self.source)
+        self.assertIn('data-year-overlay-mode="long"', self.source)
+        self.assertIn("FINANCIAL_MONTH_NAMES", self.source)
+        self.assertIn('data-year-overlay-year="${year}"', self.source)
+        self.assertIn("data-year-overlay-reset", self.source)
+        self.assertIn('data-tooltip-kind="year-overlay"', self.source)
+        self.assertIn('data-tooltip-year-series', self.source)
+        self.assertIn('label: "Forecast run"', self.source)
+        self.assertIn('label: "FY"', self.source)
+        self.assertIn('yearOverlayPath(forecast, x, y, "forecast", color)', self.source)
+        self.assertIn("year-overlay-fy-separator", self.styles)
+        self.assertIn("fiscal_year", self.source)
+        self.assertIn('aria-label="Actual demand and forward forecast by FY"', self.source)
+        self.assertIn(".year-overlay-month-hit", self.styles)
+        self.assertIn(".year-overlay-path.forecast", self.styles)
+        self.assertIn("stroke-dasharray: 7 5", self.styles)
+        self.assertIn(".year-overlay-control.is-off", self.styles)
+        self.assertIn(".chart--overview .chart__month-hit:not(.chart__volume-hit)", self.source)
         self.assertIn("function productRevisionOutcomeChart", self.source)
         self.assertIn("function productCommentary", self.source)
         self.assertIn("function productPeerBenchmark", self.source)
@@ -627,37 +783,184 @@ class DashboardUiSourceContractTests(unittest.TestCase):
         self.assertIn("var(--mono)", self.styles)
         self.assertNotIn("linear-gradient", self.index[self.index.index('id=\"pane-history\"'):self.index.index('id=\"pane-quality\"')])
 
-    def test_revision_outcomes_table_is_replaced_by_month_band_sparklines(self) -> None:
+    def test_revision_history_is_stepped_effectiveness_evolution_with_overlay(self) -> None:
         self.assertIn("function revisionHistoryChart(history)", self.source)
-        self.assertIn('payload.revision_history', self.source)
+        self.assertIn("function effectivenessScoreTone(score)", self.source)
+        self.assertIn("function effectivenessScoreLabel(score)", self.source)
+        self.assertIn("function revisionEffectivenessOverlay(month, point)", self.source)
+        self.assertIn("function openRevisionEffectiveness(month, point, trigger)", self.source)
+        self.assertIn("function closeRevisionEffectiveness", self.source)
+        self.assertIn("function openRevisionEffectivenessPoint", self.source)
+        self.assertIn("function revisionEffectivenessGuideButton", self.source)
+        self.assertIn("function openRevisionEffectivenessGuide", self.source)
+        self.assertIn("function closeRevisionEffectivenessGuide", self.source)
+        self.assertIn("const width = 720", self.source)
+        self.assertIn("const height = 300", self.source)
         self.assertIn('class="revision-history__band"', self.source)
         self.assertIn('data-target-month=', self.source)
-        self.assertIn('data-interpolation="linear"', self.source)
-        self.assertIn('class="chart__point revision-history__endpoint', self.source)
-        self.assertIn('data-tooltip-kind="revision-history"', self.source)
-        self.assertIn('data-tooltip-kind="revision-history-segment"', self.source)
-        self.assertIn("revision-history__segment--${escapeHtml(outcome)}", self.source)
-        self.assertIn('revision-history__segment--improved', self.styles)
-        self.assertIn('revision-history__segment--worsened', self.styles)
-        self.assertIn('revision-history__segment--neutral', self.styles)
-        self.assertIn("Net FA vs oldest", self.source)
-        self.assertIn("Within each month band: oldest → latest forecast version", self.source)
-        self.assertIn("Green improved FA", self.source)
-        self.assertIn("Red worsened FA", self.source)
-        self.assertIn("Shared y-axis · fixed product cohort per month", self.source)
-        self.assertIn('data-chart-fullscreen="revision-history"', self.source)
+        self.assertIn("H ${current.x} V ${current.y}", self.source)
+        self.assertIn('class="chart__point revision-history__point', self.source)
+        self.assertIn('data-tooltip-kind="revision-effectiveness"', self.source)
+        self.assertIn(
+            'data-tooltip-kind="revision-effectiveness-segment"', self.source
+        )
+        self.assertIn("revision-history__node--${tone}", self.source)
+        self.assertIn("Balanced revision effectiveness score", self.source)
+        self.assertIn("Each month resets at V1", self.source)
+        self.assertIn("Click any vintage for the breakdown", self.source)
+        self.assertIn("Revision effectiveness evolution", self.source)
+        self.assertIn('revisionFullscreenMenu("revision-history", "scatter")', self.source)
         self.assertIn('"revision-history": {', self.source)
-        self.assertIn("renderPayload: (payload) =>", self.source)
         self.assertIn("revisionHistoryChart(payload.revision_history)", self.source)
-        self.assertIn("data-chart-kind=\"revision-history\"", self.styles)
-        self.assertNotIn("function revisionTable(rows)", self.source)
-        self.assertNotIn("<b>Outcome</b><strong>Rows</strong>", self.source)
-        self.assertIn("stroke-linejoin: round", self.styles)
-        self.assertIn(".revision-history__endpoint", self.styles)
+        self.assertIn('id="revision-effectiveness-dialog"', self.index)
+        self.assertIn("data-effectiveness-body", self.index)
+        self.assertIn('data-action="revision-effectiveness-close"', self.index)
+        self.assertIn('id="revision-effectiveness-guide-dialog"', self.index)
+        self.assertIn(
+            'data-action="revision-effectiveness-guide-open"', self.source
+        )
+        self.assertIn(
+            'data-action="revision-effectiveness-guide-close"', self.index
+        )
+        self.assertIn("Two related measures, two different questions", self.index)
+        self.assertIn("Three ingredients build the score", self.index)
+        self.assertIn("With the forecasting team", self.index)
+        self.assertIn("With the business team", self.index)
+        self.assertIn(".chart-guide-trigger", self.styles)
+        self.assertIn(".revision-effectiveness-guide-dialog", self.styles)
+        self.assertIn("overflow: hidden", self.styles)
+        self.assertIn(".revision-history__point", self.styles)
+        self.assertIn(".revision-history__baseline", self.styles)
         self.assertIn(".revision-history__separator", self.styles)
         self.assertIn(".revision-history__segment--improved", self.styles)
         self.assertIn(".revision-history__segment--worsened", self.styles)
         self.assertIn(".revision-history__segment--neutral", self.styles)
+        self.assertIn(".revision-effectiveness-dialog", self.styles)
+        self.assertIn(".revision-effectiveness__summary", self.styles)
+        self.assertIn(".revision-effectiveness__metrics", self.styles)
+        self.assertNotIn("function revisionTable(rows)", self.source)
+        self.assertNotIn("<b>Outcome</b><strong>Rows</strong>", self.source)
+        self.assertNotIn('data-interpolation="linear"', self.source)
+
+    def test_comparison_scatter_and_kpis_use_full_canvas_explainers(self) -> None:
+        self.assertIn("function revisionScatterGuideButton", self.source)
+        self.assertIn("function openRevisionScatterGuide", self.source)
+        self.assertIn("function closeRevisionScatterGuide", self.source)
+        self.assertIn('data-action="revision-scatter-guide-open"', self.source)
+        self.assertIn('id="revision-scatter-guide-dialog"', self.index)
+        self.assertIn('data-action="revision-scatter-guide-close"', self.index)
+        self.assertIn("Start with the two axes", self.index)
+        self.assertIn("How one bubble is calculated", self.index)
+        self.assertIn("Use the controls intentionally", self.index)
+        self.assertIn("Heatmap = concentration, not performance", self.index)
+        self.assertIn("14 × 8 cells", self.index)
+        self.assertIn("counts", self.index)
+        self.assertIn("parents, not KL or impact", self.index)
+        self.assertIn("heatmap as population context", self.index)
+        self.assertIn(".scatter-guide__body", self.styles)
+        self.assertIn(".scatter-guide__quadrant", self.styles)
+        self.assertIn(".scatter-guide__heat-cells", self.styles)
+        self.assertIn(".scatter-guide__heatmap-scale", self.styles)
+        self.assertIn(".chart-dialog-pair__title-row", self.styles)
+
+        self.assertIn("function comparisonKpiGuideButton", self.source)
+        self.assertIn("function openComparisonKpiGuide", self.source)
+        self.assertIn("function closeComparisonKpiGuide", self.source)
+        self.assertIn('data-action="comparison-kpi-guide-open"', self.source)
+        self.assertIn('id="comparison-kpi-guide-dialog"', self.index)
+        self.assertIn('data-comparison-kpi-guide="accuracy-delta"', self.index)
+        self.assertIn('data-comparison-kpi-guide="effectiveness"', self.index)
+        self.assertIn('data-comparison-kpi-guide="error-improvement"', self.index)
+        self.assertIn("How to read vintage accuracy delta", self.source)
+        self.assertIn("How to read revision effectiveness", self.source)
+        self.assertIn("How to read total error improvement", self.source)
+        self.assertIn("Always triangulate", self.index)
+        self.assertIn("all three cards", self.index)
+        self.assertIn(".kpi-guide-trigger", self.styles)
+        self.assertIn(".comparison-kpi-guide__body", self.styles)
+        self.assertIn(".comparison-kpi-guide__equation", self.styles)
+
+    def test_monthly_accuracy_chart_has_wape_gap_driver_overlay(self) -> None:
+        self.assertIn('id="vintage-gap-dialog"', self.index)
+        self.assertIn("data-vintage-gap-body", self.index)
+        self.assertIn('data-action="vintage-gap-close"', self.index)
+        self.assertIn("function openVintageGapDrilldown(point)", self.source)
+        self.assertIn("function renderVintageGapDrilldown()", self.source)
+        self.assertIn("function closeVintageGapDrilldown", self.source)
+        self.assertIn("function openVintageGapProduct(parentCode)", self.source)
+        self.assertIn('data-target-month="${escapeHtml(row.snop_month)}"', self.source)
+        self.assertIn('data-vintage-gap-enabled="${activePayload.options.some', self.source)
+        self.assertIn("Click for WAPE gap drivers", self.source)
+        self.assertIn("Select a historical vintage to see WAPE gap drivers", self.source)
+        self.assertIn('data-vintage-gap-mode="fixes"', self.source)
+        self.assertIn('data-vintage-gap-mode="regressions"', self.source)
+        self.assertIn("data-vintage-gap-brand", self.source)
+        self.assertIn("data-vintage-gap-parent", self.source)
+        self.assertIn("data-vintage-gap-show-all", self.source)
+        self.assertIn("data-vintage-gap-brand-search", self.source)
+        self.assertIn("data-vintage-gap-parent-search", self.source)
+        self.assertIn("data-vintage-gap-open-product", self.source)
+        self.assertIn('activate("history", { historyMode: "push" })', self.source)
+        self.assertIn('"api/vintage-gap-drilldown"', self.source)
+        self.assertIn('path == "/api/vintage-gap-drilldown"', self.server)
+        self.assertIn(".vintage-gap-dialog", self.styles)
+        self.assertIn(".vintage-gap__summary", self.styles)
+        self.assertIn(".vintage-gap__workspace", self.styles)
+        self.assertIn(".vintage-gap__brand-list", self.styles)
+        self.assertIn(".vintage-gap__parent-list", self.styles)
+        self.assertIn(".vintage-gap__parent-detail", self.styles)
+
+    def test_overview_kpis_and_charts_use_full_canvas_explainers(self) -> None:
+        self.assertIn("function overviewGuideButton", self.source)
+        self.assertIn("function openOverviewGuide", self.source)
+        self.assertIn("function closeOverviewGuide", self.source)
+        self.assertIn('data-action="overview-guide-open"', self.source)
+        self.assertIn('data-action="overview-guide-close"', self.index)
+        self.assertIn('id="overview-guide-dialog"', self.index)
+        for guide_key in (
+            "accuracy",
+            "bias",
+            "actual-volume",
+            "forecast-volume",
+            "wape",
+            "effectiveness",
+            "error-accumulated",
+            "accuracy-chart",
+            "volume-chart",
+        ):
+            self.assertIn(f'data-overview-guide="{guide_key}"', self.index)
+        self.assertIn('"accuracy-chart": {', self.source)
+        self.assertIn('"volume-chart": {', self.source)
+        self.assertIn('"error-accumulated": {', self.source)
+        self.assertIn('errorAccumulatedCard(payload, kpiRows),', self.source)
+        self.assertIn('label: "Error accumulated",', self.source)
+        self.assertIn("function renderErrorAccumulatedGuide", self.source)
+        self.assertIn("Every shaded gap becomes part of the total", self.source)
+        self.assertIn("First, measure the gap each month", self.index)
+        self.assertIn("Continuous shaded space between forecast and actual", self.index)
+        self.assertIn("data-error-accumulated-months", self.index)
+        self.assertIn("error-accumulated-guide__chart", self.styles)
+        self.assertIn("error-accumulated-guide__month-errors", self.styles)
+        self.assertIn('overviewGuideButton(\n                fullscreenTitle,', self.source)
+        self.assertIn("Read it as 100% minus the error burden", self.index)
+        self.assertIn("One shared cohort, recomputed", self.index)
+        self.assertIn("data-bias-guide-lanes", self.index)
+        self.assertIn("Each signed bracket is", self.index)
+        self.assertIn("function renderBiasGuide", self.source)
+        self.assertIn("One observation is one month", self.index)
+        self.assertIn("One shared scale, two boxes", self.index)
+        self.assertIn("Actual volume with the forecast laid over it", self.index)
+        self.assertIn("Each bracket is", self.index)
+        self.assertIn("data-wape-guide-lanes", self.index)
+        self.assertIn("function renderWapeGuide", self.source)
+        self.assertIn(".wape-guide__bracket", self.styles)
+        self.assertIn("Read it as a hit rate", self.index)
+        self.assertIn("Read every selected line", self.index)
+        self.assertIn("Bias uses the KPI vintage on this same cohort", self.index)
+        self.assertNotIn("Lines and bias bars use different parent sets", self.index)
+        self.assertIn(".has-overview-guide-dialog", self.styles)
+        self.assertIn(".overview-guide__boxes", self.styles)
+        self.assertIn(".overview-guide__micro", self.styles)
 
     def test_normal_filter_flow_uses_compact_and_lazy_module_endpoints(self) -> None:
         self.assertIn('jsonRequest("api/view/compact"', self.source)

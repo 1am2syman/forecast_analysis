@@ -1,0 +1,58 @@
+TAP version 13
+# Subtest: Overview bias/lines/cohort for m5
+ok 1 - Overview bias/lines/cohort for m5
+  ---
+  duration_ms: 23.89906
+  type: 'test'
+  ...
+# Subtest: Overview bias/lines/cohort for m3
+ok 2 - Overview bias/lines/cohort for m3
+  ---
+  duration_ms: 1.475848
+  type: 'test'
+  ...
+# Subtest: Overview bias/lines/cohort for m5,m4,m3
+ok 3 - Overview bias/lines/cohort for m5,m4,m3
+  ---
+  duration_ms: 1.384369
+  type: 'test'
+  ...
+# Subtest: Overview bias/lines/cohort for m4,m3
+ok 4 - Overview bias/lines/cohort for m4,m3
+  ---
+  duration_ms: 1.053269
+  type: 'test'
+  ...
+# Subtest: Overview bias/lines/cohort for latest-only
+ok 5 - Overview bias/lines/cohort for latest-only
+  ---
+  duration_ms: 1.036488
+  type: 'test'
+  ...
+# Subtest: Trends default keeps monthly-performance bias rather than opting into Overview policy
+ok 6 - Trends default keeps monthly-performance bias rather than opting into Overview policy
+  ---
+  duration_ms: 0.929047
+  type: 'test'
+  ...
+# Subtest: Missing primary bias does not silently fall back to monthly or latest bias
+ok 7 - Missing primary bias does not silently fall back to monthly or latest bias
+  ---
+  duration_ms: 0.535515
+  type: 'test'
+  ...
+# Subtest: Vintage colors are stable through deselection and agree between chart legends
+ok 8 - Vintage colors are stable through deselection and agree between chart legends
+  ---
+  duration_ms: 0.918136
+  type: 'test'
+  ...
+1..8
+# tests 8
+# suites 0
+# pass 8
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 160.064863

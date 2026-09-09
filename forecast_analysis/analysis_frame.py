@@ -8,6 +8,7 @@ import polars as pl
 
 from .actuals import load_actuals
 from .contracts import (
+    ACTUAL_COLUMNS,
     ACTUAL_POPULATION_COLUMNS,
     ANALYSIS_DATASET_COLUMNS,
     AnalysisDataset,
@@ -140,5 +141,8 @@ def build_analysis_dataset(inputs: AnalysisInputs) -> AnalysisDataset:
         frame=frame,
         diagnostics=build_population_diagnostics(frame),
         actual_population=_build_actual_population(inputs, sku_classifications),
+        actual_history=actual_history.select(ACTUAL_COLUMNS).sort(
+            ["parent_code", "snop_month"]
+        ),
         hierarchy_diagnostics=inputs.hierarchy_diagnostics,
     )

@@ -28,12 +28,15 @@ from forecast_analysis import (
     build_analysis_dataset,
     build_common_vintage_accuracy,  # pyright: ignore[reportAttributeAccessIssue]
     build_dashboard_view,
+    build_vintage_gap_drilldown,  # pyright: ignore[reportAttributeAccessIssue]
     build_product_detail,
     build_product_postmortem,  # pyright: ignore[reportAttributeAccessIssue]
+    build_product_year_overlay,  # pyright: ignore[reportAttributeAccessIssue]
     load_analysis_inputs,
     with_display_brand,
 )
 from forecast_analysis.dashboard import DashboardView
+from forecast_analysis.filters import available_product_filter_values
 from forecast_analysis.sku_classification import SKU_CLASSES  # pyright: ignore[reportMissingImports]
 
 DEFAULT_FORECAST_HISTORY = Path(
@@ -263,7 +266,8 @@ def _revision_action_payload(
         }
 
     valid = frame.filter(
-        pl.col("revision_kl").is_not_null()
+        (pl.col("pair_status") == "complete")
+        & pl.col("revision_kl").is_not_null()
         & pl.col("error_improvement_kl").is_not_null()
     )
     material = valid.filter(pl.col("revision_kl").abs() > tolerance_kl)
@@ -442,6 +446,82 @@ def _revision_drilldown_payload(
     }
 
 
+def _bounded_score(value: float) -> float:
+    return max(-1.0, min(1.0, value))
+
+
+def _add_revision_effectiveness_scores(points: list[dict[str, Any]]) -> None:
+    """Add cumulative, explainable effectiveness scores to vintage points.
+
+    V1 is a neutral score baseline. Each later vintage scores the cumulative
+    path from V1 through that vintage using accuracy gain (50%), error removed
+    per forecast movement (30%), and movement-weighted consistency (20%).
+    """
+    if not points:
+        return
+    oldest_error = cast(float, points[0].get("absolute_error_kl") or 0.0)
+    error_denominator = max(abs(oldest_error), 1.0)
+    cumulative_movement = 0.0
+    helpful_movement = 0.0
+    harmful_movement = 0.0
+    helpful_count = 0
+    harmful_count = 0
+    neutral_count = 0
+    for index, point in enumerate(points):
+        if index:
+            movement = cast(float, point.get("revision_movement_kl") or 0.0)
+            cumulative_movement += movement
+            outcome = point.get("revision_outcome")
+            if outcome == "improved":
+                helpful_movement += movement
+                helpful_count += 1
+            elif outcome == "worsened":
+                harmful_movement += movement
+                harmful_count += 1
+            else:
+                neutral_count += 1
+        current_error = cast(float, point.get("absolute_error_kl") or 0.0)
+        error_removed = oldest_error - current_error
+        accuracy_ratio = _bounded_score(error_removed / error_denominator)
+        efficiency_ratio = (
+            _bounded_score(error_removed / cumulative_movement)
+            if cumulative_movement
+            else 0.0
+        )
+        consistency_ratio = (
+            (helpful_movement - harmful_movement) / cumulative_movement
+            if cumulative_movement
+            else 0.0
+        )
+        score = 50.0 + 50.0 * (
+            0.50 * accuracy_ratio
+            + 0.30 * efficiency_ratio
+            + 0.20 * _bounded_score(consistency_ratio)
+        )
+        bounded_score = max(0.0, min(100.0, score))
+        previous_score = (
+            cast(float, points[index - 1]["revision_effectiveness_score"])
+            if index
+            else bounded_score
+        )
+        point.update(
+            {
+                "vintage_index": index + 1,
+                "revision_effectiveness_score": bounded_score,
+                "accuracy_gain_score": 50.0 + 50.0 * accuracy_ratio,
+                "revision_efficiency_score": 50.0 + 50.0 * efficiency_ratio,
+                "revision_consistency_score": 50.0
+                + 50.0 * _bounded_score(consistency_ratio),
+                "score_change": bounded_score - previous_score,
+                "cumulative_error_removed_kl": error_removed,
+                "cumulative_movement_kl": cumulative_movement,
+                "helpful_revision_count": helpful_count,
+                "harmful_revision_count": harmful_count,
+                "neutral_revision_count": neutral_count,
+            }
+        )
+
+
 def _revision_history_payload(
     view: DashboardView,
     source: str,
@@ -450,12 +530,13 @@ def _revision_history_payload(
 ) -> dict[str, Any]:
     """Build fixed-cohort forecast paths through the latest actual month.
 
-    Each target month is independent. Its oldest aggregate forecast is indexed
-    to zero, and later vintages show percentage movement from that baseline.
-    Only products present in every displayed vintage for that target month are
-    retained, so path movement reflects forecast revisions rather than changing
-    product coverage. Future forecast-only months are excluded by anchoring the
-    six-month window to the latest selected actual month.
+    Each target month is independent. Its five vintage points expose a
+    cumulative revision-effectiveness score, while the forecast and error
+    fields preserve the underlying revision evidence. Only products present in
+    every displayed vintage for that target month are retained, so movement
+    reflects forecast revisions rather than changing product coverage. Future
+    forecast-only months are excluded by anchoring the six-month window to the
+    latest selected actual month.
     """
     required = {
         "source",
@@ -498,18 +579,19 @@ def _revision_history_payload(
         & pl.col("forecast_kl").is_not_null()
         & pl.col("actual_kl").is_not_null()
     )
-    target_months = sorted(frame.get_column("snop_month").unique().to_list())[
-        -month_limit:
-    ]
+    target_months = sorted(frame.get_column("snop_month").unique().to_list())
     months: list[dict[str, Any]] = []
     for target_month in target_months:
         target_frame = frame.filter(pl.col("snop_month") == target_month)
         calculation_months = sorted(
             target_frame.get_column("calculation_month").unique().to_list()
-        )
+        )[-5:]
         vintage_count = len(calculation_months)
-        if vintage_count == 0:
+        if vintage_count < 5:
             continue
+        target_frame = target_frame.filter(
+            pl.col("calculation_month").is_in(calculation_months)
+        )
         common_products = (
             target_frame.group_by("parent_code")
             .agg(pl.col("calculation_month").n_unique().alias("vintage_count"))
@@ -518,9 +600,21 @@ def _revision_history_payload(
         )
         if common_products.height == 0:
             continue
-        history = (
+        cohort_history = (
             target_frame.join(common_products, on="parent_code", how="semi")
-            .group_by("calculation_month")
+            .sort(["parent_code", "calculation_month"])
+            .with_columns(
+                (
+                    pl.col("forecast_kl")
+                    - pl.col("forecast_kl").shift(1).over("parent_code")
+                )
+                .abs()
+                .fill_null(0.0)
+                .alias("_revision_movement_kl")
+            )
+        )
+        history = (
+            cohort_history.group_by("calculation_month")
             .agg(
                 pl.col("forecast_kl").sum().alias("forecast_kl"),
                 pl.when(pl.col("actual_kl") > 0)
@@ -533,6 +627,9 @@ def _revision_history_payload(
                 .otherwise(0.0)
                 .sum()
                 .alias("absolute_error_kl"),
+                pl.col("_revision_movement_kl")
+                .sum()
+                .alias("revision_movement_kl"),
             )
             .sort("calculation_month")
         )
@@ -600,12 +697,18 @@ def _revision_history_payload(
             .alias("revision_outcome")
         )
         points = _rows(history)
+        _add_revision_effectiveness_scores(points)
         latest = points[-1]
         months.append(
             {
                 "snop_month": _iso(target_month),
                 "vintage_count": history.height,
                 "product_count": common_products.height,
+                "effectiveness_baseline": 50.0,
+                "latest_effectiveness_score": latest["revision_effectiveness_score"],
+                "latest_accuracy_gain_score": latest["accuracy_gain_score"],
+                "latest_revision_efficiency_score": latest["revision_efficiency_score"],
+                "latest_revision_consistency_score": latest["revision_consistency_score"],
                 "actual_kl": latest["actual_kl"],
                 "oldest_calculation_month": points[0]["calculation_month"],
                 "latest_calculation_month": latest["calculation_month"],
@@ -627,11 +730,14 @@ def _revision_history_payload(
                 "points": points,
             }
         )
+    months = months[-month_limit:]
     return {
         "source": source,
         "month_limit": month_limit,
         "baseline": "oldest_available",
-        "latest_actual_month": _iso(latest_actual_month),
+        "latest_actual_month": (
+            months[-1]["snop_month"] if months else _iso(latest_actual_month)
+        ),
         "months": months,
     }
 
@@ -712,9 +818,28 @@ def _accuracy_vintage_rows(
         {
             "snop_month": _iso(row.target_month),
             "forecast_accuracy_pct": row.forecast_accuracy_pct,
+            "forecast_kl": row.forecast_kl,
+            "wape_pct": (
+                100.0
+                * row.absolute_error_numerator_kl
+                / row.actual_denominator_kl
+                if row.actual_denominator_kl > 0
+                else None
+            ),
+            "bias_pct": (
+                100.0 * row.bias_numerator_kl / row.actual_denominator_kl
+                if row.actual_denominator_kl > 0
+                else None
+            ),
+            "revision_effectiveness_pct": row.revision_effectiveness_pct,
+            "effectiveness_numerator": row.effectiveness_numerator,
+            "effectiveness_denominator": row.effectiveness_denominator,
             "eligible_parents": row.eligible_parents,
             "actual_denominator_kl": row.actual_denominator_kl,
             "absolute_error_numerator_kl": row.absolute_error_numerator_kl,
+            "latest_absolute_error_numerator_kl": (
+                row.latest_absolute_error_numerator_kl
+            ),
         }
         for row in series.rows
     ]
@@ -725,6 +850,7 @@ def _accuracy_vintages(
     source: str,
     selected_ids: list[str],
     horizons: list[int],
+    revision_tolerance_kl: float,
 ) -> dict[str, Any]:
     """Project canonical common-cohort results without hiding unselected options."""
     option_rules = _accuracy_vintage_rules(horizons)
@@ -734,6 +860,7 @@ def _accuracy_vintages(
         view.filtered_population,
         source,
         comparison_rules=selected_rules,
+        revision_tolerance_kl=revision_tolerance_kl,
     )
     selected_series = {series.rule_id: series for series in result.series}
 
@@ -756,6 +883,19 @@ def _accuracy_vintages(
 
     latest_rule = VintageRule.latest_available()
     latest = selected_series[latest_rule.label]
+    primary = result.series[0]
+    overview = result.overview
+    cohort_monthly = pl.DataFrame(
+        [
+            {
+                "actual_kl": row.actual_denominator_kl,
+                "forecast_kl": row.forecast_kl,
+            }
+            for row in primary.rows
+            if row.eligible_parents > 0
+        ],
+        schema={"actual_kl": pl.Float64, "forecast_kl": pl.Float64},
+    )
     return {
         "latest": {
             "id": latest.rule_id,
@@ -765,6 +905,144 @@ def _accuracy_vintages(
             "rows": _accuracy_vintage_rows(latest),
         },
         "options": options,
+        "overview": {
+            "primary": {
+                "id": overview.primary_rule_id,
+                "label": overview.primary_label,
+                "rule": {
+                    "kind": primary.rule.kind,
+                    "value": _json_value(primary.rule.value),
+                },
+            },
+            "cohort_months": cohort_monthly.height,
+            "wape_examples": [
+                {
+                    "parent_code": row.parent_code,
+                    "parent_description": row.parent_description,
+                    "snop_month": _iso(row.target_month),
+                    "forecast_kl": row.forecast_kl,
+                    "actual_kl": row.actual_kl,
+                    "absolute_error_kl": row.absolute_error_kl,
+                    "direction": row.direction,
+                }
+                for row in result.wape_examples
+            ],
+            "metrics": {
+                "forecast_accuracy_pct": overview.forecast_accuracy_pct,
+                "wape_pct": overview.wape_pct,
+                "bias_pct": overview.bias_pct,
+                "accuracy_numerator_kl": overview.accuracy_numerator_kl,
+                "accuracy_denominator_actual_kl": (
+                    overview.accuracy_denominator_actual_kl
+                ),
+                "bias_numerator_kl": overview.bias_numerator_kl,
+                "bias_denominator_actual_kl": overview.bias_denominator_actual_kl,
+                "eligible_observations": overview.eligible_observations,
+                "accuracy_delta_pp": overview.accuracy_delta_pp,
+                "revision_effectiveness_pct": (
+                    overview.revision_effectiveness_pct
+                ),
+                "effectiveness_numerator": overview.effectiveness_numerator,
+                "effectiveness_denominator": overview.effectiveness_denominator,
+                "primary_error_kl": overview.primary_error_kl,
+                "latest_error_kl": overview.latest_error_kl,
+            },
+            "volume_distributions": {
+                "actual": _box_plot_summary(cohort_monthly, "actual_kl"),
+                "forecast": _box_plot_summary(cohort_monthly, "forecast_kl"),
+            },
+        },
+    }
+
+
+def _vintage_gap_payload(
+    view: DashboardView,
+    source: str,
+    selected_ids: list[str],
+    horizons: list[int],
+    target_month: date,
+) -> dict[str, Any]:
+    """Project one on-demand month-level WAPE reconciliation."""
+    option_rules = _accuracy_vintage_rules(horizons)
+    rules_by_id = {rule.label: rule for rule in option_rules}
+    selected_rules = tuple(
+        rule for rule in option_rules if rule.label in set(selected_ids)
+    )
+    if not selected_rules:
+        raise DashboardRequestError(
+            "select at least one historical accuracy vintage to inspect gap drivers"
+        )
+    result = build_vintage_gap_drilldown(
+        view.filtered_population,
+        source,
+        selected_rules,
+        target_month,
+    )
+    return {
+        "source": result.source,
+        "target_month": _iso(result.target_month),
+        "baseline": {
+            "id": result.baseline_rule_id,
+            "label": result.baseline_label,
+            "rule": {
+                "kind": rules_by_id[result.baseline_rule_id].kind,
+                "value": _json_value(rules_by_id[result.baseline_rule_id].value),
+            },
+        },
+        "latest": {
+            "id": result.latest_rule_id,
+            "label": result.latest_label,
+            "rule": {"kind": "latest_available", "value": None},
+        },
+        "summary": {
+            "eligible_parents": result.eligible_parents,
+            "actual_denominator_kl": result.actual_denominator_kl,
+            "baseline_absolute_error_kl": result.baseline_absolute_error_kl,
+            "latest_absolute_error_kl": result.latest_absolute_error_kl,
+            "baseline_wape_pct": result.baseline_wape_pct,
+            "latest_wape_pct": result.latest_wape_pct,
+            "net_wape_improvement_pp": result.net_wape_improvement_pp,
+            "gross_fix_kl": result.gross_fix_kl,
+            "gross_fix_wape_pp": result.gross_fix_wape_pp,
+            "regression_kl": result.regression_kl,
+            "regression_wape_pp": result.regression_wape_pp,
+        },
+        "brands": [
+            {
+                "brand": row.brand,
+                "parent_count": row.parent_count,
+                "actual_kl": row.actual_kl,
+                "baseline_forecast_kl": row.baseline_forecast_kl,
+                "latest_forecast_kl": row.latest_forecast_kl,
+                "baseline_absolute_error_kl": row.baseline_absolute_error_kl,
+                "latest_absolute_error_kl": row.latest_absolute_error_kl,
+                "error_change_kl": row.error_change_kl,
+                "wape_contribution_pp": row.wape_contribution_pp,
+                "gross_fix_kl": row.gross_fix_kl,
+                "gross_fix_wape_pp": row.gross_fix_wape_pp,
+                "regression_kl": row.regression_kl,
+                "regression_wape_pp": row.regression_wape_pp,
+            }
+            for row in result.brands
+        ],
+        "parents": [
+            {
+                "brand": row.brand,
+                "parent_code": row.parent_code,
+                "parent_description": row.parent_description,
+                "actual_kl": row.actual_kl,
+                "baseline_forecast_kl": row.baseline_forecast_kl,
+                "latest_forecast_kl": row.latest_forecast_kl,
+                "baseline_absolute_error_kl": row.baseline_absolute_error_kl,
+                "latest_absolute_error_kl": row.latest_absolute_error_kl,
+                "error_change_kl": row.error_change_kl,
+                "wape_contribution_pp": row.wape_contribution_pp,
+                "forecast_revision_kl": row.forecast_revision_kl,
+                "baseline_direction": row.baseline_direction,
+                "latest_direction": row.latest_direction,
+            }
+            for row in result.parents
+        ],
     }
 
 
@@ -793,6 +1071,38 @@ def _parse_string(
             f"{field} must be one of {', '.join(sorted(allowed))}"
         )
     return value
+
+
+def _parse_string_list(
+    payload: dict[str, Any],
+    field: str,
+    *,
+    allowed: set[str] | None = None,
+    maximum_items: int = 500,
+) -> tuple[str, ...]:
+    value = payload.get(field)
+    if value is None:
+        return ()
+    if not isinstance(value, list):
+        raise DashboardRequestError(f"{field} must be an array")
+    if len(value) > maximum_items:
+        raise DashboardRequestError(
+            f"{field} must contain at most {maximum_items} values"
+        )
+    normalized: list[str] = []
+    for item in value:
+        if not isinstance(item, str):
+            raise DashboardRequestError(f"{field} must contain strings")
+        item = item.strip()
+        if not item:
+            raise DashboardRequestError(f"{field} must not contain empty strings")
+        if allowed is not None and item not in allowed:
+            raise DashboardRequestError(
+                f"{field} must contain only {', '.join(sorted(allowed))}"
+            )
+        if item not in normalized:
+            normalized.append(item)
+    return tuple(normalized)
 
 
 def _parse_int(
@@ -935,6 +1245,7 @@ class DashboardDataService:
         refresh_timestamp: str,
         source_label: str,
         cache_size: int = 32,
+        today: date | None = None,
     ) -> None:
         if cache_size < 1:
             raise ValueError("cache_size must be positive")
@@ -942,6 +1253,7 @@ class DashboardDataService:
         self.refresh_timestamp = refresh_timestamp
         self.source_label = source_label
         self.cache_size = cache_size
+        self.current_month = (today or date.today()).replace(day=1)
         self.dataset_version = self._build_dataset_version()
         self._cache: OrderedDict[str, _ComputedView] = OrderedDict()
         self._options_cache: dict[tuple[str, bool], dict[str, Any]] = {}
@@ -957,6 +1269,7 @@ class DashboardDataService:
         actuals_path: Path = DEFAULT_ACTUALS,
         *,
         cache_size: int = 32,
+        today: date | None = None,
     ) -> "DashboardDataService":
         paths = (
             Path(forecast_history_path).resolve(),
@@ -970,6 +1283,7 @@ class DashboardDataService:
             refresh_timestamp=_latest_timestamp(paths),
             source_label=" · ".join(path.name for path in paths),
             cache_size=cache_size,
+            today=today,
         )
 
     def bootstrap(self) -> dict[str, Any]:
@@ -1000,14 +1314,15 @@ class DashboardDataService:
             source="ml",
             comparison_mode=False,
         )
+        default_target_end = self._latest_completed_target_month(months)
         return {
             "source": "ml",
             "comparison_mode": False,
             "target_start": _iso(months[0]) if months else None,
-            "target_end": _iso(months[-1]) if months else None,
-            "brand": None,
-            "sku_class": None,
-            "parent_code": None,
+            "target_end": _iso(default_target_end) if default_target_end else None,
+            "brands": [],
+            "sku_classes": [],
+            "parent_codes": [],
             "horizon": None,
             "minimum_actual_volume": 0.0,
             "vintage_a": {"kind": "oldest_available", "value": None},
@@ -1053,7 +1368,7 @@ class DashboardDataService:
             raise DashboardRequestError(
                 f"unsupported dashboard module {module_name!r}"
             )
-        request, _, _, _, _ = self._normalize_request(raw_request)
+        request, _, _, _, _, _ = self._normalize_request(raw_request)
         if module_name == "product":
             base_request = dict(request)
             base_request["product_parent_code"] = None
@@ -1079,12 +1394,36 @@ class DashboardDataService:
 
     def product_detail(self, raw_request: dict[str, Any]) -> dict[str, Any] | None:
         """Build one product history from an already cacheable filter scope."""
-        request, _, _, _, _ = self._normalize_request(raw_request)
+        request, _, _, _, _, _ = self._normalize_request(raw_request)
         base_request = dict(request)
         base_request["product_parent_code"] = None
         base_request["product_target_month"] = None
         base_view = self._computed(base_request).view
         return self._build_product_payload(base_view, request)
+
+    def vintage_gap_drilldown(self, raw_request: dict[str, Any]) -> dict[str, Any]:
+        """Return one month of brand and parent WAPE-gap contributions."""
+        target_month = _parse_date(
+            raw_request.get("vintage_gap_target_month"),
+            "vintage_gap_target_month",
+        )
+        if target_month is None:
+            raise DashboardRequestError("vintage_gap_target_month is required")
+        request, options, _, _, _, _ = self._normalize_request(raw_request)
+        computed = self._computed(request)
+        drilldown = _vintage_gap_payload(
+            computed.view,
+            request["source"],
+            request["accuracy_vintage_ids"],
+            cast(list[int], options["horizons"]),
+            target_month,
+        )
+        return {
+            "contract": {"name": "vintage-gap-drilldown", "version": 1},
+            "meta": self._meta_payload(computed),
+            "request": request,
+            "drilldown": drilldown,
+        }
 
     def export_csv(
         self,
@@ -1149,9 +1488,14 @@ class DashboardDataService:
     def _computed(self, raw_request: dict[str, Any]) -> _ComputedView:
         if not isinstance(raw_request, dict):
             raise DashboardRequestError("request body must be a JSON object")
-        request, options, filters, vintage_a, vintage_b = self._normalize_request(
-            raw_request
-        )
+        (
+            request,
+            options,
+            filters,
+            vintage_a,
+            vintage_b,
+            filter_adjustments,
+        ) = self._normalize_request(raw_request)
         analysis_request = dict(request)
         analysis_request.pop("accuracy_vintage_ids")
         key = json.dumps(analysis_request, sort_keys=True, separators=(",", ":"))
@@ -1168,14 +1512,16 @@ class DashboardDataService:
             else:
                 owner = False
         if cached is not None:
-            return self._with_accuracy_selection(cached, request)
+            selected = self._with_accuracy_selection(cached, request)
+            return self._with_filter_adjustments(selected, filter_adjustments)
         if not owner:
             pending.ready.wait()
             if pending.error is not None:
                 raise pending.error
             if pending.result is None:
                 raise RuntimeError("dashboard computation completed without a result")
-            return self._with_accuracy_selection(pending.result, request)
+            selected = self._with_accuracy_selection(pending.result, request)
+            return self._with_filter_adjustments(selected, filter_adjustments)
 
         try:
             view = build_dashboard_view(
@@ -1204,7 +1550,21 @@ class DashboardDataService:
             self._inflight.pop(key, None)
             pending.result = computed
             pending.ready.set()
-        return computed
+        return self._with_filter_adjustments(computed, filter_adjustments)
+
+    @staticmethod
+    def _with_filter_adjustments(
+        computed: _ComputedView,
+        filter_adjustments: dict[str, dict[str, int]],
+    ) -> _ComputedView:
+        payload = {**computed.payload, "filter_adjustments": filter_adjustments}
+        return _ComputedView(
+            computed.request,
+            computed.options,
+            computed.view,
+            computed.product_detail,
+            payload,
+        )
 
     def _with_accuracy_selection(
         self,
@@ -1222,6 +1582,7 @@ class DashboardDataService:
                 request["source"],
                 request["accuracy_vintage_ids"],
                 cast(list[int], computed.options["horizons"]),
+                request["revision_tolerance_kl"],
             ),
         }
         return _ComputedView(
@@ -1240,6 +1601,7 @@ class DashboardDataService:
         DashboardFilters,
         VintageRule | None,
         VintageRule | None,
+        dict[str, dict[str, int]],
     ]:
         source = _parse_string(
             raw, "source", default="ml", allowed={"tm", "ml"}
@@ -1247,18 +1609,111 @@ class DashboardDataService:
         comparison_mode = _parse_bool(raw, "comparison_mode")
         options = self._filter_options(source, comparison_mode)
 
-        brand = _parse_string(raw, "brand")
-        sku_class = _parse_string(
+        requested_brands = _parse_string_list(raw, "brands")
+        if not requested_brands and (
+            legacy_brand := _parse_string(raw, "brand")
+        ) is not None:
+            requested_brands = (legacy_brand,)
+        requested_sku_classes = _parse_string_list(
             raw,
-            "sku_class",
+            "sku_classes",
             allowed=set(SKU_CLASSES),
         )
-        parent_code = _parse_int(raw, "parent_code", minimum=0)
+        if not requested_sku_classes and (
+            legacy_sku_class := _parse_string(
+                raw,
+                "sku_class",
+                allowed=set(SKU_CLASSES),
+            )
+        ) is not None:
+            requested_sku_classes = (legacy_sku_class,)
+        requested_parent_codes = _parse_int_list(
+            raw,
+            "parent_codes",
+            minimum=0,
+            maximum_items=500,
+        )
+        if not requested_parent_codes and (
+            legacy_parent_code := _parse_int(raw, "parent_code", minimum=0)
+        ) is not None:
+            requested_parent_codes = (legacy_parent_code,)
         drilldown_parent_codes = _parse_int_list(
             raw,
             "drilldown_parent_codes",
             minimum=0,
         )
+
+        source_product_availability = available_product_filter_values(
+            self.dataset.frame,
+            source,
+            comparison_mode=comparison_mode,
+        )
+        available_brands = set(cast(list[str], options["brands"]))
+        available_sku_classes = set(
+            cast(list[str], source_product_availability["sku_classes"])
+        )
+        available_parent_codes = {
+            cast(int, row["parent_code"])
+            for row in cast(list[dict[str, Any]], options["parent_products"])
+        }
+        brands = tuple(
+            value for value in requested_brands if value in available_brands
+        )
+        sku_classes = tuple(
+            value
+            for value in requested_sku_classes
+            if value in available_sku_classes
+        )
+        parent_codes = tuple(
+            value
+            for value in requested_parent_codes
+            if value in available_parent_codes
+        )
+        filter_adjustments = {
+            "removed_product_selections": {
+                "brands": len(requested_brands) - len(brands),
+                "sku_classes": len(requested_sku_classes) - len(sku_classes),
+                "parent_codes": len(requested_parent_codes) - len(parent_codes),
+            }
+        }
+
+        product_availability = available_product_filter_values(
+            self.dataset.frame,
+            source,
+            comparison_mode=comparison_mode,
+            brands=brands or None,
+            sku_classes=sku_classes or None,
+            parent_codes=parent_codes or None,
+        )
+        incompatible_fields: list[str] = []
+        if set(brands) - set(cast(list[str], product_availability["brands"])):
+            incompatible_fields.append("brands")
+        if set(sku_classes) - set(
+            cast(list[str], product_availability["sku_classes"])
+        ):
+            incompatible_fields.append("sku_classes")
+        if set(parent_codes) - set(
+            cast(list[int], product_availability["parent_codes"])
+        ):
+            incompatible_fields.append("parent_codes")
+        if incompatible_fields:
+            raise DashboardRequestError(
+                "product filters are mutually incompatible: "
+                + ", ".join(incompatible_fields)
+            )
+
+        compatible_parent_codes = set(
+            cast(list[int], product_availability["parent_codes"])
+        )
+        options = {
+            **options,
+            "parent_products": [
+                row
+                for row in cast(list[dict[str, Any]], options["parent_products"])
+                if cast(int, row["parent_code"]) in compatible_parent_codes
+            ],
+            "product_availability": product_availability,
+        }
         horizon = _parse_int(raw, "horizon", minimum=0)
         available_horizons = cast(list[int], options["horizons"])
         accuracy_vintage_ids = _parse_accuracy_vintage_ids(
@@ -1342,13 +1797,9 @@ class DashboardDataService:
             options,
             source=source,
             comparison_mode=comparison_mode,
-            brand=brand,
-            sku_class=sku_class,
-            parent_codes=(
-                (parent_code,)
-                if parent_code is not None
-                else drilldown_parent_codes or None
-            ),
+            brands=brands or None,
+            sku_classes=sku_classes or None,
+            parent_codes=parent_codes or drilldown_parent_codes or None,
             horizon=horizon,
             hierarchy_status=hierarchy_status,
             actual_status=actual_status,
@@ -1359,7 +1810,14 @@ class DashboardDataService:
                 minimum=0.0,
             ),
         )
-        options = {**options, "target_months": available_months}
+        latest_completed_target_month = self._latest_completed_target_month(
+            available_months
+        )
+        options = {
+            **options,
+            "target_months": available_months,
+            "latest_completed_target_month": latest_completed_target_month,
+        }
         target_start = _parse_date(raw.get("target_start"), "target_start")
         target_end = _parse_date(raw.get("target_end"), "target_end")
         if available_months:
@@ -1368,7 +1826,9 @@ class DashboardDataService:
                 target_start = available_months[0]
             elif target_start > latest_actual_month:
                 target_start = latest_actual_month
-            if target_end is None or target_end > latest_actual_month:
+            if target_end is None:
+                target_end = latest_completed_target_month
+            elif target_end > latest_actual_month:
                 target_end = latest_actual_month
         if target_start and target_end and target_start > target_end:
             raise DashboardRequestError("target_start must be on or before target_end")
@@ -1394,9 +1854,9 @@ class DashboardDataService:
             "comparison_mode": comparison_mode,
             "target_start": _iso(target_start) if target_start else None,
             "target_end": _iso(target_end) if target_end else None,
-            "brand": brand,
-            "sku_class": sku_class,
-            "parent_code": parent_code,
+            "brands": list(brands),
+            "sku_classes": list(sku_classes),
+            "parent_codes": list(parent_codes),
             "horizon": horizon,
             "minimum_actual_volume": _parse_float(
                 raw,
@@ -1457,13 +1917,9 @@ class DashboardDataService:
             comparison_mode=comparison_mode,
             comparison_horizon=comparison_horizon,
             target_months=target_months,
-            brands=_single_choice(brand),
-            sku_classes=_single_choice(sku_class),
-            parent_codes=(
-                (parent_code,)
-                if parent_code is not None
-                else tuple(normalized["drilldown_parent_codes"]) or None
-            ),
+            brands=brands or None,
+            sku_classes=sku_classes or None,
+            parent_codes=parent_codes or tuple(normalized["drilldown_parent_codes"]) or None,
             horizons=(horizon,) if horizon is not None else None,
             minimum_actual_volume=normalized["minimum_actual_volume"],
             hierarchy_statuses=_single_choice(hierarchy_status),
@@ -1492,7 +1948,7 @@ class DashboardDataService:
             top_n=normalized["top_n"],
             top_n_metric=top_n_metric,
         )
-        return normalized, options, filters, vintage_a, vintage_b
+        return normalized, options, filters, vintage_a, vintage_b, filter_adjustments
 
     def _parse_vintage_rule(
         self,
@@ -1536,14 +1992,21 @@ class DashboardDataService:
             )
         return VintageRule.specific_horizon(horizon)
 
+    def _latest_completed_target_month(self, months: list[date]) -> date | None:
+        """Return the latest month before the running month, with a safe fallback."""
+        if not months:
+            return None
+        completed = [month for month in months if month < self.current_month]
+        return completed[-1] if completed else months[-1]
+
     def _actual_target_months(
         self,
         options: dict[str, Any],
         *,
         source: str,
         comparison_mode: bool,
-        brand: str | None = None,
-        sku_class: str | None = None,
+        brands: tuple[str, ...] | None = None,
+        sku_classes: tuple[str, ...] | None = None,
         parent_codes: tuple[int, ...] | None = None,
         horizon: int | None = None,
         hierarchy_status: str | None = None,
@@ -1556,10 +2019,10 @@ class DashboardDataService:
             pl.col("source").is_in(selected_sources)
             & pl.col("actual_kl").is_not_null()
         )
-        if brand is not None:
-            actual_frame = actual_frame.filter(pl.col("brand_display") == brand)
-        if sku_class is not None:
-            actual_frame = actual_frame.filter(pl.col("sku_class") == sku_class)
+        if brands is not None:
+            actual_frame = actual_frame.filter(pl.col("brand_display").is_in(brands))
+        if sku_classes is not None:
+            actual_frame = actual_frame.filter(pl.col("sku_class").is_in(sku_classes))
         if parent_codes is not None:
             actual_frame = actual_frame.filter(pl.col("parent_code").is_in(parent_codes))
         if horizon is not None:
@@ -1610,6 +2073,7 @@ class DashboardDataService:
                 "refresh": self.refresh_timestamp,
                 "forecast_rows": self.dataset.frame.height,
                 "actual_rows": self.dataset.actual_population.height,
+                "actual_history_rows": self.dataset.actual_history.height,
             },
             sort_keys=True,
             separators=(",", ":"),
@@ -1628,6 +2092,7 @@ class DashboardDataService:
             "dataset_version": self.dataset_version,
             "dataset_rows": self.dataset.frame.height,
             "actual_population_rows": self.dataset.actual_population.height,
+            "actual_history_rows": self.dataset.actual_history.height,
             "synthetic": False,
         }
 
@@ -1653,6 +2118,7 @@ class DashboardDataService:
             "meta": self._meta_payload(computed),
             "request": computed.request,
             "options": self._options_payload(computed.options),
+            "filter_adjustments": payload["filter_adjustments"],
             "state": payload["state"],
             "population_summary": payload["population_summary"],
             "metrics": payload["metrics"],
@@ -1743,6 +2209,12 @@ class DashboardDataService:
             rolling_months=12,
             revision_tolerance_kl=request["revision_tolerance_kl"],
         )
+        year_overlay = build_product_year_overlay(
+            self.dataset.frame,
+            self.dataset.actual_history,
+            parent_code,
+            source=request["source"],
+        )
         return {
             "parent_code": detail.parent_code,
             "target_month": _iso(detail.target_month),
@@ -1759,6 +2231,20 @@ class DashboardDataService:
             "points": _frame_payload(detail.points, limit=120),
             "revisions": _frame_payload(detail.revisions, limit=40),
             "stability": _frame_payload(detail.stability),
+            "year_overlay": {
+                "source": year_overlay.source,
+                "forecast_run": (
+                    _iso(year_overlay.forecast_run)
+                    if year_overlay.forecast_run is not None
+                    else None
+                ),
+                "actual_through": (
+                    _iso(year_overlay.actual_through)
+                    if year_overlay.actual_through is not None
+                    else None
+                ),
+                "points": _frame_payload(year_overlay.points),
+            },
             "postmortem": {
                 "source": postmortem.source,
                 "sku_class": postmortem.sku_class,
@@ -1836,6 +2322,7 @@ class DashboardDataService:
                 request["source"],
                 request["accuracy_vintage_ids"],
                 cast(list[int], options["horizons"]),
+                request["revision_tolerance_kl"],
             ),
             "monthly_audit": _frame_payload(view.monthly_audit, limit=60),
             "horizon_performance": _frame_payload(view.horizon_performance, limit=30),
@@ -1868,9 +2355,15 @@ class DashboardDataService:
     def _options_payload(options: dict[str, Any]) -> dict[str, Any]:
         return {
             "target_months": [_iso(value) for value in options["target_months"]],
+            "latest_completed_target_month": (
+                _iso(value)
+                if (value := options["latest_completed_target_month"])
+                else None
+            ),
             "brands": options["brands"],
             "sku_classes": options["sku_classes"],
             "parent_products": options["parent_products"],
+            "product_availability": options["product_availability"],
             "horizons": options["horizons"],
             "common_horizons": options["common_horizons"],
             "default_comparison_horizon": options["default_comparison_horizon"],

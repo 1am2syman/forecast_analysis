@@ -1,0 +1,11 @@
+test_latest_only_and_duplicate_rule_contract (tests.test_common_vintage_accuracy.CommonVintageAccuracyTests.test_latest_only_and_duplicate_rule_contract) ... ok
+test_missing_selected_vintage_is_excluded_from_every_series (tests.test_common_vintage_accuracy.CommonVintageAccuracyTests.test_missing_selected_vintage_is_excluded_from_every_series) ... ok
+test_monthly_gap_drivers_reconcile_wape_by_parent_and_brand (tests.test_common_vintage_accuracy.CommonVintageAccuracyTests.test_monthly_gap_drivers_reconcile_wape_by_parent_and_brand) ... ok
+test_monthly_gap_drivers_require_a_historical_vintage (tests.test_common_vintage_accuracy.CommonVintageAccuracyTests.test_monthly_gap_drivers_require_a_historical_vintage) ... ok
+test_series_share_common_denominator_and_worked_fa_values (tests.test_common_vintage_accuracy.CommonVintageAccuracyTests.test_series_share_common_denominator_and_worked_fa_values) ... ok
+test_single_selected_vintage_becomes_overview_primary (tests.test_common_vintage_accuracy.CommonVintageAccuracyTests.test_single_selected_vintage_becomes_overview_primary) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.252s
+
+OK

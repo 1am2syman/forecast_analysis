@@ -379,7 +379,7 @@ async function main() {
         );
         assert(
           await page.evaluate(
-            `document.querySelectorAll('[data-kpis] .kpi').length === 6`,
+            `document.querySelectorAll('[data-kpis] .kpi').length === 7`,
           ),
           "Compact bootstrap did not paint overview KPIs",
         );
@@ -397,9 +397,15 @@ async function main() {
         `JSON.stringify([...document.querySelectorAll('[data-control]')].map((control) => ({name: control.dataset.control, tag: control.tagName, type: control.type, disabled: control.disabled, options: control.tagName === 'SELECT' ? [...control.options].map((option) => ({value: option.value, label: option.textContent})) : []})))`,
       ),
     );
-    const expectedControlNames = controlInventory
-      .map((control) => control.name)
-      .sort();
+    const productFilterInventory = JSON.parse(
+      await page.evaluate(
+        `JSON.stringify([...document.querySelectorAll('[data-product-filter]')].map((root) => root.dataset.productFilter))`,
+      ),
+    );
+    const expectedControlNames = [
+      ...controlInventory.map((control) => control.name),
+      ...productFilterInventory,
+    ].sort();
     const exercised = new Set();
 
     const resetShared = async () => {
@@ -471,26 +477,6 @@ async function main() {
       {
         name: "target_end",
         mutation: `(()=>{const c=document.querySelector('[data-control="target_end"]');c.selectedIndex=Math.max(0,c.options.length-2);c.dispatchEvent(new Event('change',{bubbles:true}));return c.value})()`,
-      },
-      {
-        name: "brand",
-        mutation: `(()=>{const c=document.querySelector('[data-control="brand"]');c.selectedIndex=Math.min(1,c.options.length-1);c.dispatchEvent(new Event('change',{bubbles:true}));return c.value})()`,
-      },
-      {
-        name: "sku_class",
-        mutation: `(()=>{const c=document.querySelector('[data-control="sku_class"]');c.selectedIndex=Math.min(1,c.options.length-1);c.dispatchEvent(new Event('change',{bubbles:true}));return c.value})()`,
-      },
-      {
-        name: "parent_code",
-        mutation: `(()=>{const c=document.querySelector('[data-control="parent_code"]');c.selectedIndex=Math.min(1,c.options.length-1);c.dispatchEvent(new Event('change',{bubbles:true}));return Number(c.value)})()`,
-      },
-      {
-        name: "horizon",
-        mutation: `(()=>{const c=document.querySelector('[data-control="horizon"]');c.selectedIndex=Math.min(1,c.options.length-1);c.dispatchEvent(new Event('change',{bubbles:true}));return Number(c.value)})()`,
-      },
-      {
-        name: "minimum_actual_volume",
-        mutation: `(()=>{const c=document.querySelector('[data-control="minimum_actual_volume"]');c.value='1';c.dispatchEvent(new Event('change',{bubbles:true}));return Number(c.value)})()`,
       },
       {
         name: "revision_direction",
@@ -568,67 +554,205 @@ async function main() {
         });
         const disabled = JSON.parse(
           await page.evaluate(
-            `JSON.stringify({source:document.querySelector('[data-control="source"]').disabled,vintage:document.querySelector('[data-vintage-group]').disabled,performance:document.querySelector('[data-performance-group]').disabled,horizon:document.querySelector('[data-control="horizon"]').value})`,
+            `JSON.stringify({source:document.querySelector('[data-control="source"]').disabled,performance:document.querySelector('[data-performance-group]').disabled,product:document.querySelector('[data-product-group]').disabled,productTriggers:[...document.querySelectorAll('[data-product-filter] [data-multiselect-trigger]')].map((button)=>button.disabled)})`,
           ),
         );
         assert(
           disabled.source &&
-            disabled.vintage &&
             disabled.performance &&
-            disabled.horizon !== "",
+            !disabled.product &&
+            disabled.productTriggers.every((value) => !value),
           "Comparison mode did not enforce its control contract",
         );
         return { ...detail, disabled };
       },
     );
 
-    for (const prefix of ["vintage_a", "vintage_b"]) {
-      await check(`shared control · ${prefix}_kind`, async () => {
-        const detail = await mutateShared({
-          name: `${prefix}_kind`,
-          expectedPath: `${prefix}.kind`,
-          mutation: `(()=>{const c=document.querySelector('[data-control="${prefix}_kind"]');c.value='specific_horizon';c.dispatchEvent(new Event('change',{bubbles:true}));return c.value})()`,
-        });
-        exercised.add(`${prefix}_value`);
-        return detail;
-      });
-      await check(`shared control · ${prefix}_value`, async () => {
+    const productCases = [
+      { name: "brands", query: "bbl", count: 2, numeric: false },
+      { name: "sku_classes", query: "unclass", count: 1, numeric: false },
+      { name: "parent_codes", query: "3584", count: 1, numeric: true },
+    ];
+    for (const testCase of productCases) {
+      await check(`product multi-select · ${testCase.name}`, async () => {
         await resetShared();
-        const kind = `${prefix}_kind`;
-        let before = await page.evaluate("window.__dashboardFetches.length");
-        await page.evaluate(
-          `(()=>{const c=document.querySelector('[data-control="${kind}"]');c.value='specific_horizon';c.dispatchEvent(new Event('change',{bubbles:true}))})()`,
+        const before = await page.evaluate("window.__dashboardFetches.length");
+        const selected = JSON.parse(
+          await page.evaluate(`(()=>{
+            const root=document.querySelector('[data-product-filter="${testCase.name}"]');
+            root.querySelector('[data-multiselect-trigger]').click();
+            const search=root.querySelector('[data-multiselect-search]');
+            search.value='${testCase.query}';
+            search.dispatchEvent(new Event('input',{bubbles:true}));
+            for(let index=0;index<${testCase.count};index+=1){
+              const option=[...root.querySelectorAll('[data-filter-option]')].find((item)=>item.getAttribute('aria-selected')==='false');
+              if(!option) throw new Error('Not enough matching ${testCase.name} options');
+              option.click();
+            }
+            const values=[...root.querySelectorAll('[data-filter-option][aria-selected="true"]')].map((item)=>${testCase.numeric ? "Number(item.dataset.filterOption)" : "item.dataset.filterOption"});
+            return JSON.stringify({values,summary:root.querySelector('[data-multiselect-summary]').textContent,query:search.value,open:!root.querySelector('[data-multiselect-popover]').hidden});
+          })()`),
         );
         await waitFor(
           page,
           `window.__dashboardFetches.slice(${before}).some((record) => record.url.includes('api/view/compact') && record.done && record.status === 200)`,
-          `${kind} setup`,
-        );
-        before = await page.evaluate("window.__dashboardFetches.length");
-        const selected = await page.evaluate(
-          `(()=>{const c=document.querySelector('[data-control="${prefix}_value"]');c.selectedIndex=c.options.length-1;c.dispatchEvent(new Event('change',{bubbles:true}));return Number(c.value)})()`,
-        );
-        await waitFor(
-          page,
-          `window.__dashboardFetches.slice(${before}).some((record) => record.url.includes('api/view/compact') && record.done && record.status === 200)`,
-          `${prefix}_value recomputation`,
+          `${testCase.name} recomputation`,
         );
         const record = JSON.parse(
           await page.evaluate(
-            `JSON.stringify(window.__dashboardFetches.slice(${before}).find((item) => item.url.includes('api/view/compact') && item.status === 200))`,
+            `JSON.stringify(window.__dashboardFetches.slice(${before}).findLast((item) => item.url.includes('api/view/compact') && item.status === 200))`,
           ),
         );
-        assert(record.status === 200, `${prefix}_value request failed`);
         const body = JSON.parse(record.body);
         assert(
-          body[prefix].kind === "specific_horizon" &&
-            Number(body[prefix].value) === selected,
-          `${prefix}_value was not submitted`,
+          JSON.stringify(body[testCase.name]) ===
+            JSON.stringify(selected.values),
+          `${testCase.name} request drifted: ${JSON.stringify(body[testCase.name])}`,
         );
-        exercised.add(`${prefix}_value`);
-        return { selected };
+        assert(
+          selected.summary === `${testCase.count} selected` &&
+            selected.query === testCase.query &&
+            selected.open,
+          `${testCase.name} did not retain its searchable multi-select state`,
+        );
+        exercised.add(testCase.name);
+        return selected;
       });
     }
+
+    await check("product multi-select clear and Escape behavior", async () => {
+      await resetShared();
+      await page.evaluate(
+        `(()=>{if(document.querySelector('#scope-drawer').hidden)document.querySelector('[data-action="scope"]').click()})()`,
+      );
+      let before = await page.evaluate("window.__dashboardFetches.length");
+      await page.evaluate(`(()=>{
+        const root=document.querySelector('[data-product-filter="brands"]');
+        root.querySelector('[data-multiselect-trigger]').click();
+        root.querySelector('[data-filter-option]').click();
+      })()`);
+      await waitFor(
+        page,
+        `window.__dashboardFetches.slice(${before}).some((record) => record.url.includes('api/view/compact') && record.done && record.status === 200)`,
+        "brand selection before clear",
+      );
+      before = await page.evaluate("window.__dashboardFetches.length");
+      await page.evaluate(
+        `document.querySelector('[data-product-filter="brands"] [data-multiselect-clear]').click()`,
+      );
+      await waitFor(
+        page,
+        `window.__dashboardFetches.slice(${before}).some((record) => record.url.includes('api/view/compact') && record.done && record.status === 200)`,
+        "brand clear all",
+      );
+      const clearedRecord = JSON.parse(
+        await page.evaluate(
+          `JSON.stringify(window.__dashboardFetches.slice(${before}).findLast((item) => item.url.includes('api/view/compact') && item.status === 200))`,
+        ),
+      );
+      assert(
+        JSON.parse(clearedRecord.body).brands.length === 0,
+        "Clear all did not submit an empty brand selection",
+      );
+      const escaped = JSON.parse(
+        await page.evaluate(`(()=>{
+          const root=document.querySelector('[data-product-filter="brands"]');
+          const search=root.querySelector('[data-multiselect-search]');
+          search.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));
+          return JSON.stringify({popoverHidden:root.querySelector('[data-multiselect-popover]').hidden,drawerHidden:document.querySelector('#scope-drawer').hidden,focusReturned:document.activeElement===root.querySelector('[data-multiselect-trigger]')});
+        })()`),
+      );
+      assert(
+        escaped.popoverHidden && !escaped.drawerHidden && escaped.focusReturned,
+        `Escape behavior drifted: ${JSON.stringify(escaped)}`,
+      );
+      return escaped;
+    });
+
+    await check("interconnected product facets", async () => {
+      await resetShared();
+      let before = await page.evaluate("window.__dashboardFetches.length");
+      await page.evaluate(
+        `(()=>{if(document.querySelector('#scope-drawer').hidden)document.querySelector('[data-action="scope"]').click();const root=document.querySelector('[data-product-filter="sku_classes"]');root.querySelector('[data-multiselect-trigger]').click();root.querySelector('[data-filter-option="A"]').click();root.querySelector('[data-multiselect-trigger]').click()})()`,
+      );
+      await waitFor(
+        page,
+        `window.__dashboardFetches.slice(${before}).some(record=>record.url.includes('api/view/compact')&&record.done&&record.status===200)`,
+        "Class A Product facet recomputation",
+      );
+      const classFacet = JSON.parse(
+        await page.evaluate(
+          `JSON.stringify({parents:[...document.querySelectorAll('[data-product-filter="parent_codes"] [data-filter-option]')].map(item=>Number(item.dataset.filterOption)),disabledBrand:document.querySelector('[data-product-filter="brands"] [data-filter-option="BBEL_LUP"]')?.getAttribute('aria-disabled')})`,
+        ),
+      );
+      assert(
+        classFacet.parents.includes(706059) &&
+          !classFacet.parents.includes(703584) &&
+          classFacet.disabledBrand === "true",
+        `Class A facets drifted: ${JSON.stringify(classFacet)}`,
+      );
+      before = await page.evaluate("window.__dashboardFetches.length");
+      await page.evaluate(
+        `(()=>{const root=document.querySelector('[data-product-filter="parent_codes"]');root.querySelector('[data-multiselect-trigger]').click();root.querySelector('[data-filter-option="706059"]').click();root.querySelector('[data-multiselect-trigger]').click()})()`,
+      );
+      await waitFor(
+        page,
+        `window.__dashboardFetches.slice(${before}).some(record=>record.url.includes('api/view/compact')&&record.done&&record.status===200)`,
+        "Parent Product reverse facet recomputation",
+      );
+      const reverseFacet = JSON.parse(
+        await page.evaluate(
+          `JSON.stringify({disabledClassB:document.querySelector('[data-product-filter="sku_classes"] [data-filter-option="B"]')?.getAttribute('aria-disabled'),disabledBrand:document.querySelector('[data-product-filter="brands"] [data-filter-option="BBEL_LUP"]')?.getAttribute('aria-disabled'),before:document.querySelector('[data-product-filter="brands"] [data-multiselect-summary]').textContent})`,
+        ),
+      );
+      await page.evaluate(
+        `document.querySelector('[data-product-filter="brands"] [data-filter-option="BBEL_LUP"]').click()`,
+      );
+      const afterDisabledClick = await page.evaluate(
+        `document.querySelector('[data-product-filter="brands"] [data-multiselect-summary]').textContent`,
+      );
+      assert(
+        reverseFacet.disabledClassB === "true" &&
+          reverseFacet.disabledBrand === "true" &&
+          reverseFacet.before === afterDisabledClick,
+        `Reverse Product facets drifted: ${JSON.stringify({ reverseFacet, afterDisabledClick })}`,
+      );
+      return { classFacet, reverseFacet, afterDisabledClick };
+    });
+
+    await check("product facet removal feedback", async () => {
+      await resetShared();
+      let before = await page.evaluate("window.__dashboardFetches.length");
+      await page.evaluate(
+        `(()=>{if(document.querySelector('#scope-drawer').hidden)document.querySelector('[data-action="scope"]').click();const root=document.querySelector('[data-product-filter="brands"]');root.querySelector('[data-multiselect-trigger]').click();root.querySelector('[data-filter-option="BBEL_LUP"]').click();root.querySelector('[data-multiselect-trigger]').click()})()`,
+      );
+      await waitFor(
+        page,
+        `window.__dashboardFetches.slice(${before}).some(record=>record.url.includes('api/view/compact')&&record.done&&record.status===200)`,
+        "ML-only Brand selection",
+      );
+      before = await page.evaluate("window.__dashboardFetches.length");
+      await page.evaluate(
+        `(()=>{const source=document.querySelector('[data-control="source"]');source.value='tm';source.dispatchEvent(new Event('change',{bubbles:true}))})()`,
+      );
+      await waitFor(
+        page,
+        `window.__dashboardFetches.slice(${before}).some(record=>record.url.includes('api/view/compact')&&record.done&&record.status===200) && document.querySelector('[data-control="source"]').value === 'tm' && document.querySelector('.toast').textContent.includes('1 removed Brand selection')`,
+        "source-scoped Product selection removal",
+      );
+      const detail = JSON.parse(
+        await page.evaluate(
+          `JSON.stringify({request:window.__dashboardFetches.findLast(record=>record.url.includes('api/view/compact')&&record.status===200)?.body,toast:document.querySelector('.toast').textContent,summary:document.querySelector('[data-product-filter="brands"] [data-multiselect-summary]').textContent})`,
+        ),
+      );
+      assert(
+        JSON.parse(detail.request).brands.length === 1 &&
+          detail.toast.includes("1 removed Brand selection") &&
+          detail.summary.includes("All brands"),
+        `Product removal feedback drifted: ${JSON.stringify(detail)}`,
+      );
+      return detail;
+    });
 
     await check("all shared controls exercised", () => {
       const missing = expectedControlNames.filter(
@@ -1111,7 +1235,11 @@ async function main() {
         await page.evaluate(`(()=>{
           const chart=document.querySelector('[data-revision-panel] [data-revision-scatter]');
           const points=[...chart.querySelectorAll('.scatter__point')];
+          const defaultMode=chart.dataset.scatterMode;
+          chart.querySelector('[data-scatter-action="mode-uniform"]').click();
           const uniformRadii=points.map((point)=>Number(point.getAttribute('r')));
+          chart.querySelector('[data-scatter-action="mode-error"]').click();
+          const errorRadii=points.map((point)=>Number(point.getAttribute('r'))).sort((a,b)=>a-b);
           const densityCells=[...chart.querySelectorAll('.scatter__density rect')];
           const densityBefore=densityCells.length;
           const densityMaxOpacity=Math.max(...densityCells.map((cell)=>Number(cell.style.opacity)));
@@ -1128,7 +1256,11 @@ async function main() {
           chart.querySelector('[data-scatter-action="density"]').click();
           const densityOff=chart.dataset.scatterDensity === 'off';
           const result={
+            defaultMode,
             uniformRadiusBands:new Set(uniformRadii.map((radius)=>radius.toFixed(1))).size,
+            errorMinRadius:errorRadii[0],
+            errorMaxRadius:errorRadii.at(-1),
+            errorRadiusBands:new Set(errorRadii.map((radius)=>radius.toFixed(1))).size,
             minRadius:volumeRadii[0],
             medianRadius:volumeRadii[Math.floor(volumeRadii.length/2)],
             maxRadius:volumeRadii.at(-1),
@@ -1150,19 +1282,25 @@ async function main() {
             transitions:Number(sample.dataset.tooltipTransitions),
             hasImprovement:Boolean(sample.dataset.tooltipImprovement),
             hasRevision:Boolean(sample.dataset.tooltipRevision),
+            hasAbsoluteError:Boolean(sample.dataset.tooltipAbsoluteError),
           };
           sample.dispatchEvent(new PointerEvent('pointerout',{bubbles:true,relatedTarget:document.body}));
-          chart.querySelector('[data-scatter-action="mode-uniform"]').click();
+          chart.querySelector('[data-scatter-action="mode-error"]').click();
           chart.querySelector('[data-scatter-action="density"]').click();
           chart.querySelector('[data-scatter-action="clear-selection"]').click();
           return JSON.stringify(result);
         })()`),
       );
       assert(
-        bubbleEvidence.uniformRadiusBands === 1 &&
-          bubbleEvidence.minRadius >= 4.7 &&
+        bubbleEvidence.defaultMode === "error" &&
+          bubbleEvidence.uniformRadiusBands === 1 &&
+          bubbleEvidence.errorMinRadius >= 7.2 &&
+          bubbleEvidence.errorMaxRadius - bubbleEvidence.errorMinRadius >= 8 &&
+          bubbleEvidence.errorMaxRadius <= 25.7 &&
+          bubbleEvidence.errorRadiusBands >= 8 &&
+          bubbleEvidence.minRadius >= 7.2 &&
           bubbleEvidence.maxRadius - bubbleEvidence.minRadius >= 9 &&
-          bubbleEvidence.maxRadius <= 17.2 &&
+          bubbleEvidence.maxRadius <= 25.7 &&
           bubbleEvidence.radiusP90 - bubbleEvidence.radiusP10 >= 4.5 &&
           bubbleEvidence.radiusBands >= 12 &&
           bubbleEvidence.densityBefore > 0 &&
@@ -1188,6 +1326,10 @@ async function main() {
           bubbleEvidence.transitions === 24 &&
           bubbleEvidence.hasImprovement &&
           bubbleEvidence.hasRevision &&
+          bubbleEvidence.hasAbsoluteError &&
+          bubbleEvidence.tooltipText.includes(
+            "Latest-vintage absolute error",
+          ) &&
           bubbleEvidence.tooltipText.includes("Vintage improvement score") &&
           bubbleEvidence.tooltipText.includes("SKU class") &&
           !bubbleEvidence.tooltipText.includes("Winsorized months") &&

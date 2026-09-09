@@ -1,0 +1,109 @@
+{
+  "feature": "Overview KPI card 'Error accumulated' with full-canvas ? explainer",
+  "generated_at": "2026-09-03T10:23:12+00:00",
+  "viewports": [
+    "1280x720",
+    "1920x1080"
+  ],
+  "matrix": [
+    {
+      "state": "overview-default (Oldest M-5 selected)",
+      "files": [
+        "1280-default.png",
+        "1920-default.png"
+      ],
+      "assertions": [
+        "7 kpi cards",
+        "single row",
+        "no horizontal scroll",
+        "card rightmost",
+        "value 6,972",
+        "delta +1,516 delta--down",
+        "caption 'KL vs latest \u00b7 oldest selection' unclipped at 1920"
+      ]
+    },
+    {
+      "state": "vintage-selector popover open",
+      "files": [
+        "1280-selector-open.png",
+        "1920-selector-open.png"
+      ],
+      "assertions": [
+        "popover renders",
+        "card unchanged"
+      ]
+    },
+    {
+      "state": "two vintages selected (Oldest + M-3)",
+      "files": [
+        "1280-two-vintages.png",
+        "1920-two-vintages.png"
+      ],
+      "assertions": [
+        "card reads oldest selection: 6,966 / +1,514",
+        "subtitle '2 vintages selected'",
+        "live update on checkbox change"
+      ]
+    },
+    {
+      "state": "latest-only (no historical vintage)",
+      "files": [
+        "1280-latest-only.png",
+        "1920-latest-only.png"
+      ],
+      "assertions": [
+        "value \u2014",
+        "delta \u2014",
+        "caption 'no historical vintage selected'"
+      ]
+    },
+    {
+      "state": "horizon filter M-3 (empty common cohort)",
+      "files": [
+        "1280-horizon-m3.png",
+        "1920-horizon-m3.png"
+      ],
+      "assertions": [
+        "value \u2014",
+        "caption 'no common cohort months'",
+        "matches pre-existing blank vintage-line chart state"
+      ]
+    },
+    {
+      "state": "error-accumulated ? overlay open",
+      "files": [
+        "1280-overlay.png",
+        "1920-overlay.png"
+      ],
+      "assertions": [
+        "dialog opens",
+        "section visible",
+        "no internal/document scroll",
+        "focus moves to close",
+        "Escape closes and restores focus",
+        "body scroll-lock class toggles"
+      ]
+    }
+  ],
+  "classification": {
+    "improved": [
+      "KPI row now quantifies accumulated absolute error of the oldest selected vintage with a color-coded vs-latest delta; single-row layout preserved at both viewports",
+      "Card updates live with vintage-selection, timeline-range and filter changes because it derives from the same common-cohort payload as the accuracy chart",
+      "Honest empty states for latest-only and horizon-filtered scopes",
+      "Ninth explainer matches the established 4-part anatomy and interaction contract"
+    ],
+    "regressed": [
+      "None observed (intermediate delta-text clipping at 1280 was found by assertion and fixed before final capture)"
+    ],
+    "out_of_place": [
+      "None introduced. Pre-existing, unchanged: with a Horizon filter set, the vintage accuracy chart lines blank out (common cohort empties); the new card mirrors this with 'no common cohort months'. Flagged for a separate future fix.",
+      "Pre-existing, unchanged: Bias/Revision-effectiveness delta text ellipsizes slightly at 1280 (house pattern)."
+    ]
+  },
+  "checks": {
+    "node_check": "pass",
+    "unit_tests": "tests.test_forecast_analysis_dashboard_ui DashboardUiSourceContractTests + DashboardUiOverflowTests OK",
+    "git_diff_check": "pass",
+    "pre_existing_failures_noted": "4 unrelated data-dependent tests in tests.test_static_dashboard_adapter fail identically on the unmodified tree"
+  }
+}

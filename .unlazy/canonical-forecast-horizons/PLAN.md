@@ -26,13 +26,13 @@
 
 | ID | State | Needs | OWNS |
 | --- | --- | --- | --- |
-| leaf-1.1.1 | READY | — | `forecast_history_pipeline.py`, `tests/test_forecast_history_etl.py` |
-| leaf-1.1.2 | WAITING | leaf-1.1.1 | `forecast_history_pipeline.py`, `tests/test_forecast_history_etl.py`, `scripts/verify_canonical_horizons.py`, `artifacts/forecast_history/consolidated/forecast_history_waterfall.csv`, `artifacts/forecast_history/consolidated/source_summary.csv`, `artifacts/forecast_history/consolidated/validation_status.csv`, `artifacts/forecast_history/consolidated/tm_validation.csv`, `artifacts/forecast_history/consolidated/ml_validation.csv` |
-| node-1.1 | OPEN | both pipeline leaves | integration only |
-| leaf-1.2.1 | WAITING | node-1.1 | `dashboard/adapter.py`, `forecast_analysis/vintage_accuracy.py`, `tests/test_common_vintage_accuracy.py`, `tests/test_static_dashboard_adapter.py` |
-| leaf-1.2.2 | WAITING | leaf-1.2.1 | `scripts/verify_canonical_horizons.py`, `scripts/validate_vintage_selector.mjs`, `validation-artifacts/vintage-selector/**` |
-| node-1.2 | OPEN | both analytical leaves | integration only |
-| node-1 | OPEN | node-1.1, node-1.2 | integration only |
+| leaf-1.1.1 | VERIFIED | — | `forecast_history_pipeline.py`, `tests/test_forecast_history_etl.py` |
+| leaf-1.1.2 | VERIFIED | leaf-1.1.1 | `forecast_history_pipeline.py`, `tests/test_forecast_history_etl.py`, `scripts/verify_canonical_horizons.py`, `artifacts/forecast_history/consolidated/forecast_history_waterfall.csv`, `artifacts/forecast_history/consolidated/source_summary.csv`, `artifacts/forecast_history/consolidated/validation_status.csv`, `artifacts/forecast_history/consolidated/tm_validation.csv`, `artifacts/forecast_history/consolidated/ml_validation.csv` |
+| node-1.1 | VERIFIED | both pipeline leaves | integration only |
+| leaf-1.2.1 | VERIFIED | node-1.1 | `dashboard/adapter.py`, `forecast_analysis/vintage_accuracy.py`, `tests/test_common_vintage_accuracy.py`, `tests/test_static_dashboard_adapter.py` |
+| leaf-1.2.2 | VERIFIED | leaf-1.2.1 | `scripts/verify_canonical_horizons.py`, `scripts/validate_vintage_selector.mjs`, `validation-artifacts/vintage-selector/**` |
+| node-1.2 | VERIFIED | both analytical leaves | integration only |
+| node-1 | VERIFIED | node-1.1, node-1.2 | integration only |
 
 Work is sequential because the ETL and analytical contracts depend on the regenerated canonical artifact; no concurrent ownership claims are needed.
 

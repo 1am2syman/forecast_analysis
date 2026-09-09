@@ -153,9 +153,10 @@ class AnalysisInputs:
 
 @dataclass(frozen=True)
 class AnalysisDataset:
-    """The shared forecast population, actual population, and quality diagnostics."""
+    """The shared forecast population, actual populations, and quality diagnostics."""
 
     frame: pl.DataFrame
     diagnostics: pl.DataFrame
     actual_population: pl.DataFrame
+    actual_history: pl.DataFrame
     hierarchy_diagnostics: pl.DataFrame | None = None
