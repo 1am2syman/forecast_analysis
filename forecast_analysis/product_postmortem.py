@@ -292,15 +292,18 @@ def build_product_year_overlay(
     parent_code: int,
     *,
     source: str = "tm",
+    completed_before: date | None = None,
 ) -> ProductYearOverlayView:
-    """Project all supplied actual months and one latest forward run by FY.
+    """Project completed actual months and one latest forward run by FY.
 
     The financial year starts in April and is named for its starting calendar
     year: April 2027 through March 2028 is ``FY27``. Actuals come from the
-    normalized dataset-level history. Forecasts come only from the latest
-    calculation month for the selected source and begin after the latest
-    non-null actual month. Missing months remain gaps rather than being
-    synthesized or backfilled from an older forecast run.
+    normalized dataset-level history. When ``completed_before`` is supplied,
+    that month and later months are treated as incomplete and excluded from
+    actuals. Forecasts come only from the latest calculation month for the
+    selected source and begin after the latest completed actual month. Missing
+    months remain gaps rather than being synthesized or backfilled from an
+    older forecast run.
     """
     require_columns(frame, ANALYSIS_COLUMNS, "product year-overlay population")
     require_columns(actual_history, ACTUAL_COLUMNS, "product actual history")
@@ -308,6 +311,9 @@ def build_product_year_overlay(
     if normalized_source not in FORECAST_SOURCES:
         raise ValueError(f"unsupported product year-overlay source {source!r}")
     normalized_parent = _parent_code(parent_code)
+    normalized_completed_before = (
+        _normalize_month(completed_before) if completed_before is not None else None
+    )
     selected = frame.filter(
         (pl.col("parent_code") == normalized_parent)
         & (pl.col("source") == normalized_source)
@@ -315,6 +321,11 @@ def build_product_year_overlay(
     actuals = (
         actual_history.filter(pl.col("parent_code") == normalized_parent)
         .filter(pl.col("actual_kl").is_not_null())
+        .filter(
+            pl.col("snop_month") < normalized_completed_before
+            if normalized_completed_before is not None
+            else pl.lit(True)
+        )
         .sort("snop_month")
         .unique(subset=["snop_month"], keep="last", maintain_order=True)
     )

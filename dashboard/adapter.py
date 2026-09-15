@@ -2214,6 +2214,7 @@ class DashboardDataService:
             self.dataset.actual_history,
             parent_code,
             source=request["source"],
+            completed_before=self.current_month,
         )
         return {
             "parent_code": detail.parent_code,

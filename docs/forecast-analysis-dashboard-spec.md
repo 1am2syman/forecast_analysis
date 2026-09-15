@@ -756,6 +756,8 @@ FY labels always use the starting calendar year: April 2027–March 2028 is FY27
 
 Both layouts use the dashboard’s persistent month-wide tooltip interaction: every populated month has a transparent, keyboard-focusable hit band spanning the plot height; pointer hover and keyboard focus show the shared fixed chart tooltip with the month, source, FY, actual/forecast values, and forecast-run provenance. Missing months do not receive synthetic observations or tooltip rows.
 
+The current running month is treated as incomplete for this chart. If an actual exists for that month, it is excluded from the History actual series and the latest coherent forecast is shown instead. The actual-through boundary therefore ends at the latest completed month, preventing partial-month actuals from being presented as final demand.
+
 ### 11.9 Exceptions table
 
 Required columns:

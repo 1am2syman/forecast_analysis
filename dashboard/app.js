@@ -861,7 +861,10 @@
       legend: (payload) =>
         yearOverlayLegend(payload.product_detail?.year_overlay),
       renderPayload: (payload) =>
-        productYearOverlayChart(payload.product_detail?.year_overlay),
+        productYearOverlayChart(
+          payload.product_detail?.year_overlay,
+          payload.product_detail?.postmortem,
+        ),
     },
     "postmortem-revision": {
       title: (payload) =>
@@ -870,13 +873,6 @@
         '<span><i class="scatter-key scatter-key--improved"></i>Improved</span><span><i class="scatter-key scatter-key--worsened"></i>Worsened</span><span><i class="scatter-key scatter-key--neutral"></i>Neutral</span>',
       renderPayload: (payload) =>
         productRevisionOutcomeChart(payload.product_detail?.postmortem),
-    },
-    "product-history": {
-      title: (payload) =>
-        `Selected target forecast development · ${payload.product_detail?.parent_code || "SKU"}`,
-      legend:
-        '<span><i class="key key--amber"></i>TM</span><span><i class="key key--teal"></i>ML</span><span><i class="key key--blue"></i>Actual</span>',
-      renderPayload: (payload) => historyChart(payload.product_detail || {}),
     },
   };
 
@@ -4682,7 +4678,7 @@
     );
     setHtml(
       document.querySelector("[data-postmortem-performance-chart]"),
-      productYearOverlayChart(history),
+      productYearOverlayChart(history, detail?.postmortem),
     );
     if (!chartDialog.hidden && fullscreenChart === "postmortem-performance")
       renderFullscreenChart();
@@ -5001,10 +4997,41 @@
     return `<svg class="chart postmortem-chart year-overlay-chart year-overlay-chart--long" viewBox="0 0 ${width} ${height}" role="img" aria-label="Actual demand and forward forecast across the continuous monthly horizon"><title>Actual demand and forward forecast across the continuous monthly horizon</title><g class="year-overlay-grid">${yearOverlayGrid(min, max, left, right, top, bottom)}</g><text class="year-overlay-axis-unit" x="${left}" y="16">KL</text>${fiscalSeparators}${yearOverlayPath(actual, x, y, "actual", actualColor)}${yearOverlayPath(forecast, x, y, "forecast", forecastColor)}${points}<g class="year-overlay-labels">${labels}</g>${cutoff}<g class="year-overlay-month-hits">${monthHits}</g></svg>`;
   }
 
-  function productYearOverlayChart(history) {
-    return yearOverlayMode === "long"
-      ? productLongHorizonChart(history)
-      : productFiscalYearOverlayChart(history);
+  function treatmentReviewLabel(reviewTrigger) {
+    const value = String(reviewTrigger || "").toLowerCase();
+    if (value.includes("next two forecast updates")) return "2 updates";
+    if (value.includes("target-month actual")) return "Actual close";
+    if (value.includes("positive-volume observation"))
+      return "Positive volume";
+    if (value.includes("two usable vintages")) return "2 vintages";
+    if (value.includes("material revision") && value.includes("actual close"))
+      return "Revision / close";
+    return "Next review";
+  }
+
+  function baselineAdjustment(postmortem) {
+    const summary = postmortem?.summary || {};
+    const treatment = postmortem?.treatment || {};
+    const current = summary.latest_forecast_kl;
+    const impact = treatment.impact_kl;
+    const proposed = finite(current)
+      ? current + (finite(impact) ? impact : 0)
+      : null;
+    const change = finite(impact) && Math.abs(impact) > 0.0005
+      ? signedKl(impact)
+      : "No change";
+    const confidence = labelize(treatment.confidence || "Not assessed");
+    const review = treatmentReviewLabel(treatment.review_trigger);
+    const ariaLabel = `Current baseline ${kl(current)}, change ${change}, proposed baseline ${kl(proposed)}, ${confidence} confidence, review ${review}`;
+    return `<div class="year-overlay-adjustment" data-baseline-adjustment role="group" aria-label="${escapeHtml(ariaLabel)}"><div class="year-overlay-adjustment__flow"><span><b>Current</b><strong>${escapeHtml(kl(current))}</strong></span><i aria-hidden="true">→</i><span class="year-overlay-adjustment__change"><b>Change</b><strong>${escapeHtml(change)}</strong></span><i aria-hidden="true">→</i><span><b>Proposed</b><strong>${escapeHtml(kl(proposed))}</strong></span></div><div class="year-overlay-adjustment__meta"><span><b>Confidence</b><strong>${escapeHtml(confidence)}</strong></span><span><b>Review</b><strong>${escapeHtml(review)}</strong></span></div></div>`;
+  }
+
+  function productYearOverlayChart(history, postmortem) {
+    const chart =
+      yearOverlayMode === "long"
+        ? productLongHorizonChart(history)
+        : productFiscalYearOverlayChart(history);
+    return `<div class="year-overlay-visual">${baselineAdjustment(postmortem)}${chart}</div>`;
   }
 
   function productRevisionOutcomeChart(postmortem) {
@@ -5051,27 +5078,6 @@
     return `<div class="postmortem-revision-chart"><svg class="chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="Monthly revision error improvement with zero baseline"><title>Monthly revision error improvement with zero baseline</title><line class="postmortem-revision-chart__zero" x1="${left}" y1="${zeroY}" x2="${right}" y2="${zeroY}"></line><path class="postmortem-revision-chart__line" d="${line}"></path>${dots}<g class="chart__labels">${labels}</g></svg><div class="postmortem-revision-chart__legend"><span><i class="scatter-key scatter-key--improved"></i>Improved</span><span><i class="scatter-key scatter-key--worsened"></i>Worsened</span><span><i class="scatter-key scatter-key--neutral"></i>Neutral</span><span>Error improvement · zero baseline · ${count(points.length)} months</span></div></div>`;
   }
 
-  function productCommentary(postmortem) {
-    const rows = postmortem?.commentary?.rows || [];
-    const body = rows.length
-      ? rows
-          .map((row) => {
-            const kind =
-              row.severity === "positive"
-                ? "good"
-                : row.severity === "critical"
-                  ? "bad"
-                  : row.severity === "warning"
-                    ? "warn"
-                    : "neutral";
-            const refs = (row.evidence_refs || []).join(" · ");
-            return `<article class="postmortem-comment postmortem-comment--${kind}"><i class="postmortem-comment__lamp" aria-hidden="true"></i><div class="postmortem-comment__copy"><b>${escapeHtml(labelize(row.category))}</b><strong>${escapeHtml(row.headline)}</strong><p>${escapeHtml(row.body)}${refs ? `<br><span>Evidence: ${escapeHtml(refs)}</span>` : ""}</p></div><span class="postmortem-comment__confidence">${escapeHtml(row.confidence)} confidence</span></article>`;
-          })
-          .join("")
-      : '<div class="empty-row">No material issue callouts for this selection.</div>';
-    return `<header class="postmortem-commentary__head"><h3>Planner commentary</h3><p>Rules-based observations · evidence refs · no invented cause</p></header><div class="postmortem-commentary__body">${body}</div>`;
-  }
-
   function productPeerBenchmark(postmortem) {
     const peers = postmortem?.peer_benchmarks?.rows || [];
     if (!peers.length) return emptyVisual("No eligible sibling cohort");
@@ -5108,13 +5114,6 @@
   function renderProductPostmortem(detail) {
     const postmortem = detail.postmortem || {};
     const summary = postmortem.summary || {};
-    const treatment = postmortem.treatment || {};
-    const decisionKind =
-      treatment.action === "hold" ? "severity--good" : "severity--warn";
-    setHtml(
-      document.querySelector("[data-postmortem-decision]"),
-      `<div class="postmortem-decision__lead"><header><span class="severity ${decisionKind}">${escapeHtml(labelize(treatment.action || "Review"))}</span><h3>${escapeHtml(treatment.rationale || postmortem.status_message)}</h3></header><p>Evidence-bound recommendation for the forward baseline; business cause remains a review input.</p></div><div class="postmortem-decision__fact"><b>Proposed impact</b><strong>${finite(treatment.impact_kl) ? signedKl(treatment.impact_kl) : "No quantified change"}</strong><small>Directional adjustment, not an auto-write</small></div><div class="postmortem-decision__fact"><b>Confidence</b><strong>${escapeHtml(labelize(treatment.confidence))}</strong><small>Based on connected forecast evidence</small></div><div class="postmortem-decision__fact"><b>Review trigger</b><strong>${escapeHtml(treatment.review_trigger || "Next material update")}</strong><small>Planner retains final judgment</small></div>`,
-    );
     const metrics = [
       [
         "Latest forecast",
@@ -5150,10 +5149,6 @@
     );
     renderYearOverlay(detail);
     setHtml(
-      document.querySelector("[data-postmortem-commentary]"),
-      productCommentary(postmortem),
-    );
-    setHtml(
       document.querySelector("[data-postmortem-revision-chart]"),
       productRevisionOutcomeChart(postmortem),
     );
@@ -5169,14 +5164,6 @@
     );
     document.querySelector("[data-postmortem-peer-scope]").textContent =
       `${count(peerCount)} eligible siblings`;
-    setHtml(
-      document.querySelector("[data-postmortem-evidence]"),
-      `<header class="postmortem-evidence__head"><h3>Selected-target evidence</h3><p>Facts to take into the forecast review</p></header><div class="postmortem-evidence__body"><div class="postmortem-evidence__row"><strong>Latest position</strong><span>${kl(summary.latest_forecast_kl)} forecast vs ${kl(summary.actual_kl)} actual</span><b>${signedKl(summary.bias_kl)}</b></div><div class="postmortem-evidence__row"><strong>Forecast value add</strong><span>Oldest-to-latest absolute-error change</span><b>${signedKl(summary.first_to_latest_fva_kl)}</b></div><div class="postmortem-evidence__row"><strong>Revision discipline</strong><span>${count(summary.material_revisions)} material moves · ${count(summary.material_revision_hits)} helped</span><b>${pct(summary.material_hit_rate_pct)}</b></div><div class="postmortem-evidence__row"><strong>Data scope</strong><span>${escapeHtml(postmortem.source?.toUpperCase())} · class ${escapeHtml(postmortem.sku_class)} · ${count(summary.vintage_count)} vintages</span><b>${escapeHtml(labelize(postmortem.status))}</b></div></div>`,
-    );
-    setHtml(
-      document.querySelector("[data-postmortem-treatment]"),
-      `<header class="postmortem-treatment__head"><h3>Forward forecast treatment</h3><p>Decision contract for planner, business and forecasting teams</p></header><div class="postmortem-treatment__item"><b>Action</b><strong>${escapeHtml(labelize(treatment.action))}</strong><small>Controlled recommendation</small></div><div class="postmortem-treatment__item"><b>Adjustment</b><strong>${finite(treatment.impact_kl) ? signedKl(treatment.impact_kl) : "Hold pending evidence"}</strong><small>Against current baseline</small></div><div class="postmortem-treatment__item"><b>Rationale</b><strong title="${escapeHtml(treatment.rationale)}">${escapeHtml(treatment.rationale)}</strong><small>Forecast evidence only</small></div><div class="postmortem-treatment__item"><b>Review contract</b><strong title="${escapeHtml(treatment.review_trigger)}">${escapeHtml(treatment.review_trigger)}</strong><small>Reassess, do not autopilot</small></div>`,
-    );
   }
 
   function renderProduct(detail) {
@@ -5187,15 +5174,11 @@
       '[data-product-control="month"]',
     );
     const postmortemTargets = [
-      "[data-postmortem-decision]",
       "[data-postmortem-metrics]",
       "[data-postmortem-performance-chart]",
       "[data-year-overlay-legend]",
-      "[data-postmortem-commentary]",
       "[data-postmortem-revision-chart]",
       "[data-postmortem-peers]",
-      "[data-postmortem-evidence]",
-      "[data-postmortem-treatment]",
       "[data-product-revisions]",
     ];
     if (!detail || detail.error) {
@@ -5207,10 +5190,6 @@
           "History",
           detail?.error || "No active product-target keys",
         ),
-      );
-      setHtml(
-        document.querySelector("[data-history-chart]"),
-        emptyVisual("No product history"),
       );
       postmortemTargets.forEach((selector) =>
         setHtml(document.querySelector(selector), ""),
@@ -5244,55 +5223,9 @@
     );
     renderProductPostmortem(detail);
     setHtml(
-      document.querySelector("[data-history-chart]"),
-      historyChart(detail),
-    );
-    setHtml(
       document.querySelector("[data-product-revisions]"),
       productRevisionTable(detail.revisions.rows),
     );
-  }
-
-  function historyChart(detail) {
-    const rows = detail.points.rows.filter((row) => finite(row.forecast_kl));
-    if (!rows.length)
-      return emptyVisual(detail.status_message || "No product history");
-    const months = [
-      ...new Set(rows.map((row) => row.calculation_month)),
-    ].sort();
-    const values = rows.map((row) => row.forecast_kl);
-    if (finite(detail.actual_kl)) values.push(detail.actual_kl);
-    const [min, max] = chartExtent(values);
-    const left = 62;
-    const right = 730;
-    const top = 30;
-    const bottom = 220;
-    const x = (month) =>
-      left +
-      (months.indexOf(month) / Math.max(1, months.length - 1)) * (right - left);
-    const y = (value) =>
-      bottom - ((value - min) / (max - min)) * (bottom - top);
-    const colors = { tm: "var(--amber)", ml: "var(--teal)" };
-    const series = [...new Set(rows.map((row) => row.source))]
-      .map((source) => {
-        const sourceRows = rows.filter((row) => row.source === source);
-        const points = sourceRows.map((row) => ({
-          x: x(row.calculation_month),
-          y: y(row.forecast_kl),
-        }));
-        return `<path data-interpolation="smooth" d="${smoothLinePath(points)}" fill="none" stroke="${colors[source]}" stroke-width="3"/>${sourceRows.map((row) => `<circle cx="${x(row.calculation_month)}" cy="${y(row.forecast_kl)}" r="4" fill="white" stroke="${colors[source]}" stroke-width="3"><title>${source.toUpperCase()} · ${dateLabel(row.calculation_month)} · M−${row.forecast_horizon_months} · ${kl(row.forecast_kl)} · error ${signedKl(row.error_kl)} · bias ${pct(row.bias_pct)}</title></circle>`).join("")}`;
-      })
-      .join("");
-    const actual = finite(detail.actual_kl)
-      ? `<line class="actual-line" x1="${left}" y1="${y(detail.actual_kl)}" x2="${right}" y2="${y(detail.actual_kl)}"/><text x="${right - 45}" y="${y(detail.actual_kl) - 7}">Actual ${number(detail.actual_kl, 1)} KL</text>`
-      : "";
-    const labels = months
-      .map(
-        (month) =>
-          `<text x="${x(month)}" y="244">${escapeHtml(monthLabel(month).split(" ")[0])}</text>`,
-      )
-      .join("");
-    return `<svg class="chart" viewBox="0 0 760 250" role="img" aria-label="Chronological forecast development"><title>Chronological forecast development</title>${actual}${series}<g class="chart__labels">${labels}</g></svg>`;
   }
 
   function productRevisionTable(rows) {

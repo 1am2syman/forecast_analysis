@@ -596,6 +596,19 @@ class StaticDashboardAdapterTests(unittest.TestCase):
         )
         self.assertEqual(explicit["request"]["target_end"], "2026-09-01")
 
+        detail = service.product_detail(bootstrap["defaults"])
+        self.assertIsNotNone(detail)
+        assert detail is not None
+        overlay = detail["year_overlay"]
+        september = next(
+            row
+            for row in overlay["points"]["rows"]
+            if row["snop_month"] == "2026-09-01"
+        )
+        self.assertEqual(overlay["actual_through"], "2026-08-01")
+        self.assertIsNone(september["actual_kl"])
+        self.assertIsNotNone(september["forecast_kl"])
+
     def test_product_multi_selects_filter_every_projection(self) -> None:
         parent_codes = [706090, 710085]
         request = dict(self.defaults)

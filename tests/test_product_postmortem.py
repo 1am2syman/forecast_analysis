@@ -154,6 +154,44 @@ class ProductPostmortemTests(unittest.TestCase):
             ],
         )
 
+    def test_year_overlay_replaces_running_month_actual_with_latest_run_forecast(
+        self,
+    ) -> None:
+        frame = _analysis_frame(
+            [
+                ("ml", 100, "Selected", "Alpha", "A", date(2026, 7, 1), date(2026, 9, 1), 125.0, 80.0),
+                ("ml", 100, "Selected", "Alpha", "A", date(2026, 7, 1), date(2026, 10, 1), 130.0, None),
+            ]
+        )
+        actual_history = pl.DataFrame(
+            {
+                "parent_code": [100, 100],
+                "snop_month": [date(2026, 8, 1), date(2026, 9, 1)],
+                "actual_kl": [90.0, 80.0],
+            }
+        )
+
+        result = build_product_year_overlay(
+            frame,
+            actual_history,
+            100,
+            source="ml",
+            completed_before=date(2026, 9, 1),
+        )
+
+        self.assertEqual(result.actual_through, date(2026, 8, 1))
+        self.assertEqual(
+            [
+                (row["snop_month"], row["actual_kl"], row["forecast_kl"])
+                for row in result.points.to_dicts()
+            ],
+            [
+                (date(2026, 8, 1), 90.0, None),
+                (date(2026, 9, 1), None, 125.0),
+                (date(2026, 10, 1), None, 130.0),
+            ],
+        )
+
     def test_year_overlay_does_not_fall_back_when_latest_run_has_no_future_targets(
         self,
     ) -> None:

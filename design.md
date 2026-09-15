@@ -283,9 +283,11 @@ The data contract may expose `fiscal_year` and `fiscal_month`, but user-facing c
 
 The chart is product-level and independent of the selected post-mortem target month. It uses:
 
-1. all normalized actual history available for the selected SKU;
+1. all normalized **completed-month** actual history available for the selected SKU;
 2. the latest coherent forecast run for the selected global source and SKU;
-3. only forecast targets strictly after the latest actual month.
+3. only forecast targets strictly after the latest completed actual month.
+
+The running month is incomplete even when a partial actual has already been loaded. Exclude that partial actual from the chart and show the latest coherent forecast for the running month instead. The actual-through boundary must stop at the preceding completed month.
 
 Do not fall back to an older run merely because the latest run has no targets after the actual cutoff. Do not add a synthetic actual value as a forecast anchor.
 
