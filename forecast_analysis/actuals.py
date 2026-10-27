@@ -58,10 +58,11 @@ def normalize_actuals(
 ) -> pl.DataFrame:
     """Return one finite, non-negative actual per parent and target month.
 
-    ``target_months`` is used only by the forecast-driven population loader to
-    discard historical actuals outside the analysis window before validating
-    actual-volume finiteness and non-negativity. Parent and month keys are still
-    normalized before the window filter is applied.
+    Negative source rows are clipped to zero before parent-month aggregation so
+    historical returns or corrections cannot reduce reported sales volume.
+    ``target_months`` remains available for callers that intentionally need a
+    bounded window. Parent and month keys are normalized before any window
+    filter is applied.
     """
     canonical = _canonicalize_columns(raw)
     normalized = pl.DataFrame(
@@ -83,19 +84,17 @@ def normalize_actuals(
         allowed_months = list(target_months)
         normalized = normalized.filter(pl.col("snop_month").is_in(allowed_months))
 
-    normalized = normalized.with_columns(
-        normalize_float_values(
-            normalized.get_column("_actual_raw").to_list(),
-            "actual_kl",
-            "secondary-sales",
-        ).alias("actual_kl")
-    ).drop("_actual_raw")
-    negative = normalized.filter(pl.col("actual_kl") < 0)
-    if negative.height:
-        raise ValueError(
-            "secondary-sales validation failed: actual_kl must be non-negative; "
-            f"sample rows: {negative.head(3).to_dicts()}"
+    normalized = (
+        normalized.with_columns(
+            normalize_float_values(
+                normalized.get_column("_actual_raw").to_list(),
+                "actual_kl",
+                "secondary-sales",
+            ).alias("actual_kl")
         )
+        .drop("_actual_raw")
+        .with_columns(pl.col("actual_kl").clip(lower_bound=0.0))
+    )
 
     aggregated = (
         normalized.group_by(["parent_code", "snop_month"])
@@ -133,7 +132,7 @@ def _input_files(path: Path) -> list[Path]:
 def load_actuals(
     path: Path, *, target_months: Iterable[date] | None = None
 ) -> pl.DataFrame:
-    """Read current secondary-sales workbooks and aggregate the analysis window."""
+    """Read current secondary-sales workbooks and aggregate retained history."""
     files = _input_files(Path(path))
     raw_frames: list[pl.DataFrame] = []
     for workbook in files:

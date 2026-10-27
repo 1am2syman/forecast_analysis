@@ -1,0 +1,183 @@
+{
+  "source": "live HTTP API read-only capture",
+  "url": "http://127.0.0.1:8766/api/product",
+  "request": {
+    "source": "ml",
+    "comparison_mode": false,
+    "target_start": "2025-05-01",
+    "target_end": "2026-08-01",
+    "brands": [],
+    "sku_classes": [],
+    "parent_codes": [],
+    "horizon": null,
+    "minimum_actual_volume": 0.0,
+    "vintage_a": {
+      "kind": "oldest_available",
+      "value": null
+    },
+    "vintage_b": {
+      "kind": "latest_available",
+      "value": null
+    },
+    "accuracy_vintage_ids": [
+      "oldest_available"
+    ],
+    "revision_direction": null,
+    "revision_outcome": null,
+    "revision_tolerance_kl": 0.01,
+    "forecast_direction": null,
+    "accuracy_band": null,
+    "bias_band": null,
+    "minimum_absolute_error_kl": 0.0,
+    "top_n": null,
+    "top_n_metric": "actual_volume",
+    "hierarchy_status": null,
+    "actual_status": null,
+    "pair_status": null,
+    "source_availability": null,
+    "zero_forecast_only": false,
+    "complete_vintage_history_only": false,
+    "drilldown_parent_codes": [],
+    "product_parent_code": null,
+    "product_target_month": null
+  },
+  "product_request": {
+    "source": "ml",
+    "comparison_mode": false,
+    "target_start": "2025-05-01",
+    "target_end": "2026-08-01",
+    "brands": [],
+    "sku_classes": [],
+    "parent_codes": [],
+    "horizon": null,
+    "minimum_actual_volume": 0.0,
+    "vintage_a": {
+      "kind": "oldest_available",
+      "value": null
+    },
+    "vintage_b": {
+      "kind": "latest_available",
+      "value": null
+    },
+    "accuracy_vintage_ids": [
+      "oldest_available"
+    ],
+    "revision_direction": null,
+    "revision_outcome": null,
+    "revision_tolerance_kl": 0.01,
+    "forecast_direction": null,
+    "accuracy_band": null,
+    "bias_band": null,
+    "minimum_absolute_error_kl": 0.0,
+    "top_n": null,
+    "top_n_metric": "actual_volume",
+    "hierarchy_status": null,
+    "actual_status": null,
+    "pair_status": null,
+    "source_availability": null,
+    "zero_forecast_only": false,
+    "complete_vintage_history_only": false,
+    "drilldown_parent_codes": [],
+    "product_parent_code": 706059,
+    "product_target_month": null
+  },
+  "dataset_version": "303e744e4a0cba64",
+  "detail_summary": {
+    "parent_code": 706059,
+    "target_month": "2026-08-01",
+    "target_options_count": 16,
+    "row_count": 69,
+    "actual_row_count": 65,
+    "first_row": {
+      "snop_month": "2021-04-01",
+      "calendar_year": 2021,
+      "calendar_month": 4,
+      "fiscal_year": 2022,
+      "fiscal_month": 1,
+      "actual_kl": 292.2141320000095,
+      "forecast_kl": null,
+      "actual_status": "matched_positive"
+    },
+    "last_row": {
+      "snop_month": "2026-12-01",
+      "calendar_year": 2026,
+      "calendar_month": 12,
+      "fiscal_year": 2027,
+      "fiscal_month": 9,
+      "actual_kl": null,
+      "forecast_kl": 211.019647924,
+      "actual_status": "missing"
+    },
+    "actual_through": "2026-08-01",
+    "forecast_run": "2026-07-01",
+    "fiscal_years": [
+      2022,
+      2023,
+      2024,
+      2025,
+      2026,
+      2027
+    ]
+  },
+  "checks": {
+    "selected_parent_code": {
+      "expected": 706059,
+      "actual": 706059,
+      "passed": true
+    },
+    "actual_points_begin": {
+      "expected": "2021-04-01",
+      "actual": "2021-04-01",
+      "passed": true
+    },
+    "no_negative_actual_kl": {
+      "negative_rows": [],
+      "passed": true
+    },
+    "completed_month_cutoff": {
+      "expected_actual_through": "2026-08-01",
+      "actual_actual_through": "2026-08-01",
+      "september_row": {
+        "snop_month": "2026-09-01",
+        "calendar_year": 2026,
+        "calendar_month": 9,
+        "fiscal_year": 2027,
+        "fiscal_month": 6,
+        "actual_kl": null,
+        "forecast_kl": 286.929165769,
+        "actual_status": "missing"
+      },
+      "passed": true
+    },
+    "multiple_fiscal_years": {
+      "fiscal_years": [
+        2022,
+        2023,
+        2024,
+        2025,
+        2026,
+        2027
+      ],
+      "count": 6,
+      "passed": true
+    },
+    "full_chronological_history": {
+      "first": "2021-04-01",
+      "last": "2026-12-01",
+      "row_count": 69,
+      "contiguous_months": true,
+      "passed": true
+    }
+  },
+  "all_passed": true,
+  "artifacts": {
+    "bootstrap.json": {
+      "bytes": 38442,
+      "sha256": "98380694369b203476d0938346dde033c0d595c777a8abe54dcaf4c4057dfac3"
+    },
+    "product-706059.json": {
+      "bytes": 37163,
+      "sha256": "c70415af3d3c27195943abd5bcfa0f3d83b137cdb84eeb5f852fa5b75eb0c96c"
+    }
+  }
+}

@@ -251,9 +251,9 @@ The content structure is:
 The product calls the operating period **FY (financial year)**.
 
 - FY begins in April and ends in March.
-- The label uses the calendar year in which the FY starts.
-- April 2027 through March 2028 is **FY27**.
-- April 2028 through March 2029 is **FY28**.
+- The label uses the calendar year in which the FY ends.
+- April 2026 through March 2027 is **FY27**.
+- April 2027 through March 2028 is **FY28**.
 - UI labels should say “FY”, not “calendar year” or a competing year convention.
 
 The data contract may expose `fiscal_year` and `fiscal_month`, but user-facing copy is FY.

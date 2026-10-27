@@ -8,11 +8,19 @@
       },
       "selected": "702082",
       "paneActive": true,
+      "productTriggerText": "702082 · PCNO 20ml FT BOT NEW",
+      "productSearchInsidePopover": true,
+      "targetMonthVisible": false,
       "contextLabels": [
         "PRODUCT",
-        "TARGET MONTH",
         "BRAND",
-        "SKU CLASS"
+        "SKU CLASS",
+        "LATEST FORECAST",
+        "ACTUAL",
+        "FORECAST ACCURACY",
+        "BIAS",
+        "ABSOLUTE ERROR",
+        "REVISION EFFICIENCY"
       ],
       "contextSingleRow": true,
       "contextOrder": true,
@@ -25,7 +33,7 @@
       "revisionPoints": 5,
       "revisionZero": true,
       "adjustment": "CURRENT\n3.2 KL\n→\nCHANGE\n+0.7 KL\n→\nPROPOSED\n3.9 KL\nCONFIDENCE\nMedium\nREVIEW\n2 updates",
-      "adjustmentWidth": 993,
+      "adjustmentWidth": 589.59375,
       "commentaryPresent": false,
       "peers": 3,
       "treatmentPresent": false,
@@ -38,7 +46,7 @@
       "background": "rgb(237, 243, 241)",
       "title": "How performance moves",
       "fullscreenButtons": 2,
-      "firstChartVisiblePx": 347.421875,
+      "firstChartVisiblePx": 347.28125,
       "metricFont": 16,
       "adjustmentFont": 15,
       "metadataFont": 9.5
@@ -50,11 +58,19 @@
       },
       "selected": "702082",
       "paneActive": true,
+      "productTriggerText": "702082 · PCNO 20ml FT BOT NEW",
+      "productSearchInsidePopover": true,
+      "targetMonthVisible": false,
       "contextLabels": [
         "PRODUCT",
-        "TARGET MONTH",
         "BRAND",
-        "SKU CLASS"
+        "SKU CLASS",
+        "LATEST FORECAST",
+        "ACTUAL",
+        "FORECAST ACCURACY",
+        "BIAS",
+        "ABSOLUTE ERROR",
+        "REVISION EFFICIENCY"
       ],
       "contextSingleRow": true,
       "contextOrder": true,
@@ -67,7 +83,7 @@
       "revisionPoints": 5,
       "revisionZero": true,
       "adjustment": "CURRENT\n3.2 KL\n→\nCHANGE\n+0.7 KL\n→\nPROPOSED\n3.9 KL\nCONFIDENCE\nMedium\nREVIEW\n2 updates",
-      "adjustmentWidth": 1633,
+      "adjustmentWidth": 973.59375,
       "commentaryPresent": false,
       "peers": 3,
       "treatmentPresent": false,
@@ -80,7 +96,7 @@
       "background": "rgb(237, 243, 241)",
       "title": "How performance moves",
       "fullscreenButtons": 2,
-      "firstChartVisiblePx": 585.75,
+      "firstChartVisiblePx": 430.34375,
       "metricFont": 16,
       "adjustmentFont": 15,
       "metadataFont": 9.5
@@ -102,8 +118,10 @@
   ],
   "screenshots": [
     "/root/GitHub/forecast_analysis/validation-artifacts/sku-postmortem/desktop-1280x720.png",
+    "/root/GitHub/forecast_analysis/validation-artifacts/sku-postmortem/desktop-1280x720-product-picker-open.png",
     "/root/GitHub/forecast_analysis/validation-artifacts/sku-postmortem/desktop-1280x720-lower.png",
     "/root/GitHub/forecast_analysis/validation-artifacts/sku-postmortem/wide-1920x1080.png",
+    "/root/GitHub/forecast_analysis/validation-artifacts/sku-postmortem/wide-1920x1080-product-picker-open.png",
     "/root/GitHub/forecast_analysis/validation-artifacts/sku-postmortem/fullscreen-postmortem-performance.png",
     "/root/GitHub/forecast_analysis/validation-artifacts/sku-postmortem/fullscreen-postmortem-revision.png"
   ]

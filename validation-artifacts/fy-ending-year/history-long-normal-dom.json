@@ -1,0 +1,44 @@
+{
+  "lifecycle": {
+    "effectiveLaunch": {
+      "browserLaunched": true,
+      "engine": "chrome",
+      "launchHash": 10555201366498914000
+    },
+    "launched": false,
+    "relaunchedBrowser": false,
+    "restartedBackground": false,
+    "restoreStatus": "missing",
+    "reused": true,
+    "saveStatus": "saved"
+  },
+  "origin": "https://sazzadvps.taildd3bd9.ts.net/forecast-dashboard/#history",
+  "result": {
+    "body": "est\n\nError improvement · zero baseline · by target month\n\n+0.1 KL FVA · 50.0% hit rate\nFULL SCREEN\nSep\nOct\nNov\nDec\nJan\nFeb\nMar\nApr\nMay\nJun\nJul\nAug\nImproved\nWorsened\nNeutral\nError improvement · zero baseline · 12 months\nSibling benchmark\n\nSame brand and SKU class · matched active scope\n\n84 eligible siblings\nBrand\nSAFF ACTV · 1 eligible\n85.8%\n\nMedian 85.8% · rank 1/1 · percentile 100.0%\n\nSku Class\nC · 84 eligible\n85.8%\n\nMedian 59.7% · rank 20/84 · percentile 77.4%\n\nBrand Sku Class\nSAFF ACTV · C · 1 eligible\n85.8%\n\nMedian 85.8% · rank 1/1 · percentile 100.0%\n\nAccuracy scale 0% to 100% · same target month and active source.\n\nSOURCE\nFROM → TO\nHORIZON\nREVISION\nDIRECTION\nERROR AFTER\nOUTCOME\nML\nJun 01, 2026 → Jul 01, 2026\nM−2 → M−1\n-0.0 KL\nDown\n-0.1 KL\nWorsened · -0.0 KL\nML\nMay 01, 2026 → Jun 01, 2026\nM−3 → M−2\n-0.2 KL\nDown\n-0.0 KL\nImproved · +0.1 KL\nML\nApr 01, 2026 → May 01, 2026\nM−4 → M−3\n-8.7 KL\nDown\n+0.2 KL\nImproved · +8.7 KL\nML\nMar 01, 2026 → Apr 01, 2026\nM−5 → M−4\n+8.7 KL\nUp\n+8.8 KL\nWorsened · -8.7 KL\ncanonical dataset ready\npopulation · 16,035 forecast rows\nforecast_history_waterfall.csv · PH_FG.xlsx · secondary_sales\nmetrics computed by forecast_analysis\nComputing active population",
+    "buttons": [
+      {
+        "pressed": "false",
+        "text": "FY overlay"
+      },
+      {
+        "pressed": "true",
+        "text": "Long horizon"
+      }
+    ],
+    "chart": {
+      "aria": "Actual demand and forward forecast across the continuous monthly horizon",
+      "cls": "chart postmortem-chart year-overlay-chart year-overlay-chart--long",
+      "html": "<svg class=\"chart postmortem-chart year-overlay-chart year-overlay-chart--long\" viewBox=\"0 0 900 300\" role=\"img\" aria-label=\"Actual demand and forward forecast across the continuous monthly horizon\"><title>Actual demand and forward forecast across the continuous monthly horizon</title><g class=\"year-overlay-grid\"><line x1=\"58\" y1=\"28\" x2=\"866\" y2=\"28\"></line><text x=\"50\" y=\"31\">2</text><line x1=\"58\" y1=\"84\" x2=\"866\" y2=\"84\"></line><text x=\"50\" y=\"87\">2</text><line x1=\"58\" y1=\"140\" x2=\"866\" y2=\"140\"></line><text x=\"50\" y=\"143\">1</text><line x1=\"58\" y1=\"196\" x2=\"866\" y2=\"196\"></line><text x=\"50\" y=\"199\">1</text><line x1=\"58\" y1=\"252\" x2=\"866\" y2=\"252\"></line><text x=\"50\" y=\"255\">0</text></g><text class=\"year-overlay-axis-unit\" x=\"58\" y=\"16\">KL</text><line class=\"year-overlay-fy-separator\" x1=\"58\" y1=\"28\" x2=\"58\" y2=\"252\"></line><text class=\"year-overlay-fy-label\" x=\"65\" y=\"39\">FY25</text><line class=\"year-overlay-fy-separator\" x1=\"203.44\" y1=\"28\" x2=\"203.44\" y2=\"252\"></line><text class=\"year-overlay-fy-label\" x=\"210.44\" y=\"39\">FY26</text><line class=\"year-overlay-fy-separator\" x1=\"591.28\" y1=\"28\" x2=\"591.28\" y2=\"252\"></line><text class=\"year-overlay-fy-label\" x=\"598.28\" y=\"39\">FY27</text><path class=\"year-overlay-path actual\" d=\"M 58,102.512728573434 C 74.16,102.512728573434 74.16,49.67741935483869 90.32,49.67741935483869 C 106.47999999999999,49.67741935483869 106.47999999999999,90.66181809449674 122.64,90.66181809449674 C 138.79999999999998,90.66181809449674 138.79999999999998,123.25182191157424 154.95999999999998,123.25182191157424 C 171.12,123.25182191157424 171.12,161.7672809681204 187.28,161.7672809681204 C 203.44,161.7672809681204 203.44,183.000162242883 219.60000000000002,183.000162242883 C 235.76,183.000162242883 235.76,164.7300085878547 251.92,164.7300085878547 C 268.08,164.7300085878547 268.08,192.87592097533076 284.24,192.87592097533076 C 300.4,192.87592097533076 300.4,180.5312225597711 316.56,180.5312225597711 C 332.72,180.5312225597711 332.72,173.61819144705768 348.88,173.61819144705768 C 365.04,173.61819144705768 365.04,193.8634968485755 381.20000000000005,193.8634968485755 C 397.36,193.8634968485755 397.36,214.60259018671573 413.52,214.60259018671573 C 429.67999999999995,214.60259018671573 429.67999999999995,200.77652796128893 445.84,200.77652796128893 C 462,200.77652796128893 462,220.03425748956198 478.16,220.03425748956198 C 494.32000000000005,220.03425748956198 494.32000000000005,193.36970891195313 510.48,193.36970891195313 C 526.64,193.36970891195313 526.64,187.44425367248448 542.8,187.44425367248448 C 558.96,187.44425367248448 558.96,218.55289367969482 575.12,218.55289367969482 C 591.28,218.55289367969482 591.28,192.87592097533076 607.44,192.87592097533076 C 623.6,192.87592097533076 623.6,222.50319717267394 639.76,222.50319717267394 C 655.9200000000001,222.50319717267394 655.9200000000001,222.9969851092963 672.08,222.9969851092963 C 688.24,222.9969851092963 688.24,211.63986256698138 704.4000000000001,211.63986256698138 C 720.5600000000001,211.63986256698138 720.5600000000001,211.63986256698138 736.72,211.63986256698138\" stroke=\"var(--series-actual)\"></path><path class=\"year-overlay-path forecast\" d=\"M 769.04,230.32258064516128 C 785.2,230.32258064516128 785.2,223.95992700846796 801.36,223.95992700846796 C 817.52,223.95992700846796 817.52,214.33923661722523 833.68,214.33923661722523 C 849.8399999999999,214.33923661722523 849.8399999999999,218.0426461418931 866,218.0426461418931\" stroke=\"var(--teal)\"></path><circle class=\"year-overlay-point actual\" cx=\"58\" cy=\"102.512728573434\" r=\"3.5\" stroke=\"var(--series-actual)\"></circle><circle class=\"year-overlay-point actual\" cx=\"90.32\" cy=\"49.67741935483869\" r=\"3.5\" stroke=\"var(--series-actual)\"></circle><circle class=\"year-overlay-point actual\" cx=\"122.64\" cy=\"90.66181809449674\" r=\"3.5\" stroke=\"var(--series-actual)\"></circle><circle class=\"year-overlay-point actual\" cx=\"154.95999999999998\" cy=\"123.25182191157424\" r=\"3.5\" stroke=\"var(--series-actual)\"></circle><circle class=\"year-overlay-point actual\" cx=\"187.28\" cy=\"161.7672809681204\" r=\"3.5\" stroke=\"var(--series-actual)\"></circle><circle class=\"year-overlay-point actual\" cx=\"219.60000000000002\" cy=\"183.000162242883\" r=\"3.5\" stroke=\"var(--series-actual)\"></circle><circle class=\"year-overlay-point actual\" cx=\"251.92\" cy=\"164.7300085878547\" r=\"3.5\" stroke=\"var(--series-actual)\"></circle><circle class=\"year-overlay-point actual\" cx=\"284.24\" cy=\"192.87592097533076\" r=\"3.5\" stroke=\"var(--series-actual)\"></circle><circle class=\"year-overlay-point actual\" cx=\"316.56\" cy=\"180.5312225597711\" r=\"3.5\" stroke=\"var(--series-actual)\"></circle><circle class=\"year-overlay-point actual\" cx=\"348.88\" cy=\"173.61819144705768\" r=\"3.5\" stroke=\"var(--series-actual)\"></circle><circle class=\"year-overlay-point actual\" cx=\"381.20000000000005\" cy=\"193.8634968485755\" r=\"3.5\" stroke=\"var(--series-actual)\"></circle><circle class=\"year-overlay-point actual\" cx=\"413.52\" cy=\"214.60259018671573\" r=\"3.5\" stroke=\"var(--series-actual)\"><",
+      "rect": {
+        "bottom": 787.953125,
+        "height": 399.625,
+        "left": 251,
+        "right": 840.59375,
+        "top": 388.328125,
+        "width": 589.59375,
+        "x": 251,
+        "y": 388.328125
+      }
+    }
+  }
+}

@@ -132,13 +132,13 @@ class ProductPostmortemTests(unittest.TestCase):
                 for row in rows
             ],
             [
-                (date(2024, 10, 1), 2024, 7),
-                (date(2024, 11, 1), 2024, 8),
-                (date(2024, 12, 1), 2024, 9),
-                (date(2025, 1, 1), 2024, 10),
-                (date(2025, 2, 1), 2024, 11),
-                (date(2025, 3, 1), 2024, 12),
-                (date(2025, 4, 1), 2025, 1),
+                (date(2024, 10, 1), 2025, 7),
+                (date(2024, 11, 1), 2025, 8),
+                (date(2024, 12, 1), 2025, 9),
+                (date(2025, 1, 1), 2025, 10),
+                (date(2025, 2, 1), 2025, 11),
+                (date(2025, 3, 1), 2025, 12),
+                (date(2025, 4, 1), 2026, 1),
             ],
         )
         self.assertEqual(
@@ -180,6 +180,11 @@ class ProductPostmortemTests(unittest.TestCase):
         )
 
         self.assertEqual(result.actual_through, date(2026, 8, 1))
+        august = result.points.filter(
+            pl.col("snop_month") == date(2026, 8, 1)
+        ).to_dicts()[0]
+        self.assertEqual(august["fiscal_year"], 2027)
+        self.assertEqual(august["fiscal_month"], 5)
         self.assertEqual(
             [
                 (row["snop_month"], row["actual_kl"], row["forecast_kl"])

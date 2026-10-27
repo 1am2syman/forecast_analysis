@@ -24,7 +24,10 @@ from .contracts import (
     SOURCE_AVAILABILITY_STATUSES,
     normalize_revision_tolerance,
 )
-from .sku_classification import SKU_CLASSES  # pyright: ignore[reportMissingImports]
+from .sku_classification import (  # pyright: ignore[reportMissingImports]
+    SKU_CLASSES,
+    SKU_CLASS_FILTER_VALUES,
+)
 
 SOURCE_OPTIONS = {"TM": "tm", "ML": "ml"}
 QUALITY_BRAND_LABELS = {
@@ -989,7 +992,9 @@ def available_product_filter_values(
         "brands": sorted(
             scoped(exclude="brands")["brand_display"].drop_nulls().unique().to_list()
         ),
-        "sku_classes": [value for value in SKU_CLASSES if value in available_classes],
+        "sku_classes": [
+            value for value in SKU_CLASS_FILTER_VALUES if value in available_classes
+        ],
         "parent_codes": sorted(
             scoped(exclude="parent_codes")["parent_code"]
             .drop_nulls()
@@ -1053,7 +1058,7 @@ def available_filter_values(
     return {
         "target_months": sorted(source_frame["snop_month"].unique().to_list()),
         "brands": sorted(source_frame["brand_display"].drop_nulls().unique().to_list()),
-        "sku_classes": list(SKU_CLASSES),
+        "sku_classes": list(SKU_CLASS_FILTER_VALUES),
         "parent_products": parent_options,
         "horizons": horizons,
         "hierarchy_statuses": ["mapped", "unmapped", "conflict"],

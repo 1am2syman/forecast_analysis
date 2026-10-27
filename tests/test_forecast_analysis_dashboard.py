@@ -522,7 +522,7 @@ class DashboardPopulationTests(unittest.TestCase):
     def test_sku_class_filter_recomputes_forecast_and_actual_populations_together(self):
         frame = DashboardFixtureTests.frame()
         options = available_filter_values(frame, "tm")
-        self.assertEqual(options["sku_classes"], ["A", "B", "C", "Unclassified"])
+        self.assertEqual(options["sku_classes"], ["A", "B", "C"])
 
         view = build_dashboard_view(
             frame,

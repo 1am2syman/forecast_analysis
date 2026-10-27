@@ -178,24 +178,30 @@ async function main() {
       const audit = await page.evaluate(`(() => {
         const pane = document.querySelector('#pane-history');
         const product = document.querySelector('[data-product-control="parent"]');
+        const productTrigger = document.querySelector('[data-product-picker-trigger]');
+        const productSearch = document.querySelector('[data-product-picker-popover] [data-product-search]');
+        const metricsLedger = document.querySelector('[data-postmortem-metrics]');
         const metrics = document.querySelectorAll('[data-postmortem-metrics] .postmortem-metric');
         const revisionPoints = document.querySelectorAll('[data-postmortem-revision-chart] .postmortem-revision-chart__point');
         const adjustment = document.querySelector('[data-baseline-adjustment]');
         const historyContext = document.querySelector('.history-context');
         const historyToolbar = document.querySelector('.history-context .history-toolbar');
         const productSummary = document.querySelector('.history-context [data-product-summary]');
-        const contextLabels = [...document.querySelectorAll('.history-context .field__k, .history-context [data-product-summary] b')].map((node) => node.innerText.trim());
-        const contextChildren = [historyToolbar, productSummary].map((node) => node?.getBoundingClientRect());
+        const contextLabels = [...document.querySelectorAll('.history-context .field__k, .history-context [data-product-summary] b, .history-context [data-postmortem-metrics] b')].map((node) => node.innerText.trim());
+        const contextChildren = [historyToolbar, productSummary, metricsLedger].map((node) => node?.getBoundingClientRect());
         const summaryLabelLines = [...document.querySelectorAll('.history-context [data-product-summary] b')].map((node) => Math.round(node.getBoundingClientRect().height));
-        const sectionRects = [...document.querySelectorAll('[data-postmortem-metrics], .postmortem-primary, .postmortem-secondary')].map((node) => ({top: node.getBoundingClientRect().top, bottom: node.getBoundingClientRect().bottom, left: node.getBoundingClientRect().left, right: node.getBoundingClientRect().right}));
+        const sectionRects = [...document.querySelectorAll('.history-context, .postmortem-primary, .postmortem-secondary')].map((node) => ({top: node.getBoundingClientRect().top, bottom: node.getBoundingClientRect().bottom, left: node.getBoundingClientRect().left, right: node.getBoundingClientRect().right}));
         const overlap = sectionRects.some((rect, index) => sectionRects.slice(index + 1).some((other) => rect.left < other.right && rect.right > other.left && rect.top < other.bottom && rect.bottom > other.top));
         return {
           viewport: {width: innerWidth, height: innerHeight},
           selected: product?.value || null,
           paneActive: pane?.classList.contains('is-active') || false,
+          productTriggerText: productTrigger?.innerText.trim() || '',
+          productSearchInsidePopover: Boolean(productSearch),
+          targetMonthVisible: Boolean(document.querySelector('.history-context [data-product-control="month"]:not([hidden])')),
           contextLabels,
           contextSingleRow: Boolean(historyContext && contextChildren.every((rect) => rect && Math.abs(rect.top - contextChildren[0].top) <= 1 && Math.abs(rect.bottom - contextChildren[0].bottom) <= 1)),
-          contextOrder: Boolean(historyToolbar && productSummary && historyToolbar.compareDocumentPosition(productSummary) & Node.DOCUMENT_POSITION_FOLLOWING),
+          contextOrder: Boolean(historyToolbar && productSummary && metricsLedger && historyToolbar.compareDocumentPosition(productSummary) & Node.DOCUMENT_POSITION_FOLLOWING && productSummary.compareDocumentPosition(metricsLedger) & Node.DOCUMENT_POSITION_FOLLOWING),
           summaryLabelLines,
           metrics: metrics.length,
           performancePaths: document.querySelectorAll('[data-postmortem-performance-chart] path').length,
@@ -226,9 +232,11 @@ async function main() {
       })()`);
       assert(audit.paneActive, `${viewport.name}: history pane is not active`);
       assert(audit.selected, `${viewport.name}: no selected SKU`);
-      assert(JSON.stringify(audit.contextLabels) === JSON.stringify(["PRODUCT", "TARGET MONTH", "BRAND", "SKU CLASS"]), `${viewport.name}: history context fields are duplicated or out of order`);
-      assert(audit.contextSingleRow, `${viewport.name}: history context does not stay on one row`);
-      assert(audit.contextOrder, `${viewport.name}: history selectors must precede metadata`);
+      assert(JSON.stringify(audit.contextLabels) === JSON.stringify(["PRODUCT", "BRAND", "SKU CLASS", "LATEST FORECAST", "ACTUAL", "FORECAST ACCURACY", "BIAS", "ABSOLUTE ERROR", "REVISION EFFICIENCY"]), `${viewport.name}: history context and KPI labels are duplicated or out of order`);
+      assert(audit.productTriggerText.length > 0 && audit.productSearchInsidePopover, `${viewport.name}: product search is not contained in the product dropdown`);
+      assert(!audit.targetMonthVisible, `${viewport.name}: target month should not be a visible field`);
+      assert(audit.contextSingleRow, `${viewport.name}: product context and KPIs do not stay on one row`);
+      assert(audit.contextOrder, `${viewport.name}: product, metadata, and KPI ordering is incorrect`);
       assert(audit.summaryLabelLines.every((height) => height <= 10), `${viewport.name}: history metadata labels wrap`);
       assert(audit.metrics === 6, `${viewport.name}: expected six post-mortem metrics`);
       assert(audit.performancePaths >= 2, `${viewport.name}: forecast/actual chart missing`);
@@ -249,6 +257,25 @@ async function main() {
       await page.screenshot(path);
       audits.push(audit);
       screenshots.push(path);
+      await page.evaluate(`document.querySelector('[data-product-picker-trigger]').click()`);
+      await waitForExpression(page, `!document.querySelector('[data-product-picker-popover]').hidden && document.activeElement === document.querySelector('[data-product-search]') && document.querySelectorAll('[data-product-picker-option]').length > 0`, `${viewport.name} product picker`);
+      const pickerAudit = await page.evaluate(`(() => {
+        const popover = document.querySelector('[data-product-picker-popover]');
+        const search = document.querySelector('[data-product-search]');
+        const rect = popover.getBoundingClientRect();
+        return {
+          visible: !popover.hidden,
+          searchInside: popover.contains(search),
+          optionCount: document.querySelectorAll('[data-product-picker-option]').length,
+          withinViewport: rect.left >= 0 && rect.right <= innerWidth && rect.top >= 0 && rect.bottom <= innerHeight,
+        };
+      })()`);
+      assert(pickerAudit.visible && pickerAudit.searchInside, `${viewport.name}: product picker search is not inside the open dropdown`);
+      assert(pickerAudit.optionCount > 0 && pickerAudit.withinViewport, `${viewport.name}: product picker options are missing or clipped`);
+      const pickerPath = join(OUTPUT, `${viewport.name}-${viewport.width}x${viewport.height}-product-picker-open.png`);
+      await page.screenshot(pickerPath);
+      screenshots.push(pickerPath);
+      await page.evaluate(`document.querySelector('[data-product-picker-trigger]').click()`);
       if (viewport.name === "desktop") {
         await page.evaluate(`(() => {
           const panel = document.querySelector('[data-subpanel="history:product"]');
@@ -281,7 +308,7 @@ async function main() {
     }
     assert(page.errors.length === 0, `Browser errors: ${page.errors.join(" | ")}`);
     writeFileSync(join(OUTPUT, "validation-report.json"), `${JSON.stringify({ baseUrl: BASE_URL, audits, fullscreenAudits, screenshots }, null, 2)}\n`);
-    writeFileSync(join(OUTPUT, "validation-report.md"), `# SKU post-mortem browser validation\n\n- Result: PASS\n- Viewports: ${VIEWPORTS.map((viewport) => `${viewport.width}×${viewport.height}`).join(", ")}\n- Core sections: performance ledger, forecast/actual with baseline adjustment, revision outcome, peers\n- Removed sections: narrative decision, planner commentary, selected-target development/evidence, duplicate forward treatment\n- Landing-page chart visibility: at least 100 px at every validated viewport\n- Full-screen charts: forecast/actual, revision outcome\n- Minimum checked fonts: KPI 16 px, adjustment 15 px, product metadata 9.5 px\n- Browser errors: 0\n`);
+    writeFileSync(join(OUTPUT, "validation-report.md"), `# SKU post-mortem browser validation\n\n- Result: PASS\n- Viewports: ${VIEWPORTS.map((viewport) => `${viewport.width}×${viewport.height}`).join(", ")}\n- States per viewport: product picker closed, product picker open\n- Core sections: merged product context + KPI ledger, forecast/actual with baseline adjustment, revision outcome, peers\n- Product selection: search is contained inside the dropdown; target month is not a visible field\n- Landing-page chart visibility: at least 100 px at every validated viewport\n- Full-screen charts: forecast/actual, revision outcome\n- Minimum checked fonts: KPI 16 px, adjustment 15 px, product metadata 9.5 px\n- Browser errors: 0\n\n## Visual classification\n\n- Improved: product, brand, SKU class, and six KPIs share one compact row; shortened notes remain readable at both viewports.\n- Regressed: None observed.\n- Out of place: None observed in the impacted row or open product dropdown.\n`);
     process.stdout.write("sku postmortem browser validation passed\n");
   } finally {
     page?.close();

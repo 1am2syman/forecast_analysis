@@ -58,6 +58,13 @@ assert.deepEqual(
   "applicable options should appear before unavailable options",
 );
 assert.deepEqual(
+  rankOptions(availabilityOptions, "", { preserveOrder: true }).map(
+    (option) => option.value,
+  ),
+  ["disabled-a", "enabled-z", "enabled-b", "disabled-g"],
+  "static filters should preserve the supplied option order",
+);
+assert.deepEqual(
   rankOptions(
     [
       { value: "disabled-lp", label: "BPCNO LP", disabled: true },

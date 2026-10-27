@@ -1,0 +1,789 @@
+{
+  "lifecycle": {
+    "effectiveLaunch": {
+      "browserLaunched": true,
+      "engine": "chrome",
+      "launchHash": 10555201366498914000
+    },
+    "launched": false,
+    "relaunchedBrowser": false,
+    "restartedBackground": false,
+    "restoreStatus": "missing",
+    "reused": true,
+    "saveStatus": "saved"
+  },
+  "requests": [
+    {
+      "headers": {
+        "Accept-Language": "en-US,en;q=0.9",
+        "Upgrade-Insecure-Requests": "1",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not;A=Brand\";v=\"8\", \"Chromium\";v=\"150\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Linux\""
+      },
+      "method": "GET",
+      "mimeType": "text/html",
+      "requestId": "F5875F13FD30A267F0460E3E4D6B424D",
+      "resourceType": "Document",
+      "responseHeaders": {
+        "Cache-Control": "no-cache",
+        "Content-Length": "167089",
+        "Content-Type": "text/html",
+        "Date": "Tue, 22 Sep 2026 05:52:01 GMT",
+        "Server": "BaseHTTP/0.6 Python/3.13.14",
+        "X-Content-Type-Options": "nosniff"
+      },
+      "status": 200,
+      "timestamp": 1790056322331,
+      "url": "http://127.0.0.1:8766/"
+    },
+    {
+      "headers": {
+        "Accept-Language": "en-US,en;q=0.9",
+        "Referer": "http://127.0.0.1:8766/",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not;A=Brand\";v=\"8\", \"Chromium\";v=\"150\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Linux\""
+      },
+      "method": "GET",
+      "mimeType": "text/css",
+      "requestId": "1262702.2",
+      "resourceType": "Stylesheet",
+      "responseHeaders": {
+        "Cache-Control": "no-cache",
+        "Content-Length": "175723",
+        "Content-Type": "text/css",
+        "Date": "Tue, 22 Sep 2026 05:52:01 GMT",
+        "Server": "BaseHTTP/0.6 Python/3.13.14",
+        "X-Content-Type-Options": "nosniff"
+      },
+      "status": 200,
+      "timestamp": 1790056322331,
+      "url": "http://127.0.0.1:8766/styles.css"
+    },
+    {
+      "headers": {
+        "Accept-Language": "en-US,en;q=0.9",
+        "Referer": "http://127.0.0.1:8766/",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not;A=Brand\";v=\"8\", \"Chromium\";v=\"150\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Linux\""
+      },
+      "method": "GET",
+      "mimeType": "text/javascript",
+      "requestId": "1262702.3",
+      "resourceType": "Script",
+      "responseHeaders": {
+        "Cache-Control": "no-cache",
+        "Content-Length": "5498",
+        "Content-Type": "text/javascript",
+        "Date": "Tue, 22 Sep 2026 05:52:01 GMT",
+        "Server": "BaseHTTP/0.6 Python/3.13.14",
+        "X-Content-Type-Options": "nosniff"
+      },
+      "status": 200,
+      "timestamp": 1790056322331,
+      "url": "http://127.0.0.1:8766/timeline.js"
+    },
+    {
+      "headers": {
+        "Accept-Language": "en-US,en;q=0.9",
+        "Referer": "http://127.0.0.1:8766/",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not;A=Brand\";v=\"8\", \"Chromium\";v=\"150\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Linux\""
+      },
+      "method": "GET",
+      "mimeType": "text/javascript",
+      "requestId": "1262702.4",
+      "resourceType": "Script",
+      "responseHeaders": {
+        "Cache-Control": "no-cache",
+        "Content-Length": "11876",
+        "Content-Type": "text/javascript",
+        "Date": "Tue, 22 Sep 2026 05:52:01 GMT",
+        "Server": "BaseHTTP/0.6 Python/3.13.14",
+        "X-Content-Type-Options": "nosniff"
+      },
+      "status": 200,
+      "timestamp": 1790056322331,
+      "url": "http://127.0.0.1:8766/filter-multiselect.js"
+    },
+    {
+      "headers": {
+        "Accept-Language": "en-US,en;q=0.9",
+        "Referer": "http://127.0.0.1:8766/",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not;A=Brand\";v=\"8\", \"Chromium\";v=\"150\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Linux\""
+      },
+      "method": "GET",
+      "mimeType": "text/javascript",
+      "requestId": "1262702.5",
+      "resourceType": "Script",
+      "responseHeaders": {
+        "Cache-Control": "no-cache",
+        "Content-Length": "300671",
+        "Content-Type": "text/javascript",
+        "Date": "Tue, 22 Sep 2026 05:52:01 GMT",
+        "Server": "BaseHTTP/0.6 Python/3.13.14",
+        "X-Content-Type-Options": "nosniff"
+      },
+      "status": 200,
+      "timestamp": 1790056322331,
+      "url": "http://127.0.0.1:8766/app.js"
+    },
+    {
+      "headers": {
+        "Accept-Language": "en-US,en;q=0.9",
+        "Origin": "http://127.0.0.1:8766",
+        "Referer": "http://127.0.0.1:8766/styles.css",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not;A=Brand\";v=\"8\", \"Chromium\";v=\"150\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Linux\""
+      },
+      "method": "GET",
+      "mimeType": "font/ttf",
+      "requestId": "1262702.8",
+      "resourceType": "Font",
+      "responseHeaders": {
+        "Cache-Control": "no-cache",
+        "Content-Length": "70240",
+        "Content-Type": "font/ttf",
+        "Date": "Tue, 22 Sep 2026 05:52:01 GMT",
+        "Server": "BaseHTTP/0.6 Python/3.13.14",
+        "X-Content-Type-Options": "nosniff"
+      },
+      "status": 200,
+      "timestamp": 1790056322331,
+      "url": "http://127.0.0.1:8766/fonts/chakra-petch-600.ttf"
+    },
+    {
+      "headers": {
+        "Accept-Language": "en-US,en;q=0.9",
+        "Origin": "http://127.0.0.1:8766",
+        "Referer": "http://127.0.0.1:8766/styles.css",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not;A=Brand\";v=\"8\", \"Chromium\";v=\"150\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Linux\""
+      },
+      "method": "GET",
+      "mimeType": "font/ttf",
+      "requestId": "1262702.9",
+      "resourceType": "Font",
+      "responseHeaders": {
+        "Cache-Control": "no-cache",
+        "Content-Length": "128812",
+        "Content-Type": "font/ttf",
+        "Date": "Tue, 22 Sep 2026 05:52:01 GMT",
+        "Server": "BaseHTTP/0.6 Python/3.13.14",
+        "X-Content-Type-Options": "nosniff"
+      },
+      "status": 200,
+      "timestamp": 1790056322331,
+      "url": "http://127.0.0.1:8766/fonts/ibm-plex-mono-400.ttf"
+    },
+    {
+      "headers": {
+        "Accept-Language": "en-US,en;q=0.9",
+        "Origin": "http://127.0.0.1:8766",
+        "Referer": "http://127.0.0.1:8766/styles.css",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not;A=Brand\";v=\"8\", \"Chromium\";v=\"150\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Linux\""
+      },
+      "method": "GET",
+      "mimeType": "font/ttf",
+      "requestId": "1262702.10",
+      "resourceType": "Font",
+      "responseHeaders": {
+        "Cache-Control": "no-cache",
+        "Content-Length": "129916",
+        "Content-Type": "font/ttf",
+        "Date": "Tue, 22 Sep 2026 05:52:01 GMT",
+        "Server": "BaseHTTP/0.6 Python/3.13.14",
+        "X-Content-Type-Options": "nosniff"
+      },
+      "status": 200,
+      "timestamp": 1790056322331,
+      "url": "http://127.0.0.1:8766/fonts/ibm-plex-mono-500.ttf"
+    },
+    {
+      "headers": {
+        "Accept-Language": "en-US,en;q=0.9",
+        "Origin": "http://127.0.0.1:8766",
+        "Referer": "http://127.0.0.1:8766/styles.css",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not;A=Brand\";v=\"8\", \"Chromium\";v=\"150\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Linux\""
+      },
+      "method": "GET",
+      "mimeType": "font/ttf",
+      "requestId": "1262702.11",
+      "resourceType": "Font",
+      "responseHeaders": {
+        "Cache-Control": "no-cache",
+        "Content-Length": "133444",
+        "Content-Type": "font/ttf",
+        "Date": "Tue, 22 Sep 2026 05:52:01 GMT",
+        "Server": "BaseHTTP/0.6 Python/3.13.14",
+        "X-Content-Type-Options": "nosniff"
+      },
+      "status": 200,
+      "timestamp": 1790056322331,
+      "url": "http://127.0.0.1:8766/fonts/ibm-plex-mono-600.ttf"
+    },
+    {
+      "headers": {
+        "Accept-Language": "en-US,en;q=0.9",
+        "Origin": "http://127.0.0.1:8766",
+        "Referer": "http://127.0.0.1:8766/styles.css",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not;A=Brand\";v=\"8\", \"Chromium\";v=\"150\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Linux\""
+      },
+      "method": "GET",
+      "mimeType": "font/ttf",
+      "requestId": "1262702.14",
+      "resourceType": "Font",
+      "responseHeaders": {
+        "Cache-Control": "no-cache",
+        "Content-Length": "205284",
+        "Content-Type": "font/ttf",
+        "Date": "Tue, 22 Sep 2026 05:52:01 GMT",
+        "Server": "BaseHTTP/0.6 Python/3.13.14",
+        "X-Content-Type-Options": "nosniff"
+      },
+      "status": 200,
+      "timestamp": 1790056322331,
+      "url": "http://127.0.0.1:8766/fonts/ibm-plex-sans-600.ttf"
+    },
+    {
+      "headers": {
+        "Accept-Language": "en-US,en;q=0.9",
+        "Origin": "http://127.0.0.1:8766",
+        "Referer": "http://127.0.0.1:8766/styles.css",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not;A=Brand\";v=\"8\", \"Chromium\";v=\"150\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Linux\""
+      },
+      "method": "GET",
+      "mimeType": "font/ttf",
+      "requestId": "1262702.12",
+      "resourceType": "Font",
+      "responseHeaders": {
+        "Cache-Control": "no-cache",
+        "Content-Length": "205252",
+        "Content-Type": "font/ttf",
+        "Date": "Tue, 22 Sep 2026 05:52:01 GMT",
+        "Server": "BaseHTTP/0.6 Python/3.13.14",
+        "X-Content-Type-Options": "nosniff"
+      },
+      "status": 200,
+      "timestamp": 1790056322331,
+      "url": "http://127.0.0.1:8766/fonts/ibm-plex-sans-400.ttf"
+    },
+    {
+      "headers": {
+        "Accept-Language": "en-US,en;q=0.9",
+        "Content-Type": "application/json",
+        "Referer": "http://127.0.0.1:8766/",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not;A=Brand\";v=\"8\", \"Chromium\";v=\"150\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Linux\""
+      },
+      "method": "GET",
+      "mimeType": "application/json",
+      "requestId": "1262702.17",
+      "resourceType": "Fetch",
+      "responseHeaders": {
+        "Cache-Control": "no-store",
+        "Content-Length": "38442",
+        "Content-Type": "application/json; charset=utf-8",
+        "Date": "Tue, 22 Sep 2026 05:52:01 GMT",
+        "Server": "BaseHTTP/0.6 Python/3.13.14",
+        "X-Content-Type-Options": "nosniff"
+      },
+      "status": 200,
+      "timestamp": 1790056322331,
+      "url": "http://127.0.0.1:8766/api/bootstrap"
+    },
+    {
+      "headers": {
+        "Accept-Language": "en-US,en;q=0.9",
+        "Referer": "http://127.0.0.1:8766/",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not;A=Brand\";v=\"8\", \"Chromium\";v=\"150\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Linux\""
+      },
+      "method": "GET",
+      "mimeType": "image/vnd.microsoft.icon",
+      "requestId": "1262702.18",
+      "resourceType": "Other",
+      "responseHeaders": {
+        "Cache-Control": "no-cache",
+        "Content-Length": "16958",
+        "Content-Type": "image/vnd.microsoft.icon",
+        "Date": "Tue, 22 Sep 2026 05:52:02 GMT",
+        "Server": "BaseHTTP/0.6 Python/3.13.14",
+        "X-Content-Type-Options": "nosniff"
+      },
+      "status": 200,
+      "timestamp": 1790056322332,
+      "url": "http://127.0.0.1:8766/favicon.ico"
+    },
+    {
+      "headers": {
+        "Accept-Language": "en-US,en;q=0.9",
+        "Content-Type": "application/json",
+        "Referer": "http://127.0.0.1:8766/",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not;A=Brand\";v=\"8\", \"Chromium\";v=\"150\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Linux\""
+      },
+      "method": "POST",
+      "mimeType": "application/json",
+      "postData": "{\"source\":\"ml\",\"comparison_mode\":false,\"target_start\":\"2025-05-01\",\"target_end\":\"2026-08-01\",\"brands\":[],\"sku_classes\":[],\"parent_codes\":[],\"horizon\":null,\"minimum_actual_volume\":0,\"vintage_a\":{\"kind\":\"oldest_available\",\"value\":null},\"vintage_b\":{\"kind\":\"latest_available\",\"value\":null},\"accuracy_vintage_ids\":[\"oldest_available\"],\"revision_direction\":null,\"revision_outcome\":null,\"revision_tolerance_kl\":0.01,\"forecast_direction\":null,\"accuracy_band\":null,\"bias_band\":null,\"minimum_absolute_error_kl\":0,\"top_n\":null,\"top_n_metric\":\"actual_volume\",\"hierarchy_status\":null,\"actual_status\":null,\"pair_status\":null,\"source_availability\":null,\"zero_forecast_only\":false,\"complete_vintage_history_only\":false,\"drilldown_parent_codes\":[],\"product_parent_code\":null,\"product_target_month\":null}",
+      "requestId": "1262702.19",
+      "resourceType": "Fetch",
+      "responseHeaders": {
+        "Cache-Control": "no-store",
+        "Content-Length": "26683",
+        "Content-Type": "application/json; charset=utf-8",
+        "Date": "Tue, 22 Sep 2026 05:52:17 GMT",
+        "Server": "BaseHTTP/0.6 Python/3.13.14",
+        "X-Content-Type-Options": "nosniff"
+      },
+      "status": 200,
+      "timestamp": 1790056337759,
+      "url": "http://127.0.0.1:8766/api/module/product"
+    },
+    {
+      "headers": {
+        "Accept-Language": "en-US,en;q=0.9",
+        "Content-Type": "application/json",
+        "Referer": "http://127.0.0.1:8766/",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not;A=Brand\";v=\"8\", \"Chromium\";v=\"150\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Linux\""
+      },
+      "method": "POST",
+      "mimeType": "application/json",
+      "postData": "{\"source\":\"ml\",\"comparison_mode\":false,\"target_start\":\"2025-05-01\",\"target_end\":\"2026-08-01\",\"brands\":[],\"sku_classes\":[],\"parent_codes\":[],\"horizon\":null,\"minimum_actual_volume\":0,\"vintage_a\":{\"kind\":\"oldest_available\",\"value\":null},\"vintage_b\":{\"kind\":\"latest_available\",\"value\":null},\"accuracy_vintage_ids\":[\"oldest_available\"],\"revision_direction\":null,\"revision_outcome\":null,\"revision_tolerance_kl\":0.01,\"forecast_direction\":null,\"accuracy_band\":null,\"bias_band\":null,\"minimum_absolute_error_kl\":0,\"top_n\":null,\"top_n_metric\":\"actual_volume\",\"hierarchy_status\":null,\"actual_status\":null,\"pair_status\":null,\"source_availability\":null,\"zero_forecast_only\":false,\"complete_vintage_history_only\":false,\"drilldown_parent_codes\":[],\"product_parent_code\":706059,\"product_target_month\":null}",
+      "requestId": "1262702.20",
+      "resourceType": "Fetch",
+      "responseHeaders": {
+        "Cache-Control": "no-store",
+        "Content-Length": "38383",
+        "Content-Type": "application/json; charset=utf-8",
+        "Date": "Tue, 22 Sep 2026 05:53:33 GMT",
+        "Server": "BaseHTTP/0.6 Python/3.13.14",
+        "X-Content-Type-Options": "nosniff"
+      },
+      "status": 200,
+      "timestamp": 1790056413185,
+      "url": "http://127.0.0.1:8766/api/module/product"
+    },
+    {
+      "headers": {
+        "Accept-Language": "en-US,en;q=0.9",
+        "Upgrade-Insecure-Requests": "1",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not;A=Brand\";v=\"8\", \"Chromium\";v=\"150\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Linux\""
+      },
+      "method": "GET",
+      "mimeType": "text/html",
+      "requestId": "8256CA7477E77CE274BE98DF40EF7543",
+      "resourceType": "Document",
+      "responseHeaders": {
+        "Cache-Control": "no-cache",
+        "Content-Length": "167089",
+        "Content-Type": "text/html",
+        "Date": "Tue, 22 Sep 2026 05:56:28 GMT",
+        "Server": "BaseHTTP/0.6 Python/3.13.14",
+        "X-Content-Type-Options": "nosniff"
+      },
+      "status": 200,
+      "timestamp": 1790056597105,
+      "url": "http://127.0.0.1:8766/"
+    },
+    {
+      "headers": {
+        "Accept-Language": "en-US,en;q=0.9",
+        "Referer": "http://127.0.0.1:8766/",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not;A=Brand\";v=\"8\", \"Chromium\";v=\"150\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Linux\""
+      },
+      "method": "GET",
+      "mimeType": "text/css",
+      "requestId": "1262702.22",
+      "resourceType": "Stylesheet",
+      "responseHeaders": {
+        "Cache-Control": "no-cache",
+        "Content-Length": "175723",
+        "Content-Type": "text/css",
+        "Date": "Tue, 22 Sep 2026 05:56:28 GMT",
+        "Server": "BaseHTTP/0.6 Python/3.13.14",
+        "X-Content-Type-Options": "nosniff"
+      },
+      "status": 200,
+      "timestamp": 1790056597105,
+      "url": "http://127.0.0.1:8766/styles.css"
+    },
+    {
+      "headers": {
+        "Accept-Language": "en-US,en;q=0.9",
+        "Referer": "http://127.0.0.1:8766/",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not;A=Brand\";v=\"8\", \"Chromium\";v=\"150\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Linux\""
+      },
+      "method": "GET",
+      "mimeType": "text/javascript",
+      "requestId": "1262702.23",
+      "resourceType": "Script",
+      "responseHeaders": {
+        "Cache-Control": "no-cache",
+        "Content-Length": "5498",
+        "Content-Type": "text/javascript",
+        "Date": "Tue, 22 Sep 2026 05:56:28 GMT",
+        "Server": "BaseHTTP/0.6 Python/3.13.14",
+        "X-Content-Type-Options": "nosniff"
+      },
+      "status": 200,
+      "timestamp": 1790056597105,
+      "url": "http://127.0.0.1:8766/timeline.js"
+    },
+    {
+      "headers": {
+        "Accept-Language": "en-US,en;q=0.9",
+        "Referer": "http://127.0.0.1:8766/",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not;A=Brand\";v=\"8\", \"Chromium\";v=\"150\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Linux\""
+      },
+      "method": "GET",
+      "mimeType": "text/javascript",
+      "requestId": "1262702.24",
+      "resourceType": "Script",
+      "responseHeaders": {
+        "Cache-Control": "no-cache",
+        "Content-Length": "11876",
+        "Content-Type": "text/javascript",
+        "Date": "Tue, 22 Sep 2026 05:56:28 GMT",
+        "Server": "BaseHTTP/0.6 Python/3.13.14",
+        "X-Content-Type-Options": "nosniff"
+      },
+      "status": 200,
+      "timestamp": 1790056597105,
+      "url": "http://127.0.0.1:8766/filter-multiselect.js"
+    },
+    {
+      "headers": {
+        "Accept-Language": "en-US,en;q=0.9",
+        "Referer": "http://127.0.0.1:8766/",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not;A=Brand\";v=\"8\", \"Chromium\";v=\"150\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Linux\""
+      },
+      "method": "GET",
+      "mimeType": "text/javascript",
+      "requestId": "1262702.25",
+      "resourceType": "Script",
+      "responseHeaders": {
+        "Cache-Control": "no-cache",
+        "Content-Length": "300671",
+        "Content-Type": "text/javascript",
+        "Date": "Tue, 22 Sep 2026 05:56:28 GMT",
+        "Server": "BaseHTTP/0.6 Python/3.13.14",
+        "X-Content-Type-Options": "nosniff"
+      },
+      "status": 200,
+      "timestamp": 1790056597105,
+      "url": "http://127.0.0.1:8766/app.js"
+    },
+    {
+      "headers": {
+        "Accept-Language": "en-US,en;q=0.9",
+        "Origin": "http://127.0.0.1:8766",
+        "Referer": "http://127.0.0.1:8766/styles.css",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not;A=Brand\";v=\"8\", \"Chromium\";v=\"150\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Linux\""
+      },
+      "method": "GET",
+      "mimeType": "font/ttf",
+      "requestId": "1262702.27",
+      "resourceType": "Font",
+      "responseHeaders": {
+        "Cache-Control": "no-cache",
+        "Content-Length": "70240",
+        "Content-Type": "font/ttf",
+        "Date": "Tue, 22 Sep 2026 05:56:32 GMT",
+        "Server": "BaseHTTP/0.6 Python/3.13.14",
+        "X-Content-Type-Options": "nosniff"
+      },
+      "status": 200,
+      "timestamp": 1790056597106,
+      "url": "http://127.0.0.1:8766/fonts/chakra-petch-600.ttf"
+    },
+    {
+      "headers": {
+        "Accept-Language": "en-US,en;q=0.9",
+        "Origin": "http://127.0.0.1:8766",
+        "Referer": "http://127.0.0.1:8766/styles.css",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not;A=Brand\";v=\"8\", \"Chromium\";v=\"150\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Linux\""
+      },
+      "method": "GET",
+      "mimeType": "font/ttf",
+      "requestId": "1262702.28",
+      "resourceType": "Font",
+      "responseHeaders": {
+        "Cache-Control": "no-cache",
+        "Content-Length": "128812",
+        "Content-Type": "font/ttf",
+        "Date": "Tue, 22 Sep 2026 05:56:32 GMT",
+        "Server": "BaseHTTP/0.6 Python/3.13.14",
+        "X-Content-Type-Options": "nosniff"
+      },
+      "status": 200,
+      "timestamp": 1790056597106,
+      "url": "http://127.0.0.1:8766/fonts/ibm-plex-mono-400.ttf"
+    },
+    {
+      "headers": {
+        "Accept-Language": "en-US,en;q=0.9",
+        "Origin": "http://127.0.0.1:8766",
+        "Referer": "http://127.0.0.1:8766/styles.css",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not;A=Brand\";v=\"8\", \"Chromium\";v=\"150\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Linux\""
+      },
+      "method": "GET",
+      "mimeType": "font/ttf",
+      "requestId": "1262702.29",
+      "resourceType": "Font",
+      "responseHeaders": {
+        "Cache-Control": "no-cache",
+        "Content-Length": "129916",
+        "Content-Type": "font/ttf",
+        "Date": "Tue, 22 Sep 2026 05:56:32 GMT",
+        "Server": "BaseHTTP/0.6 Python/3.13.14",
+        "X-Content-Type-Options": "nosniff"
+      },
+      "status": 200,
+      "timestamp": 1790056597106,
+      "url": "http://127.0.0.1:8766/fonts/ibm-plex-mono-500.ttf"
+    },
+    {
+      "headers": {
+        "Accept-Language": "en-US,en;q=0.9",
+        "Origin": "http://127.0.0.1:8766",
+        "Referer": "http://127.0.0.1:8766/styles.css",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not;A=Brand\";v=\"8\", \"Chromium\";v=\"150\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Linux\""
+      },
+      "method": "GET",
+      "mimeType": "font/ttf",
+      "requestId": "1262702.30",
+      "resourceType": "Font",
+      "responseHeaders": {
+        "Cache-Control": "no-cache",
+        "Content-Length": "133444",
+        "Content-Type": "font/ttf",
+        "Date": "Tue, 22 Sep 2026 05:56:32 GMT",
+        "Server": "BaseHTTP/0.6 Python/3.13.14",
+        "X-Content-Type-Options": "nosniff"
+      },
+      "status": 200,
+      "timestamp": 1790056597106,
+      "url": "http://127.0.0.1:8766/fonts/ibm-plex-mono-600.ttf"
+    },
+    {
+      "headers": {
+        "Accept-Language": "en-US,en;q=0.9",
+        "Origin": "http://127.0.0.1:8766",
+        "Referer": "http://127.0.0.1:8766/styles.css",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not;A=Brand\";v=\"8\", \"Chromium\";v=\"150\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Linux\""
+      },
+      "method": "GET",
+      "mimeType": "font/ttf",
+      "requestId": "1262702.33",
+      "resourceType": "Font",
+      "responseHeaders": {
+        "Cache-Control": "no-cache",
+        "Content-Length": "205284",
+        "Content-Type": "font/ttf",
+        "Date": "Tue, 22 Sep 2026 05:56:32 GMT",
+        "Server": "BaseHTTP/0.6 Python/3.13.14",
+        "X-Content-Type-Options": "nosniff"
+      },
+      "status": 200,
+      "timestamp": 1790056597106,
+      "url": "http://127.0.0.1:8766/fonts/ibm-plex-sans-600.ttf"
+    },
+    {
+      "headers": {
+        "Accept-Language": "en-US,en;q=0.9",
+        "Origin": "http://127.0.0.1:8766",
+        "Referer": "http://127.0.0.1:8766/styles.css",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not;A=Brand\";v=\"8\", \"Chromium\";v=\"150\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Linux\""
+      },
+      "method": "GET",
+      "mimeType": "font/ttf",
+      "requestId": "1262702.31",
+      "resourceType": "Font",
+      "responseHeaders": {
+        "Cache-Control": "no-cache",
+        "Content-Length": "205252",
+        "Content-Type": "font/ttf",
+        "Date": "Tue, 22 Sep 2026 05:56:37 GMT",
+        "Server": "BaseHTTP/0.6 Python/3.13.14",
+        "X-Content-Type-Options": "nosniff"
+      },
+      "status": 200,
+      "timestamp": 1790056597106,
+      "url": "http://127.0.0.1:8766/fonts/ibm-plex-sans-400.ttf"
+    },
+    {
+      "headers": {
+        "Accept-Language": "en-US,en;q=0.9",
+        "Content-Type": "application/json",
+        "Referer": "http://127.0.0.1:8766/",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not;A=Brand\";v=\"8\", \"Chromium\";v=\"150\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Linux\""
+      },
+      "method": "GET",
+      "mimeType": "application/json",
+      "requestId": "1262702.37",
+      "resourceType": "Fetch",
+      "responseHeaders": {
+        "Cache-Control": "no-store",
+        "Content-Length": "38442",
+        "Content-Type": "application/json; charset=utf-8",
+        "Date": "Tue, 22 Sep 2026 05:56:32 GMT",
+        "Server": "BaseHTTP/0.6 Python/3.13.14",
+        "X-Content-Type-Options": "nosniff"
+      },
+      "status": 200,
+      "timestamp": 1790056597106,
+      "url": "http://127.0.0.1:8766/api/bootstrap"
+    },
+    {
+      "headers": {
+        "Accept-Language": "en-US,en;q=0.9",
+        "Content-Type": "application/json",
+        "Referer": "http://127.0.0.1:8766/",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not;A=Brand\";v=\"8\", \"Chromium\";v=\"150\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Linux\""
+      },
+      "method": "POST",
+      "mimeType": "application/json",
+      "postData": "{\"source\":\"ml\",\"comparison_mode\":false,\"target_start\":\"2025-05-01\",\"target_end\":\"2026-08-01\",\"brands\":[],\"sku_classes\":[],\"parent_codes\":[],\"horizon\":null,\"minimum_actual_volume\":0,\"vintage_a\":{\"kind\":\"oldest_available\",\"value\":null},\"vintage_b\":{\"kind\":\"latest_available\",\"value\":null},\"accuracy_vintage_ids\":[\"oldest_available\"],\"revision_direction\":null,\"revision_outcome\":null,\"revision_tolerance_kl\":0.01,\"forecast_direction\":null,\"accuracy_band\":null,\"bias_band\":null,\"minimum_absolute_error_kl\":0,\"top_n\":null,\"top_n_metric\":\"actual_volume\",\"hierarchy_status\":null,\"actual_status\":null,\"pair_status\":null,\"source_availability\":null,\"zero_forecast_only\":false,\"complete_vintage_history_only\":false,\"drilldown_parent_codes\":[],\"product_parent_code\":null,\"product_target_month\":null}",
+      "requestId": "1262702.38",
+      "resourceType": "Fetch",
+      "responseHeaders": {
+        "Cache-Control": "no-store",
+        "Content-Length": "26683",
+        "Content-Type": "application/json; charset=utf-8",
+        "Date": "Tue, 22 Sep 2026 05:56:32 GMT",
+        "Server": "BaseHTTP/0.6 Python/3.13.14",
+        "X-Content-Type-Options": "nosniff"
+      },
+      "status": 200,
+      "timestamp": 1790056597106,
+      "url": "http://127.0.0.1:8766/api/module/product"
+    },
+    {
+      "headers": {
+        "Accept-Language": "en-US,en;q=0.9",
+        "Referer": "http://127.0.0.1:8766/",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not;A=Brand\";v=\"8\", \"Chromium\";v=\"150\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Linux\""
+      },
+      "method": "GET",
+      "mimeType": "image/vnd.microsoft.icon",
+      "requestId": "1262702.39",
+      "resourceType": "Other",
+      "responseHeaders": {
+        "Cache-Control": "no-cache",
+        "Content-Length": "16958",
+        "Content-Type": "image/vnd.microsoft.icon",
+        "Date": "Tue, 22 Sep 2026 05:56:37 GMT",
+        "Server": "BaseHTTP/0.6 Python/3.13.14",
+        "X-Content-Type-Options": "nosniff"
+      },
+      "status": 200,
+      "timestamp": 1790056597231,
+      "url": "http://127.0.0.1:8766/favicon.ico"
+    },
+    {
+      "headers": {
+        "Accept-Language": "en-US,en;q=0.9",
+        "Content-Type": "application/json",
+        "Referer": "http://127.0.0.1:8766/",
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/150.0.0.0 Safari/537.36",
+        "sec-ch-ua": "\"Not;A=Brand\";v=\"8\", \"Chromium\";v=\"150\"",
+        "sec-ch-ua-mobile": "?0",
+        "sec-ch-ua-platform": "\"Linux\""
+      },
+      "method": "POST",
+      "mimeType": "application/json",
+      "postData": "{\"source\":\"ml\",\"comparison_mode\":false,\"target_start\":\"2025-05-01\",\"target_end\":\"2026-08-01\",\"brands\":[],\"sku_classes\":[],\"parent_codes\":[],\"horizon\":null,\"minimum_actual_volume\":0,\"vintage_a\":{\"kind\":\"oldest_available\",\"value\":null},\"vintage_b\":{\"kind\":\"latest_available\",\"value\":null},\"accuracy_vintage_ids\":[\"oldest_available\"],\"revision_direction\":null,\"revision_outcome\":null,\"revision_tolerance_kl\":0.01,\"forecast_direction\":null,\"accuracy_band\":null,\"bias_band\":null,\"minimum_absolute_error_kl\":0,\"top_n\":null,\"top_n_metric\":\"actual_volume\",\"hierarchy_status\":null,\"actual_status\":null,\"pair_status\":null,\"source_availability\":null,\"zero_forecast_only\":false,\"complete_vintage_history_only\":false,\"drilldown_parent_codes\":[],\"product_parent_code\":706059,\"product_target_month\":null}",
+      "requestId": "1262702.40",
+      "resourceType": "Fetch",
+      "responseHeaders": {
+        "Cache-Control": "no-store",
+        "Content-Length": "38383",
+        "Content-Type": "application/json; charset=utf-8",
+        "Date": "Tue, 22 Sep 2026 05:57:45 GMT",
+        "Server": "BaseHTTP/0.6 Python/3.13.14",
+        "X-Content-Type-Options": "nosniff"
+      },
+      "status": 200,
+      "timestamp": 1790056665882,
+      "url": "http://127.0.0.1:8766/api/module/product"
+    }
+  ]
+}

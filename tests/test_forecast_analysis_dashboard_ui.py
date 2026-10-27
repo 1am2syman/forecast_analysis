@@ -15,11 +15,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from forecast_analysis_dashboard_ui_contract import (  # pyright: ignore[reportMissingImports]
+from forecast_analysis_dashboard_ui_contract import (  # noqa: E402, I001  # pyright: ignore[reportMissingImports]
     sha256_json,
     sha256_json_file,
 )
-from validate_forecast_analysis_dashboard_ui import (  # pyright: ignore[reportMissingImports]
+from validate_forecast_analysis_dashboard_ui import (  # noqa: E402, I001  # pyright: ignore[reportMissingImports]
     CAPTURE_CONTRACT,
     CaptureValidationError,
     NORMALIZATION_CONTRACT,
@@ -527,13 +527,11 @@ class DashboardUiSourceContractTests(unittest.TestCase):
         self.assertNotIn('class="chart__section-label"', self.source)
         self.assertEqual(self.source.count('class="chart__axis-year" x="${x(month)}" dy="16"'), 2)
 
-    def test_overview_volume_axis_uses_absolute_whole_kl_values(self) -> None:
-        self.assertIn("const OVERVIEW_VOLUME_Y_MIN_KL = 1600", self.source)
-        self.assertIn("const OVERVIEW_VOLUME_Y_MAX_KL = 4500", self.source)
-        self.assertIn(
-            "return [OVERVIEW_VOLUME_Y_MIN_KL, OVERVIEW_VOLUME_Y_MAX_KL]",
-            self.source,
-        )
+    def test_overview_volume_axis_uses_filtered_data_extent_in_whole_kl(self) -> None:
+        self.assertNotIn("OVERVIEW_VOLUME_Y_MIN_KL", self.source)
+        self.assertNotIn("OVERVIEW_VOLUME_Y_MAX_KL", self.source)
+        self.assertIn("function overviewVolumeExtent(values)", self.source)
+        self.assertIn("return chartExtent(values)", self.source)
         self.assertIn("number(value, 0)", self.source)
         self.assertNotIn("number(value / 1000, 1)", self.source)
         self.assertIn(">KL</text><g class=\"chart__grid chart__grid--volume\"", self.source)
@@ -578,6 +576,11 @@ class DashboardUiSourceContractTests(unittest.TestCase):
         self.assertIn("width: calc(100% + 20px);", self.styles)
         self.assertIn("box-shadow: none;", self.styles)
         self.assertIn("FilterMultiSelect.create", self.source)
+        self.assertIn('selectedFirst: name !== "sku_classes"', self.source)
+        self.assertIn(
+            ".quick-filter-field--sku .filter-multiselect__popover {\n  right: 0;\n  left: auto;\n  width: min(240px, calc(100vw - 64px));\n}",
+            self.styles,
+        )
         self.assertIn('brands: productFilterValue("brands")', self.source)
         self.assertIn('sku_classes: productFilterValue("sku_classes")', self.source)
         self.assertIn('parent_codes: productFilterValue("parent_codes")', self.source)
@@ -659,7 +662,7 @@ class DashboardUiSourceContractTests(unittest.TestCase):
         self.assertNotIn("explicit analytical modes", comparison.lower())
         self.assertIn(".pane__head-actions .subtabs", self.styles)
 
-    def test_history_controls_and_nonduplicated_context_share_one_row(self) -> None:
+    def test_history_product_context_and_kpis_share_one_row(self) -> None:
         history_start = self.index.index('id="pane-history"')
         history_end = self.index.index('id="pane-quality"')
         history = self.index[history_start:history_end]
@@ -667,21 +670,33 @@ class DashboardUiSourceContractTests(unittest.TestCase):
         header_end = history.index('class="subpanel is-active"')
         header = history[:header_end]
         context_start = history.index('class="history-context"')
-        context_end = history.index('class="postmortem-metrics"')
+        context_end = history.index('class="postmortem-cockpit"')
         context = history[context_start:context_end]
 
         self.assertIn('data-subtabs="history"', header)
         self.assertIn('class="pane__head-actions"', header)
+        self.assertIn('data-product-picker', context)
+        self.assertIn('data-product-picker-popover', context)
+        self.assertIn('data-product-search', context)
         self.assertIn('data-product-summary', context)
-        self.assertIn('class="toolbar history-toolbar"', context)
+        self.assertIn('data-postmortem-metrics', context)
+        self.assertIn('data-product-control="month"', context)
+        self.assertIn('aria-label="Selected target month"', context)
         self.assertLess(
             context.index('class="toolbar history-toolbar"'),
             context.index('data-product-summary'),
         )
+        self.assertLess(
+            context.index('data-product-summary'),
+            context.index('data-postmortem-metrics'),
+        )
+        self.assertNotIn('<span class="field__k">Target month</span', context)
         self.assertNotIn('data-product-source', history)
         self.assertIn(".history-context {", self.styles)
         self.assertIn(".history-context .history-toolbar {", self.styles)
         self.assertIn(".history-context .product-summary {", self.styles)
+        self.assertIn(".history-context .postmortem-metrics {", self.styles)
+        self.assertIn(".product-picker__popover {", self.styles)
         self.assertNotIn('populationItem("Product", detail.parent_code)', self.source)
         self.assertNotIn(
             'populationItem("Description", detail.parent_description)', self.source
@@ -756,6 +771,10 @@ class DashboardUiSourceContractTests(unittest.TestCase):
         self.assertIn("function resetYearOverlay", self.source)
         self.assertIn("function productLongHorizonChart", self.source)
         self.assertIn("function financialYearLabel", self.source)
+        self.assertIn(
+            "return date.getUTCMonth() + 1 >= 4 ? year + 1 : year;",
+            self.source,
+        )
         self.assertIn('data-year-overlay-mode="long"', self.source)
         self.assertIn("FINANCIAL_MONTH_NAMES", self.source)
         self.assertIn('data-year-overlay-year="${year}"', self.source)

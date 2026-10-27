@@ -1,0 +1,116 @@
+{
+  "lifecycle": {
+    "effectiveLaunch": {
+      "browserLaunched": true,
+      "engine": "chrome",
+      "launchHash": 10555201366498914000
+    },
+    "launched": false,
+    "relaunchedBrowser": false,
+    "restartedBackground": false,
+    "restoreStatus": "missing",
+    "reused": true,
+    "saveStatus": "saved"
+  },
+  "origin": "http://127.0.0.1:8766/#history",
+  "result": {
+    "capture": "1920_long_horizon_fullscreen.png",
+    "fullscreen": {
+      "dialogs": [
+        {
+          "rect": {
+            "bottom": 1080,
+            "height": 1080,
+            "left": 0,
+            "right": 1920,
+            "top": 0,
+            "width": 1920,
+            "x": 0,
+            "y": 0
+          },
+          "text": "Chart analysis Actual demand + forward outlook · 706059 Vintages 1 Filters · 0 Close FY overlayLong horizonActualForecast Current237.0 KL→Change+44.4 KL→Propose"
+        }
+      ],
+      "visible": true
+    },
+    "modes": [
+      {
+        "pressed": "false",
+        "rect": {
+          "bottom": 258.46875,
+          "height": 23,
+          "left": 836.625,
+          "right": 901.640625,
+          "top": 235.46875,
+          "width": 65.015625,
+          "x": 836.625,
+          "y": 235.46875
+        },
+        "text": "FY overlay",
+        "visible": true
+      },
+      {
+        "pressed": "true",
+        "rect": {
+          "bottom": 258.46875,
+          "height": 23,
+          "left": 901.640625,
+          "right": 977.84375,
+          "top": 235.46875,
+          "width": 76.203125,
+          "x": 901.640625,
+          "y": 235.46875
+        },
+        "text": "Long horizon",
+        "visible": true
+      },
+      {
+        "pressed": "false",
+        "rect": {
+          "bottom": 106.390625,
+          "height": 27,
+          "left": 1609,
+          "right": 1683,
+          "top": 79.390625,
+          "width": 74,
+          "x": 1609,
+          "y": 79.390625
+        },
+        "text": "FY overlay",
+        "visible": true
+      },
+      {
+        "pressed": "true",
+        "rect": {
+          "bottom": 106.390625,
+          "height": 27,
+          "left": 1683,
+          "right": 1770,
+          "top": 79.390625,
+          "width": 87,
+          "x": 1683,
+          "y": 79.390625
+        },
+        "text": "Long horizon",
+        "visible": true
+      }
+    ],
+    "pageGeometry": {
+      "bodyOverflow": "hidden",
+      "clientHeight": 1080,
+      "clientWidth": 1920,
+      "htmlOverflow": "hidden",
+      "outsideVisibleElements": [],
+      "scrollHeight": 1080,
+      "scrollWidth": 1920
+    },
+    "selectedParentCode": "706059",
+    "selectedProductText": "706059 · PCNO 100ml FT BOT NEW PB",
+    "url": "http://127.0.0.1:8766/#history",
+    "viewport": {
+      "devicePixelRatio": 1,
+      "height": 1080,
+      "width": 1920
+    }
+  }
+}

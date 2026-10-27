@@ -61,6 +61,7 @@
     const name = root.dataset.productFilter;
     let filter = null;
     filter = FilterMultiSelect.create(root, {
+      selectedFirst: name !== "sku_classes",
       onChange: (selected) => {
         for (const candidate of productFilters.get(name)) {
           if (candidate !== filter) candidate.setValue(selected);
@@ -99,8 +100,6 @@
   revisionDrilldownPopover.hidden = true;
   document.body.append(revisionDrilldownPopover);
   const INPUT_DEBOUNCE_MS = 160;
-  const OVERVIEW_VOLUME_Y_MIN_KL = 1600;
-  const OVERVIEW_VOLUME_Y_MAX_KL = 4500;
   const moduleStates = new Map();
   const moduleRequests = new Map();
   const optionSignatures = new Map();
@@ -112,6 +111,18 @@
   let defaults = null;
   let currentPayload = null;
   let currentRequest = null;
+  let productOptionRows = [];
+  const productPicker = document.querySelector("[data-product-picker]");
+  const productPickerTrigger = document.querySelector(
+    "[data-product-picker-trigger]",
+  );
+  const productPickerPopover = document.querySelector(
+    "[data-product-picker-popover]",
+  );
+  const productPickerOptions = document.querySelector(
+    "[data-product-picker-options]",
+  );
+  let productPickerActiveIndex = -1;
   let fullscreenChart = null;
   let fullscreenChartMode = "single";
   let fullscreenTrigger = null;
@@ -2227,8 +2238,8 @@
     return [min - padding, max + padding];
   }
 
-  function overviewVolumeExtent() {
-    return [OVERVIEW_VOLUME_Y_MIN_KL, OVERVIEW_VOLUME_Y_MAX_KL];
+  function overviewVolumeExtent(values) {
+    return chartExtent(values);
   }
 
   function smoothLinePath(points) {
@@ -4572,7 +4583,7 @@
   function financialYearForMonth(value) {
     const date = new Date(`${value}T00:00:00Z`);
     const year = date.getUTCFullYear();
-    return date.getUTCMonth() + 1 >= 4 ? year : year - 1;
+    return date.getUTCMonth() + 1 >= 4 ? year + 1 : year;
   }
 
   function financialMonthForMonth(value) {
@@ -5118,24 +5129,24 @@
       [
         "Latest forecast",
         kl(summary.latest_forecast_kl),
-        `As of ${dateLabel(summary.latest_calculation_month)}`,
+        `As of ${monthLabel(summary.latest_calculation_month)}`,
       ],
       ["Actual", kl(summary.actual_kl), monthLabel(detail.target_month)],
       [
         "Forecast accuracy",
         pct(summary.forecast_accuracy_pct),
-        "Latest forecast vs actual",
+        "Vs actual",
       ],
       ["Bias", signedKl(summary.bias_kl), pct(summary.bias_pct)],
       [
         "Absolute error",
         kl(summary.absolute_error_kl),
-        "Magnitude of latest miss",
+        "Latest miss",
       ],
       [
         "Revision efficiency",
         pct(summary.revision_efficiency_pct),
-        `${count(summary.material_revision_hits)} of ${count(summary.material_revisions)} material moves helped`,
+        `${count(summary.material_revision_hits)} / ${count(summary.material_revisions)} helped`,
       ],
     ];
     setHtml(
@@ -5166,10 +5177,93 @@
       `${count(peerCount)} eligible siblings`;
   }
 
-  function renderProduct(detail) {
+  function productPickerRows() {
+    const searchControl = document.querySelector("[data-product-search]");
+    const options = productOptionRows.map((row) => ({
+      value: row.parent_code,
+      label: `${row.parent_code} · ${row.parent_description}`,
+    }));
+    return {
+      options,
+      visible: FilterMultiSelect.rankOptions(
+        options,
+        searchControl?.value || "",
+        { preserveOrder: true },
+      ),
+    };
+  }
+
+  function renderProductOptions(selectedValue) {
     const productControl = document.querySelector(
       '[data-product-control="parent"]',
     );
+    const searchControl = document.querySelector("[data-product-search]");
+    const status = document.querySelector("[data-product-search-status]");
+    const summary = document.querySelector("[data-product-picker-summary]");
+    const { options, visible } = productPickerRows();
+    const selectedKey = String(selectedValue ?? productControl.value ?? "");
+    const selected = options.find(
+      (candidate) => String(candidate.value) === selectedKey,
+    );
+    setHtml(
+      productControl,
+      options.length
+        ? options
+            .map((candidate) =>
+              option(candidate.value, candidate.label, selectedKey),
+            )
+            .join("")
+        : option("", "No product available", ""),
+    );
+    if (summary) summary.textContent = selected?.label || "Select product";
+    productPickerActiveIndex = Math.min(
+      productPickerActiveIndex,
+      visible.length - 1,
+    );
+    setHtml(
+      productPickerOptions,
+      visible.length
+        ? visible
+            .map((candidate, index) => {
+              const key = String(candidate.value);
+              const isSelected = key === selectedKey;
+              return `<div class="product-picker__option${isSelected ? " is-selected" : ""}" id="product-picker-option-${index}" role="option" aria-selected="${isSelected}" data-product-picker-option="${escapeHtml(key)}" data-product-picker-option-index="${index}"><i aria-hidden="true">${isSelected ? "✓" : ""}</i><span>${escapeHtml(candidate.label)}</span></div>`;
+            })
+            .join("")
+        : '<p class="product-picker__empty">No matching products</p>',
+    );
+    const active = productPickerOptions?.querySelector(
+      `[data-product-picker-option-index="${productPickerActiveIndex}"]`,
+    );
+    searchControl?.setAttribute("aria-activedescendant", active?.id || "");
+    if (status) {
+      const matchCount = visible.length;
+      status.textContent = searchControl?.value
+        ? matchCount
+          ? `${count(matchCount)} matching ${matchCount === 1 ? "product" : "products"}`
+          : "No matching products"
+        : `${count(options.length)} products available`;
+    }
+  }
+
+  function setProductPickerOpen(open) {
+    const searchControl = document.querySelector("[data-product-search]");
+    productPickerPopover.hidden = !open;
+    productPickerTrigger.setAttribute("aria-expanded", String(open));
+    productPicker.classList.toggle("is-open", open);
+    if (open) {
+      renderProductOptions(
+        document.querySelector('[data-product-control="parent"]').value,
+      );
+      requestAnimationFrame(() => searchControl.focus());
+      return;
+    }
+    productPickerActiveIndex = -1;
+    searchControl.value = "";
+    searchControl.removeAttribute("aria-activedescendant");
+  }
+
+  function renderProduct(detail) {
     const monthControl = document.querySelector(
       '[data-product-control="month"]',
     );
@@ -5182,7 +5276,14 @@
       "[data-product-revisions]",
     ];
     if (!detail || detail.error) {
-      setHtml(productControl, option("", "No product available", ""));
+      productOptionRows = [];
+      const searchControl = document.querySelector("[data-product-search]");
+      if (searchControl) searchControl.value = "";
+      const searchStatus = document.querySelector(
+        "[data-product-search-status]",
+      );
+      if (searchStatus) searchStatus.textContent = "";
+      renderProductOptions("");
       setHtml(monthControl, option("", "No target month available", ""));
       setHtml(
         document.querySelector("[data-product-summary]"),
@@ -5196,18 +5297,8 @@
       );
       return;
     }
-    setHtml(
-      productControl,
-      detail.product_options
-        .map((row) =>
-          option(
-            row.parent_code,
-            `${row.parent_code} · ${row.parent_description}`,
-            detail.parent_code,
-          ),
-        )
-        .join(""),
-    );
+    productOptionRows = detail.product_options;
+    renderProductOptions(detail.parent_code);
     setHtml(
       monthControl,
       detail.target_options
@@ -5810,15 +5901,79 @@
   document
     .querySelector("[data-exception-limit]")
     .addEventListener("change", renderExceptionRows);
+  productPickerTrigger.addEventListener("click", () =>
+    setProductPickerOpen(productPickerPopover.hidden),
+  );
+  productPickerTrigger.addEventListener("keydown", (event) => {
+    if (event.key !== "ArrowDown") return;
+    event.preventDefault();
+    setProductPickerOpen(true);
+  });
+  document
+    .querySelector("[data-product-search]")
+    .addEventListener("input", () => {
+      productPickerActiveIndex = productPickerRows().visible.length ? 0 : -1;
+      renderProductOptions(
+        document.querySelector('[data-product-control="parent"]').value,
+      );
+    });
+  document
+    .querySelector("[data-product-search]")
+    .addEventListener("keydown", (event) => {
+      const { visible } = productPickerRows();
+      if (["ArrowDown", "ArrowUp"].includes(event.key)) {
+        event.preventDefault();
+        const direction = event.key === "ArrowDown" ? 1 : -1;
+        productPickerActiveIndex = visible.length
+          ? (productPickerActiveIndex + direction + visible.length) %
+            visible.length
+          : -1;
+        renderProductOptions(
+          document.querySelector('[data-product-control="parent"]').value,
+        );
+      } else if (event.key === "Enter" && productPickerActiveIndex >= 0) {
+        event.preventDefault();
+        const candidate = visible[productPickerActiveIndex];
+        if (!candidate) return;
+        const productControl = document.querySelector(
+          '[data-product-control="parent"]',
+        );
+        productControl.value = String(candidate.value);
+        productControl.dispatchEvent(new Event("change", { bubbles: true }));
+        setProductPickerOpen(false);
+        productPickerTrigger.focus();
+      } else if (event.key === "Escape") {
+        event.preventDefault();
+        setProductPickerOpen(false);
+        productPickerTrigger.focus();
+      }
+    });
+  productPickerOptions.addEventListener("click", (event) => {
+    const selected = event.target.closest("[data-product-picker-option]");
+    if (!selected) return;
+    const productControl = document.querySelector(
+      '[data-product-control="parent"]',
+    );
+    productControl.value = selected.dataset.productPickerOption;
+    productControl.dispatchEvent(new Event("change", { bubbles: true }));
+    setProductPickerOpen(false);
+    productPickerTrigger.focus();
+  });
   document
     .querySelector('[data-product-control="parent"]')
     .addEventListener("change", () => {
+      const searchControl = document.querySelector("[data-product-search]");
+      searchControl.value = "";
+      renderProductOptions(
+        document.querySelector('[data-product-control="parent"]').value,
+      );
       document.querySelector('[data-product-control="month"]').value = "";
       refreshProduct();
     });
-  document
-    .querySelector('[data-product-control="month"]')
-    .addEventListener("change", refreshProduct);
+  document.addEventListener("pointerdown", (event) => {
+    if (!productPickerPopover.hidden && !productPicker.contains(event.target))
+      setProductPickerOpen(false);
+  });
   document.addEventListener("pointerdown", (event) => {
     const svg = event.target.closest?.(".chart--revision-scatter");
     if (svg) beginScatterDrag(svg, event);

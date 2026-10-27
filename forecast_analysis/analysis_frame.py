@@ -20,7 +20,6 @@ from .hierarchy import load_hierarchy
 from .sku_classification import (  # pyright: ignore[reportMissingImports]
     attach_sku_classification,
     build_sku_classifications,
-    required_sku_class_actual_months,
 )
 
 
@@ -33,10 +32,7 @@ def load_analysis_inputs(
     hierarchy_result = load_hierarchy(hierarchy_path)
     forecast_history = load_forecast_history(forecast_history_path)
     target_months = forecast_history.get_column("snop_month").unique().to_list()
-    actual_history = load_actuals(
-        actuals_path,
-        target_months=required_sku_class_actual_months(target_months),
-    )
+    actual_history = load_actuals(actuals_path)
     actuals = actual_history.filter(pl.col("snop_month").is_in(target_months))
     return AnalysisInputs(
         forecast_history=forecast_history,

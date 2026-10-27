@@ -1,0 +1,72 @@
+{
+  "lifecycle": {
+    "effectiveLaunch": {
+      "browserLaunched": true,
+      "engine": "chrome",
+      "launchHash": 10555201366498914000
+    },
+    "launched": false,
+    "relaunchedBrowser": false,
+    "restartedBackground": false,
+    "restoreStatus": "missing",
+    "reused": true,
+    "saveStatus": "saved"
+  },
+  "origin": "http://127.0.0.1:8766/#history",
+  "result": {
+    "capture": "1920_long_horizon_normal.png",
+    "fullscreen": {
+      "dialogs": [],
+      "visible": false
+    },
+    "modes": [
+      {
+        "pressed": "false",
+        "rect": {
+          "bottom": 258.46875,
+          "height": 23,
+          "left": 836.625,
+          "right": 901.640625,
+          "top": 235.46875,
+          "width": 65.015625,
+          "x": 836.625,
+          "y": 235.46875
+        },
+        "text": "FY overlay",
+        "visible": true
+      },
+      {
+        "pressed": "true",
+        "rect": {
+          "bottom": 258.46875,
+          "height": 23,
+          "left": 901.640625,
+          "right": 977.84375,
+          "top": 235.46875,
+          "width": 76.203125,
+          "x": 901.640625,
+          "y": 235.46875
+        },
+        "text": "Long horizon",
+        "visible": true
+      }
+    ],
+    "pageGeometry": {
+      "bodyOverflow": "hidden",
+      "clientHeight": 1080,
+      "clientWidth": 1920,
+      "htmlOverflow": "hidden",
+      "outsideVisibleElements": [],
+      "scrollHeight": 1080,
+      "scrollWidth": 1920
+    },
+    "selectedParentCode": "706059",
+    "selectedProductText": "706059 · PCNO 100ml FT BOT NEW PB",
+    "url": "http://127.0.0.1:8766/#history",
+    "viewport": {
+      "devicePixelRatio": 1,
+      "height": 1080,
+      "width": 1920
+    }
+  }
+}

@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+import csv
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date
-import csv
 import io
 import json
 from threading import Barrier
@@ -37,7 +37,7 @@ class StaticDashboardAdapterTests(unittest.TestCase):
         self.assertEqual(payload["options"]["horizons"], [5, 4, 3, 2, 1])
         self.assertEqual(
             payload["options"]["sku_classes"],
-            ["A", "B", "C", "Unclassified"],
+            ["A", "B", "C"],
         )
         self.assertEqual(payload["request"]["brands"], [])
         self.assertEqual(payload["request"]["sku_classes"], [])
@@ -236,12 +236,11 @@ class StaticDashboardAdapterTests(unittest.TestCase):
             ["unsupported"],
         )
         for invalid in invalid_values:
-            with self.subTest(invalid=invalid):
-                with self.assertRaisesRegex(
-                    DashboardRequestError,
-                    "accuracy_vintage_ids",
-                ):
-                    self.service.compact_view({"accuracy_vintage_ids": invalid})
+            with self.subTest(invalid=invalid), self.assertRaisesRegex(
+                DashboardRequestError,
+                "accuracy_vintage_ids",
+            ):
+                self.service.compact_view({"accuracy_vintage_ids": invalid})
 
     def test_accuracy_vintages_use_common_cohort_without_changing_global_metrics(
         self,
@@ -1233,9 +1232,9 @@ class StaticDashboardAdapterTests(unittest.TestCase):
                 and row["calendar_month"] == int(row["snop_month"][5:7])
                 and row["fiscal_year"]
                 == (
-                    int(row["snop_month"][:4])
+                    int(row["snop_month"][:4]) + 1
                     if int(row["snop_month"][5:7]) >= 4
-                    else int(row["snop_month"][:4]) - 1
+                    else int(row["snop_month"][:4])
                 )
                 and row["fiscal_month"]
                 == (

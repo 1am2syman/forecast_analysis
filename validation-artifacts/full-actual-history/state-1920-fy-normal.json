@@ -1,0 +1,98 @@
+{
+  "lifecycle": {
+    "effectiveLaunch": {
+      "browserLaunched": true,
+      "engine": "chrome",
+      "launchHash": 10555201366498914000
+    },
+    "launched": false,
+    "relaunchedBrowser": false,
+    "restartedBackground": false,
+    "restoreStatus": "missing",
+    "reused": true,
+    "saveStatus": "saved"
+  },
+  "origin": "http://127.0.0.1:8766/#history",
+  "result": {
+    "capture": "1920_fy_comparison_normal.png",
+    "fullscreen": {
+      "dialogs": [],
+      "visible": false
+    },
+    "fy": [
+      {
+        "pressed": "false",
+        "text": "FY22"
+      },
+      {
+        "pressed": "false",
+        "text": "FY23"
+      },
+      {
+        "pressed": "true",
+        "text": "FY24"
+      },
+      {
+        "pressed": "true",
+        "text": "FY25"
+      },
+      {
+        "pressed": "true",
+        "text": "FY26"
+      },
+      {
+        "pressed": "true",
+        "text": "FY27"
+      }
+    ],
+    "modes": [
+      {
+        "pressed": "true",
+        "rect": {
+          "bottom": 298.03125,
+          "height": 23,
+          "left": 263,
+          "right": 328.015625,
+          "top": 275.03125,
+          "width": 65.015625,
+          "x": 263,
+          "y": 275.03125
+        },
+        "text": "FY overlay",
+        "visible": true
+      },
+      {
+        "pressed": "false",
+        "rect": {
+          "bottom": 298.03125,
+          "height": 23,
+          "left": 328.015625,
+          "right": 404.21875,
+          "top": 275.03125,
+          "width": 76.203125,
+          "x": 328.015625,
+          "y": 275.03125
+        },
+        "text": "Long horizon",
+        "visible": true
+      }
+    ],
+    "pageGeometry": {
+      "bodyOverflow": "hidden",
+      "clientHeight": 1080,
+      "clientWidth": 1920,
+      "htmlOverflow": "hidden",
+      "outsideVisibleElements": [],
+      "scrollHeight": 1080,
+      "scrollWidth": 1920
+    },
+    "selectedParentCode": "706059",
+    "selectedProductText": "706059 · PCNO 100ml FT BOT NEW PB",
+    "url": "http://127.0.0.1:8766/#history",
+    "viewport": {
+      "devicePixelRatio": 1,
+      "height": 1080,
+      "width": 1920
+    }
+  }
+}

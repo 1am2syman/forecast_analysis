@@ -60,7 +60,7 @@ The dashboard must:
 | Comparable pair | Two selected vintages for the same source, parent product, and target month. |
 | Forecast accuracy | Volume-weighted accuracy derived from absolute error and actual volume. |
 | Bias | Signed forecast error relative to actual volume. |
-| FY (financial year) | The operating year starts in April and ends in March; the FY label uses the starting calendar year. April 2027 through March 2028 is FY27, and April 2028 starts FY28. |
+| FY (financial year) | The operating year starts in April and ends in March; the FY label uses the ending calendar year. April 2026 through March 2027 is FY27, and April 2027 starts FY28. |
 | FY overlay | History-chart view with month positions Apr through Mar and one selectable series per FY. |
 | Long horizon | History-chart view with all available months in chronological order, preserving FY boundaries as separators. |
 
@@ -245,9 +245,11 @@ Cleaning rules:
 2. Parse `Month-Year` to a first-of-month `Date`.
 3. Cast `parent_code` to `Int64`.
 4. Cast actual volume to finite `Float64`.
-5. Aggregate bill-wise rows by `parent_code × snop_month`.
-6. Preserve zero actuals as valid observations with special metric handling.
-7. Reject negative actual volume unless an explicit business rule is added later.
+5. Clip negative source-row actual volume to zero before aggregation.
+6. Aggregate bill-wise rows by `parent_code × snop_month`.
+7. Preserve zero actuals as valid observations with special metric handling.
+8. Retain the full normalized actual-sales history for product History views.
+9. Derive the Dashboard-comparable actual population separately by filtering to forecast target months; do not expand KPI populations merely because older actual history exists.
 
 Canonical actual grain:
 
@@ -752,7 +754,7 @@ The History chart has two explicit layouts:
 - **FY overlay (default):** the horizontal axis is Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec, Jan, Feb, Mar. Each visible FY is a separate selectable line color. Actual segments are solid and forward-forecast segments are dashed. FY controls support toggle, double-click isolate, and Reset.
 - **Long horizon:** all real months are plotted in chronological order. The chart retains missing months as gaps, uses an FY separator at each April boundary, and keeps the actual-through boundary distinct from FY boundaries. The source’s latest coherent forecast run supplies the forward forecast.
 
-FY labels always use the starting calendar year: April 2027–March 2028 is FY27; April 2028–March 2029 is FY28. The chart must not relabel these periods by their ending year.
+FY labels always use the ending calendar year: April 2026–March 2027 is FY27; April 2027–March 2028 is FY28. The chart must not relabel these periods by their starting year.
 
 Both layouts use the dashboard’s persistent month-wide tooltip interaction: every populated month has a transparent, keyboard-focusable hit band spanning the plot height; pointer hover and keyboard focus show the shared fixed chart tooltip with the month, source, FY, actual/forecast values, and forecast-run provenance. Missing months do not receive synthetic observations or tooltip rows.
 

@@ -21,6 +21,13 @@ SKU_CLASSES = (
     SKU_CLASS_C,
     SKU_CLASS_UNCLASSIFIED,
 )
+# Keep the internal fallback class for diagnostics, but omit it from the
+# user-facing product filter because it does not represent an actionable class.
+SKU_CLASS_FILTER_VALUES = (
+    SKU_CLASS_A,
+    SKU_CLASS_B,
+    SKU_CLASS_C,
+)
 SKU_CLASS_LOOKBACK_MONTHS = 6
 SKU_CLASS_A_CUMULATIVE_SHARE = 0.70
 SKU_CLASS_B_CUMULATIVE_SHARE = 0.90

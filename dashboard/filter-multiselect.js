@@ -81,7 +81,8 @@
     return scores.reduce((total, score) => total + score, 0);
   }
 
-  function rankOptions(options, query) {
+  function rankOptions(options, query, { preserveOrder = false } = {}) {
+    const hasQuery = Boolean(normalizeText(query));
     return (options || [])
       .map((option, index) => ({
         option,
@@ -89,14 +90,16 @@
         score: fuzzyScore(query, option.searchText || option.label),
       }))
       .filter((entry) => entry.score !== null)
-      .sort(
-        (left, right) =>
+      .sort((left, right) => {
+        if (preserveOrder && !hasQuery) return left.index - right.index;
+        return (
           Number(Boolean(left.option.disabled)) -
             Number(Boolean(right.option.disabled)) ||
           right.score - left.score ||
           left.option.label.localeCompare(right.option.label) ||
-          left.index - right.index,
-      )
+          left.index - right.index
+        );
+      })
       .map((entry) => entry.option);
   }
 
@@ -119,7 +122,7 @@
 
   let instanceCount = 0;
 
-  function create(root, { onChange } = {}) {
+  function create(root, { onChange, selectedFirst = true } = {}) {
     const fieldLabel =
       root
         .closest(".compact-field")
@@ -159,6 +162,9 @@
 
     const optionKey = (value) => String(value);
     const visibleOptions = () => {
+      if (!selectedFirst) {
+        return rankOptions(options, search.value, { preserveOrder: true });
+      }
       const selectedOptions = options.filter((option) =>
         selected.has(optionKey(option.value)),
       );

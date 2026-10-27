@@ -296,8 +296,8 @@ def build_product_year_overlay(
 ) -> ProductYearOverlayView:
     """Project completed actual months and one latest forward run by FY.
 
-    The financial year starts in April and is named for its starting calendar
-    year: April 2027 through March 2028 is ``FY27``. Actuals come from the
+    The financial year starts in April and is named for its ending calendar
+    year: April 2026 through March 2027 is ``FY27``. Actuals come from the
     normalized dataset-level history. When ``completed_before`` is supplied,
     that month and later months are treated as incomplete and excluded from
     actuals. Forecasts come only from the latest calculation month for the
@@ -363,8 +363,8 @@ def build_product_year_overlay(
 
     fiscal_year = (
         pl.when(pl.col("snop_month").dt.month() >= 4)
-        .then(pl.col("snop_month").dt.year())
-        .otherwise(pl.col("snop_month").dt.year() - 1)
+        .then(pl.col("snop_month").dt.year() + 1)
+        .otherwise(pl.col("snop_month").dt.year())
         .cast(pl.Int64)
         .alias("fiscal_year")
     )

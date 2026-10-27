@@ -1,6 +1,7 @@
 import unittest
 from datetime import date
 from pathlib import Path
+from typing import cast
 
 import polars as pl
 
@@ -241,18 +242,32 @@ class ActualNormalizationTests(unittest.TestCase):
             [{"parent_code": 100, "snop_month": date(2025, 6, 1), "actual_kl": 2.0}],
         )
 
-    def test_in_window_negative_actuals_are_blocking(self):
-        with self.assertRaisesRegex(ValueError, "non-negative"):
-            normalize_actuals(
-                pl.DataFrame(
-                    {
-                        "parent_material_code": [100],
-                        "Month-Year": ["Jun-2025"],
-                        "sec_vol_kl_mth (billwise)": [-1.0],
-                    }
-                ),
-                target_months=[date(2025, 6, 1)],
+    def test_negative_actuals_are_clipped_to_zero_before_aggregation(self):
+        result = normalize_actuals(
+            pl.DataFrame(
+                {
+                    "parent_material_code": [100, 100, 101],
+                    "Month-Year": ["Jun-2025", "Jun-2025", "Jun-2025"],
+                    "sec_vol_kl_mth (billwise)": [-1.0, 2.0, -3.0],
+                }
             )
+        )
+
+        self.assertEqual(
+            result.to_dicts(),
+            [
+                {
+                    "parent_code": 100,
+                    "snop_month": date(2025, 6, 1),
+                    "actual_kl": 2.0,
+                },
+                {
+                    "parent_code": 101,
+                    "snop_month": date(2025, 6, 1),
+                    "actual_kl": 0.0,
+                },
+            ],
+        )
 
     def test_aggregation_overflow_is_blocking(self):
         with self.assertRaisesRegex(ValueError, "aggregated actual_kl.*finite"):
@@ -396,10 +411,23 @@ class CurrentConsolidatedArtifactTests(unittest.TestCase):
         assert inputs.actual_history is not None
         self.assertGreater(inputs.actual_history.height, inputs.actuals.height)
         self.assertEqual(dataset.actual_history.height, inputs.actual_history.height)
-        self.assertEqual(
-            dataset.actual_history.get_column("snop_month").min(),
-            inputs.actual_history.get_column("snop_month").min(),
+        actual_history_months = (
+            inputs.actual_history.get_column("snop_month").unique().sort()
         )
+        comparable_months = inputs.actuals.get_column("snop_month").unique().sort()
+        self.assertEqual(actual_history_months.min(), date(2021, 4, 1))
+        self.assertEqual(actual_history_months.max(), date(2026, 9, 1))
+        self.assertEqual(len(actual_history_months), 66)
+        minimum_actual = cast(
+            float | None,
+            inputs.actual_history.get_column("actual_kl").min(),
+        )
+        self.assertIsNotNone(minimum_actual)
+        assert minimum_actual is not None
+        self.assertGreaterEqual(minimum_actual, 0.0)
+        self.assertEqual(comparable_months.min(), date(2025, 5, 1))
+        self.assertEqual(comparable_months.max(), date(2026, 9, 1))
+        self.assertEqual(len(comparable_months), 17)
         self.assertEqual(dataset.frame["sku_class"].null_count(), 0)
         self.assertEqual(dataset.diagnostics.height, 18)
         self.assertEqual(set(dataset.frame["source"].unique().to_list()), {"ml", "tm"})

@@ -997,124 +997,176 @@
                 <div class="history-context">
                   <div
                     class="toolbar history-toolbar"
-                    aria-label="Product drill-down filters"
+                    aria-label="Product drill-down filter"
                   >
-                    <label class="field field--grow"
-                      ><span class="field__k">Product</span
-                      ><select
-                        class="field__ctl"
+                    <div
+                      class="field field--grow product-picker-field"
+                      role="group"
+                      aria-labelledby="product-picker-label"
+                    >
+                      <span class="field__k" id="product-picker-label"
+                        >Product</span
+                      >
+                      <div class="product-picker" data-product-picker>
+                        <button
+                          class="product-picker__trigger"
+                          type="button"
+                          aria-haspopup="listbox"
+                          aria-expanded="false"
+                          data-product-picker-trigger
+                        >
+                          <span data-product-picker-summary
+                            >Select product</span
+                          ><i aria-hidden="true"></i>
+                        </button>
+                        <div
+                          class="product-picker__popover"
+                          data-product-picker-popover
+                          hidden
+                        >
+                          <label class="product-picker__search">
+                            <span>Search products</span>
+                            <input
+                              type="search"
+                              role="combobox"
+                              autocomplete="off"
+                              aria-autocomplete="list"
+                              aria-controls="product-picker-options"
+                              aria-expanded="true"
+                              placeholder="Search code or product name…"
+                              data-product-search
+                            />
+                          </label>
+                          <span
+                            class="product-picker__status"
+                            aria-live="polite"
+                            data-product-search-status
+                          ></span>
+                          <div
+                            class="product-picker__options"
+                            id="product-picker-options"
+                            role="listbox"
+                            aria-label="Products"
+                            data-product-picker-options
+                          ></div>
+                        </div>
+                      </div>
+                      <select
                         data-product-control="parent"
-                      ></select></label
-                    ><label class="field"
-                      ><span class="field__k">Target month</span
-                      ><select
-                        class="field__ctl"
+                        aria-label="Selected product"
+                        hidden
+                      ></select>
+                      <select
                         data-product-control="month"
-                      ></select
-                    ></label>
+                        aria-label="Selected target month"
+                        hidden
+                      ></select>
+                    </div>
                   </div>
                   <div class="product-summary" data-product-summary></div>
+                  <div
+                    class="postmortem-metrics"
+                    aria-label="SKU post-mortem performance ledger"
+                    data-postmortem-metrics
+                  ></div>
                 </div>
-                <div
-                  class="postmortem-metrics"
-                  aria-label="SKU post-mortem performance ledger"
-                  data-postmortem-metrics
-                ></div>
-                <div class="postmortem-primary">
-                  <section class="frame postmortem-performance-frame">
-                    <header class="frame__head">
-                      <div>
-                        <h3 class="frame__title">
-                          Actual demand + forward outlook
-                        </h3>
-                        <p class="frame__sub" data-year-overlay-summary>
-                          Apr–Mar FY comparison · actual history · latest
-                          coherent source run
-                        </p>
-                      </div>
-                      <div class="frame__actions">
-                        <div
-                          class="legend year-overlay-legend"
-                          data-year-overlay-legend
-                          aria-label="FY chart controls"
-                        ></div>
-                        <button
-                          class="chart-expand"
-                          data-action="chart-fullscreen"
-                          data-chart-fullscreen="postmortem-performance"
-                          type="button"
-                          aria-label="Open actual demand and forward outlook chart full screen"
-                          aria-haspopup="dialog"
-                          aria-controls="overview-chart-dialog"
-                        >
-                          <svg viewBox="0 0 20 20" aria-hidden="true">
-                            <path d="M7 3H3v4M13 3h4v4M17 13v4h-4M7 17H3v-4" />
-                          </svg>
-                          Full screen
-                        </button>
-                      </div>
-                    </header>
-                    <div
-                      class="frame__body postmortem-chart-body"
-                      data-postmortem-performance-chart
-                    ></div>
-                  </section>
-                </div>
-                <div class="postmortem-secondary">
-                  <section class="frame">
-                    <header class="frame__head">
-                      <div>
-                        <h3 class="frame__title">
-                          Revision outcome · oldest → latest
-                        </h3>
-                        <p class="frame__sub">
-                          Error improvement · zero baseline · by target month
-                        </p>
-                      </div>
-                      <div class="frame__actions">
+                <div class="postmortem-cockpit">
+                  <div class="postmortem-primary">
+                    <section class="frame postmortem-performance-frame">
+                      <header class="frame__head">
+                        <div>
+                          <h3 class="frame__title">
+                            Actual demand + forward outlook
+                          </h3>
+                          <p class="frame__sub" data-year-overlay-summary>
+                            Apr–Mar FY comparison · actual history · latest
+                            coherent source run
+                          </p>
+                        </div>
+                        <div class="frame__actions">
+                          <div
+                            class="legend year-overlay-legend"
+                            data-year-overlay-legend
+                            aria-label="FY chart controls"
+                          ></div>
+                          <button
+                            class="chart-expand"
+                            data-action="chart-fullscreen"
+                            data-chart-fullscreen="postmortem-performance"
+                            type="button"
+                            aria-label="Open actual demand and forward outlook chart full screen"
+                            aria-haspopup="dialog"
+                            aria-controls="overview-chart-dialog"
+                          >
+                            <svg viewBox="0 0 20 20" aria-hidden="true">
+                              <path d="M7 3H3v4M13 3h4v4M17 13v4h-4M7 17H3v-4" />
+                            </svg>
+                            Full screen
+                          </button>
+                        </div>
+                      </header>
+                      <div
+                        class="frame__body postmortem-chart-body"
+                        data-postmortem-performance-chart
+                      ></div>
+                    </section>
+                  </div>
+                  <div class="postmortem-secondary">
+                    <section class="frame">
+                      <header class="frame__head">
+                        <div>
+                          <h3 class="frame__title">
+                            Revision outcome · oldest → latest
+                          </h3>
+                          <p class="frame__sub">
+                            Error improvement · zero baseline · by target month
+                          </p>
+                        </div>
+                        <div class="frame__actions">
+                          <span
+                            class="frame__metric"
+                            data-postmortem-revision-summary
+                          ></span>
+                          <button
+                            class="chart-expand"
+                            data-action="chart-fullscreen"
+                            data-chart-fullscreen="postmortem-revision"
+                            type="button"
+                            aria-label="Open revision outcome chart full screen"
+                            aria-haspopup="dialog"
+                            aria-controls="overview-chart-dialog"
+                          >
+                            <svg viewBox="0 0 20 20" aria-hidden="true">
+                              <path d="M7 3H3v4M13 3h4v4M17 13v4h-4M7 17H3v-4" />
+                            </svg>
+                            Full screen
+                          </button>
+                        </div>
+                      </header>
+                      <div
+                        class="frame__body postmortem-revision-body"
+                        data-postmortem-revision-chart
+                      ></div>
+                    </section>
+                    <section class="frame">
+                      <header class="frame__head">
+                        <div>
+                          <h3 class="frame__title">Sibling benchmark</h3>
+                          <p class="frame__sub">
+                            Same brand and SKU class · matched active scope
+                          </p>
+                        </div>
                         <span
                           class="frame__metric"
-                          data-postmortem-revision-summary
+                          data-postmortem-peer-scope
                         ></span>
-                        <button
-                          class="chart-expand"
-                          data-action="chart-fullscreen"
-                          data-chart-fullscreen="postmortem-revision"
-                          type="button"
-                          aria-label="Open revision outcome chart full screen"
-                          aria-haspopup="dialog"
-                          aria-controls="overview-chart-dialog"
-                        >
-                          <svg viewBox="0 0 20 20" aria-hidden="true">
-                            <path d="M7 3H3v4M13 3h4v4M17 13v4h-4M7 17H3v-4" />
-                          </svg>
-                          Full screen
-                        </button>
-                      </div>
-                    </header>
-                    <div
-                      class="frame__body postmortem-revision-body"
-                      data-postmortem-revision-chart
-                    ></div>
-                  </section>
-                  <section class="frame">
-                    <header class="frame__head">
-                      <div>
-                        <h3 class="frame__title">Sibling benchmark</h3>
-                        <p class="frame__sub">
-                          Same brand and SKU class · matched active scope
-                        </p>
-                      </div>
-                      <span
-                        class="frame__metric"
-                        data-postmortem-peer-scope
-                      ></span>
-                    </header>
-                    <div
-                      class="frame__body postmortem-peer-body"
-                      data-postmortem-peers
-                    ></div>
-                  </section>
+                      </header>
+                      <div
+                        class="frame__body postmortem-peer-body"
+                        data-postmortem-peers
+                      ></div>
+                    </section>
+                  </div>
                 </div>
                 <div
                   class="revision-table postmortem-revision-table"
